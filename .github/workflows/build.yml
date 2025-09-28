@@ -20,8 +20,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Clean docs folder
+        run: rm -rf docs && mkdir -p docs
+
       - name: Build Marp presentations
-        run: npm run build
+        run: npx marp -I md --html --allow-local-files -o docs
 
       - name: Commit generated HTML
         uses: stefanzweifel/git-auto-commit-action@v5

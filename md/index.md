@@ -1,4 +1,5 @@
 ---
+marp: true
 theme: gaia
 theme: style
 paginate: false

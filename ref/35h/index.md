@@ -4,7 +4,7 @@ paginate: true
 ---
 # Contents
 
-1. [foundations](./foundations.html)
+1. [foundations](foundations.html)
 2. essentials
 3. NN
 4. NLP

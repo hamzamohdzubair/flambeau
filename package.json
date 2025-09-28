@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "clean": "rm -rf html/",
+    "clean": "rm -rf docs/",
     "build": "npm run clean && marp -I md --html --allow-local-files -o docs/"
   }
 }

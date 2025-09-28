@@ -32,7 +32,7 @@ jobs:
         run: rm -rf docs && mkdir -p docs
 
       - name: Build Marp presentations
-        run: npx @marp-team/marp-cli@latest -I md --html --allow-local-files -o docs
+        run: npx @marp-team/marp-cli@latest --template base_template.html -I md --html --allow-local-files -o docs
 
       - name: Commit generated HTML
         uses: stefanzweifel/git-auto-commit-action@v5

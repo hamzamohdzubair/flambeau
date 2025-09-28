@@ -35,8 +35,9 @@ paginate: false
 </style>
 
 <div class="dashboard-tiles">
-  <a class="tile-link" href="index1.html">HTML TEST LINK</a>
-  <a class="tile-link" href="index1.md">MD TEST LINK</a>
+  <a class="tile-link" href="index.html">index</a>
+  <a class="tile-link" href="35h/index.html">35h/index</a>
+  <a class="tile-link" href="index1.html">MD TEST LINK</a>
   <a class="tile-link" href="./35h/foundations.html">folder-html-link</a>
   <!-- add more tiles as needed -->
 </div>

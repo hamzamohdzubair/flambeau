@@ -6,7 +6,7 @@ transition: slide
 
 marp: true
 # theme: default
-header: '[🏠](../index.html)'
+header: '[🏠](index.html)'
 style: |
   header {
     position: absolute;
@@ -26,3 +26,6 @@ style: |
 # foundations of Machine Learning
 
 ---
+
+  <a class="tile-link" href="index.html">index</a>
+  <a class="tile-link" href="35h/index.html">35h/index</a>

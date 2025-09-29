@@ -34,7 +34,7 @@ jobs:
       - name: Build Marp presentations
         run: |
           npx @marp-team/marp-cli@latest --base-url "https://hamzamohdzubair.github.io/flambeau/" -I md --html --allow-local-files -o docs
-          cp -r assets docs/
+          # cp -r assets docs/
 
       - name: Commit generated HTML
         uses: stefanzweifel/git-auto-commit-action@v5

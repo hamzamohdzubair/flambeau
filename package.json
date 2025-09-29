@@ -3,7 +3,7 @@
     "clean": "rm -rf docs",
     "assets": "cp -r assets docs/",
     "build-ghp": "npx @marp-team/marp-cli@latest --theme style.css --base-url 'https://hamzamohdzubair.github.io/flambeau/' -I md --html --allow-local-files -o docs",
-    "build-loc": "npx @marp-team/marp-cli@latest --theme style.css --base-url 'http://localhost:8080/' -I md --html --allow-local-files -o docs",
+    "build-loc": "npx @marp-team/marp-cli@latest --bespoke.progress true --theme-set styles/ --base-url 'http://localhost:8080/' -I md --html --allow-local-files -o docs",
     "serve-loc": "npx http-server docs -p 8080",
     "serve": "npm run clean && npm run build-loc && npm run assets && npm run serve-loc"
   }

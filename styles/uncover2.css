@@ -1,5 +1,5 @@
-/* @theme gaia2 */
-@import 'gaia';
+/* @theme uncover2 */
+@import 'uncover';
 
 .dashboard-tiles {
   display: flex;
@@ -47,6 +47,11 @@ header a:hover {
   background: #432e36;
 }
 
+
+/* Add "Page" prefix and total page number */
+section::after {
+  content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
+}
 
 /* Floating Home Button */
 

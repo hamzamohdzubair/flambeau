@@ -8,7 +8,7 @@ paginate: true
 
 What is Divergence?
 
-![h:500](../../../../assets/2025-09-29-12-59-51.png)
+![h:500](assets/2025-09-29-12-59-51.png)
 
 ---
 

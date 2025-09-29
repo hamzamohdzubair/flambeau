@@ -2,8 +2,10 @@
 paginate: false
 ---
 
+# Beginner Chapters
+
 <div class="dashboard-tiles">
-  <a class="tile-link" href="ops/git/100/101.html">101</a>
-  <a class="tile-link" href="ops/git/100/102.html">102</a>
-  <a class="tile-link" href="ops/git/100/103.html">103</a>
+  <a class="tile-link" href="ops/git/100/basic-config.html">Basic Configuration</a>
+  <a class="tile-link" href="ops/git/100/workflow.html">Basic Workflow</a>
+  <a class="tile-link" href="ops/git/100/diveregence-conflict.html">Divergence <br> and Conflicts</a>
 </div>

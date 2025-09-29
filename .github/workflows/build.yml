@@ -28,14 +28,24 @@ jobs:
       # - name: Install dependencies
       # run: npm ci
 
-      - name: Clean docs folder
-        run: rm -rf docs && mkdir -p docs
+      # - name: Clean docs folder
+      #   run: rm -rf docs && mkdir -p docs
 
       - name: Build Marp presentations
-        run: npm run build && cp -r assets docs/
+        run: npm run build-ghp && cp -r assets docs/
 
-      - name: Commit generated HTML
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/master' # Only deploy from master
         with:
-          commit_message: "chore: rebuild Marp slides"
-          file_pattern: docs/**
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: ghp
+          force_orphan: true # This keeps gh-pages branch clean
+
+
+      # - name: Commit generated HTML
+      #   uses: stefanzweifel/git-auto-commit-action@v5
+      #   with:
+      #     commit_message: "chore: rebuild Marp slides"
+      #     file_pattern: docs/**

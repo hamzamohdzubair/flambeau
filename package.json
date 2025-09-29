@@ -1,6 +1,10 @@
 {
   "scripts": {
-    "build": "npx @marp-team/marp-cli@latest --base-url 'https://hamzamohdzubair.github.io/flambeau/md/' -I md --html --allow-local-files -o docs",
-    "serve": "npx @marp-team/marp-cli@latest -s -I md --html --allow-local-files -o docs"
+    "clean": "rm -rf docs",
+    "assets": "cp -r assets docs/",
+    "build-ghp": "npx @marp-team/marp-cli@latest --base-url 'https: //hamzamohdzubair.github.io/flambeau/md/' -I md --html --allow-local-files -o docs",
+    "build-loc": "npx @marp-team/marp-cli@latest --base-url 'http://localhost:8080/' -I md --html --allow-local-files -o docs",
+    "serve-loc": "npx http-server docs -p 8080",
+    "serve": "npm run clean && npm run build-loc && npm run assets && npm run serve-loc"
   }
 }

@@ -30,7 +30,7 @@
 @property --overlay-alpha {
   syntax: "<number>";
   inherits: false;
-  initial-value: 0;
+  initial-value: 0.3;
 }
 
 .tile-link {

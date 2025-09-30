@@ -1,10 +1,6 @@
 /* @theme gaia2 */
 @import 'gaia';
 
-/* h1 { */
-/*   text-align: center; */
-/* } */
-
 .dashboard-tiles {
   display: flex;
   flex-wrap: wrap;
@@ -12,11 +8,11 @@
   justify-content: center;
   margin-top: 48px;
 }
+
 .tile-link {
   display: inline-block;
   width: 200px;
   height: 140px;
-  background: #948392;
   border-radius: 14px;
   color: #fff !important;
   text-decoration: none;
@@ -26,10 +22,28 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.30);
-  transition: background 0.2s;
+  /* transition: background 0.2s; */
+  background: var(--tile-bg-img, #498392) center/cover no-repeat;
+  position: relative;
+  overflow: hidden;
 }
-.tile-link:hover {
-  background: #432e36;
+/* .tile-link:hover { */
+/*   background: #cccccc; */
+/* } */
+
+.tile-link::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(200, 200, 200, 0); /* Transparent initially */
+  transition: background-color 0.3s ease;
+}
+
+.tile-link:hover::after {
+  background-color: rgba(200, 200, 200, 0.3); /* Semi-transparent overlay on hover */
 }
 
 header {
@@ -55,6 +69,13 @@ header a:hover {
 /* Add "Page" prefix and total page number */
 section::after {
   content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
+}
+
+
+/* Ensure content sits above the background */
+.tile-link > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Floating Home Button */

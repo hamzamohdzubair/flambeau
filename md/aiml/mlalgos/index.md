@@ -1,6 +1,11 @@
 ---
+theme: gaia2
 paginate: false
 ---
+
+<!-- _class: lead -->
+
+###### Machine Learning Algorithms
 
 <div class="dashboard-tiles">
   <a class="tile-link" href="aiml/mlalgos/glm/index.html">GLM</a>

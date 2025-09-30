@@ -13,6 +13,10 @@ footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
 
 ---
 
+![w:600](assets/2025-09-30-23-20-50.png)
+
+---
+
 <iframe src="https://www.acsu.buffalo.edu/~adamcunn/probability/probability.html", width="1100", height="600"></iframe>
 
 ---

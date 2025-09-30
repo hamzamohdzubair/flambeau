@@ -1,5 +1,6 @@
 /* @theme gaia2 */
 @import 'gaia';
+@import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
 
 .dashboard-tiles {
   display: flex;
@@ -27,9 +28,6 @@
   position: relative;
   overflow: hidden;
 }
-/* .tile-link:hover { */
-/*   background: #cccccc; */
-/* } */
 
 .tile-link::after {
   content: '';
@@ -46,24 +44,28 @@
   background-color: rgba(200, 200, 200, 0.3); /* Semi-transparent overlay on hover */
 }
 
-header {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 0.3rem;
-  z-index: 100;
-}
-header a {
-  text-decoration: none;
-  background: #948392;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 3px;
+i {
+  color: #455a64;
 }
 
-header a:hover {
-  background: #432e36;
-}
+/* header { */
+/*   position: absolute; */
+/*   top: 10px; */
+/*   right: 10px; */
+/*   font-size: 0.3rem; */
+/*   z-index: 100; */
+/* } */
+/* header a { */
+/*   text-decoration: none; */
+/*   background: #948392; */
+/*   color: white; */
+/*   padding: 5px 10px; */
+/*   border-radius: 3px; */
+/* } */
+/**/
+/* header a:hover { */
+/*   background: #432e36; */
+/* } */
 
 
 /* Add "Page" prefix and total page number */
@@ -79,7 +81,6 @@ section::after {
 }
 
 
-
 section::before {
     content: "Hamza Mohd Zubair";
     position: absolute;
@@ -91,6 +92,16 @@ section::before {
     color: #666;
     /* Add any other styling you want */
 }
+
+
+iframe {
+  transform: scale(0.75);       /* Scale down to 75% */
+  transform-origin: 0 0;        /* Scale from the top-left corner */
+  width: 125%;               /* Adjust width inversely to the scale */
+  height: 125%;              /* Adjust height inversely to the scale */
+  /* border: none;                 Optional: remove border */
+}
+
 
 /* Floating Home Button */
 

@@ -78,6 +78,20 @@ section::after {
   z-index: 1;
 }
 
+
+
+section::before {
+    content: "Hamza Mohd Zubair";
+    position: absolute;
+    bottom: 20px;
+    left: 50px;
+    right: 50px;
+    text-align: center;
+    font-size: 0.4em;
+    color: #666;
+    /* Add any other styling you want */
+}
+
 /* Floating Home Button */
 
 /*

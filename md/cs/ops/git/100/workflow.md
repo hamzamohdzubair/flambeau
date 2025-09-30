@@ -1,6 +1,8 @@
 ---
+theme: gaia2
+transition: slide
 paginate: true
-header: '[🏠](index.html#Home)'
+footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
 ---
 
 ## Workflow

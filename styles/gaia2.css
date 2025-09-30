@@ -10,39 +10,82 @@
   margin-top: 48px;
 }
 
+/*   /* transition: background 0.2s; */
+/*   background: var(--tile-bg-img, #498392) center/cover no-repeat; */
+/*   position: relative; */
+/*   overflow: hidden; */
+/*   z-index: 1; */
+/* } */
+/**/
+/* .tile-link:hover { */
+/*   /* On hover: first layer is semi-transparent tint, second is the image */
+/*   background: */
+/*     rgba(200, 200, 200, 0), */
+/*     var(--tile-bg-img, #498392) center/cover no-repeat; */
+/* } */
+/**/
+
+
+/* Register the custom property so its numeric value can animate smoothly */
+@property --overlay-alpha {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
 .tile-link {
+
   display: inline-block;
   width: 200px;
   height: 140px;
   border-radius: 14px;
-  color: #fff !important;
   text-decoration: none;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   font-size: 22px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.30);
-  /* transition: background 0.2s; */
-  background: var(--tile-bg-img, #498392) center/cover no-repeat;
-  position: relative;
-  overflow: hidden;
+
+
+  /* Base fallback color sits beneath all images */
+  background-color: #498392;
+  /* Top layer is a transparent gradient; second is the image */
+  background-image:
+    linear-gradient(rgba(100, 100, 100, var(--overlay-alpha)),
+                    rgba(100, 100, 100, var(--overlay-alpha))),
+    var(--tile-bg-img, linear-gradient(#498392, #498392));
+  background-position: center, center;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
+
+  /* Animate the overlay amount (not the background-image itself) */
+  transition: --overlay-alpha 0.3s ease;
 }
 
-.tile-link::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(200, 200, 200, 0); /* Transparent initially */
-  transition: background-color 0.3s ease;
+.tile-link:hover {
+  --overlay-alpha: 0.5; /* only the background is tinted */
 }
 
-.tile-link:hover::after {
-  background-color: rgba(200, 200, 200, 0.3); /* Semi-transparent overlay on hover */
-}
+/* .tile-link::after { */
+/*   content: ''; */
+/*   position: absolute; */
+/*   inset: 0; */
+/*   /* top: 0; */ 
+/*   /* left: 0; */ 
+/*   /* right: 0; */ 
+/*   /* bottom: 0; */ 
+/*   background-color: rgba(200, 200, 200, 0); /* Transparent initially */ 
+/*   transition: background-color 0.3s ease; */
+/*   z-index: 0; */
+/* } */
+/**/
+/* .tile-link:hover::after { */
+/*   background-color: rgba(200, 200, 200, 0.3); /* Semi-transparent overlay on hover */ 
+/*   z-index: 0; */
+/* } */
 
 i {
   color: #455a64;
@@ -75,10 +118,10 @@ section::after {
 
 
 /* Ensure content sits above the background */
-.tile-link > * {
-  position: relative;
-  z-index: 1;
-}
+/* .tile-link > * { */
+/*   position: relative; */
+/*   z-index: 10; */
+/* } */
 
 
 section::before {

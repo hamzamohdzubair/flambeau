@@ -1,7 +1,23 @@
-/* @theme gaia2 */
+/* @theme am_blue */
 
-@import 'gaia';
-@import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
+@import 'am';
+
+:root {
+  --color-code-bg: #e8f4f6;
+  --color-coverbg: #2c9cb1;
+  --color-few: #91a814;
+  --color-footer: #8c8c8c;
+  --color-main: #041d22;
+  --color-much: #1482a8;
+  --color-navbar-bg: #d0e9ee;
+  --color-navbar-font: rgb(108, 95, 91);
+  --color-quote: rgba(254, 176, 98, 0.1);
+  --color-title: rgb(255, 255, 255);
+  --color-trans: #72bdcb;
+  --filter-b: brightness(30%) contrast(70%) grayscale(100%);
+  --filter-c: brightness(0%) contrast(60%) grayscale(80%);
+  --filter-e: brightness(0%) contrast(70%) grayscale(100%);
+}
 
 .dashboard-tiles {
   display: flex;
@@ -32,6 +48,8 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.30);
+
+
   /* Base fallback color sits beneath all images */
   background-color: #498392;
   /* Top layer is a transparent gradient; second is the image */
@@ -51,14 +69,17 @@
   --overlay-alpha: 0.5; /* only the background is tinted */
 }
 
+
 i {
   color: #455a64;
 }
+
 
 /* Add "Page" prefix and total page number */
 section::after {
   content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
 }
+
 
 section::before {
     content: "Hamza Mohd Zubair";
@@ -72,25 +93,11 @@ section::before {
     /* Add any other styling you want */
 }
 
+
 iframe {
   transform: scale(0.75);       /* Scale down to 75% */
   transform-origin: 0 0;        /* Scale from the top-left corner */
   width: 125%;               /* Adjust width inversely to the scale */
   height: 125%;              /* Adjust height inversely to the scale */
   /* border: none;                 Optional: remove border */
-}
-
-img[alt~="center"] {
-  display: block;
-  margin: 0 auto;
-}
-
-
-img::after {
-  content: attr(alt);
-  display: block;
-  text-align: center;
-  font-size: 0.9em;
-  color: #555;
-  margin-top: 4px;
 }

@@ -19,6 +19,10 @@
   --filter-e: brightness(0%) contrast(70%) grayscale(100%);
 }
 
+
+
+/* Hamza's changes */
+
 .dashboard-tiles {
   display: flex;
   flex-wrap: wrap;
@@ -48,8 +52,6 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.30);
-
-
   /* Base fallback color sits beneath all images */
   background-color: #498392;
   /* Top layer is a transparent gradient; second is the image */
@@ -60,7 +62,6 @@
   background-position: center, center;
   background-size: cover, cover;
   background-repeat: no-repeat, no-repeat;
-
   /* Animate the overlay amount (not the background-image itself) */
   transition: --overlay-alpha 0.3s ease;
 }
@@ -69,17 +70,14 @@
   --overlay-alpha: 0.5; /* only the background is tinted */
 }
 
-
 i {
   color: #455a64;
 }
-
 
 /* Add "Page" prefix and total page number */
 section::after {
   content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
 }
-
 
 section::before {
     content: "Hamza Mohd Zubair";
@@ -92,7 +90,6 @@ section::before {
     color: #666;
     /* Add any other styling you want */
 }
-
 
 iframe {
   transform: scale(0.75);       /* Scale down to 75% */

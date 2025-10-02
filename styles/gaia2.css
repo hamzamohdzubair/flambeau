@@ -24,7 +24,7 @@
   height: 140px;
   border-radius: 14px;
   text-decoration: none;
-  color: #fff !important;
+  color: #ffe !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   font-size: 22px;
   font-weight: 700;
@@ -33,16 +33,15 @@
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.30);
   /* Base fallback color sits beneath all images */
-  background-color: #498392;
+  background-color: #456;
   /* Top layer is a transparent gradient; second is the image */
   background-image:
     linear-gradient(rgba(100, 100, 100, var(--overlay-alpha)),
                     rgba(100, 100, 100, var(--overlay-alpha))),
-    var(--tile-bg-img, linear-gradient(#498392, #498392));
+    var(--tile-bg-img, linear-gradient(#456, #456));
   background-position: center, center;
   background-size: cover, cover;
   background-repeat: no-repeat, no-repeat;
-
   /* Animate the overlay amount (not the background-image itself) */
   transition: --overlay-alpha 0.3s ease;
 }
@@ -51,25 +50,8 @@
   --overlay-alpha: 0.5; /* only the background is tinted */
 }
 
-i {
-  color: #455a64;
-}
-
-/* Add "Page" prefix and total page number */
-section::after {
-  content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
-}
-
-section::before {
-    content: "Hamza Mohd Zubair";
-    position: absolute;
-    bottom: 20px;
-    left: 50px;
-    right: 50px;
-    text-align: center;
-    font-size: 0.4em;
-    color: #666;
-    /* Add any other styling you want */
+footer i {
+  color: #ffe;
 }
 
 iframe {
@@ -85,12 +67,200 @@ img[alt~="center"] {
   margin: 0 auto;
 }
 
+a {
+  text-decoration: none;
+  color: #456;
+}
 
-img::after {
-  content: attr(alt);
-  display: block;
+
+/* from: am */
+
+:root {
+  /* --color-code-bg: #e8f4f6; */
+  /* --color-coverbg: #2c9cb1; */
+  /* --color-few: #91a814; */
+  /* --color-footer: #8c8c8c; */
+  /* --color-main: #041d22; */
+  --color-much: #1482a8;
+  /* --color-navbar-bg: #d0e9ee; */
+  --color-navbar-font: rgb(108, 95, 91);
+  /* --color-quote: rgba(254, 176, 98, 0.1); */
+  /* --color-title: rgb(255, 255, 255); */
+  /* --color-trans: #72bdcb; */
+  /* --filter-b: brightness(30%) contrast(70%) grayscale(100%); */
+  /* --filter-c: brightness(0%) contrast(60%) grayscale(80%); */
+  /* --filter-e: brightness(0%) contrast(70%) grayscale(100%); */
+}
+
+
+section.toc_a ul {
+  list-style-type: none; 
+  padding: 30px;
+  margin: 30px;
+  position: relative; 
+  border-radius: 0px 0px 20px 20px;
+  border-top: 8px solid var(--color-navbar-font);
+  background-color: white;
+  box-shadow: 3px 3px 25px  rgb(215, 224, 235);
+} 
+
+section.toc_a ul li {
+  counter-increment: toc_a;
+} 
+
+section.toc_a ul li::before {
+  /* font-family: 'Fira Code'; */
+  /* font-family: var(--font-family-title); */
+  color:white;
+  content: counter(toc_a);
+  margin-right: 20px;
+  margin-bottom: 10px;
+  width:35px;
+  height:35px;
+  display:inline-flex;
+  position: relative; 
+  align-items:center;
+  justify-content: center;
+  background-color: #456;
+  /* background-color:var(--color-much); */
+  border-radius:50%;
+} 
+
+/* section.toc_a ul li:hover::before { */
+/*   -moz-transition: all 0.5s ease-out; */
+/*   transition: all 0.3s ease-out; */
+/*   -moz-transform: rotate(360deg);  */
+/*   -webkit-transform: rotate(360deg);  */
+/*   -o-transform: rotate(360deg);  */
+/*   -ms-transform: rotate(360deg);  */
+/*   transform: rotate(360deg); */
+/* } */
+
+/* section.toc_a header { */
+/*   height: 100%; */
+/*   width: 150%; */
+/*   font-family: 'Fira Code'; */
+/*   font-weight: bolder; */
+/*   font-size: 1080%; */
+/*   left: -8px; */
+/*   text-align: center; */
+/*   display: flex; */
+/*   line-height: 162px;   */
+/*   -webkit-text-fill-color: transparent;    */
+/*   -webkit-text-stroke: 0.75px var(--color-navbar-font); */
+/* } */
+
+
+
+/* from beam */
+
+/* h3:nth-of-type(1) { */
+  /* color: #ffffff; */
+  /* background-color: #456; */
+  /* border-top: 0.3em solid #456; */
+  /* padding: 0; */
+  /* position: absolute; */
+  /* top: 0; */
+  /* right: 10px; */
+  /* left: 10px; */
+  /* width: 100%; */
+  /* height: 1em; */
+  /* text-indent: 0.5em; */
+/* } */
+
+
+h3:nth-of-type(1) {
+  position: absolute;
+  border-left: 2px solid #ffe;
+  border-right: 2px solid #ffe;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;            /* reset default margins */
+  padding: 0.2em 0.5em; /* vertical & horizontal padding */
+  background-color: #456;
+  color: #ffe;
+  text-align: center;   /* center the text */
+  line-height: 1em;     /* vertically center text inside 1em height */
+}
+
+
+/* footer { */
+/*   position: absolute; */
+/*   border-left: 2px solid #ffe; */
+/*   border-right: 2px solid #ffe; */
+/*   bottom: 0; */
+/*   left: 0; */
+/*   right: 0; */
+/*   margin: 0; */
+/*   padding: 0.2em 0.5em; */
+/*   background-color: #456; */
+/*   color: #ffe; */
+/*   line-height: 0.3em; */
+/* } */
+
+
+
+/* footer { */
+/*   font-size: 0.7em; */
+/*   background-color: #456; */
+/*   color: #ffe; */
+/*   height: 40px; */
+/*   line-height: 40px; */
+/*   position: absolute; */
+/*   bottom: 0; */
+/*   left: 0; */
+/*   right: 0; */
+/*   z-index: 1; */
+/* } */
+/**/
+/* section::after { */
+/*   content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total); */
+/*   font-size: 0.7em; */
+/*   color: #ffe; */
+/*   position: absolute; */
+/*   bottom: 0; */
+/*   right: 50px; */
+/*   height: 40px; */
+/*   line-height: 40px; */
+/*   z-index: 2; */
+/*   text-align: right; */
+/* } */
+
+section::before {
+  content: "Hamza Zubair | hzubair.com";
+  position: absolute;
+  bottom: 0;  /* Changed from 5px */
   text-align: center;
-  font-size: 0.9em;
-  color: #555;
-  margin-top: 4px;
+  font-size: 0.4em;  /* Changed to match footer */
+  color: #ffe;
+  z-index: 2;  /* Changed to sit above footer */
+  line-height: 40px;  /* Added to match footer height */
+  left: 10px;
+  right: 10px;
+  pointer-events: none;
+}
+
+footer {
+  font-size: 0.7em;
+  background-color: #456;
+  color: #ffe;
+  height: 40px;
+  line-height: 40px;
+  z-index: 1;  /* Changed to sit below text */
+  display: flex;  /* Added */
+  justify-content: space-between;  /* Added */
+  padding: 0 10px;
+}
+
+section::after {
+  content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
+  font-size: 0.7em;
+  color: #ffe;
+  height: 40px;
+  line-height: 40px;
+  position: absolute;  /* Added */
+  padding: 0 10px;
+  z-index: 2;  /* Added */
+  pointer-events: none;
 }

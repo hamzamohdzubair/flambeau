@@ -18,9 +18,19 @@ footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
 </div>
 
 ---
+<!-- _class: toc_a -->
 
+# Contents
+
+- Terminology
+- How Computers Learn
+- Different Types of Learning
+- Types of Learning Tasks
+- Examples of Simple ML Models
+
+---
 <!-- _class: lead -->
-![h:500 drop-shadow](assets/2025-10-01-11-18-12.png) ![h:500 drop-shadow source:asdfasddf](assets/2025-10-01-11-24-41.png )
+![h:500 drop-shadow](assets/2025-10-01-11-18-12.png) ![h:500 drop-shadow](assets/2025-10-01-11-24-41.png)
 
 ---
 

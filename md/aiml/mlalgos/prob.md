@@ -3,13 +3,27 @@ theme: gaia2
 paginate: true
 transition: slide
 footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
+class: lead
 ---
-<!-- _class: lead -->
+
+<!-- _class: lead invert -->
+
 # Probabilistic Models
 
 ---
 
-##### Simple / Brute Force Bayes
+### Contents
+
+1. Inferencing
+2. Unbiased Estimation
+3. MLE
+4. MAP
+5. Simple Bayes
+6. Naive Bayes
+
+---
+
+### Simple / Brute Force Bayes
 
 $$
 
@@ -25,6 +39,6 @@ $$
 
 $$
 
-<!-- _footer: '[<i class="fa-regular fa-house"></i>](index.html#Home) [beta](/md/math/probstats/dist/beta.html)' -->
+<!-- _footer: '[<i class="fa-regular fa-house"></i>](index.html#Home) [bayes](/md/math/probstats/dist/beta.html)' -->
 
 ---

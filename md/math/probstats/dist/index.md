@@ -8,7 +8,7 @@ footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
 ###### Distribution Theory Chapters
 
 <div class="dashboard-tiles">
-  <a class="tile-link" href="math/probstats/dist/beta.html" style="--tile-bg-img:url('assets/2025-09-30-19-41-08.png');">Beta<br>Distribution</a>
+  <a class="tile-link" href="math/probstats/dist/beta.html" style="--tile-bg-img:url('assets/2025-10-02-22-40-24.png');">Beta<br>Distribution</a>
 </div>
 
 ---

@@ -2,11 +2,9 @@
 theme: gaia2
 paginate: true
 transition: slide
+class: lead
 footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
 ---
-
-
-<!-- _class: lead -->
 
 ###### AI/ML
 
@@ -18,28 +16,55 @@ footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
 </div>
 
 ---
-<!-- _class: toc_a -->
 
-# Contents
+<!-- _class: lead invert -->
 
-- Terminology
-- How Computers Learn
-- Different Types of Learning
-- Types of Learning Tasks
-- Examples of Simple ML Models
+# AI/ML
 
 ---
-<!-- _class: lead -->
+
+### Contents
+
+1. Terminology
+2. How Computers Learn
+3. Different Types of Learning
+4. Types of Learning Tasks
+5. Examples of Simple ML Models
+
+---
+
+## Terminology
+
+---
+
+### AI? ML? GENAI?
+
 ![h:500 drop-shadow](assets/2025-10-01-11-18-12.png) ![h:500 drop-shadow](assets/2025-10-01-11-24-41.png)
 
 ---
 
-<!-- _class: lead -->
+### DS?
+
 ![w:300 h:250 drop-shadow](assets/2025-10-01-12-27-54.png) ![w:300 h:250 drop-shadow](assets/2025-10-01-12-28-17.png) ![w:300 h:250 drop-shadow](assets/2025-10-01-12-28-58.png) ![w:300 w:250 drop-shadow](assets/2025-10-01-12-29-14.png)
 
 ---
 
-<!-- _class: lead -->
+### ML Foundations and Pillars
+
 ![w:800 drop-shadow](assets/2025-10-01-09-45-50.png)
 
 ---
+
+## How Computers Learn
+
+---
+
+## Examples of ML Models
+
+---
+
+###### Machine Learning Algorithms
+
+<div class="dashboard-tiles">
+  <a class="tile-link" href="aiml/mlalgos/prob.html" style="--tile-bg-img:url('assets/2025-10-02-08-38-50.png');">Probabilistic</a>
+</div>

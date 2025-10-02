@@ -1,10 +1,11 @@
 ---
 theme: gaia2
 paginate: false
+class: lead
+footer: ' '
 ---
 
 
-<!-- _class: lead -->
 <i class="fa-regular fa-house"></i>
 
 ###### Course Topics

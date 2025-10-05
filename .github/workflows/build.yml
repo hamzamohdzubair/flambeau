@@ -42,10 +42,4 @@ jobs:
           publish_dir: ./docs
           publish_branch: ghp
           force_orphan: true # This keeps gh-pages branch clean
-
-
-      # - name: Commit generated HTML
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: "chore: rebuild Marp slides"
-      #     file_pattern: docs/**
+          cname: slides.hzubair.com

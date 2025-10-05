@@ -62,15 +62,12 @@ iframe {
   /* border: none;                 Optional: remove border */
 }
 
-img[alt~="center"] {
-  display: block;
-  margin: 0 auto;
-}
 
 a {
   text-decoration: none;
   color: #456;
 }
+
 
 
 /* from: am */
@@ -141,7 +138,9 @@ h3:nth-of-type(1) {
   background-color: #456;
   color: #ffe;
   text-align: center;   /* center the text */
-  line-height: 1em;     /* vertically center text inside 1em height */
+  line-height: 0.9em;     /* vertically center text inside 1em height */
+  font-size: 0.9em;
+  font-weight: normal;
 }
 
 section::before {
@@ -180,4 +179,39 @@ section::after {
   padding: 0 10px;
   z-index: 2;  /* Added */
   pointer-events: none;
+}
+
+
+figcaption {
+  font-size: 0.3em;
+  font-style: italic;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+figcaption:hover {
+  white-space: normal;
+  overflow: visible;
+}
+
+figure {
+  text-align: center;
+  margin: auto;
+  display: block;
+}
+
+figure img {
+  width: 100%;
+  filter:drop-shadow(0 5px 10px rgba(0,0,0,.4));
+}
+
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+
+section.nob ul {
+  list-style: none;
 }

@@ -28,7 +28,7 @@ footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
 
 ---
 
-### Reference books
+### Resources
 
 <figure data-marpit-fragment style="width:300px;">
   <img src="assets/2025-10-05-09-08-25.png">

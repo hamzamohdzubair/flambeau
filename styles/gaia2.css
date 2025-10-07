@@ -1,6 +1,6 @@
 /* @theme gaia2 */
 
-@import 'gaia';
+@import "gaia";
 @import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
 
 .dashboard-tiles {
@@ -31,13 +31,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.30);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   /* Base fallback color sits beneath all images */
   background-color: #456;
   /* Top layer is a transparent gradient; second is the image */
   background-image:
-    linear-gradient(rgba(100, 100, 100, var(--overlay-alpha)),
-                    rgba(100, 100, 100, var(--overlay-alpha))),
+    linear-gradient(
+      rgba(100, 100, 100, var(--overlay-alpha)),
+      rgba(100, 100, 100, var(--overlay-alpha))
+    ),
     var(--tile-bg-img, linear-gradient(#456, #456));
   background-position: center, center;
   background-size: cover, cover;
@@ -55,20 +57,17 @@ footer i {
 }
 
 iframe {
-  transform: scale(0.75);       /* Scale down to 75% */
-  transform-origin: 0 0;        /* Scale from the top-left corner */
-  width: 125%;               /* Adjust width inversely to the scale */
-  height: 125%;              /* Adjust height inversely to the scale */
+  transform: scale(0.75); /* Scale down to 75% */
+  transform-origin: 0 0; /* Scale from the top-left corner */
+  width: 125%; /* Adjust width inversely to the scale */
+  height: 125%; /* Adjust height inversely to the scale */
   /* border: none;                 Optional: remove border */
 }
-
 
 a {
   text-decoration: none;
   color: #456;
 }
-
-
 
 /* from: am */
 
@@ -89,40 +88,38 @@ a {
   /* --filter-e: brightness(0%) contrast(70%) grayscale(100%); */
 }
 
-
 section.toc_a ul {
-  list-style-type: none; 
+  list-style-type: none;
   padding: 30px;
   margin: 30px;
-  position: relative; 
+  position: relative;
   border-radius: 0px 0px 20px 20px;
   border-top: 8px solid var(--color-navbar-font);
   background-color: white;
-  box-shadow: 3px 3px 25px  rgb(215, 224, 235);
-} 
+  box-shadow: 3px 3px 25px rgb(215, 224, 235);
+}
 
 section.toc_a ul li {
   counter-increment: toc_a;
-} 
+}
 
 section.toc_a ul li::before {
   /* font-family: 'Fira Code'; */
   /* font-family: var(--font-family-title); */
-  color:white;
+  color: white;
   content: counter(toc_a);
   margin-right: 20px;
   margin-bottom: 10px;
-  width:35px;
-  height:35px;
-  display:inline-flex;
-  position: relative; 
-  align-items:center;
+  width: 35px;
+  height: 35px;
+  display: inline-flex;
+  position: relative;
+  align-items: center;
   justify-content: center;
   background-color: #456;
   /* background-color:var(--color-much); */
-  border-radius:50%;
-} 
-
+  border-radius: 50%;
+}
 
 /* from beam */
 
@@ -133,12 +130,12 @@ h3:nth-of-type(1) {
   top: 0;
   left: 0;
   right: 0;
-  margin: 0;            /* reset default margins */
+  margin: 0; /* reset default margins */
   padding: 0.2em 0.5em; /* vertical & horizontal padding */
   background-color: #456;
   color: #ffe;
-  text-align: center;   /* center the text */
-  line-height: 0.9em;     /* vertically center text inside 1em height */
+  text-align: center; /* center the text */
+  line-height: 0.9em; /* vertically center text inside 1em height */
   font-size: 0.9em;
   font-weight: normal;
 }
@@ -146,12 +143,12 @@ h3:nth-of-type(1) {
 section::before {
   content: "Hamza Zubair | hzubair.com";
   position: absolute;
-  bottom: 0;  /* Changed from 5px */
+  bottom: 0; /* Changed from 5px */
   text-align: center;
-  font-size: 0.4em;  /* Changed to match footer */
+  font-size: 0.4em; /* Changed to match footer */
   color: #ffe;
-  z-index: 2;  /* Changed to sit above footer */
-  line-height: 40px;  /* Added to match footer height */
+  z-index: 2; /* Changed to sit above footer */
+  line-height: 40px; /* Added to match footer height */
   left: 10px;
   right: 10px;
   pointer-events: none;
@@ -163,24 +160,23 @@ footer {
   color: #ffe;
   height: 40px;
   line-height: 40px;
-  z-index: 1;  /* Changed to sit below text */
-  display: flex;  /* Added */
-  justify-content: space-between;  /* Added */
+  z-index: 1; /* Changed to sit below text */
+  display: flex; /* Added */
+  /* justify-content: space-between; */
   padding: 0 10px;
 }
 
 section::after {
-  content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
+  content: attr(data-marpit-pagination) " / " attr(data-marpit-pagination-total);
   font-size: 0.7em;
   color: #ffe;
   height: 40px;
   line-height: 40px;
-  position: absolute;  /* Added */
+  position: absolute; /* Added */
   padding: 0 10px;
-  z-index: 2;  /* Added */
+  z-index: 2; /* Added */
   pointer-events: none;
 }
-
 
 figcaption {
   font-size: 0.3em;
@@ -204,7 +200,7 @@ figure {
 
 figure img {
   width: 100%;
-  filter:drop-shadow(0 5px 10px rgba(0,0,0,.4));
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.4));
 }
 
 img[alt~="center"] {
@@ -214,4 +210,38 @@ img[alt~="center"] {
 
 section.nob ul {
   list-style: none;
+}
+
+.marpit-fragment-invisible {
+  filter: blur(3px) !important;
+  opacity: 0.5 !important;
+}
+
+/* section li { */
+/*   transition: filter 0.3s ease; */
+/* } */
+/**/
+/* section */
+/*   li:not([data-marpit-fragment="current"]):not([data-marpit-fragment="past"]) { */
+/*   filter: blur(3px); */
+/*   opacity: 0.5; */
+/* } */
+
+/* section li { */
+/*   filter: blur(3px); */
+/*   opacity: 0.5; */
+/*   transition: */
+/*     filter 0.3s ease, */
+/*     opacity 0.3s ease; */
+/* } */
+/* section li.visible { */
+/*   filter: blur(0); */
+/*   opacity: 1; */
+/* } */
+
+li[data-bespoke-marp-fragment="inactive"],
+ol[data-bespoke-marp-fragment="inactive"] {
+  visibility: visible !important;
+  opacity: 0.5 !important;
+  filter: blur(7px) !important;
 }

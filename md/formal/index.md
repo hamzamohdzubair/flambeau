@@ -19,5 +19,3 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 <!-- _class: lead invert -->
 
 # Formal Science
-
----

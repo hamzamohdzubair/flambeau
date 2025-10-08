@@ -52,7 +52,8 @@
   --overlay-alpha: 0.5; /* only the background is tinted */
 }
 
-footer i {
+footer i,
+footer a {
   color: #ffe;
 }
 
@@ -244,4 +245,10 @@ ol[data-bespoke-marp-fragment="inactive"] {
   visibility: visible !important;
   opacity: 0.5 !important;
   filter: blur(7px) !important;
+}
+
+figure[data-bespoke-marp-fragment="inactive"] {
+  visibility: visible !important;
+  opacity: 0.08 !important;
+  filter: blur(3px) contrast(0) brightness(2000) drop-shadow(0px 4px 8px rgba(0, 0, 0, 1)) !important;
 }

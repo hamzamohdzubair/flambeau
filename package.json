@@ -4,11 +4,8 @@
     "clean-md": "find md -name '*.html' -type f -delete",
     "assets": "cp -r assets docs/",
     "build-ghp": "npx @marp-team/marp-cli@latest --bespoke.progress true --theme-set styles/ -I md --html --allow-local-files -o docs",
-    "build-loc": "npx @marp-team/marp-cli@latest --bespoke.progress true --theme-set styles/ --base-url 'http://localhost:8080/' -I md --html --allow-local-files -o docs",
-    "serve-marp": "npx @marp-team/marp-cli@latest --watch --bespoke.progress true --theme-set styles/ --html --allow-local-files --server -I md",
-    "serve": "npm run clean && npm run build-loc && npm run assets && npm run serve-loc",
     "watch:md": "marp --theme-set styles/ --html --watch -I md  --html -o docs",
-    "serve:html": "live-server docs --watch=docs --mount=assets:assets",
+    "serve:html": "live-server docs --watch=docs --mount=/assets:assets",
     "start": "concurrently npm:watch:md npm:serve:html"
   },
   "dependencies": {

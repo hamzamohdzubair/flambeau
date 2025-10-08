@@ -10,6 +10,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ###### Math Topics
 
 <div class="dashboard-tiles">
+  <a class="tile-link" href="dm/index.html" style="--tile-bg-img:url('2025-10-07-19-42-23.png');">Discrete Maths</a>
   <a class="tile-link" href="ag/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-13-40.png');">Analytic<br>Geometry</a>
   <a class="tile-link" href="probstats/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-10-12.png');">Prob<br>Stats</a>
   <a class="tile-link" href="la/index.html" style="--tile-bg-img:url('/assets/2025-09-30-22-21-30.png');">Linear<br>Algebra</a>

@@ -9,10 +9,10 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ###### AI/ML
 
 <div class="dashboard-tiles">
-  <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('assets/2025-10-01-08-41-30.png');">Major Tasks</a>
-  <a class="tile-link" href="minor/index.html" style="--tile-bg-img:url('assets/2025-10-01-08-35-30.png');">Minor Tasks</a>
-  <a class="tile-link" href="mlalgos/index.html" style="--tile-bg-img:url('assets/2025-10-01-08-47-10.png');">ML Algos</a>
-  <a class="tile-link" href="history/index.html" style="--tile-bg-img:url('assets/2025-10-01-11-36-59.png');">History</a>
+  <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-41-30.png');">Major Tasks</a>
+  <a class="tile-link" href="minor/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-35-30.png');">Minor Tasks</a>
+  <a class="tile-link" href="mlalgos/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-47-10.png');">ML Algos</a>
+  <a class="tile-link" href="history/index.html" style="--tile-bg-img:url('/assets/2025-10-01-11-36-59.png');">History</a>
 </div>
 
 ---
@@ -36,7 +36,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### Resources
 
 <figure data-marpit-fragment style="width:300px;">
-  <img src="assets/2025-10-05-09-49-36.png">
+  <img src="/assets/2025-10-05-09-49-36.png">
   <figcaption>free access: https://mml-book.github.io/book/mml-book.pdf</figcaption>
 </figure>
 
@@ -49,7 +49,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### What is AI?
 
 <figure data-marpit-fragment style="width:800px;">
-  <img src="assets/2025-10-03-14-20-49.png">
+  <img src="/assets/2025-10-03-14-20-49.png">
   <figcaption>source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg</figcaption>
 </figure>
 
@@ -66,20 +66,21 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### ML vs Programming
 
-```mermaid
-graph LR
-  A[Start] --> B{Decision}
-  B -- Yes --> C[Do Thing]
-  B -- No --> D[Do Other Thing]
-  C --> D
-  D --> E[End]
-```
 
 ---
 
 ### How are these terms related?
 
-![h:500 drop-shadow](assets/2025-10-01-11-18-12.png) ![h:500 drop-shadow](assets/2025-10-01-11-24-41.png)
+<div style="display: flex;"><figure data-marpit-fragment style="width:450px;">
+  <img src="/assets/2025-10-07-22-42-13.png">
+  <figcaption>source: https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101 </figcaption>
+</figure>
+
+<figure data-marpit-fragment style="width:550px;">
+  <img src="/assets/2025-10-07-22-57-05.png">
+  <figcaption>source: https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174</figcaption>
+
+</figure></div>
 
 ---
 

@@ -27,7 +27,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 1) Terminology
 2) How Computers Learn
-3) Different Types of Learning
+3) Types of Learning
 4) Types of Learning Tasks
 5) Examples of Simple ML Models
 
@@ -35,70 +35,151 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### Resources
 
-<figure data-marpit-fragment style="width:300px;">
-  <img src="/assets/2025-10-05-09-49-36.png">
-  <figcaption>free access: https://mml-book.github.io/book/mml-book.pdf</figcaption>
-</figure>
+<div class="figrow">
+  <figure data-marpit-fragment>
+    <img src="/assets/2025-10-05-09-49-36.png">
+    <figcaption>Free access: https://mml-book.github.io/book/mml-book.pdf</figcaption>
+  </figure>
+
+  <figure data-marpit-fragment>
+    <img src="/assets/2025-10-05-09-08-25.png">
+    <figcaption>Free access: d2l.ai</figcaption>
+  </figure>
+</div>
 
 ---
+
 
 ## Terminology
 
 ---
 
+### What is Intelligence?
+
+<div class="figrow">
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-16-14-52.png">
+  <figcaption>source: https://image.slidesharecdn.com/lecture-18-201104045342/75/intelligence-meaning-types-factors-theories-3-2048.jpg</figcaption>
+</figure>
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-16-15-51.png">
+  <figcaption>source: https://richardyonck.com/wp-content/uploads/2020/11/Intelligence-Definition.jpg</figcaption>
+</figure>
+</div>
+
+---
+
+### What is Intelligence?
+
+<div class="figrow">
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-15-05-35.png">
+  <figcaption>source: https://www.verywellmind.com</figcaption>
+</figure>
+</div>
+
+---
+
 ### What is AI?
 
-<figure data-marpit-fragment style="width:800px;">
+<div class="figrow"><figure data-marpit-fragment>
   <img src="/assets/2025-10-03-14-20-49.png">
-  <figcaption>source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg</figcaption>
+  <figcaption>Source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg</figcaption>
+</figure></div>
+
+---
+
+### Have we made ASI?
+
+<div class="figrow">
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-16-25-07.png">
+  <figcaption>source: https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png</figcaption>
 </figure>
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-16-27-19.png">
+  <figcaption>source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s</figcaption>
+</figure>
+</div>
 
 ---
 
 ### What is ML?
 
-<figure data-marpit-fragment style="width:600px;">
-  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlmXPsK9QdyZlxzGu7ms4vt38R469QlYiwvA&s">
-  <figcaption>source: </figcaption>
-</figure>
-
 ---
 
 ### ML vs Programming
-
 
 ---
 
 ### How are these terms related?
 
-<div style="display: flex;"><figure data-marpit-fragment style="width:450px;">
+<div class="figrow"><figure data-marpit-fragment >
   <img src="/assets/2025-10-07-22-42-13.png">
-  <figcaption>source: https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101 </figcaption>
+  <figcaption>Source: https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101 </figcaption>
 </figure>
 
-<figure data-marpit-fragment style="width:550px;">
+<figure data-marpit-fragment >
   <img src="/assets/2025-10-07-22-57-05.png">
-  <figcaption>source: https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174</figcaption>
-
+  <figcaption>Source: https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174</figcaption>
 </figure></div>
 
 ---
 
 ### What about DS?
 
-![w:300 h:250 drop-shadow](assets/2025-10-01-12-27-54.png) ![w:300 h:250 drop-shadow](assets/2025-10-01-12-28-17.png) ![w:300 h:250 drop-shadow](assets/2025-10-01-12-28-58.png) ![w:300 w:250 drop-shadow](assets/2025-10-01-12-29-14.png)
-
----
+<div class="figrow">
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-12-44-46.png">
+  <figcaption></figcaption>
+</figure>
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-12-45-11.png">
+  <figcaption></figcaption>
+</figure>
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-12-46-10.png">
+  <figcaption></figcaption>
+</figure>
+</div>
 
 ---
 
 ### ML Foundations and Pillars
 
-![w:800 drop-shadow](assets/2025-10-01-09-45-50.png)
+<div class="figrow">
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-08-13-03-46.png">
+  <figcaption>Source: Deisenroth, M. P., Faisal, A. A., & Ong, C. S. (2020). Mathematics for machine learning. Cambridge University Press.</figcaption>
+</figure>
+</div>
+
+---
+
+
+### Checkpoint
+
+1. Terminology
+2. **How Computers Learn**
+3. Types of Learning
+4. Types of Learning Tasks
+5. Examples of Simple ML Models
+
+
 
 ---
 
 ## How Computers Learn
+
+---
+
+### Checkpoint
+
+1. Terminology
+2. How Computers Learn
+3. Types of Learning
+4. Types of Learning Tasks
+5. **Examples of Simple ML Models**
 
 ---
 

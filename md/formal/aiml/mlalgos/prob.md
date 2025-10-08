@@ -14,16 +14,34 @@ class: lead
 
 ### Contents
 
-1. Inferencing
-2. Unbiased Estimation
-3. MLE
-4. MAP
-5. Simple Bayes
-6. Naive Bayes
+
+1) History
+2) Inferencing
+3) Unbiased Estimation
+4) MLE
+5) MAP
+6) Brute Force Bayes
+7) Naive Bayes
 
 ---
 
-### Simple / Brute Force Bayes
+### Checkpoint
+
+1. History
+2. Inferencing
+3. Unbiased Estimation
+4. MLE
+5. MAP
+6. **Brute Force Bayes**
+7. Naive Bayes
+
+---
+
+## Brute Force Bayes
+
+---
+
+### Brute Force Bayes
 
 $$
 

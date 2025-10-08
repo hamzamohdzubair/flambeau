@@ -179,25 +179,30 @@ section::after {
   pointer-events: none;
 }
 
-figcaption {
-  font-size: 0.3em;
-  font-style: italic;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  max-width: 100%;
-  white-space: nowrap;
-}
-
-figcaption:hover {
-  white-space: normal;
-  overflow: visible;
-}
-
-figure {
-  text-align: center;
-  margin: auto;
-  display: block;
-}
+/* figcaption { */
+/*   font-size: 0.3em; */
+/*   font-style: italic; */
+/*   text-overflow: ellipsis; */
+/*   overflow: hidden; */
+/*   max-width: 100%; */
+/*   white-space: nowrap; */
+/**/
+/*   display: block; */
+/*   text-align: center; */
+/*   box-sizing: border-box; */
+/* } */
+/**/
+/* figcaption:hover { */
+/*   white-space: normal; */
+/*   overflow: visible; */
+/*   word-wrap: break-word; */
+/*   text-align: center; */
+/* } */
+/**/
+/* figure { */
+/*   text-align: center; */
+/*   margin: 0; */
+/* } */
 
 figure img {
   width: 100%;
@@ -218,28 +223,6 @@ section.nob ul {
   opacity: 0.5 !important;
 }
 
-/* section li { */
-/*   transition: filter 0.3s ease; */
-/* } */
-/**/
-/* section */
-/*   li:not([data-marpit-fragment="current"]):not([data-marpit-fragment="past"]) { */
-/*   filter: blur(3px); */
-/*   opacity: 0.5; */
-/* } */
-
-/* section li { */
-/*   filter: blur(3px); */
-/*   opacity: 0.5; */
-/*   transition: */
-/*     filter 0.3s ease, */
-/*     opacity 0.3s ease; */
-/* } */
-/* section li.visible { */
-/*   filter: blur(0); */
-/*   opacity: 1; */
-/* } */
-
 li[data-bespoke-marp-fragment="inactive"],
 ol[data-bespoke-marp-fragment="inactive"] {
   visibility: visible !important;
@@ -250,5 +233,202 @@ ol[data-bespoke-marp-fragment="inactive"] {
 figure[data-bespoke-marp-fragment="inactive"] {
   visibility: visible !important;
   opacity: 0.08 !important;
-  filter: blur(3px) contrast(0) brightness(2000) drop-shadow(0px 4px 8px rgba(0, 0, 0, 1)) !important;
+  filter: blur(3px) contrast(0) brightness(2000)
+    drop-shadow(0px 4px 8px rgba(0, 0, 0, 1)) !important;
 }
+
+/* .figrow { */
+/*   display: flex; */
+/*   justify-content: space-around; */
+/*   align-items: flex-end; */
+/*   flex-wrap: wrap; */
+/*   gap: 20px; */
+/*   max-width: 100%; */
+/*   margin: 0 auto; */
+/* } */
+/**/
+/* .figrow figure { */
+/*   flex: 0 1 auto; */
+/*   display: flex; */
+/*   flex-direction: column; */
+/*   align-items: center; */
+/*   max-width: 100%; */
+/*   margin: 0; */
+/* } */
+/**/
+/* .figrow img { */
+/*   max-width: 100%; */
+/*   height: auto; */
+/*   max-height: 400px; */
+/*   object-fit: contain; */
+/*   display: block; */
+/* } */
+
+/* new */
+
+/* container */
+/* .figrow { */
+/*   display: flex; */
+/*   justify-content: space-evenly; */
+/*   align-items: flex-end; */
+/*   flex-wrap: wrap; */
+/*   gap: 20px; */
+/*   width: 90%; */
+/*   margin: 0 auto; */
+/* } */
+/**/
+/* .figrow figure { */
+/*   flex: 0 0 auto; */
+/*   display: flex; */
+/*   flex-direction: column; */
+/*   align-items: center; */
+/*   margin: 0; */
+/*   overflow: visible; */
+/*   box-sizing: border-box; */
+/* } */
+/**/
+/* .figrow img { */
+/*   display: block; */
+/*   max-width: 100%; */
+/*   height: auto; */
+/* } */
+/**/
+/* .figrow figcaption { */
+/*   display: block; */
+/*   width: 100%; */
+/*   box-sizing: border-box; */
+/*   font-size: 0.8rem; */
+/*   font-style: italic; */
+/*   text-overflow: ellipsis; */
+/*   overflow: hidden; */
+/*   white-space: nowrap; */
+/*   text-align: center; */
+/* } */
+/**/
+/* .figrow figcaption:hover { */
+/*   white-space: normal; */
+/*   overflow: visible; */
+/*   word-break: break-word; */
+/*   z-index: 10; */
+/*   background: rgba(255, 255, 255, 0.95); */
+/*   padding: 6px; */
+/*   border-radius: 4px; */
+/* } */
+/**/
+/* new: grid */
+
+.figrow {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(150px, 1fr)
+  ); /* auto adapts to number of items */
+  /* gap: 20px; */
+  align-items: end; /* bottom-align items in their grid cells */
+  justify-items: center; /* center each figure in its cell */
+  width: 80%;
+  margin: 0 auto;
+}
+
+.figrow figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  width: 90%; /* figure fills its grid cell */
+  box-sizing: border-box;
+}
+
+.figrow img {
+  width: 100%; /* image scales to cell width */
+  height: auto;
+  display: block;
+}
+
+.figrow figcaption {
+  width: 100%;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+  font-size: 0.3em;
+}
+
+.figrow figcaption:hover {
+  white-space: normal;
+  overflow: visible;
+}
+
+/* nice colors of contents */
+
+/* ol { */
+/*   list-style: none; */
+/*   counter-reset: item; */
+/*   padding-left: 0; */
+/* } */
+/**/
+/* ol li { */
+/*   counter-increment: item; */
+/*   margin-bottom: 1rem; */
+/*   padding-left: 3rem; */
+/*   position: relative; */
+/*   font-size: 1.1rem; */
+/*   line-height: 1.6; */
+/* } */
+/**/
+/* ol li::before { */
+/*   content: counter(item); */
+/*   position: absolute; */
+/*   left: 0; */
+/*   top: 0; */
+/*   background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); */
+/*   color: white; */
+/*   width: 2rem; */
+/*   height: 2rem; */
+/*   border-radius: 50%; */
+/*   display: flex; */
+/*   align-items: center; */
+/*   justify-content: center; */
+/*   font-weight: bold; */
+/*   font-size: 0.9rem; */
+/* } */
+
+/* modern card style list */
+
+/* ol { */
+/*   list-style: none; */
+/*   counter-reset: item; */
+/*   padding-left: 0; */
+/*   max-width: 800px; */
+/* } */
+/**/
+/* ol li { */
+/*   counter-increment: item; */
+/*   margin-bottom: 0rem; */
+/*   /* padding: 0; */
+/*   padding-left: 50px; */
+/*   position: relative; */
+/*   background: white; */
+/*   border-radius: 2px; */
+/*   border-left: 4px solid #007bff; */
+/*   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+/* transition: all 0.3s ease; */
+/* } */
+/**/
+/* ol li::before { */
+/*   content: counter(item); */
+/*   position: absolute; */
+/*   left: 2px; */
+/* top: 0px; */
+/*   background: #007bff; */
+/*   color: white; */
+/*   width: 1rem; */
+/*   height: 1rem; */
+/*   border-radius: 50%; */
+/*   display: flex; */
+/*   align-items: center; */
+/*   justify-content: center; */
+/*   font-weight: bold; */
+/*   font-size: 0.9rem; */
+/*   border: 3px solid white; */

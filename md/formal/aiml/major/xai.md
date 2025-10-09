@@ -1,3 +1,4 @@
+{{yaml}}
 
 <div class="figrow">
 <figure data-marpit-fragment>

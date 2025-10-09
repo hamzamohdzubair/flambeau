@@ -1,9 +1,4 @@
----
-theme: gaia2
-transition: slide
-paginate: true
-footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
----
+{{yaml}}
 
 ## Workflow
 

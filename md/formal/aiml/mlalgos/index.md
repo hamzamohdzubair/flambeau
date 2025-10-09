@@ -1,8 +1,4 @@
----
-theme: gaia2
-paginate: false
-class: lead
----
+{{yaml}}
 
 ###### Machine Learning Algorithms
 

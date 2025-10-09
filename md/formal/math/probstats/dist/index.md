@@ -1,8 +1,6 @@
----
-theme: gaia2
-paginate: true
-footer: '[<i class="fa-regular fa-house"></i>](index.html#Home)'
----
+{{yaml}}
+
+
 <!-- _class: lead -->
 
 ###### Distribution Theory Chapters

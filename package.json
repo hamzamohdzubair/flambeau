@@ -3,11 +3,11 @@
     "clean": "rm -rf docs",
     "clean-md": "find md -name '*.html' -type f -delete",
     "assets": "cp -r assets docs/",
-    "build-ghp": "npx @marp-team/marp-cli@latest --bespoke.progress true --theme-set styles/ -I md --html --allow-local-files -o docs",
-    "watch:md": "marp --theme-set styles/ --html --watch -I md  --html -o docs",
+    "build-ghp": "npx @marp-team/marp-cli@latest --bespoke.progress true --theme-set styles/ -I mdx --html --allow-local-files -o docs",
+    "watch:mdx": "marp --theme-set styles/ --html --watch -I mdx  --html -o docs",
     "serve:html": "live-server docs --watch=docs --mount=/assets:assets",
-    "preprocess": "node preprocess.js",
-    "start": "concurrently npm:preprocess npm:watch:md npm:serve:html"
+    "watch:md": "node genmdx.js",
+    "start": "concurrently npm:watch:md npm:watch:mdx npm:serve:html"
   },
   "dependencies": {
     "@marp-team/marpit": "^3.1.3",

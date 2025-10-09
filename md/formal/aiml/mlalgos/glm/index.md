@@ -1,7 +1,4 @@
----
-theme: gaia2
-paginate: false
----
+{{yaml}}
 
 <!-- _class: lead -->
 

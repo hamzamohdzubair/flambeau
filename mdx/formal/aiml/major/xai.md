@@ -6,7 +6,6 @@ class: lead
 footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
 ---
 
-
 <div class="figrow">
 <figure data-marpit-fragment>
   <img src="/assets/2025-10-09-08-07-04.png">

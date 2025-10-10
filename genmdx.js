@@ -12,7 +12,7 @@ function loadTemplate(name) {
   if (!templateCache[name]) {
     const templatePath = path.join(templatesDir, `${name}.md`);
     if (fs.existsSync(templatePath)) {
-      templateCache[name] = fs.readFileSync(templatePath, 'utf8');
+      templateCache[name] = fs.readFileSync(templatePath, 'utf8').trim();
     } else {
       console.warn(`Template not found: ${name}`);
       templateCache[name] = `<!-- Template {{${name}}} not found -->`;
@@ -21,11 +21,72 @@ function loadTemplate(name) {
   return templateCache[name];
 }
 
-function processContent(content) {
-  return content.replace(/\{\{(\w+)\}\}/g, (match, name) => {
-    const template = loadTemplate(name);
-    return processContent(template);
+function parseArguments(argsString) {
+  // Parse comma-separated arguments, handling quoted strings
+  const args = [];
+  let current = '';
+  let inQuotes = false;
+  let quoteChar = null;
+
+  for (let i = 0; i < argsString.length; i++) {
+    const char = argsString[i];
+
+    if ((char === '"' || char === "'") && (i === 0 || argsString[i - 1] !== '\\')) {
+      if (!inQuotes) {
+        inQuotes = true;
+        quoteChar = char;
+      } else if (char === quoteChar) {
+        inQuotes = false;
+        quoteChar = null;
+      } else {
+        current += char;
+      }
+    } else if (char === ',' && !inQuotes) {
+      args.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  if (current.trim()) {
+    args.push(current.trim());
+  }
+
+  return args;
+}
+
+function processTemplate(templateName, args) {
+  const template = loadTemplate(templateName);
+
+  // Replace $1, $2, $3... with the corresponding arguments
+  let result = template;
+  args.forEach((arg, index) => {
+    const placeholder = `$${index + 1}`;
+    result = result.split(placeholder).join(arg);
   });
+
+  // Replace $0 with all arguments joined by space (if needed)
+  result = result.replace(/\$0/g, args.join(' '));
+
+  return result;
+}
+
+function processContent(content) {
+  // First pass: Process function-style templates {{ name(args) }}
+  content = content.replace(/\{\{\s*(\w+)\s*\((.*?)\)\s*\}\}/g, (match, name, argsString) => {
+    const args = parseArguments(argsString);
+    const processed = processTemplate(name, args);
+    return processContent(processed); // Recursively process in case template contains more placeholders
+  });
+
+  // Second pass: Process simple templates {{ name }}
+  content = content.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, name) => {
+    const template = loadTemplate(name);
+    return processContent(template); // Recursively process
+  });
+
+  return content;
 }
 
 function processFile(filePath) {

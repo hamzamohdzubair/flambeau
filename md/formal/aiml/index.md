@@ -5,8 +5,8 @@
 <div class="dashboard-tiles">
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-41-30.png');">Major Tasks</a>
   <a class="tile-link" href="minor/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-35-30.png');">Minor Tasks</a>
-  <a class="tile-link" href="mlalgos/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-47-10.png');">ML Algos</a>
-  <a class="tile-link" href="history/index.html" style="--tile-bg-img:url('/assets/2025-10-01-11-36-59.png');">History</a>
+  <a class="tile-link" href="mlalgos/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-47-10.png');">Algos</a>
+  <a class="tile-link" href="extras/index.html" style="--tile-bg-img:url('/assets/2025-10-01-11-36-59.png');">Extras</a>
 </div>
 
 ---

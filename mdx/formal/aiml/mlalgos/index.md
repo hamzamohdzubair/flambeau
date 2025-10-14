@@ -13,7 +13,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-41-32.png');">GLM</a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-36-27.png');">Neighbours</a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-32-36.png');">Trees</a>
-  <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-38-46.png ');">SVM</a>
+  <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-38-46.png');">SVM</a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-34-05.png');">Ensembles</a>
   <a class="tile-link" href="nn/index.html" style="--tile-bg-img:url('/assets/2025-10-04-11-51-47.png');">Neural Networks</a>
 </div>

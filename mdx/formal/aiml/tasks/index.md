@@ -1,6 +1,10 @@
-{{yaml}}
-
-<!-- _class: lead -->
+---
+theme: gaia2
+paginate: true
+transition: slide
+class: lead
+footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
+---
 
 ###### Major Tasks
 
@@ -11,6 +15,18 @@
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-41-30.png');">Dimensionality<br>Reduction</a>
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-24-37.png');">Recommendation</a>
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-23-37.png');">Forecasting</a>
-  <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-21-33.png');">Vision</a>
+  <a class="tile-link" href="vision/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-21-33.png');">Vision</a>
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-22-22.png');">Language</a>
+</div>
+
+
+---
+
+###### Minor Tasks
+
+<div class="dashboard-tiles">
+  <a class="tile-link" href="aiml/minor/test1.html" style="--tile-bg-img:url('$3');">Scaling</a>
+  <a class="tile-link" href="aiml/minor/test2.html" style="--tile-bg-img:url('$3');">Encoding</a>
+  <a class="tile-link" href="aiml/minor/test3.html" style="--tile-bg-img:url('$3');">Missing Values</a>
+  <a class="tile-link" href="aiml/minor/imb.html" style="--tile-bg-img:url('$3');">Class<br>Imbalance</a>
 </div>

@@ -4,6 +4,7 @@
 
 <div class="dashboard-tiles">
   <a class="tile-link" href="formal/cs/programming/python/numpy/index.html" style="--tile-bg-img:url('assets/2025-10-05-12-23-25.png');"></a>
+  {{tile(, formal/cs/programming/python/numpy/index.html, assets/2025-10-05-12-23-25.png)}}
   <a class="tile-link" href="formal/cs/programming/python/pandas/index.html" style="--tile-bg-img:url('assets/2025-10-05-12-17-07.png');"></a>
   <a class="tile-link" href="formal/cs/programming/python/skl/index.html" style="--tile-bg-img:url('assets/2025-10-05-12-16-08.png');"></a>
   <a class="tile-link" href="formal/cs/programming/python/keras/index.html" style="--tile-bg-img:url('assets/2025-10-05-12-21-55.png');"></a>

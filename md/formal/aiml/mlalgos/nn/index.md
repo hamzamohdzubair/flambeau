@@ -3,7 +3,7 @@
 ###### Neural Networks
 
 <hdiv class="dashboard-tiles">
-  <a class="tile-link" href="forma/aiml/mlalgos/nn/cnn/index.html" style="--tile-bg-img:url('assets/2025-10-04-12-02-13.png');">CNN</a>
+  {{tile(CNN, forma/aiml/mlalgos/nn/cnn/index.html, assets/2025-10-04-12-02-13.png)}}
 </hdiv>
 
 ---

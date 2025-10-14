@@ -7,8 +7,8 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ---
 
 <!-- _class: lead -->
+# LLM
 
-###### CPP Courses
+---
 
-<div class="dashboard-tiles">
-</div>
+Aligned Query Expansion

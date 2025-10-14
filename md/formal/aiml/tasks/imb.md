@@ -1,11 +1,9 @@
 {{yaml}}
 
-<!-- _class: lead -->
 # Class Imbalance
 
 ---
 
-<!-- _class: lead -->
 What is class imbalance?
 
 ---

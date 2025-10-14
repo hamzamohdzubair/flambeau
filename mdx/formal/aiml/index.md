@@ -9,10 +9,10 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ###### AI/ML
 
 <div class="dashboard-tiles">
-  <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-41-30.png');">Major Tasks</a>
-  <a class="tile-link" href="minor/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-35-30.png');">Minor Tasks</a>
-  <a class="tile-link" href="mlalgos/index.html" style="--tile-bg-img:url('/assets/2025-10-01-08-47-10.png');">Algos</a>
-  <a class="tile-link" href="extras/index.html" style="--tile-bg-img:url('/assets/2025-10-01-11-36-59.png');">Extras</a>
+  <a class="tile-link" href="history.html" style="--tile-bg-img:url('/assets/2025-10-01-11-36-59.png');">History</a>
+  <a class="tile-link" href="tasks/index.html" style="--tile-bg-img:url('/assets/2025-10-10-11-57-17.png');">ML Tasks</a>
+  <a class="tile-link" href="mlalgos/index.html" style="--tile-bg-img:url('/assets/2025-10-10-12-04-42.png');">ML Algos</a>
+  <a class="tile-link" href="limitations.html" style="--tile-bg-img:url('/assets/2025-10-10-12-13-11.png');">Limitations</a>
 </div>
 
 ---
@@ -25,23 +25,24 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### Contents
 
-1) Terminology
-2) How Computers Learn
-3) Types of Learning
-4) Types of Learning Tasks
-5) Examples of Simple ML Models
+1) Why learn AI/ML?
+2) Terminology
+3) How Computers Learn
+4) Types of Learning
+5) Types of Learning Tasks
+6) Examples of Simple ML Models
 
 ---
 
 ### Resources
 
 <div class="figrow">
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment style="width:300px;">
     <img src="/assets/2025-10-05-09-49-36.png">
     <figcaption>Free access: https://mml-book.github.io/book/mml-book.pdf</figcaption>
   </figure>
 
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment style="width:300px;">
     <img src="/assets/2025-10-05-09-08-25.png">
     <figcaption>Free access: d2l.ai</figcaption>
   </figure>
@@ -49,6 +50,39 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ---
 
+## Why Learn AI/ML?
+
+---
+
+### Is there any benefit in learning AI/ML?
+
+1. Its not only beneficial but essential to learn AI/ML?
+2. There is lot of benefit in learning latest technologies
+3. What is the benefit of learning python if Chatgpt can write all code
+
+---
+
+### Why is knowledge of AI/ML essential?
+
+<div class="figrow">
+<figure data-marpit-fragment>
+  <img src="/assets/2025-10-12-16-15-40.png">
+  <figcaption>Source: https://cdn.bulbapp.io/frontend/images/d1c3fa1d-75c7-4432-bbb8-523495cd53ee/1</figcaption>
+</figure>
+</div>
+
+---
+
+### Checkpoint
+
+1. Why Learn AI/ML?
+2. **Terminology**
+3. How Computers Learn
+4. Types of Learning
+5. Types of Learning Tasks
+6. Examples of Simple ML Models
+
+---
 
 ## Terminology
 
@@ -82,12 +116,21 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### What is AI?
 
+<span data-marpit-fragment>Attempt at mimicry of Human Intelligence</span>
+
+---
+
+### Level of mimicry
+
 <div class="figrow"><figure data-marpit-fragment>
   <img src="/assets/2025-10-03-14-20-49.png">
   <figcaption>Source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg</figcaption>
-</figure></div>
+</figure>
+</div>
+
 
 ---
+
 
 ### Have we made ASI?
 
@@ -106,9 +149,33 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### What is ML?
 
+* A computer program is said to learn from experience **E** with respect to some class of tasks **T** and performance measure **P**, if its performance at tasks in **T**, as measured by **P**, improves with experience **E** &mdash; *Tom Mitchell (1997)*
+
+* The field of study that gives computers the ability to learn without being explicitly programmed &mdash; *Arthur Samuel (1959)*
+
 ---
 
 ### ML vs Programming
+
+<div class="figrow">
+<figure data-marpit-fragment>
+      <span>Traditional Programming</span>
+  <img src="/assets/2025-10-13-12-45-47.png">
+  <figcaption></figcaption>
+</figure>
+</div>
+
+<div class="figrow">
+<figure data-marpit-fragment>
+    <span>Machine Learning</span>
+  <img src="/assets/2025-10-13-12-47-56.png">
+  <figcaption></figcaption>
+</figure>
+</div>
+
+---
+
+<iframe src = "https://drive.google.com/file/d/1UgWoz2tWh6--K_fQrzzvVCZDvhcJupa8/view?usp=sharing"></iframe>
 
 ---
 
@@ -159,11 +226,12 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### Checkpoint
 
-1. Terminology
-2. **How Computers Learn**
-3. Types of Learning
-4. Types of Learning Tasks
-5. Examples of Simple ML Models
+1. Why Learn AI/ML?
+2. Terminology
+3. **How Computers Learn**
+4. Types of Learning
+5. Types of Learning Tasks
+6. Examples of Simple ML Models
 
 
 

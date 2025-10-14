@@ -6,28 +6,26 @@ class: lead
 footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
 ---
 
-###### Classification
-
-<div class="dashboard-tiles">
-</div>
-
----
-
 <!-- _class: lead invert -->
 
-# Classification
+# Computer Vision
 
 ---
 
 ### Contents
 
-1) Binary Classification
-2) Multiclass Classification
+1) Fundamentals
+2) Filters
+
 
 ---
 
-### What is binary classification?
+### Resources
 
-<!-- _class: lead nob -->
-* $$ f : \mathbb{R}^D \to \{ 0, 1 \} $$
-* $$ f : \mathbb{R}^D \to \{ +1, -1 \} $$
+
+<div class="figrow">
+<figure data-marpit-fragment style="width:400px;">
+  <img src="/assets/2025-10-12-13-06-55.png">
+  <figcaption>Free Access: https://szeliski.org/Book/</figcaption>
+</figure>
+</div>

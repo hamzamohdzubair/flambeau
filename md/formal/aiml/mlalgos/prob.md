@@ -72,5 +72,5 @@ $$
 
 ### Naive Assumption
 
-<!-- _class: lead nob -->
+{{nob}}
 * $$P(\mathbf{x} \mid y) = \prod_{i} P(x_i \mid y)$$

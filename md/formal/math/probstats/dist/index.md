@@ -6,7 +6,7 @@
 ###### Distribution Theory Chapters
 
 <div class="dashboard-tiles">
-  <a class="tile-link" href="math/probstats/dist/beta.html" style="--tile-bg-img:url('assets/2025-10-02-22-40-24.png');">Beta<br>Distribution</a>
+  {{tile(Beta<br>Distribution, math/probstats/dist/beta.html, assets/2025-10-02-22-40-24.png)}}
 </div>
 
 ---

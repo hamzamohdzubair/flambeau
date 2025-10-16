@@ -2,11 +2,16 @@
 
 {{title}}
 
-# History
+# History of AI
 
 ---
 
-### Contents
+### History of AI &mdash; Chapters
+
+<div class="dashboard-tiles">
+{{tile(Dreams, dreams.html, /assets/2025-10-16-09-29-24.png)}}
+</div>
+
 
 ---
 
@@ -14,19 +19,23 @@
 
 
 <div class="figrow">
-<figure data-marpit-fragment>
+<figure>
   <img src="/assets/2025-10-14-11-56-38.png">
   <figcaption></figcaption>
 </figure>
 
-<figure data-marpit-fragment>
+
+
+<figure>
   <img src="/assets/2025-10-14-11-33-44.png">
   <figcaption></figcaption>
 </figure>
-<figure data-marpit-fragment>
+
+<figure>
   <img src="/assets/2025-10-14-11-32-57.png">
   <figcaption></figcaption>
 </figure>
+
 </div>
 
 

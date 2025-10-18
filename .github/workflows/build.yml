@@ -34,6 +34,16 @@ jobs:
       - name: Build Marp presentations
         run: npm run build-ghp && cp -r assets docs/
 
+      - name: Install image optimization tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y  pngquant
+
+      - name: Compress PNGs in docs/assets
+        run: |
+          find docs/assets -type f -iname '*.png' \
+            -exec pngquant --force --quality=65-80 --skip-if-larger --ext .png --strip '{}' +
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/master' # Only deploy from master

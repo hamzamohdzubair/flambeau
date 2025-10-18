@@ -42,7 +42,7 @@ jobs:
       - name: Compress PNGs in docs/assets
         run: |
           find docs/assets -type f -iname '*.png' \
-            -exec pngquant --force --quality=65-80 --skip-if-larger --ext .png --strip '{}' +
+            -exec pngquant --force --quality=65-80 --skip-if-larger --ext .png --strip '{}' \;
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

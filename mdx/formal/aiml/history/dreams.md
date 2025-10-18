@@ -31,9 +31,30 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### Aristotle
 
-<div class="figrow">
+<div class="cc" style="--col:50;">
+  <div><div class="figrow">
 <figure data-marpit-fragment style="width:300px;">
   <img src="/assets/2025-10-16-10-44-27.png">
-  <figcaption>~320 BC</figcaption>
+  <figcaption>Written: ~320 BC</figcaption>
+</figure>
+</div></div>
+
+<div>
+
+* Automation Impossible
+* Slavery Essential for leisure
+
+</div>
+
+
+</div>
+
+---
+
+
+<div class="figrow">
+<figure data-marpit-fragment style="width:700px;">
+  <img src="/assets/2025-10-18-06-55-32.png">
+  <figcaption>Ars Magna (~1300 AD) by Roman Lull</figcaption>
 </figure>
 </div>

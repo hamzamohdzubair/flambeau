@@ -34,7 +34,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-16-19-17-39.png');">Dimensionality Reduction</a>
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-24-37.png');">Recommendation</a>
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-23-37.png');">Forecasting</a>
-  <a class="tile-link" href="vision/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-21-33.png');">Vision</a>
+  <a class="tile-link" href="tasks/vision/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-21-33.png');">Vision</a>
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-22-22.png');">Language</a>
 </div>
 
@@ -69,6 +69,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### Extra Topics
 
 <div class="dashboard-tiles">
+  <a class="tile-link" href="tasks/xai.html" style="--tile-bg-img:url('/assets/2025-10-18-09-32-58.png');">XAI</a>
   <a class="tile-link" href="history/index.html" style="--tile-bg-img:url('/assets/2025-10-01-11-36-59.png');">History</a>
   <a class="tile-link" href="limitations.html" style="--tile-bg-img:url('/assets/2025-10-10-12-13-11.png');">Limitations</a>
 </div>

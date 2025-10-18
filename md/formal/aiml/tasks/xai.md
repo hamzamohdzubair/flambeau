@@ -12,7 +12,7 @@
 ### Resources
 
 <div class="figrow">
-<figure data-marpit-fragment>
+<figure data-marpit-fragment style="width:400px;">
   <img src="/assets/2025-10-09-11-27-46.png">
   <figcaption>Free Access: https://christophm.github.io/interpretable-ml-book/</figcaption>
 </figure>

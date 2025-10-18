@@ -3,8 +3,8 @@
     "clean": "rm -rf docs",
     "clean-md": "find md -name '*.html' -type f -delete",
     "assets": "cp -r assets docs/",
-    "build-ghp": "npx @marp-team/marp-cli@latest --theme-set styles/ -I mdx --html --allow-local-files -o docs",
-    "watch:mdx": "marp --bespoke.osc false --theme-set styles/ --html --watch -I mdx  --html -o docs",
+    "build-ghp": "npx @marp-team/marp-cli@latest --bespoke.osc false --theme-set styles/ -I mdx --html --allow-local-files -o docs",
+    "watch:mdx": "marp --engine ./engine2.js --bespoke.osc false --theme-set styles/ --watch -I mdx  --html -o docs",
     "serve:html": "live-server docs --watch=docs --mount=/assets:assets",
     "watch:md": "node genmdx.js",
     "start": "concurrently npm:watch:md npm:watch:mdx npm:serve:html"

@@ -238,15 +238,29 @@ figure[data-bespoke-marp-fragment="inactive"] {
 ol {
   list-style: none;
   counter-reset: item;
-  padding-left: 1.5em;
+  padding-left: 1em; /* Wider gutter for line numbers */
+  margin: 0; /* Align flush with container */
 }
+
 ol li {
   counter-increment: item;
+  position: relative;
+  padding-left: 0.5em; /* Padding between number and content */
+  /* font-family: Menlo, Consolas, "Courier New", monospace; */
+  /* line-height: 1.5; */
 }
-ol li::marker {
-  content: counter(item) "・";
 
-  width: 1.5em;
+/* 2. Number styling via ::marker (modern browsers) */
+ol li::marker {
+  content: counter(item);
   display: inline-block;
+  width: 2.5em; /* Fixed width for alignment */
+  margin-left: -3em; /* Pull into the gutter */
+  padding-right: 0.5em; /* Space between number and text */
   text-align: right;
+  color: #999; /* Muted gray number color */
+  background-color: #f6f8fa; /* Light editor-like gutter */
+  border-right: 1px solid #e1e4e8; /* Divider line between gutter & content */
+  font-size: 0.8em; /* Slightly smaller than main text */
+  font-family: Menlo, Consolas, "Courier New", monospace;
 }

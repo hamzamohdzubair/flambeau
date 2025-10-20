@@ -2,8 +2,8 @@
 
 ### Libraries
 
-<div class="dashboard-tiles">
-  {{tile(, formal/cs/programming/python/numpy/index.html, /assets/2025-10-05-12-23-25.png)}}
+<div class="tiles">
+  {{tile(, numpy/index.html, /assets/2025-10-19-00-46-48.png)}}
   {{tile(, formal/cs/programming/python/pandas/index.html, /assets/2025-10-05-12-17-07.png)}}
   {{tile(, formal/cs/programming/python/skl/index.html, /assets/2025-10-05-12-16-08.png)}}
   {{tile(, formal/cs/programming/python/keras/index.html, /assets/2025-10-05-12-21-55.png)}}
@@ -15,7 +15,7 @@
 
 ### Tasks
 
-<div class="dashboard-tiles">
+<div class="tiles">
   {{tile(Getting Toy Data, getting-toy-data.html, /assets/2025-10-18-08-01-50.png)}}
 </div>
 

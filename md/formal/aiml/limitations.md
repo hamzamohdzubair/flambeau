@@ -1,7 +1,7 @@
 {{yaml}}
 
 
-<!-- _class: lead invert -->
+{{title}}
 
 # Limitations of AI
 

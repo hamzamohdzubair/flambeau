@@ -4,5 +4,5 @@
 
 ###### Rust Courses
 
-<div class="dashboard-tiles">
+<div class="tiles">
 </div>

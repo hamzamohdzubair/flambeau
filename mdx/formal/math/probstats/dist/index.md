@@ -11,7 +11,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ###### Distribution Theory Chapters
 
-<div class="dashboard-tiles">
+<div class="tiles">
   <a class="tile-link" href="math/probstats/dist/beta.html" style="--tile-bg-img:url('assets/2025-10-02-22-40-24.png');">Beta<br>Distribution</a>
 </div>
 
@@ -29,6 +29,6 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ###### Distribution Theory Chapters
 
-<div class="dashboard-tiles">
+<div class="tiles">
   <a class="tile-link" href="math/probstats/dist/beta.html">Beta<br>Distribution</a>
 </div>

@@ -10,6 +10,6 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ###### GIT Intermediate Course
 
-<div class="dashboard-tiles">
+<div class="tiles">
   <a class="tile-link" href="ops/git/index.html">GIT</a>
 </div>

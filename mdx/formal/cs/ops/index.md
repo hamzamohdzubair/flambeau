@@ -10,6 +10,6 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ###### OPS
 
-<div class="dashboard-tiles">
+<div class="tiles">
   <a class="tile-link" href="cs/ops/git/index.html">GIT</a>
 </div>

@@ -10,5 +10,5 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ###### Rust Courses
 
-<div class="dashboard-tiles">
+<div class="tiles">
 </div>

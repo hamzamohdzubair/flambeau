@@ -2,7 +2,7 @@
 
 ###### Humanities
 
-<div class="dashboard-tiles">
+<div class="tiles">
   {{tile(Quran, quran/index.html, /assets/2025-09-30-14-29-13.png)}}
 </div>
 

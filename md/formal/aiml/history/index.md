@@ -8,37 +8,19 @@
 
 ### History of AI &mdash; Chapters
 
-<div class="dashboard-tiles">
+<div class="tiles">
 {{tile(Dreams, dreams.html, /assets/2025-10-16-09-29-24.png)}}
 </div>
-
 
 ---
 
 ### Resources
 
-
 <div class="figrow">
-<figure>
-  <img src="/assets/2025-10-14-11-56-38.png">
-  <figcaption></figcaption>
-</figure>
-
-
-
-<figure>
-  <img src="/assets/2025-10-14-11-33-44.png">
-  <figcaption></figcaption>
-</figure>
-
-<figure>
-  <img src="/assets/2025-10-14-11-32-57.png">
-  <figcaption></figcaption>
-</figure>
-
+  {{ig(, /assets/2025-10-14-11-56-38.png)}}
+  {{ig(, /assets/2025-10-14-11-33-44.png)}}
+  {{ig(, /assets/2025-10-14-11-32-57.png)}}
 </div>
-
-
 
 ---
 

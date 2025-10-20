@@ -2,7 +2,7 @@
 
 ###### Natural Science
 
-<div class="dashboard-tiles">
+<div class="tiles">
 </div>
 
 ---

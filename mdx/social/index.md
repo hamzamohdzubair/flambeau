@@ -8,7 +8,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ###### Social Science
 
-<div class="dashboard-tiles">
+<div class="tiles">
 </div>
 
 ---

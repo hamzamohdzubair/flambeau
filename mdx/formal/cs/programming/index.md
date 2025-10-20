@@ -8,13 +8,13 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 <!-- _class: lead -->
 
-###### Programming Topics
+### Programming Languages
 
-<div class="dashboard-tiles">
+<div class="tiles">
   <a class="tile-link" href="cpp/index.html" style="--tile-bg-img:url('/assets/2025-10-02-11-55-50.png');"></a>
-  <a class="tile-link" href="python/index.html" style="--tile-bg-img:url('/assets/2025-10-02-11-55-05.png');"></a>
-  <a class="tile-link" href="rust/index.html" style="--tile-bg-img:url('/assets/2025-10-02-11-57-21.png');"></a>
-  <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-02-11-57-09.png');"></a>
+  <a class="tile-link" href="python/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-50-48.png');"></a>
+  <a class="tile-link" href="rust/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-52-23.png');"></a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-02-11-56-23.png');"></a>
-  <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-02-11-56-57.png');">SQL</a>
+  <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-19-01-03-25.png');"></a>
+  <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-55-48.png');"></a>
 </div>

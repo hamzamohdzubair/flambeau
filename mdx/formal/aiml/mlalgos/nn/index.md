@@ -8,7 +8,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ###### Neural Networks
 
-<hdiv class="dashboard-tiles">
+<hdiv class="tiles">
   <a class="tile-link" href="forma/aiml/mlalgos/nn/cnn/index.html" style="--tile-bg-img:url('assets/2025-10-04-12-02-13.png');">CNN</a>
 </hdiv>
 

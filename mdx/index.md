@@ -10,11 +10,11 @@ footer: ' '
 
 ###### Course Topics
 
-<div class="dashboard-tiles">
-  <a class="tile-link" href="natural/index.html" style="--tile-bg-img:url('/assets/2025-10-03-22-54-11.png');">Natural Science</a>
-  <a class="tile-link" href="formal/index.html" style="--tile-bg-img:url('/assets/2025-10-03-22-51-50.png');">Formal Science</a>
-  <a class="tile-link" href="social/index.html" style="--tile-bg-img:url('/assets/2025-10-03-22-55-48.png');">Social Science</a>
+<div class="tiles">
+  <a class="tile-link" href="natural/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-42-10.png');">Natural Science</a>
+  <a class="tile-link" href="formal/index.html" style="--tile-bg-img:url('/assets/2025-10-18-19-56-26.png');">Formal Science</a>
+  <a class="tile-link" href="social/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-42-47.png');">Social Science</a>
   <a class="tile-link" href="applied/index.html" style="--tile-bg-img:url('/assets/2025-10-03-22-57-34.png');">Applied Science</a>
-  <a class="tile-link" href="humanities/index.html" style="--tile-bg-img:url('/assets/2025-10-03-22-50-49.png');">Humanities</a>
+  <a class="tile-link" href="humanities/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-41-13.png');">Humanities</a>
 </div>
 

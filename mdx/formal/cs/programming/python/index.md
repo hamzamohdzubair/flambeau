@@ -8,8 +8,8 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### Libraries
 
-<div class="dashboard-tiles">
-  <a class="tile-link" href="formal/cs/programming/python/numpy/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-23-25.png');"></a>
+<div class="tiles">
+  <a class="tile-link" href="numpy/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-46-48.png');"></a>
   <a class="tile-link" href="formal/cs/programming/python/pandas/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-17-07.png');"></a>
   <a class="tile-link" href="formal/cs/programming/python/skl/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-16-08.png');"></a>
   <a class="tile-link" href="formal/cs/programming/python/keras/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-21-55.png');"></a>
@@ -21,7 +21,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### Tasks
 
-<div class="dashboard-tiles">
+<div class="tiles">
   <a class="tile-link" href="getting-toy-data.html" style="--tile-bg-img:url('/assets/2025-10-18-08-01-50.png');">Getting Toy Data</a>
 </div>
 

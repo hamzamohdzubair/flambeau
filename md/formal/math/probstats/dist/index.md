@@ -5,7 +5,7 @@
 
 ###### Distribution Theory Chapters
 
-<div class="dashboard-tiles">
+<div class="tiles">
   {{tile(Beta<br>Distribution, math/probstats/dist/beta.html, assets/2025-10-02-22-40-24.png)}}
 </div>
 
@@ -23,6 +23,6 @@
 
 ###### Distribution Theory Chapters
 
-<div class="dashboard-tiles">
+<div class="tiles">
   <a class="tile-link" href="math/probstats/dist/beta.html">Beta<br>Distribution</a>
 </div>

@@ -9,19 +9,19 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### Automata
 
 <div class="figrow">
-<figure data-marpit-fragment>
+  <figure data-marpit-fragment>
   <img src="/assets/2025-10-16-10-17-59.png">
   <figcaption>800-600 BC</figcaption>
 </figure>
-<figure data-marpit-fragment>
+  <figure data-marpit-fragment>
   <img src="/assets/2025-10-16-10-39-15.png">
   <figcaption>C3PO</figcaption>
 </figure>
-<figure data-marpit-fragment>
+  <figure data-marpit-fragment>
   <img src="/assets/2025-10-16-10-24-09.png">
   <figcaption>2026</figcaption>
 </figure>
-<figure data-marpit-fragment>
+  <figure data-marpit-fragment>
   <img src="/assets/2025-10-16-10-25-10.png">
   <figcaption>2004</figcaption>
 </figure>
@@ -33,8 +33,8 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 <div class="cc" style="--col:50;">
   <div><div class="figrow">
-<figure data-marpit-fragment style="width:300px;">
-  <img src="/assets/2025-10-16-10-44-27.png">
+    <figure data-marpit-fragment style="width:300px;">
+  <img src="/assets/2025-10-19-09-01-43.png">
   <figcaption>Written: ~320 BC</figcaption>
 </figure>
 </div></div>
@@ -51,10 +51,15 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ---
 
+### Early attempts at automation and AI
 
 <div class="figrow">
-<figure data-marpit-fragment style="width:700px;">
+  <figure data-marpit-fragment>
   <img src="/assets/2025-10-18-06-55-32.png">
   <figcaption>Ars Magna (~1300 AD) by Roman Lull</figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-19-08-53-00.png">
+  <figcaption>Automaton Knight (1495) by Leonardo da Vinci</figcaption>
 </figure>
 </div>

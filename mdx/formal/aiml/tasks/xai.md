@@ -23,5 +23,3 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
   <figcaption>Free Access: https://christophm.github.io/interpretable-ml-book/</figcaption>
 </figure>
 </div>
-
----

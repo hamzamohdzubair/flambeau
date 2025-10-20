@@ -14,37 +14,28 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ### History of AI &mdash; Chapters
 
-<div class="dashboard-tiles">
+<div class="tiles">
 <a class="tile-link" href="dreams.html" style="--tile-bg-img:url('/assets/2025-10-16-09-29-24.png');">Dreams</a>
 </div>
-
 
 ---
 
 ### Resources
 
-
 <div class="figrow">
-<figure>
+  <figure>
   <img src="/assets/2025-10-14-11-56-38.png">
   <figcaption></figcaption>
 </figure>
-
-
-
-<figure>
+  <figure>
   <img src="/assets/2025-10-14-11-33-44.png">
   <figcaption></figcaption>
 </figure>
-
-<figure>
+  <figure>
   <img src="/assets/2025-10-14-11-32-57.png">
   <figcaption></figcaption>
 </figure>
-
 </div>
-
-
 
 ---
 

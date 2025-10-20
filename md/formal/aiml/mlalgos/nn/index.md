@@ -2,7 +2,7 @@
 
 ###### Neural Networks
 
-<hdiv class="dashboard-tiles">
+<hdiv class="tiles">
   {{tile(CNN, forma/aiml/mlalgos/nn/cnn/index.html, assets/2025-10-04-12-02-13.png)}}
 </hdiv>
 

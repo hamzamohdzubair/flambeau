@@ -3,22 +3,10 @@
 ### Automata
 
 <div class="figrow">
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-10-17-59.png">
-  <figcaption>800-600 BC</figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-10-39-15.png">
-  <figcaption>C3PO</figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-10-24-09.png">
-  <figcaption>2026</figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-10-25-10.png">
-  <figcaption>2004</figcaption>
-</figure>
+  {{fig(800-600 BC, /assets/2025-10-16-10-17-59.png)}}
+  {{fig(C3PO, /assets/2025-10-16-10-39-15.png)}}
+  {{fig(2026, /assets/2025-10-16-10-24-09.png)}}
+  {{fig(2004, /assets/2025-10-16-10-25-10.png)}}
 </div>
 
 ---
@@ -27,10 +15,7 @@
 
 <div class="cc" style="--col:50;">
   <div><div class="figrow">
-<figure data-marpit-fragment style="width:300px;">
-  <img src="/assets/2025-10-16-10-44-27.png">
-  <figcaption>Written: ~320 BC</figcaption>
-</figure>
+    {{figw(300, Written: ~320 BC, /assets/2025-10-19-09-01-43.png)}}
 </div></div>
 
 <div>
@@ -45,10 +30,9 @@
 
 ---
 
+### Early attempts at automation and AI
 
 <div class="figrow">
-<figure data-marpit-fragment style="width:700px;">
-  <img src="/assets/2025-10-18-06-55-32.png">
-  <figcaption>Ars Magna (~1300 AD) by Roman Lull</figcaption>
-</figure>
+  {{fig('Ars Magna (~1300 AD) by Roman Lull', /assets/2025-10-18-06-55-32.png)}}
+  {{fig(Automaton Knight (1495) by Leonardo da Vinci, /assets/2025-10-19-08-53-00.png)}}
 </div>

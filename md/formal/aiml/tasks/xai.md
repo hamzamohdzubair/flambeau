@@ -17,5 +17,3 @@
   <figcaption>Free Access: https://christophm.github.io/interpretable-ml-book/</figcaption>
 </figure>
 </div>
-
----

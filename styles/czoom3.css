@@ -1,0 +1,49 @@
+/* Ensure smooth transitions */
+figure[data-marpit-fragment] {
+  transition: all 0.4s ease-in-out !important;
+}
+
+figure[data-marpit-fragment] img {
+  transition: all 0.4s ease-in-out !important;
+}
+
+/* Zoomed state - more specific and stronger */
+body figure[data-marpit-fragment].zoomed {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 10000 !important;
+  width: 80vw !important;
+  height: 80vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body figure[data-marpit-fragment].zoomed img {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) !important;
+}
+
+body figure[data-marpit-fragment].zoomed::before {
+  content: "" !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+  z-index: -1 !important;
+}
+
+body figure[data-marpit-fragment].zoomed figcaption {
+  display: none !important;
+}

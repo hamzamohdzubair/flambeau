@@ -6,7 +6,69 @@ class: lead
 footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
 ---
 
+<link href="/styles/czoom3.css" rel="stylesheet">
+
+<script src="/scripts/czoom3.js"></script>
+
 ## Why Learn AI/ML?
+
+---
+
+
+### Today's World
+
+
+We are surrounded by Algorithms
+<br>
+<div class="figrow">
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-12-56-32.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-12-48-33.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-12-52-39.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-12-51-19.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-12-59-25.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-20-51-08.png">
+  <figcaption></figcaption>
+</figure>
+</div>
+<br>
+<div class="figrow">
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-21-02-20.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-20-58-40.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-12-53-48.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-12-54-53.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment>
+  <img src="/assets/2025-10-16-20-54-13.png">
+  <figcaption></figcaption>
+</figure>
+</div>
 
 ---
 
@@ -48,55 +110,3 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ---
 
-### Surrounded by Algorithms
-
-
-<div class="figrow">
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-56-32.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-48-33.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-52-39.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-51-19.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-59-25.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-51-08.png">
-  <figcaption></figcaption>
-</figure>
-</div>
-<br>
-<div class="figrow">
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-21-02-20.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-58-40.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-53-48.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-54-53.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-54-13.png">
-  <figcaption></figcaption>
-</figure>
-</div>

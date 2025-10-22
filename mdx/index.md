@@ -5,7 +5,6 @@ class: lead
 footer: ' '
 ---
 
-
 <i class="fa-regular fa-house"></i>
 
 ###### Course Topics

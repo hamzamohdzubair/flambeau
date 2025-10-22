@@ -25,8 +25,5 @@
 ---
 
 <div class="figrow">
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-12-16-09-42.png">
-  <figcaption>Source: https://media.licdn.com/dms/image/v2/D4D12AQEt4g6pTNlDIA/article-cover_image-shrink_720_1280/</figcaption>
-</figure>
+  {{fig(Source: https://media.licdn.com/dms/image/v2/D4D12AQEt4g6pTNlDIA/article-cover_image-shrink_720_1280/, /assets/2025-10-12-16-09-42.png)}}
 </div>

@@ -10,10 +10,11 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 <script src="/scripts/czoom3.js"></script>
 
-<!-- _class: lead -->
+### Trade off chart
 
-###### GIT Intermediate Course
-
-<div class="tiles">
-  <a class="tile-link" href="ops/git/index.html">GIT</a>
+<div class="figrow">
+  <figure data-marpit-fragment style="width:900px;">
+  <img src="/assets/2025-10-21-14-03-24.png">
+  <figcaption>Trade-off (Source: Johansson, Robert, Robert Johansson, and Suresh John. Numerical python. Vol. 1. New York, NY: Apress, 2019.)</figcaption>
+</figure>
 </div>

@@ -1,8 +1,16 @@
 {{yaml}}
 
-<!-- _class: lead -->
 
-### Programming Languages
+### Concepts
+
+<div class="tiles">
+  {{tile(High Level<br>vs<br>Low Level, highvslow.html,)}}
+
+</div>
+
+---
+
+### Languages
 
 <div class="tiles">
   {{tile(, cpp/index.html, /assets/2025-10-02-11-55-50.png)}}

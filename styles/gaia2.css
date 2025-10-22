@@ -3,6 +3,11 @@
 @import "gaia";
 @import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
 
+section {
+  width: 1280px;
+  height: 730px;
+}
+
 .tiles {
   display: flex;
   flex-wrap: wrap;

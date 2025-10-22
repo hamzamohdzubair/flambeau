@@ -6,6 +6,10 @@ class: lead
 footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
 ---
 
+<link href="/styles/czoom3.css" rel="stylesheet">
+
+<script src="/scripts/czoom3.js"></script>
+
 <!-- _class: lead invert -->
 
 # AI/ML
@@ -79,15 +83,15 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### Books
 
 <div class="figrow">
-  <figure data-marpit-fragment>
+  <figure>
   <img src="/assets/2025-10-05-09-49-36.png">
   <figcaption>Free access: https://mml-book.github.io/book/mml-book.pdf</figcaption>
 </figure>
-  <figure data-marpit-fragment>
+  <figure>
   <img src="/assets/2025-10-16-19-06-32.png">
   <figcaption>Free access: https://www.statlearning.com/</figcaption>
 </figure>
-  <figure data-marpit-fragment>
+  <figure>
   <img src="/assets/2025-10-05-09-08-25.png">
   <figcaption>Free access: d2l.ai</figcaption>
 </figure>
@@ -98,7 +102,7 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### Web Resources
 
 <div class="figrow">
-  <figure data-marpit-fragment>
+  <figure>
   <img src="/assets/2025-10-08-22-25-27.png">
   <figcaption>Source: https://mlu-explain.github.io/</figcaption>
 </figure>

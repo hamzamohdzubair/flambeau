@@ -4,6 +4,31 @@
 
 ---
 
+
+### Today's World
+
+
+We are surrounded by Algorithms
+<br>
+<div class="figrow">
+  {{fig(, /assets/2025-10-16-12-56-32.png)}}
+  {{fig(, /assets/2025-10-16-12-48-33.png)}}
+  {{fig(, /assets/2025-10-16-12-52-39.png)}}
+  {{fig(, /assets/2025-10-16-12-51-19.png)}}
+  {{fig(, /assets/2025-10-16-12-59-25.png)}}
+  {{fig(, /assets/2025-10-16-20-51-08.png)}}
+</div>
+<br>
+<div class="figrow">
+  {{fig(, /assets/2025-10-16-21-02-20.png)}}
+  {{fig(, /assets/2025-10-16-20-58-40.png)}}
+  {{fig(, /assets/2025-10-16-12-53-48.png)}}
+  {{fig(, /assets/2025-10-16-12-54-53.png)}}
+  {{fig(, /assets/2025-10-16-20-54-13.png)}}
+</div>
+
+---
+
 ### Is there any benefit in learning AI/ML?
 
 1) Its not only beneficial but essential to learn AI/ML.
@@ -42,55 +67,3 @@
 
 ---
 
-### Surrounded by Algorithms
-
-
-<div class="figrow">
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-56-32.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-48-33.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-52-39.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-51-19.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-59-25.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-51-08.png">
-  <figcaption></figcaption>
-</figure>
-</div>
-<br>
-<div class="figrow">
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-21-02-20.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-58-40.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-53-48.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-54-53.png">
-  <figcaption></figcaption>
-</figure>
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-54-13.png">
-  <figcaption></figcaption>
-</figure>
-</div>

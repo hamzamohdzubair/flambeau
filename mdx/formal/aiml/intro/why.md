@@ -6,9 +6,10 @@ class: lead
 footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
 ---
 
-<link href="/styles/czoom3.css" rel="stylesheet">
+<link href="/styles/zoom.css" rel="stylesheet">
 
-<script src="/scripts/czoom3.js"></script>
+<script src="/scripts/zoom.js"></script>
+<script src="/scripts/navigation.js"></script>
 
 ## Why Learn AI/ML?
 
@@ -18,55 +19,67 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### Today's World
 
 
-We are surrounded by Algorithms
+We are surrounded by ML Algorithms
 <br>
 <div class="figrow">
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-56-32.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-22-18-15-49.png">
+  <figcaption>LLM users (https://nerdynav.com/chatgpt-statistics/)</figcaption>
 </figure>
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-16-12-48-33.png">
-  <figcaption></figcaption>
+  <figcaption>Search Engines</figcaption>
 </figure>
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-52-39.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-16-21-02-20.png">
+  <figcaption>Personal Assistants</figcaption>
 </figure>
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-51-19.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-16-12-56-32.png">
+  <figcaption>Face Unlock</figcaption>
 </figure>
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-16-12-59-25.png">
-  <figcaption></figcaption>
+  <figcaption>Doom Scrolling</figcaption>
 </figure>
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-51-08.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-16-12-51-19.png">
+  <figcaption>Entertainment</figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-16-12-52-39.png">
+  <figcaption>Product Recommendations</figcaption>
 </figure>
 </div>
 <br>
 <div class="figrow">
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-21-02-20.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-22-18-33-22.png">
+  <figcaption>Loans & Credits</figcaption>
 </figure>
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-58-40.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-22-18-36-51.png">
+  <figcaption>Robo taxis (https://www.visualcapitalist.com/mapped-every-robotaxi-service-operating-in-2025/)</figcaption>
 </figure>
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-53-48.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-22-16-16-14.png">
+  <figcaption>Drone Delivery (https://www.technologyreview.com/2023/05/23/1073500/drone-food-delivery-shenzhen-meituan/)</figcaption>
 </figure>
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-12-54-53.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-22-16-24-17.png">
+  <figcaption>Face Recognition (https://www.business-standard.com/india-news/himachal-first-to-use-aadhaar-face-recognition-for-ration-distribution-125070500563_1.html)</figcaption>
 </figure>
-  <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-20-54-13.png">
-  <figcaption></figcaption>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-22-17-36-43.png">
+  <figcaption>Diagnosis (https://www.bbc.com/news/articles/c3e1xdk0d7wo)</figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-22-17-52-11.png">
+  <figcaption>AI in HR (https://www.thequint.com/tech-and-auto/tech-news/ai-algorithms-hiring-firing-pay-transparency-india#read-more)</figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-22-18-43-50.png">
+  <figcaption>Robo Surgery</figcaption>
 </figure>
 </div>
 

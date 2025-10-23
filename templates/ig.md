@@ -1,4 +1,4 @@
-<figure>
+<figure class="tall">
   <img src="$2">
   <figcaption>$1</figcaption>
 </figure>

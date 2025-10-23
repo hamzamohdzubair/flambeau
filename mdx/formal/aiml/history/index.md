@@ -6,9 +6,10 @@ class: lead
 footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
 ---
 
-<link href="/styles/czoom3.css" rel="stylesheet">
+<link href="/styles/zoom.css" rel="stylesheet">
 
-<script src="/scripts/czoom3.js"></script>
+<script src="/scripts/zoom.js"></script>
+<script src="/scripts/navigation.js"></script>
 
 <!-- _class: lead invert -->
 
@@ -27,15 +28,15 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### Resources
 
 <div class="figrow">
-  <figure>
+  <figure class="tall">
   <img src="/assets/2025-10-14-11-56-38.png">
   <figcaption></figcaption>
 </figure>
-  <figure>
+  <figure class="tall">
   <img src="/assets/2025-10-14-11-33-44.png">
   <figcaption></figcaption>
 </figure>
-  <figure>
+  <figure class="tall">
   <img src="/assets/2025-10-14-11-32-57.png">
   <figcaption></figcaption>
 </figure>

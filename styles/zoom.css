@@ -1,0 +1,48 @@
+/* @theme zoom */
+
+/* Zoom effect for images */
+.figrow figure {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.figrow figure.zoomed {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 80vw !important;
+  height: 80vh !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.figrow figure.zoomed img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Optional: Add backdrop for zoomed images */
+/* body::before { */
+/*   content: ""; */
+/*   position: fixed; */
+/*   top: 0; */
+/*   left: 0; */
+/*   right: 0; */
+/*   bottom: 0; */
+/*   background: rgba(0, 0, 0, 0.8); */
+/*   z-index: 9998; */
+/*   opacity: 0; */
+/*   pointer-events: none; */
+/*   transition: opacity 0.3s ease; */
+/* } */
+
+body.has-zoomed-image::before {
+  opacity: 1;
+  pointer-events: auto;
+}

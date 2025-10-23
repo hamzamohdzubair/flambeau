@@ -7,8 +7,8 @@
 ### What is Intelligence?
 
 <div class="figrow">
-  {{fig(source: https://image.slidesharecdn.com/lecture-18-201104045342/75/intelligence-meaning-types-factors-theories-3-2048.jpg, /assets/2025-10-08-16-14-52.png)}}
-  {{fig(source: https://richardyonck.com/wp-content/uploads/2020/11/Intelligence-Definition.jpg, /assets/2025-10-08-16-15-51.png)}}
+  {{ifle_(source: https://image.slidesharecdn.com/lecture-18-201104045342/75/intelligence-meaning-types-factors-theories-3-2048.jpg, /assets/2025-10-08-16-14-52.png)}}
+  {{ifle_(source: https://richardyonck.com/wp-content/uploads/2020/11/Intelligence-Definition.jpg, /assets/2025-10-08-16-15-51.png)}}
 </div>
 
 ---

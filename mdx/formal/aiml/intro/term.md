@@ -6,9 +6,10 @@ class: lead
 footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
 ---
 
-<link href="/styles/czoom3.css" rel="stylesheet">
+<link href="/styles/zoom.css" rel="stylesheet">
 
-<script src="/scripts/czoom3.js"></script>
+<script src="/scripts/zoom.js"></script>
+<script src="/scripts/navigation.js"></script>
 
 ## Terminology
 
@@ -17,11 +18,11 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### What is Intelligence?
 
 <div class="figrow">
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-14-52.png">
   <figcaption>source: https://image.slidesharecdn.com/lecture-18-201104045342/75/intelligence-meaning-types-factors-theories-3-2048.jpg</figcaption>
 </figure>
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-15-51.png">
   <figcaption>source: https://richardyonck.com/wp-content/uploads/2020/11/Intelligence-Definition.jpg</figcaption>
 </figure>

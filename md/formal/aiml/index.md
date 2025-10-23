@@ -2,6 +2,8 @@
 
 {{title}}
 
+![bg blur:5px](/assets/2025-09-30-14-32-40.png)
+
 # AI/ML
 
 ---
@@ -73,9 +75,9 @@
 ### Books
 
 <div class="figrow">
-  {{ig(Free access: https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
-  {{ig(Free access: https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
-  {{ig(Free access: d2l.ai, /assets/2025-10-05-09-08-25.png)}}
+  {{i_p__(Free access: https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
+  {{i_p__(Free access: https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
+  {{i_p__(Free access: d2l.ai, /assets/2025-10-05-09-08-25.png)}}
 </div>
 
 ---
@@ -83,5 +85,5 @@
 ### Web Resources
 
 <div class="figrow">
-  {{ig(Source: https://mlu-explain.github.io/, /assets/2025-10-08-22-25-27.png)}}
+  {{i____(Source: https://mlu-explain.github.io/, /assets/2025-10-08-22-25-27.png)}}
 </div>

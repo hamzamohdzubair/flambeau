@@ -3,6 +3,12 @@
 @import "gaia";
 @import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
 
+/* svg[data-marpit-svg] { */
+/*   display: block; */
+/*   width: 100vw; */
+/*   height: 100vh; */
+/* } */
+
 section {
   width: 1280px;
   height: 730px;
@@ -135,12 +141,6 @@ section::after {
   pointer-events: none;
 }
 
-figure img {
-  width: 100%;
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.4));
-  border-radius: 5px;
-}
-
 img[alt~="center"] {
   display: block;
   margin: 0 auto;
@@ -172,13 +172,11 @@ figure[data-bespoke-marp-fragment="inactive"] {
 
 .figrow {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(150px, 1fr)
-  ); /* auto adapts to number of items */
-  /* gap: 20px; */
-  align-items: end; /* bottom-align items in their grid cells */
-  justify-items: center; /* center each figure in its cell */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  /* align-items: end; */
+  gap: 10px;
+  align-items: center;
+  justify-items: center;
   width: 100%;
   margin: 0 auto;
 }
@@ -188,15 +186,32 @@ figure[data-bespoke-marp-fragment="inactive"] {
   flex-direction: column;
   align-items: center;
   margin: 0;
-  width: 90%; /* figure fills its grid cell */
+  width: 100%;
   box-sizing: border-box;
 }
 
 .figrow img {
-  width: 100%; /* image scales to cell width */
-  height: auto;
+  object-fit: cover;
   display: block;
+  width: 100%;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.4));
+  border-radius: 5px;
 }
+
+.portrait img {
+  aspect-ratio: 2/3;
+}
+
+.landscape img {
+  aspect-ratio: 16/9;
+}
+
+/* .figrow img { */
+/*   width: 100%; */
+/*   max-height: 400px; */
+/*   object-fit: contain; */
+/*   display: block; */
+/* } */
 
 .figrow figcaption {
   width: 100%;

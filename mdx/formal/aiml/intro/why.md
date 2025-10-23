@@ -85,6 +85,38 @@ We are surrounded by ML Algorithms
 
 ---
 
+### AI is everywhere so what?
+
+<div class="figrow">
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-23-12-44-27.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-23-12-35-11.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-23-12-59-00.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-23-13-01-22.png">
+  <figcaption></figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-23-12-41-27.png">
+  <figcaption></figcaption>
+</figure>
+</div>
+
+<span data-marpit-fragment>Competence & Resilience</span>
+<span data-marpit-fragment>Digital Literacy</span>
+<span data-marpit-fragment>Legal Literacy</span>
+<span class="highblur" data-marpit-fragment style="font-size:2em;">AI Literacy</span>
+
+---
+
 ### Is there any benefit in learning AI/ML?
 
 1) Its not only beneficial but essential to learn AI/ML.

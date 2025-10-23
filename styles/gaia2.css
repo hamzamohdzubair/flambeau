@@ -163,6 +163,12 @@ span[data-bespoke-marp-fragment="inactive"] {
   filter: blur(7px) !important;
 }
 
+span[data-bespoke-marp-fragment="inactive"].highblur {
+  visibility: visible !important;
+  opacity: 0.5 !important;
+  filter: blur(15px) !important;
+}
+
 figure[data-bespoke-marp-fragment="inactive"] {
   visibility: visible !important;
   opacity: 0.08 !important;

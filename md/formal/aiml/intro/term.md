@@ -7,8 +7,8 @@
 ### What is Intelligence?
 
 <div class="figrow">
-  {{ifle_(source: https://image.slidesharecdn.com/lecture-18-201104045342/75/intelligence-meaning-types-factors-theories-3-2048.jpg, /assets/2025-10-08-16-14-52.png)}}
-  {{ifle_(source: https://richardyonck.com/wp-content/uploads/2020/11/Intelligence-Definition.jpg, /assets/2025-10-08-16-15-51.png)}}
+  {{ifle(, /assets/2025-10-08-16-14-52.png)}}
+  {{ifle(, /assets/2025-10-08-16-15-51.png)}}
 </div>
 
 ---
@@ -40,8 +40,8 @@
 ### Have we made ASI?
 
 <div class="figrow">
-  {{fig(source: https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png, /assets/2025-10-08-16-25-07.png)}}
-  {{fig(source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s, /assets/2025-10-08-16-27-19.png)}}
+  {{ifle(source: https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png, /assets/2025-10-08-16-25-07.png)}}
+  {{ifle(source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s, /assets/2025-10-08-16-27-19.png)}}
 </div>
 
 ---
@@ -50,7 +50,9 @@
 
 * A computer program is said to learn from experience **E** with respect to some class of tasks **T** and performance measure **P**, if its performance at tasks in **T**, as measured by **P**, improves with experience **E** &mdash; *Tom Mitchell (1997)*
 
-* The field of study that gives computers the ability to learn without being explicitly programmed &mdash; *Arthur Samuel (1959)*
+* The field of study that gives computers the ability to learn <u>without being explicitly programmed</u> &mdash; *Arthur Samuel (1959)*
+
+* Finding Patterns &mdash; *History*
 
 ---
 
@@ -85,9 +87,9 @@
 ### How are these terms related?
 
 <div class="figrow">
-  {{figw(500, Source: https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101 , /assets/2025-10-07-22-42-13.png)}}
+  {{ifleh(Source, https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101 , /assets/2025-10-07-22-42-13.png)}}
 
-  {{fig(Source: https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174, /assets/2025-10-07-22-57-05.png)}}
+  {{ifleh(Source, https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174, /assets/2025-10-07-22-57-05.png)}}
 
 </div>
 

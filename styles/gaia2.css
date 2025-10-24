@@ -127,6 +127,9 @@ footer {
   display: flex; /* Added */
   /* justify-content: space-between; */
   padding: 0 10px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 300;
+  letter-spacing: -1px;
 }
 
 section::after {
@@ -139,6 +142,9 @@ section::after {
   padding: 0 10px;
   z-index: 2; /* Added */
   pointer-events: none;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 300;
+  letter-spacing: -1px;
 }
 
 img[alt~="center"] {

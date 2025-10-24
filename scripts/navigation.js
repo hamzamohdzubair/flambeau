@@ -30,17 +30,14 @@
     }
 
     if (targetIndex !== undefined && targetIndex !== currentIndex) {
-      // Update URL hash to trigger slide change
-      const newHash = targetIndex + 1;
-      window.location.hash = newHash;
-
-      // Also manually trigger the slide change
+      // Manually trigger the slide change without affecting history
       slides.forEach((slide, idx) => {
         const isActive = idx === targetIndex;
         slide.classList.toggle('bespoke-marp-active', isActive);
+        slide.classList.toggle('bespoke-marp-active-ready', isActive);
         slide.setAttribute('aria-hidden', !isActive);
 
-        // Reset all fragments in the target slide to visible
+        // Reset all fragments in the target slide to visible (show all)
         if (isActive) {
           slide.querySelectorAll('[data-bespoke-marp-fragment]').forEach(fragment => {
             fragment.setAttribute('data-bespoke-marp-fragment', 'active');
@@ -53,6 +50,9 @@
       if (pageCounter) {
         pageCounter.textContent = `Page ${targetIndex + 1} of ${slides.length}`;
       }
+
+      // Update URL hash without creating history entry
+      history.replaceState(null, '', `#${targetIndex + 1}`);
     }
   }, true); // Use capture phase (true parameter is important!)
 

@@ -3,9 +3,13 @@ theme: gaia2
 paginate: true
 transition: slide
 class: lead
-footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
+footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1)'
 ---
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
 <link href="/styles/zoom.css" rel="stylesheet">
 
 <script src="/scripts/zoom.js"></script>
@@ -20,11 +24,11 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-14-52.png">
-  <figcaption>source: https://image.slidesharecdn.com/lecture-18-201104045342/75/intelligence-meaning-types-factors-theories-3-2048.jpg</figcaption>
+  <figcaption></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-15-51.png">
-  <figcaption>source: https://richardyonck.com/wp-content/uploads/2020/11/Intelligence-Definition.jpg</figcaption>
+  <figcaption></figcaption>
 </figure>
 </div>
 
@@ -63,11 +67,11 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### Have we made ASI?
 
 <div class="figrow">
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-25-07.png">
   <figcaption>source: https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png</figcaption>
 </figure>
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-27-19.png">
   <figcaption>source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s</figcaption>
 </figure>
@@ -79,7 +83,9 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 * A computer program is said to learn from experience **E** with respect to some class of tasks **T** and performance measure **P**, if its performance at tasks in **T**, as measured by **P**, improves with experience **E** &mdash; *Tom Mitchell (1997)*
 
-* The field of study that gives computers the ability to learn without being explicitly programmed &mdash; *Arthur Samuel (1959)*
+* The field of study that gives computers the ability to learn <u>without being explicitly programmed</u> &mdash; *Arthur Samuel (1959)*
+
+* Finding Patterns &mdash; *History*
 
 ---
 
@@ -129,14 +135,14 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 ### How are these terms related?
 
 <div class="figrow">
-  <figure data-marpit-fragment style="width:500px;">
+  <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-07-22-42-13.png">
-  <figcaption>Source: https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101</figcaption>
+  <figcaption>Source<sup><a href="https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
 
-  <figure data-marpit-fragment>
+  <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-07-22-57-05.png">
-  <figcaption>Source: https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174</figcaption>
+  <figcaption>Source<sup><a href="https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
 
 </div>

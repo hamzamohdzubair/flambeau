@@ -26,15 +26,17 @@
 <div class="tiles">
   {{tile(Regression, major/index.html, /assets/2025-10-16-19-03-03.png)}}
   {{tile(Classification, classification/index.html, /assets/2025-10-04-08-15-36.png)}}
-  {{tile(Clustering, major/index.html, /assets/2025-10-09-22-03-03.png)}}
+  {{tile(Density Estimation, des-est.html, /assets/2025-10-23-22-23-41.png)}}
   {{tile(Dimensionality Reduction, major/index.html, /assets/2025-10-16-19-17-39.png)}}
+  {{tile(Clustering, major/index.html, /assets/2025-10-09-22-03-03.png)}}
   {{tile(Recommendation, major/index.html, /assets/2025-10-09-22-24-37.png)}}
   {{tile(Forecasting, major/index.html, /assets/2025-10-09-22-23-37.png)}}
   {{tile(Vision, vision/index.html, /assets/2025-10-09-22-21-33.png)}}
   {{tile(Language, major/index.html, /assets/2025-10-09-22-22-22.png)}}
+  {{tile(Reasoning, reasoning.html, /assets/2025-10-23-22-26-28.png)}}
 </div>
 
-
+{{foot(fig,/formal/aiml/intro/term.html?f=2#12)}}
 ---
 
 ### Minor Tasks
@@ -67,7 +69,7 @@
 <div class="tiles">
   {{tile(XAI, tasks/xai.html, /assets/2025-10-18-09-32-58.png )}}
   {{tile(History, history/index.html, /assets/2025-10-01-11-36-59.png)}}
-  {{tile(Limitations, limitations.html, /assets/2025-10-10-12-13-11.png )}}
+  {{tile(Limitations, limitations/index.html, /assets/2025-10-10-12-13-11.png )}}
 </div>
 
 ---
@@ -75,9 +77,9 @@
 ### Books
 
 <div class="figrow">
-  {{i_p__(Free access: https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
-  {{i_p__(Free access: https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
-  {{i_p__(Free access: d2l.ai, /assets/2025-10-05-09-08-25.png)}}
+  {{ip(Free access: https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
+  {{ip(Free access: https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
+  {{ip(Free access: d2l.ai, /assets/2025-10-05-09-08-25.png)}}
 </div>
 
 ---
@@ -85,5 +87,5 @@
 ### Web Resources
 
 <div class="figrow">
-  {{i____(Source: https://mlu-explain.github.io/, /assets/2025-10-08-22-25-27.png)}}
+  {{i(Source: https://mlu-explain.github.io/, /assets/2025-10-08-22-25-27.png)}}
 </div>

@@ -3,9 +3,13 @@ theme: gaia2
 paginate: true
 transition: slide
 class: lead
-footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regular fa-circle-up"></i>](../index.html) [<i class="fa-regular fa-circle-left"></i>](#1)'
+footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1)'
 ---
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
 <link href="/styles/zoom.css" rel="stylesheet">
 
 <script src="/scripts/zoom.js"></script>
@@ -15,16 +19,14 @@ footer: '[<i class="fa-regular fa-house"></i>](/index.html) [<i class="fa-regula
 
 ---
 
-
 ### Today's World
-
 
 We are surrounded by ML Algorithms
 <br>
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-18-15-49.png">
-  <figcaption>LLM users (https://nerdynav.com/chatgpt-statistics/)</figcaption>
+  <figcaption>LLM users<sup><a href="https://nerdynav.com/chatgpt-statistics/"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-16-12-48-33.png">
@@ -48,7 +50,7 @@ We are surrounded by ML Algorithms
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-16-12-52-39.png">
-  <figcaption>Product Recommendations</figcaption>
+  <figcaption>Recommendations</figcaption>
 </figure>
 </div>
 <br>
@@ -59,27 +61,27 @@ We are surrounded by ML Algorithms
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-18-36-51.png">
-  <figcaption>Robo taxis (https://www.visualcapitalist.com/mapped-every-robotaxi-service-operating-in-2025/)</figcaption>
+  <figcaption>Robo taxis<sup><a href="https://www.visualcapitalist.com/mapped-every-robotaxi-service-operating-in-2025/"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-16-16-14.png">
-  <figcaption>Drone Delivery (https://www.technologyreview.com/2023/05/23/1073500/drone-food-delivery-shenzhen-meituan/)</figcaption>
+  <figcaption>Drone Delivery<sup><a href="https://www.technologyreview.com/2023/05/23/1073500/drone-food-delivery-shenzhen-meituan/"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-16-24-17.png">
-  <figcaption>Face Recognition (https://www.business-standard.com/india-news/himachal-first-to-use-aadhaar-face-recognition-for-ration-distribution-125070500563_1.html)</figcaption>
+  <figcaption>Face Recognition<sup><a href="https://www.business-standard.com/india-news/himachal-first-to-use-aadhaar-face-recognition-for-ration-distribution-125070500563_1.html"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-17-36-43.png">
-  <figcaption>Diagnosis (https://www.bbc.com/news/articles/c3e1xdk0d7wo)</figcaption>
+  <figcaption>Diagnosis<sup><a href="https://www.bbc.com/news/articles/c3e1xdk0d7wo"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-17-52-11.png">
-  <figcaption>AI in HR (https://www.thequint.com/tech-and-auto/tech-news/ai-algorithms-hiring-firing-pay-transparency-india#read-more)</figcaption>
+  <figcaption>AI in HR<sup><a href="https://www.thequint.com/tech-and-auto/tech-news/ai-algorithms-hiring-firing-pay-transparency-india#read-more"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-18-43-50.png">
-  <figcaption>Robo Surgery</figcaption>
+  <figcaption>Robo Surgery<sup><a href="https://www.medscape.com/viewarticle/how-robot-performed-surgery-without-human-assistance-2025a1000mp6"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
 </figure>
 </div>
 
@@ -117,41 +119,6 @@ We are surrounded by ML Algorithms
 
 ---
 
-### Is there any benefit in learning AI/ML?
+### How much should we know?
 
-1) Its not only beneficial but essential to learn AI/ML.
-2) There is lot of benefit in learning latest technologies.
-3) What is the benefit of learning AI/ML or coding if Chatgpt can write all code?
-
----
-
-### Digital Revolution
-
-<div class="cc">
-
-<div>
-
-<span data-marpit-fragment>Lack of digital literacy hampers normal functioning</span>
-
-</div>
-
-<div><div class="figrow">
-<figure data-marpit-fragment style="width:400px;">
-  <img src="/assets/2025-10-16-12-13-02.png">
-  <figcaption>Source: https://miro.medium.com/1*M0Cdofughw0KVAJKe0hdyw.jpeg</figcaption>
-</figure>
-</div></div></div>
-
----
-
-### Next revolution
-
-<div class="figrow">
-<figure data-marpit-fragment>
-  <img src="/assets/2025-10-12-16-15-40.png">
-  <figcaption>Source: https://cdn.bulbapp.io/frontend/images/d1c3fa1d-75c7-4432-bbb8-523495cd53ee/1</figcaption>
-</figure>
-</div>
-
----
-
+<span data-marpit-fragment>Mathematical Intuition</span>

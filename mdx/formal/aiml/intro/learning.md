@@ -132,3 +132,12 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
 1) Supervised Learning
 2) Unsupervised Learning
 3) Reinforcement Learning
+
+---
+
+### Tasks
+
+1) Classification
+2) Regression
+3) Clustering / Density Estimation
+4) Dimensionality Reduction

@@ -14,9 +14,9 @@
   {{tile(Why learn AI?, intro/why.html, /assets/2025-10-16-12-01-08.png)}}
   {{tile(Terminology, intro/term.html, /assets/2025-10-16-11-30-53.png)}}
   {{tile(Learning<br>Patterns, intro/learning.html, /assets/2025-10-10-12-04-42.png)}}
-  {{tile(Types of Learning, limitations.html, /assets/2025-10-16-19-10-11.png)}}
-  {{tile(Types of Tasks, intro/learning-types.html, /assets/2025-10-16-19-13-25.png)}}
-  {{tile(Examples, limitations.html, /assets/2025-10-16-12-00-00.png)}}
+  <!-- {{tile(Types of Learning, limitations.html, /assets/2025-10-16-19-10-11.png)}} -->
+  <!-- {{tile(Types of Tasks, intro/learning-types.html, /assets/2025-10-16-19-13-25.png)}} -->
+  <!-- {{tile(Examples, limitations.html, /assets/2025-10-16-12-00-00.png)}} -->
 </div>
 
 {{foot([j](/jokes/1.html))}}
@@ -84,10 +84,10 @@
   {{ip(Free access: d2l.ai, /assets/2025-10-05-09-08-25.png)}}
 </div>
 
----
-
-### Web Resources
-
-<div class="figrow">
-  {{i(Source: https://mlu-explain.github.io/, /assets/2025-10-08-22-25-27.png)}}
-</div>
+<!-- --- -->
+<!---->
+<!-- ### Web Resources -->
+<!---->
+<!-- <div class="figrow"> -->
+<!--   {{i(Source: https://mlu-explain.github.io/, /assets/2025-10-08-22-25-27.png)}} -->
+<!-- </div> -->

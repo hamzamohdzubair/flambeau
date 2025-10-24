@@ -60,11 +60,12 @@
 
 
 <div class="figrow">
-  {{fig(, /assets/2025-10-16-16-30-55.png)}}
+  {{if( , /assets/2025-10-24-16-14-41.png)}}
 </div>
 <br>
 <div class="figrow">
-  {{fig(, /assets/2025-10-16-16-33-08.png)}}
+  {{if( , /assets/2025-10-24-16-22-07.png)}}
+</div>
 </div>
 
 ---
@@ -73,12 +74,12 @@
 
 
 <div class="figrow">
-  {{fig(, /assets/2025-10-16-16-30-55.png)}}
-  {{fig(, /assets/2025-10-16-16-33-08.png)}}
+  {{if( , /assets/2025-10-24-16-14-41.png)}}
+  {{if( , /assets/2025-10-24-16-22-07.png)}}
 </div>
 <br>
 <div class="figrow">
-  {{fig(, /assets/2025-10-16-16-40-28.png)}}
+  {{if( , /assets/2025-10-24-16-29-22.png)}}
 </div>
 
 ---

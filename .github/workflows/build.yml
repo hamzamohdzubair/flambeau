@@ -32,7 +32,7 @@ jobs:
       #   run: rm -rf docs && mkdir -p docs
 
       - name: Build Marp presentations
-        run: npm run build-ghp && cp -r assets docs/
+        run: npm run build-ghp && npm run assets
 
       - name: Install image optimization tools
         run: |

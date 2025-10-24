@@ -53,7 +53,20 @@ We are surrounded by ML Algorithms
   <figcaption>Recommendations</figcaption>
 </figure>
 </div>
-<br>
+<div class="figrow">
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-24-22-13-47.png">
+  <figcaption>Amazon Robots</figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-24-22-13-32.png">
+  <figcaption>High Speed Cameras</figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="/assets/2025-10-24-22-14-31.png">
+  <figcaption>Manufacturing</figcaption>
+</figure>
+</div>
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-18-33-22.png">

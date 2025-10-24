@@ -1,1 +1,1 @@
-<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; [$1]($2)' -->
+<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; $1' -->

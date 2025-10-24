@@ -13,11 +13,13 @@
 <div class="tiles">
   {{tile(Why learn AI?, intro/why.html, /assets/2025-10-16-12-01-08.png)}}
   {{tile(Terminology, intro/term.html, /assets/2025-10-16-11-30-53.png)}}
-  {{tile(How Computers Learn, mlalgos/index.html, /assets/2025-10-10-12-04-42.png)}}
+  {{tile(Learning<br>Patterns, intro/learning.html, /assets/2025-10-10-12-04-42.png)}}
   {{tile(Types of Learning, limitations.html, /assets/2025-10-16-19-10-11.png)}}
-  {{tile(Types of Tasks, limitations.html, /assets/2025-10-16-19-13-25.png)}}
+  {{tile(Types of Tasks, intro/learning-types.html, /assets/2025-10-16-19-13-25.png)}}
   {{tile(Examples, limitations.html, /assets/2025-10-16-12-00-00.png)}}
 </div>
+
+{{foot([j](/jokes/1.html))}}
 
 ---
 

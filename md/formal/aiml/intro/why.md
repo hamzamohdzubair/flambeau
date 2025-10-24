@@ -17,7 +17,11 @@ We are surrounded by ML Algorithms
   {{ifle(Entertainment, /assets/2025-10-16-12-51-19.png)}}
   {{ifle(Recommendations, /assets/2025-10-16-12-52-39.png)}}
 </div>
-<br>
+<div class="figrow">
+  {{ifle(Amazon Robots, /assets/2025-10-24-22-13-47.png)}}
+  {{ifle(High Speed Cameras, /assets/2025-10-24-22-13-32.png)}}
+  {{ifle(Manufacturing, /assets/2025-10-24-22-14-31.png)}}
+</div>
 <div class="figrow">
   {{ifle(Loans & Credits,/assets/2025-10-22-18-33-22.png)}}
   {{ifleh(Robo taxis, https://www.visualcapitalist.com/mapped-every-robotaxi-service-operating-in-2025/, /assets/2025-10-22-18-36-51.png)}}

@@ -28,11 +28,13 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
 <div class="tiles">
   <a class="tile-link" href="intro/why.html" style="--tile-bg-img:url('/assets/2025-10-16-12-01-08.png');">Why learn AI?</a>
   <a class="tile-link" href="intro/term.html" style="--tile-bg-img:url('/assets/2025-10-16-11-30-53.png');">Terminology</a>
-  <a class="tile-link" href="mlalgos/index.html" style="--tile-bg-img:url('/assets/2025-10-10-12-04-42.png');">How Computers Learn</a>
+  <a class="tile-link" href="intro/learning.html" style="--tile-bg-img:url('/assets/2025-10-10-12-04-42.png');">Learning<br>Patterns</a>
   <a class="tile-link" href="limitations.html" style="--tile-bg-img:url('/assets/2025-10-16-19-10-11.png');">Types of Learning</a>
-  <a class="tile-link" href="limitations.html" style="--tile-bg-img:url('/assets/2025-10-16-19-13-25.png');">Types of Tasks</a>
+  <a class="tile-link" href="intro/learning-types.html" style="--tile-bg-img:url('/assets/2025-10-16-19-13-25.png');">Types of Tasks</a>
   <a class="tile-link" href="limitations.html" style="--tile-bg-img:url('/assets/2025-10-16-12-00-00.png');">Examples</a>
 </div>
+
+<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; [j](/jokes/1.html)' -->
 
 ---
 
@@ -51,7 +53,7 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
   <a class="tile-link" href="reasoning.html" style="--tile-bg-img:url('/assets/2025-10-23-22-26-28.png');">Reasoning</a>
 </div>
 
-<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; [fig](/formal/aiml/intro/term.html?f=2#12)' -->
+<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; fig' -->
 ---
 
 ### Minor Tasks

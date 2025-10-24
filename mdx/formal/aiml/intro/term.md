@@ -94,16 +94,17 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
 
 <div class="figrow">
   <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-16-30-55.png">
+  <img src="/assets/2025-10-24-16-14-41.png">
   <figcaption></figcaption>
 </figure>
 </div>
 <br>
 <div class="figrow">
   <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-16-33-08.png">
+  <img src="/assets/2025-10-24-16-22-07.png">
   <figcaption></figcaption>
 </figure>
+</div>
 </div>
 
 ---
@@ -113,18 +114,18 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
 
 <div class="figrow">
   <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-16-30-55.png">
+  <img src="/assets/2025-10-24-16-14-41.png">
   <figcaption></figcaption>
 </figure>
   <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-16-33-08.png">
+  <img src="/assets/2025-10-24-16-22-07.png">
   <figcaption></figcaption>
 </figure>
 </div>
 <br>
 <div class="figrow">
   <figure data-marpit-fragment>
-  <img src="/assets/2025-10-16-16-40-28.png">
+  <img src="/assets/2025-10-24-16-29-22.png">
   <figcaption></figcaption>
 </figure>
 </div>

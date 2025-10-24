@@ -22,7 +22,7 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
   <a class="tile-link" href="math/probstats/dist/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-22-15.png');">Distribution<br>Theory</a>
 </div>
 
-<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; [comb](comb)' -->
+<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; comb' -->
 
 ---
 
@@ -37,7 +37,7 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
 1) Terminology
 2) Conditional Probability
 
-<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; [comb](comb)' -->
+<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; comb' -->
 
 ---
 

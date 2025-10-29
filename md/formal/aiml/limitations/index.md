@@ -14,15 +14,10 @@
   {{tile(When experts got it wrong, wrong-experts.html, )}}
   {{tile(Lack of Comprehension, major/index.html, )}}
   {{tile(Bias, major/index.html, )}}
-  {{tile(Resources, resources.html,)}}
+  <!-- {{tile(Resources, resources.html,)}} -->
 </div>
 
 ---
-
-### Contents
-
-1. Bias
-
 
 
 ---

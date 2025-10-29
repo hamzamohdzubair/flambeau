@@ -118,18 +118,23 @@ section::before {
 }
 
 footer {
-  font-size: 0.7em;
+  /* font-size: 0.7em; */
   background-color: #456;
   color: #ffe;
   height: 40px;
   line-height: 40px;
   z-index: 1; /* Changed to sit below text */
-  display: flex; /* Added */
+  display: flex;
   /* justify-content: space-between; */
-  padding: 0 10px;
+  padding: 0px 10px;
   font-family: "Montserrat", sans-serif;
   font-weight: 300;
   letter-spacing: -1px;
+}
+
+iconify-icon {
+  vertical-align: middle;
+  display: inline-block;
 }
 
 section::after {

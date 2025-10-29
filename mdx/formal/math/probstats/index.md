@@ -3,7 +3,7 @@ theme: gaia2
 paginate: true
 transition: slide
 class: lead
-footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1)'
+footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/index.html) [<iconify-icon icon="si:left-up-line" title="Back"></iconify-icon>](../index.html) [<iconify-icon icon="octicon:move-to-start-24" title="Start"></iconify-icon>](#1)'
 ---
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
   <a class="tile-link" href="math/probstats/dist/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-22-15.png');">Distribution<br>Theory</a>
 </div>
 
-<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; comb' -->
+<!-- _footer: '[<iconify-icon icon="hugeicons:home-11"></iconify-icon>](/index.html)  [<iconify-icon icon="si:left-up-line"></iconify-icon>](../index.html) [<iconify-icon icon="octicon:move-to-start-24" title="Start"></iconify-icon>](#1) &nbsp; | &nbsp; comb' -->
 
 ---
 
@@ -36,7 +36,7 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
 1) Terminology
 2) Conditional Probability
 
-<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; comb' -->
+<!-- _footer: '[<iconify-icon icon="hugeicons:home-11"></iconify-icon>](/index.html)  [<iconify-icon icon="si:left-up-line"></iconify-icon>](../index.html) [<iconify-icon icon="octicon:move-to-start-24" title="Start"></iconify-icon>](#1) &nbsp; | &nbsp; comb' -->
 
 ---
 

@@ -19,7 +19,7 @@
   <!-- {{tile(Examples, limitations.html, /assets/2025-10-16-12-00-00.png)}} -->
 </div>
 
-{{foot([j](/jokes/1.html))}}
+{{foot([j](/jokes/1.html) &nbsp; [f](/feedback/1.html))}}
 
 ---
 
@@ -69,6 +69,7 @@
 ### Extra Topics
 
 <div class="tiles">
+  {{tile(Systems, systems/index.html,/assets/2025-10-27-18-57-51.png)}}
   {{tile(XAI, tasks/xai.html, /assets/2025-10-18-09-32-58.png )}}
   {{tile(History, history/index.html, /assets/2025-10-01-11-36-59.png)}}
   {{tile(Limitations, limitations/index.html, /assets/2025-10-10-12-13-11.png )}}
@@ -82,7 +83,9 @@
   {{ip(Free access: https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
   {{ip(Free access: https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
   {{ip(Free access: d2l.ai, /assets/2025-10-05-09-08-25.png)}}
+  {{ip(Free access: https://www.mlsysbook.ai/ , /assets/2025-10-26-07-13-31.png)}}
 </div>
+
 
 <!-- --- -->
 <!---->

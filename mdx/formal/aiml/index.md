@@ -5,13 +5,12 @@ transition: slide
 class: lead
 footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1)'
 ---
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
 <link href="/styles/zoom.css" rel="stylesheet">
 
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <script src="/scripts/zoom.js"></script>
 <script src="/scripts/navigation.js"></script>
 
@@ -34,7 +33,7 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
   <!-- <a class="tile-link" href="limitations.html" style="--tile-bg-img:url('/assets/2025-10-16-12-00-00.png');">Examples</a> -->
 </div>
 
-<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; [j](/jokes/1.html)' -->
+<!-- _footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html)  [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1) &nbsp; | &nbsp; [j](/jokes/1.html) &nbsp; [f](/feedback/1.html)' -->
 
 ---
 
@@ -84,6 +83,7 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
 ### Extra Topics
 
 <div class="tiles">
+  <a class="tile-link" href="systems/index.html" style="--tile-bg-img:url('/assets/2025-10-27-18-57-51.png');">Systems</a>
   <a class="tile-link" href="tasks/xai.html" style="--tile-bg-img:url('/assets/2025-10-18-09-32-58.png');">XAI</a>
   <a class="tile-link" href="history/index.html" style="--tile-bg-img:url('/assets/2025-10-01-11-36-59.png');">History</a>
   <a class="tile-link" href="limitations/index.html" style="--tile-bg-img:url('/assets/2025-10-10-12-13-11.png');">Limitations</a>
@@ -106,7 +106,12 @@ footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hg
   <img src="/assets/2025-10-05-09-08-25.png">
   <figcaption>Free access: d2l.ai</figcaption>
 </figure>
+  <figure class="portrait">
+  <img src="/assets/2025-10-26-07-13-31.png">
+  <figcaption>Free access: https://www.mlsysbook.ai/</figcaption>
+</figure>
 </div>
+
 
 <!-- --- -->
 <!---->

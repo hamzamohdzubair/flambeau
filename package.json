@@ -4,7 +4,7 @@
     "clean-md": "find md -name '*.html' -type f -delete",
     "assets": "cp -r assets docs/ && cp -r scripts docs/ && cp -r styles docs/",
     "build-ghp": "npx @marp-team/marp-cli@latest --engine ./engine2.js --bespoke.osc false --theme-set styles/ -I mdx --html --allow-local-files -o docs",
-    "watch:mdx": "marp --engine ./engine2.js --bespoke.osc false --theme-set styles/ --watch -I mdx  --html -o docs",
+    "watch:mdx": "marp --engine ./engine2.js --bespoke.osc false --theme-set styles/ --watch -I mdx  --html --allow-local-files -o docs",
     "serve:html": "live-server docs --watch=docs --mount=/assets:assets --mount=/scripts:scripts --mount=/styles:styles",
     "watch:md": "node genmdx.js",
     "start": "concurrently npm:watch:md npm:watch:mdx npm:serve:html"

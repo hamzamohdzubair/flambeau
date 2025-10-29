@@ -5,13 +5,12 @@ transition: slide
 class: lead
 footer: '[<i class="hgi hgi-stroke hgi-home-09"></i>](/index.html) [<i class="hgi hgi-stroke hgi-arrow-turn-up"></i>](../index.html) [<i class="hgi hgi-stroke hgi-arrow-left-05"></i>](#1)'
 ---
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
 <link href="/styles/zoom.css" rel="stylesheet">
 
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <script src="/scripts/zoom.js"></script>
 <script src="/scripts/navigation.js"></script>
 
@@ -55,7 +54,7 @@ We are surrounded by ML Algorithms
 </div>
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
-  <img src="/assets/2025-10-24-22-13-47.png">
+  <img src="https://diqn32j8nouaz.cloudfront.net/amazon_warehouse_robot.gif">
   <figcaption>Amazon Robots</figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
@@ -65,6 +64,10 @@ We are surrounded by ML Algorithms
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-24-22-14-31.png">
   <figcaption>Manufacturing</figcaption>
+</figure>
+  <figure data-marpit-fragment class="emph landscape">
+  <img src="https://www.yuyin.sh.cn/uploads/allimg/211229/1-2112291413410-L.gif">
+  <figcaption>Logistics</figcaption>
 </figure>
 </div>
 <div class="figrow">

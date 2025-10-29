@@ -104,7 +104,7 @@ h3:nth-of-type(1) {
 }
 
 section::before {
-  content: "Hamza Zubair | slides.hzubair.com";
+  content: "Hamza Zubair | hzubair.com";
   position: absolute;
   bottom: 0; /* Changed from 5px */
   text-align: center;

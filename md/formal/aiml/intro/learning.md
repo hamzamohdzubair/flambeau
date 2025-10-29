@@ -53,6 +53,7 @@
 <div class="figrow">
   {{ifle( , /assets/2025-10-24-23-06-06.png)}}
   {{ifle( , /assets/2025-10-24-23-06-29.png)}}
+  {{ifle( , /assets/2025-10-25-07-22-41.png)}}
   {{ifle( , /assets/2025-10-24-23-44-38.png)}}
   {{ifle( , /assets/2025-10-24-23-31-25.png)}}
 </div>

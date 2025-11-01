@@ -13,6 +13,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <script src="/scripts/zoom.js"></script>
 <script src="/scripts/navigation.js"></script>
+<script src="/scripts/backbutton.js"></script>
 
 ### Linear, Affine, Conical, Convex Combinations
 
@@ -20,10 +21,10 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-23-21-15-58.png">
-  <figcaption>wiki<sup><a href="https://en.wikipedia.org/wiki/Linear_combination#Affine,_conical,_and_convex_combinations"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
+  <figcaption><a href="https://en.wikipedia.org/wiki/Linear_combination#Affine,_conical,_and_convex_combinations">wiki</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-23-20-53-44.png">
-  <figcaption>source<sup><a href="https://www.cnblogs.com/rhyswang/p/14696146.html"><i class="hgi hgi-stroke hgi-link-square-02"></i></a></sup></figcaption>
+  <figcaption><a href="https://www.cnblogs.com/rhyswang/p/14696146.html">source</a></figcaption>
 </figure>
 </div>

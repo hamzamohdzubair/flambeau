@@ -13,6 +13,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <script src="/scripts/zoom.js"></script>
 <script src="/scripts/navigation.js"></script>
+<script src="/scripts/backbutton.js"></script>
 
 <!-- _class: lead invert -->
 
@@ -31,15 +32,15 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Resources
 
 <div class="figrow">
-  <figure class="tall">
+  <figure>
   <img src="/assets/2025-10-14-11-56-38.png">
   <figcaption></figcaption>
 </figure>
-  <figure class="tall">
+  <figure>
   <img src="/assets/2025-10-14-11-33-44.png">
   <figcaption></figcaption>
 </figure>
-  <figure class="tall">
+  <figure>
   <img src="/assets/2025-10-14-11-32-57.png">
   <figcaption></figcaption>
 </figure>

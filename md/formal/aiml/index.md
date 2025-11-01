@@ -2,7 +2,7 @@
 
 {{title}}
 
-![bg blur:5px](/assets/2025-09-30-14-32-40.png)
+<!-- ![bg blur:5px](/assets/2025-09-30-14-32-40.png) -->
 
 # AI/ML
 
@@ -11,9 +11,10 @@
 ### Introduction to AI/ML
 
 <div class="tiles">
-  {{tile(Why learn AI?, intro/why.html, /assets/2025-10-16-12-01-08.png)}}
-  {{tile(Terminology, intro/term.html, /assets/2025-10-16-11-30-53.png)}}
-  {{tile(Learning<br>Patterns, intro/learning.html, /assets/2025-10-10-12-04-42.png)}}
+  {{tile(Why learn AI?, intro-why.html, /assets/2025-10-16-12-01-08.png)}}
+  {{tile(Terminology, intro-term.html, /assets/2025-10-16-11-30-53.png)}}
+  {{tile(Learning<br>Patterns, intro-learning.html, /assets/2025-10-10-12-04-42.png)}}
+  {{tile(Hype, intro-hype.html, /assets/2025-11-01-07-20-37.png )}}
   <!-- {{tile(Types of Learning, limitations.html, /assets/2025-10-16-19-10-11.png)}} -->
   <!-- {{tile(Types of Tasks, intro/learning-types.html, /assets/2025-10-16-19-13-25.png)}} -->
   <!-- {{tile(Examples, limitations.html, /assets/2025-10-16-12-00-00.png)}} -->
@@ -34,7 +35,7 @@
   {{tile(Recommendation, major/index.html, /assets/2025-10-09-22-24-37.png)}}
   {{tile(Forecasting, major/index.html, /assets/2025-10-09-22-23-37.png)}}
   {{tile(Vision, vision/index.html, /assets/2025-10-09-22-21-33.png)}}
-  {{tile(Language, major/index.html, /assets/2025-10-09-22-22-22.png)}}
+  {{tile(Language, language/index.html, /assets/2025-10-09-22-22-22.png)}}
   {{tile(Reasoning, reasoning.html, /assets/2025-10-23-22-26-28.png)}}
 </div>
 

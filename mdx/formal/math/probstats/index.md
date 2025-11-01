@@ -13,12 +13,13 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <script src="/scripts/zoom.js"></script>
 <script src="/scripts/navigation.js"></script>
+<script src="/scripts/backbutton.js"></script>
 
 ###### Prob Stats
 
 <div class="tiles">
   <a class="tile-link" href="math/probstats/dist/index.html" style="--tile-bg-img:url('/assets/2025-10-02-12-14-59.png');">Bayes Theorem</a>
-  <a class="tile-link" href="math/probstats/dist/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-22-15.png');">Distribution<br>Theory</a>
+  <a class="tile-link" href="dist/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-22-15.png');">Distribution<br>Theory</a>
 </div>
 
 <!-- _footer: '[<iconify-icon icon="hugeicons:home-11"></iconify-icon>](/index.html)  [<iconify-icon icon="si:left-up-line"></iconify-icon>](../index.html) [<iconify-icon icon="octicon:move-to-start-24" title="Start"></iconify-icon>](#1) &nbsp; | &nbsp; comb' -->

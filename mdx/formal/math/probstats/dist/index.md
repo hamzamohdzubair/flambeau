@@ -13,30 +13,31 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <script src="/scripts/zoom.js"></script>
 <script src="/scripts/navigation.js"></script>
+<script src="/scripts/backbutton.js"></script>
 
 
-<!-- _class: lead -->
-
-###### Distribution Theory Chapters
+### Distribution Theory Chapters
 
 <div class="tiles">
-  <a class="tile-link" href="math/probstats/dist/beta.html" style="--tile-bg-img:url('assets/2025-10-02-22-40-24.png');">Beta<br>Distribution</a>
+  <a class="tile-link" href="beta/index.html" style="--tile-bg-img:url('assets/2025-10-02-22-40-24.png');">Beta<br>Distribution</a>
 </div>
 
 ---
 
-![w:600](assets/2025-09-30-23-20-50.png)
+### Distributions
 
----
-
-<iframe src="https://www.acsu.buffalo.edu/~adamcunn/probability/probability.html", width="1100", height="600"></iframe>
-
----
-
-<!-- _class: lead -->
-
-###### Distribution Theory Chapters
-
-<div class="tiles">
-  <a class="tile-link" href="math/probstats/dist/beta.html">Beta<br>Distribution</a>
+<div class="figrow">
+  <figure data-marpit-fragment class="emph" style="width:400px;">
+  <img src="/assets/2025-09-30-23-20-50.png">
+  <figcaption></figcaption>
+</figure>
 </div>
+
+---
+
+### Demo
+
+<figure>
+  <iframe src="https://www.acsu.buffalo.edu/~adamcunn/probability/probability.html"></iframe>
+  <figcaption><a href="https://www.acsu.buffalo.edu/~adamcunn/probability/probability.html" target="_blank">https://www.acsu.buffalo.edu/~adamcunn/probability/probability.html</a></figcaption>
+</figure>

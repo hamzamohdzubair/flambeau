@@ -71,17 +71,30 @@ footer a {
   color: #ffe;
 }
 
-iframe {
-  transform: scale(0.75); /* Scale down to 75% */
-  transform-origin: 0 0; /* Scale from the top-left corner */
-  width: 125%; /* Adjust width inversely to the scale */
-  height: 125%; /* Adjust height inversely to the scale */
-  /* border: none;                 Optional: remove border */
+figure iframe {
+  width: 100%;
+  height: 500px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: inset 0 0px 5px rgba(0, 0, 0, 0.4);
+}
+
+figure:has(iframe) figcaption {
+  margin-top: 10px;
+  font-size: 0.4em;
+  text-align: center;
 }
 
 a {
   text-decoration: none;
   color: #456;
+}
+
+a {
+  text-decoration: none;
+  color: #456;
+  border-bottom: 2px dashed #456;
+  text-decoration-skip-ink: auto; /* prevents underline through descenders */
 }
 
 /* from beam */
@@ -184,8 +197,34 @@ figure[data-bespoke-marp-fragment="inactive"] {
   visibility: visible !important;
   opacity: 0.08 !important;
   filter: blur(3px) contrast(0) brightness(2000)
-    drop-shadow(0px 4px 8px rgba(0, 0, 0, 1)) !important;
+    drop-shadow(0px 0px 8px rgba(0, 0, 0, 1)) !important;
 }
+
+/* figure[data-bespoke-marp-fragment="inactive"] { */
+/*   visibility: visible !important; */
+/*   opacity: 1 !important; */
+/*   position: relative; */
+/* } */
+/**/
+/* figure[data-bespoke-marp-fragment="inactive"]::before { */
+/*   content: ""; */
+/*   position: absolute; */
+/*   top: 0; */
+/*   left: 0; */
+/*   right: 0; */
+/*   bottom: 0; */
+/*   background: #ffe; */
+/*   border-radius: 5px; */
+/*   box-shadow: */
+/*     inset 0px 0px 3px rgba(0, 0, 0, 0.5), */
+/*     inset 0px 0px 0px rgba(0, 0, 0, 0.3); */
+/*   z-index: 1; */
+/* } */
+/**/
+/* figure[data-bespoke-marp-fragment="inactive"] img, */
+/* figure[data-bespoke-marp-fragment="inactive"] iframe { */
+/*   opacity: 0 !important; */
+/* } */
 
 .figrow {
   display: grid;
@@ -196,6 +235,7 @@ figure[data-bespoke-marp-fragment="inactive"] {
   justify-items: center;
   width: 100%;
   margin: 0 auto;
+  margin-top: 8px;
 }
 
 .figrow figure {

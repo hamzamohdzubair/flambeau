@@ -71,11 +71,28 @@
 
 ---
 
-### Types of Learning
+### Core Types of Learning
 
 1) Supervised Learning
 2) Unsupervised Learning
 3) Reinforcement Learning
+4) Self-Supervised Learning
+
+---
+
+### Advanced Types of Learning
+
+1) Semi-Supervised Learning
+2) Weakly Supervised Learning
+3) Active Learning
+4) Meta-Learning
+5) Transfer Learning
+6) Zero-Shot, One-Shot, Few-Shot Learning
+7) Continual Learning
+8) Online Learning
+9) Multi-Task Learning
+10) Federated Learning
+11) Representation Learning
 
 ---
 

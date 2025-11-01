@@ -4,10 +4,41 @@
 
 ---
 
-### Today's World
+### Individual's Competence & Resilience
 
-We are surrounded by ML Algorithms
-<br>
+<div class="cc">
+<div>
+
+<span data-marpit-fragment>Digital Literacy</span>
+<div class="figrow">
+  {{ifleh(Journal Article , https://pmc.ncbi.nlm.nih.gov/articles/PMC10569540/, /assets/2025-11-01-09-31-35.png)}}
+  {{ifleh(Nature Article, 'https://www.nature.com/articles/s41598-025-04472-9' , /assets/2025-11-01-10-04-32.png)}}
+</div>
+<div class="figrow">
+  {{ifleh( Journal Article , https://dl.acm.org/doi/10.1145/3532785, /assets/2025-11-01-11-30-05.png)}}
+  {{ifleh(Journal Article , https://www.sciencedirect.com/science/article/pii/S0308596124001617, /assets/2025-11-01-11-34-28.png)}}
+</div>
+
+</div>
+
+<div>
+
+<span data-marpit-fragment>Legal Literacy</span>
+<div class="figrow">
+  {{ifleh(Journal Article, http://journals.sjp.ac.lk/index.php/vjhss/article/view/5988, /assets/2025-11-01-11-40-32.png)}}
+  {{ifleh(Journal Aritcle, https://jurnal-umbuton.ac.id/index.php/Pencerah/article/view/5075, /assets/2025-11-01-11-55-06.png)}}
+</div>
+<div class="figrow">
+  {{ifleh(Journal Article, https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5233069, /assets/2025-11-01-11-57-04.png)}}
+  {{ifleh(Journal Aritcle, https://www.journalofpoliticalscience.com/archives/2025.v7.i5.C.556, /assets/2025-11-01-11-54-37.png)}}
+</div>
+</div>
+</div>
+
+---
+
+### The Algorithm
+
 <div class="figrow">
   {{ifleh(LLM users, https://nerdynav.com/chatgpt-statistics/, /assets/2025-10-22-18-15-49.png)}}
   {{ifle(Search Engines, /assets/2025-10-16-12-48-33.png, )}}
@@ -33,25 +64,4 @@ We are surrounded by ML Algorithms
   {{ifleh(Robo Surgery, https://www.medscape.com/viewarticle/how-robot-performed-surgery-without-human-assistance-2025a1000mp6, /assets/2025-10-22-18-43-50.png)}}
 </div>
 
----
-
-### AI is everywhere so what?
-
-<div class="figrow">
-  {{ifle(,/assets/2025-10-23-12-44-27.png)}}
-  {{ifle(,/assets/2025-10-23-12-35-11.png)}}
-  {{ifle(,/assets/2025-10-23-12-59-00.png)}}
-  {{ifle(,/assets/2025-10-23-13-01-22.png)}}
-  {{ifle(,/assets/2025-10-23-12-41-27.png)}}
-</div>
-
-<span data-marpit-fragment>Competence & Resilience</span>
-<span data-marpit-fragment>Digital Literacy</span>
-<span data-marpit-fragment>Legal Literacy</span>
 <span class="highblur" data-marpit-fragment style="font-size:2em;">AI Literacy</span>
-
----
-
-### How much should we know?
-
-<span data-marpit-fragment>Mathematical Intuition</span>

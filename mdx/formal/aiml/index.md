@@ -13,10 +13,11 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <script src="/scripts/zoom.js"></script>
 <script src="/scripts/navigation.js"></script>
+<script src="/scripts/backbutton.js"></script>
 
 <!-- _class: lead invert -->
 
-![bg blur:5px](/assets/2025-09-30-14-32-40.png)
+<!-- ![bg blur:5px](/assets/2025-09-30-14-32-40.png) -->
 
 # AI/ML
 
@@ -25,9 +26,10 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Introduction to AI/ML
 
 <div class="tiles">
-  <a class="tile-link" href="intro/why.html" style="--tile-bg-img:url('/assets/2025-10-16-12-01-08.png');">Why learn AI?</a>
-  <a class="tile-link" href="intro/term.html" style="--tile-bg-img:url('/assets/2025-10-16-11-30-53.png');">Terminology</a>
-  <a class="tile-link" href="intro/learning.html" style="--tile-bg-img:url('/assets/2025-10-10-12-04-42.png');">Learning<br>Patterns</a>
+  <a class="tile-link" href="intro-why.html" style="--tile-bg-img:url('/assets/2025-10-16-12-01-08.png');">Why learn AI?</a>
+  <a class="tile-link" href="intro-term.html" style="--tile-bg-img:url('/assets/2025-10-16-11-30-53.png');">Terminology</a>
+  <a class="tile-link" href="intro-learning.html" style="--tile-bg-img:url('/assets/2025-10-10-12-04-42.png');">Learning<br>Patterns</a>
+  <a class="tile-link" href="intro-hype.html" style="--tile-bg-img:url('/assets/2025-11-01-07-20-37.png');">Hype</a>
   <!-- <a class="tile-link" href="limitations.html" style="--tile-bg-img:url('/assets/2025-10-16-19-10-11.png');">Types of Learning</a> -->
   <!-- <a class="tile-link" href="intro/learning-types.html" style="--tile-bg-img:url('/assets/2025-10-16-19-13-25.png');">Types of Tasks</a> -->
   <!-- <a class="tile-link" href="limitations.html" style="--tile-bg-img:url('/assets/2025-10-16-12-00-00.png');">Examples</a> -->
@@ -48,7 +50,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-24-37.png');">Recommendation</a>
   <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-23-37.png');">Forecasting</a>
   <a class="tile-link" href="vision/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-21-33.png');">Vision</a>
-  <a class="tile-link" href="major/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-22-22.png');">Language</a>
+  <a class="tile-link" href="language/index.html" style="--tile-bg-img:url('/assets/2025-10-09-22-22-22.png');">Language</a>
   <a class="tile-link" href="reasoning.html" style="--tile-bg-img:url('/assets/2025-10-23-22-26-28.png');">Reasoning</a>
 </div>
 

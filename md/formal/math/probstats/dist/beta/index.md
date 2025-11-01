@@ -17,9 +17,9 @@
 
 ---
 
-### Demo ([source](https://mathlets.org/mathlets/beta-distribution))
+### Demo
 
-<iframe src="https://mathlets.org/mathlets/beta-distribution" width="1100" height="550"></iframe>
+{{frame(https://mathlets.org/mathlets/beta-distribution)}}
 
 ---
 

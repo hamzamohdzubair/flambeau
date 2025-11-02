@@ -15,6 +15,16 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <script src="/scripts/navigation.js"></script>
 <script src="/scripts/backbutton.js"></script>
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NLV7GHEJDK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NLV7GHEJDK');
+</script>
+
 <div class="tiles">
   <a class="tile-link" href="embeddings.html" style="--tile-bg-img:url('/assets/2025-10-16-19-03-03.png');">Embeddings</a>
 </div>

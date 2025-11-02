@@ -4,16 +4,6 @@
 
 ---
 
-### Is there a relationship between pattern recognition and Intelligence?
-
-<div class="figrow">
-  {{ifle(  , /assets/2025-10-24-12-40-55.png)}}
-  {{ifle(  , /assets/2025-10-24-12-41-08.png)}}
-  {{ifle(  , /assets/2025-10-24-12-45-45.png)}}
-</div>
-
----
-
 ### Glassdoor case study
 
 <span style="font-size:0.7em;">

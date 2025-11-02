@@ -4,6 +4,13 @@
 
 ---
 
+
+### What is AI?
+
+<span data-marpit-fragment>Mimicry of Human Intelligence</span>
+
+---
+
 ### What is Intelligence?
 
 <div class="figrow">
@@ -13,17 +20,50 @@
 
 ---
 
-### What is Intelligence?
+### Intelligence = Cognitive Abilities
 
-<div class="figrow">
-  {{figw(800,source: https://www.verywellmind.com, /assets/2025-10-08-15-05-35.png)}}
+<div class="cc">
+<div>
+
+- **Pattern Recognition**
+- Abstract Reasoning
+- Problem-Solving
+- Language Comprehension
+- Memory
+- Capacity to Learn and un-learn
+- Emotional Intelligence
+</div>
+<div>
+
+- Creativity
+- Imagination
+- Planning
+- Self-Awareness
+- Adaptability
+- Social Intelligence
+</div>
 </div>
 
 ---
 
-### What is AI?
+### How to test Human Intelligence?
 
-<span data-marpit-fragment>Attempt at mimicry of Human Intelligence</span>
+<div data-marpit-fragment>
+<div class="figrow">
+  {{i(  , /assets/2025-10-24-12-40-55.png)}}
+  {{i(  , /assets/2025-10-24-12-41-08.png)}}
+  {{i(  , /assets/2025-10-24-12-45-45.png)}}
+</div>
+</div>
+
+---
+
+### Are LLMs intelligent?
+
+<div class="figrow">
+  {{ifle(source: https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png, /assets/2025-10-08-16-25-07.png)}}
+  {{ifle(source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s, /assets/2025-10-08-16-27-19.png)}}
+</div>
 
 ---
 
@@ -31,17 +71,6 @@
 
 <div class="figrow">
   {{figw(900, Source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg, /assets/2025-10-03-14-20-49.png)}}
-</div>
-
-
----
-
-
-### Have we made ASI?
-
-<div class="figrow">
-  {{ifle(source: https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png, /assets/2025-10-08-16-25-07.png)}}
-  {{ifle(source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s, /assets/2025-10-08-16-27-19.png)}}
 </div>
 
 ---

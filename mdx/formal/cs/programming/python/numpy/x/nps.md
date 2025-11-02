@@ -15,6 +15,16 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <script src="/scripts/navigation.js"></script>
 <script src="/scripts/backbutton.js"></script>
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NLV7GHEJDK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NLV7GHEJDK');
+</script>
+
 ### Problem
 
 <span data-marpit-fragment>Find out the Net Promoter Score of this company</span>

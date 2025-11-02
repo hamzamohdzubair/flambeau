@@ -15,7 +15,24 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <script src="/scripts/navigation.js"></script>
 <script src="/scripts/backbutton.js"></script>
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NLV7GHEJDK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NLV7GHEJDK');
+</script>
+
 ## Terminology
+
+---
+
+
+### What is AI?
+
+<span data-marpit-fragment>Mimicry of Human Intelligence</span>
 
 ---
 
@@ -34,37 +51,54 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
 ---
 
-### What is Intelligence?
+### Intelligence = Cognitive Abilities
 
-<div class="figrow">
-  <figure data-marpit-fragment style="width:800px;">
-  <img src="/assets/2025-10-08-15-05-35.png">
-  <figcaption>source: https://www.verywellmind.com</figcaption>
-</figure>
+<div class="cc">
+<div>
+
+- **Pattern Recognition**
+- Abstract Reasoning
+- Problem-Solving
+- Language Comprehension
+- Memory
+- Capacity to Learn and un-learn
+- Emotional Intelligence
+</div>
+<div>
+
+- Creativity
+- Imagination
+- Planning
+- Self-Awareness
+- Adaptability
+- Social Intelligence
+</div>
 </div>
 
 ---
 
-### What is AI?
+### How to test Human Intelligence?
 
-<span data-marpit-fragment>Attempt at mimicry of Human Intelligence</span>
-
----
-
-### Level of mimicry
-
+<div data-marpit-fragment>
 <div class="figrow">
-  <figure data-marpit-fragment style="width:900px;">
-  <img src="/assets/2025-10-03-14-20-49.png">
-  <figcaption>Source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg</figcaption>
+  <figure>
+  <img src="/assets/2025-10-24-12-40-55.png">
+  <figcaption></figcaption>
+</figure>
+  <figure>
+  <img src="/assets/2025-10-24-12-41-08.png">
+  <figcaption></figcaption>
+</figure>
+  <figure>
+  <img src="/assets/2025-10-24-12-45-45.png">
+  <figcaption></figcaption>
 </figure>
 </div>
-
+</div>
 
 ---
 
-
-### Have we made ASI?
+### Are LLMs intelligent?
 
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
@@ -74,6 +108,17 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-27-19.png">
   <figcaption>source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s</figcaption>
+</figure>
+</div>
+
+---
+
+### Level of mimicry
+
+<div class="figrow">
+  <figure data-marpit-fragment style="width:900px;">
+  <img src="/assets/2025-10-03-14-20-49.png">
+  <figcaption>Source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg</figcaption>
 </figure>
 </div>
 

@@ -25,10 +25,16 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
   gtag('config', 'G-NLV7GHEJDK');
 </script>
 
+<!-- _class: lead invert -->
+
+# Programming
+
+---
 
 ### Concepts
 
 <div class="tiles">
+  <a class="tile-link" href="why-programming.html" style="--tile-bg-img:url('$3');">Why We Need Programming</a>
   <a class="tile-link" href="highvslow.html" style="--tile-bg-img:url('$3');">High Level<br>vs<br>Low Level</a>
 
 </div>

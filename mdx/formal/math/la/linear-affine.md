@@ -31,10 +31,10 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-23-21-15-58.png">
-  <figcaption><a href="https://en.wikipedia.org/wiki/Linear_combination#Affine,_conical,_and_convex_combinations">wiki</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://en.wikipedia.org/wiki/Linear_combination#Affine,_conical,_and_convex_combinations">wiki</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-23-20-53-44.png">
-  <figcaption><a href="https://www.cnblogs.com/rhyswang/p/14696146.html">source</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.cnblogs.com/rhyswang/p/14696146.html">source</a></figcaption>
 </figure>
 </div>

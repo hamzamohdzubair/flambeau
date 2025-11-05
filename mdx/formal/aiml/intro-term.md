@@ -183,12 +183,12 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-07-22-42-13.png">
-  <figcaption><a href="https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101">Source</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101">Source</a></figcaption>
 </figure>
 
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-07-22-57-05.png">
-  <figcaption><a href="https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174">Source</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174">Source</a></figcaption>
 </figure>
 
 </div>

@@ -1,9 +1,15 @@
 {{yaml}}
 
+{{title}}
+
+# Programming
+
+---
 
 ### Concepts
 
 <div class="tiles">
+  {{tile(Why We Need Programming, why-programming.html,)}}
   {{tile(High Level<br>vs<br>Low Level, highvslow.html,)}}
 
 </div>

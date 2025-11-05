@@ -38,21 +38,21 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-11-01-09-31-35.png">
-  <figcaption><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10569540/">Journal Article</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10569540/">Journal Article</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-11-01-10-04-32.png">
-  <figcaption><a href="https://www.nature.com/articles/s41598-025-04472-9">Nature Article</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.nature.com/articles/s41598-025-04472-9">Nature Article</a></figcaption>
 </figure>
 </div>
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-11-01-11-30-05.png">
-  <figcaption><a href="https://dl.acm.org/doi/10.1145/3532785">Journal Article</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://dl.acm.org/doi/10.1145/3532785">Journal Article</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-11-01-11-34-28.png">
-  <figcaption><a href="https://www.sciencedirect.com/science/article/pii/S0308596124001617">Journal Article</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.sciencedirect.com/science/article/pii/S0308596124001617">Journal Article</a></figcaption>
 </figure>
 </div>
 
@@ -64,21 +64,21 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-11-01-11-40-32.png">
-  <figcaption><a href="http://journals.sjp.ac.lk/index.php/vjhss/article/view/5988">Journal Article</a></figcaption>
+  <figcaption><a class="underlined-link" href="http://journals.sjp.ac.lk/index.php/vjhss/article/view/5988">Journal Article</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-11-01-11-55-06.png">
-  <figcaption><a href="https://jurnal-umbuton.ac.id/index.php/Pencerah/article/view/5075">Journal Aritcle</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://jurnal-umbuton.ac.id/index.php/Pencerah/article/view/5075">Journal Aritcle</a></figcaption>
 </figure>
 </div>
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-11-01-11-57-04.png">
-  <figcaption><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5233069">Journal Article</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5233069">Journal Article</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-11-01-11-54-37.png">
-  <figcaption><a href="https://www.journalofpoliticalscience.com/archives/2025.v7.i5.C.556">Journal Aritcle</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.journalofpoliticalscience.com/archives/2025.v7.i5.C.556">Journal Aritcle</a></figcaption>
 </figure>
 </div>
 </div>
@@ -91,7 +91,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-18-15-49.png">
-  <figcaption><a href="https://nerdynav.com/chatgpt-statistics/">LLM users</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://nerdynav.com/chatgpt-statistics/">LLM users</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-16-12-48-33.png">
@@ -143,27 +143,27 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-18-36-51.png">
-  <figcaption><a href="https://www.visualcapitalist.com/mapped-every-robotaxi-service-operating-in-2025/">Robo taxis</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.visualcapitalist.com/mapped-every-robotaxi-service-operating-in-2025/">Robo taxis</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-16-16-14.png">
-  <figcaption><a href="https://www.technologyreview.com/2023/05/23/1073500/drone-food-delivery-shenzhen-meituan/">Drone Delivery</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.technologyreview.com/2023/05/23/1073500/drone-food-delivery-shenzhen-meituan/">Drone Delivery</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-16-24-17.png">
-  <figcaption><a href="https://www.business-standard.com/india-news/himachal-first-to-use-aadhaar-face-recognition-for-ration-distribution-125070500563_1.html">Face Recognition</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.business-standard.com/india-news/himachal-first-to-use-aadhaar-face-recognition-for-ration-distribution-125070500563_1.html">Face Recognition</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-17-36-43.png">
-  <figcaption><a href="https://www.bbc.com/news/articles/c3e1xdk0d7wo">Diagnosis</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.bbc.com/news/articles/c3e1xdk0d7wo">Diagnosis</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-17-52-11.png">
-  <figcaption><a href="https://www.thequint.com/tech-and-auto/tech-news/ai-algorithms-hiring-firing-pay-transparency-india#read-more">AI in HR</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.thequint.com/tech-and-auto/tech-news/ai-algorithms-hiring-firing-pay-transparency-india#read-more">AI in HR</a></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-22-18-43-50.png">
-  <figcaption><a href="https://www.medscape.com/viewarticle/how-robot-performed-surgery-without-human-assistance-2025a1000mp6">Robo Surgery</a></figcaption>
+  <figcaption><a class="underlined-link" href="https://www.medscape.com/viewarticle/how-robot-performed-surgery-without-human-assistance-2025a1000mp6">Robo Surgery</a></figcaption>
 </figure>
 </div>
 

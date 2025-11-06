@@ -15,7 +15,7 @@
 
 <div class="cc" style="--col:50;">
   <div><div class="figrow">
-    {{figw(300, Written: ~320 BC, /assets/2025-10-19-09-01-43.png)}}
+    {{ifw(300, Written: ~320 BC, /assets/2025-10-19-09-01-43.png)}}
 </div></div>
 
 <div>

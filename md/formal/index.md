@@ -1,6 +1,6 @@
 {{yaml}}
 
-###### Formal Science
+### Formal Science
 
 <div class="tiles">
   {{tile(Math, math/index.html, /assets/2025-09-30-11-22-34.png)}}

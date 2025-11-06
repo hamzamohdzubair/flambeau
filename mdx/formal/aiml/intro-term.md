@@ -1,5 +1,5 @@
 ---
-theme: gaia2
+theme: blank2
 paginate: true
 transition: slide
 class: lead
@@ -7,7 +7,11 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ---
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Font imports for all three font options -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 <link href="/styles/zoom.css" rel="stylesheet">
 
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
@@ -103,11 +107,11 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-25-07.png">
-  <figcaption>source: https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png</figcaption>
+  <figcaption></figcaption>
 </figure>
   <figure data-marpit-fragment class="emph landscape">
   <img src="/assets/2025-10-08-16-27-19.png">
-  <figcaption>source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s</figcaption>
+  <figcaption></figcaption>
 </figure>
 </div>
 
@@ -118,7 +122,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure data-marpit-fragment style="width:900px;">
   <img src="/assets/2025-10-03-14-20-49.png">
-  <figcaption>Source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg</figcaption>
+  <figcaption></figcaption>
 </figure>
 </div>
 

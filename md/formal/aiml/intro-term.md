@@ -61,8 +61,8 @@
 ### Are LLMs intelligent?
 
 <div class="figrow">
-  {{ifle(source: https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png, /assets/2025-10-08-16-25-07.png)}}
-  {{ifle(source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&s, /assets/2025-10-08-16-27-19.png)}}
+  {{ifle(, /assets/2025-10-08-16-25-07.png)}}
+  {{ifle(, /assets/2025-10-08-16-27-19.png)}}
 </div>
 
 ---
@@ -70,7 +70,7 @@
 ### Level of mimicry
 
 <div class="figrow">
-  {{figw(900, Source: https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg, /assets/2025-10-03-14-20-49.png)}}
+  {{ifw(900, , /assets/2025-10-03-14-20-49.png)}}
 </div>
 
 ---
@@ -138,5 +138,5 @@
 ### ML Foundations and Pillars
 
 <div class="figrow">
-  {{figw(1000, 'Source: Deisenroth, M. P., Faisal, A. A., & Ong, C. S. (2020). Mathematics for machine learning. Cambridge University Press.', /assets/2025-10-08-13-03-46.png)}}
+  {{ifw(1000, 'Source: Deisenroth, M. P., Faisal, A. A., & Ong, C. S. (2020). Mathematics for machine learning. Cambridge University Press.', /assets/2025-10-08-13-03-46.png)}}
 </div>

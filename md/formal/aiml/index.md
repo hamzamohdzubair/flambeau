@@ -81,10 +81,10 @@
 ### Books
 
 <div class="figrow">
-  {{ip(Free access: https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
-  {{ip(Free access: https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
-  {{ip(Free access: d2l.ai, /assets/2025-10-05-09-08-25.png)}}
-  {{ip(Free access: https://www.mlsysbook.ai/ , /assets/2025-10-26-07-13-31.png)}}
+  {{iph(Free access, https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
+  {{iph(Free access, https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
+  {{iph(Free access, d2l.ai, /assets/2025-10-05-09-08-25.png)}}
+  {{iph(Free access, https://www.mlsysbook.ai/ , /assets/2025-10-26-07-13-31.png)}}
 </div>
 
 

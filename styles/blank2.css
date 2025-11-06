@@ -1,0 +1,574 @@
+/* @theme blank2 */
+
+@import "default";
+@import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
+
+/* ============================================
+   CSS VARIABLES - Light Purple Theme
+   ============================================ */
+
+:root {
+  /* Light Purple Color Palette */
+  --bg-start: #f3e8ff;
+  --bg-mid: #ede9fe;
+  --bg-end: #e9d5ff;
+  --text-color: #2d1b4e;
+  --text-secondary: #5b4c7a;
+  --accent-color: #667eea;
+
+  /* Glassmorphism Colors */
+  --glass-white: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(102, 126, 234, 0.25);
+  --glass-blur: 10px;
+
+  /* Font Family */
+  --font-family:
+    "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-code: "Fira Code", "Courier New", monospace;
+}
+
+/* ============================================
+   SLIDE LAYOUT - Section is the visible slide
+   ============================================ */
+
+section {
+  /* Light purple gradient background */
+  background: linear-gradient(
+    135deg,
+    var(--bg-start) 0%,
+    var(--bg-mid) 50%,
+    var(--bg-end) 100%
+  );
+  color: var(--text-color);
+  font-family: var(--font-family);
+  padding: 60px;
+  font-size: 1.4rem;
+  line-height: 1.6;
+}
+
+section h1,
+section h2,
+section h3,
+section h4,
+section h5,
+section h6 {
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-weight: 600;
+  margin: 0.8em 0 0.4em 0;
+}
+
+section h1 {
+  font-size: 2.8em;
+  margin-top: 0.5em;
+}
+
+section h2 {
+  font-size: 2.2em;
+}
+
+section h3 {
+  font-size: 1.8em;
+}
+
+section p,
+section li {
+  color: var(--text-secondary);
+  margin: 0.5em 0;
+}
+
+section a {
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+section a:hover {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+/* ============================================
+   CODE BLOCKS - Glassmorphism
+   ============================================ */
+
+section pre {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 1.5em;
+  margin: 1em 0;
+  overflow: auto;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 0 20px rgba(102, 126, 234, 0.1);
+  font-size: 1.25em;
+}
+
+section code {
+  font-family: var(--font-code);
+  color: var(--text-color);
+  background: transparent;
+}
+
+section p code,
+section li code {
+  background: var(--glass-white);
+  padding: 0.3em 0.6em;
+  border-radius: 4px;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ============================================
+   HEADER & FOOTER - Glassmorphism
+   ============================================ */
+
+/* Header - Using h3:nth-of-type(1) for positioning */
+h3:nth-of-type(1) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0.4em 0.5em;
+
+  /* Glassmorphism styling */
+  background: var(--glass-white);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1.5px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+  color: var(--text-color);
+  text-align: center;
+  line-height: 1.2em;
+  font-size: 1.2em;
+  font-weight: 600;
+  z-index: 10;
+}
+
+/* Pagination counter - section::after pseudo-element */
+section::after {
+  content: "hzubair.com   |   " attr(data-marpit-pagination) " / "
+    attr(data-marpit-pagination-total);
+  position: absolute;
+  bottom: 0;
+  right: 10px;
+
+  font-size: 0.7em;
+  color: var(--text-color);
+  height: 40px;
+  line-height: 40px;
+  z-index: 3;
+  pointer-events: none;
+  font-family: var(--font-code);
+  font-weight: 500;
+}
+
+/* Footer element (Marp special element) */
+footer {
+  border-radius: 12px;
+  background: var(--glass-white);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-top: 1.5px solid var(--glass-border);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
+  color: var(--text-color);
+  height: 40px;
+  line-height: 40px;
+  z-index: 1;
+  display: flex;
+  padding: 0 10px;
+  font-family: var(--font-family);
+  font-weight: 400;
+  letter-spacing: -0.5px;
+}
+
+footer a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--text-color);
+  text-decoration: underline;
+}
+
+/* ============================================
+   TILES & CARDS - Navigation Grid
+   ============================================ */
+
+@property --overlay-alpha {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.3;
+}
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  /* margin-top: 48px; */
+}
+
+.tile-link {
+  width: 160px;
+  height: 100px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px;
+  overflow: hidden;
+  word-wrap: break-word;
+
+  /* Glassmorphism effect */
+  background: var(--glass-white);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  /* Image background */
+  background-color: #e9d5ff;
+  background-image:
+    linear-gradient(
+      rgba(102, 126, 234, var(--overlay-alpha)),
+      rgba(102, 126, 234, var(--overlay-alpha))
+    ),
+    var(--tile-bg-img, linear-gradient(#ddd6fe, #e9d5ff));
+  background-position: center, center;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    --overlay-alpha 0.3s ease;
+}
+
+.tile-link:hover {
+  text-decoration: none;
+  --overlay-alpha: 0.5;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   FIGURE GALLERY
+   ============================================ */
+
+figure iframe {
+  width: 100%;
+  height: 500px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: inset 0 0px 5px rgba(0, 0, 0, 0.4);
+}
+
+figure:has(iframe) figcaption {
+  margin-top: 10px;
+  font-size: 0.4em;
+  text-align: center;
+}
+
+.underlined-link {
+  text-decoration: none;
+  color: #456;
+  border-bottom: 2px dashed #456;
+  text-decoration-skip-ink: auto; /* prevents underline through descenders */
+}
+
+.figrow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  margin: 0.3em auto;
+}
+
+.figrow figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.figrow img {
+  object-fit: cover;
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.15));
+  border-radius: 8px;
+}
+
+.figrow figcaption {
+  width: 100%;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  margin-top: 0.5em;
+}
+
+.portrait img {
+  aspect-ratio: 2/3;
+}
+
+.landscape img {
+  aspect-ratio: 16/9;
+}
+
+/* ============================================
+   LISTS
+   ============================================ */
+
+section ul,
+section ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+section li {
+  margin: 0.4em 0;
+}
+
+section ul li::marker {
+  color: var(--accent-color);
+}
+
+section ol li::marker {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+/* ============================================
+   BLOCKQUOTE
+   ============================================ */
+
+section blockquote {
+  border-left: 4px solid var(--accent-color);
+  padding-left: 1.5em;
+  margin: 1em 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+
+section.lead {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+}
+
+.lead h1 {
+  font-size: 3.5em;
+  margin: 0.2em 0;
+}
+
+.lead p {
+  font-size: 1.5em;
+  margin: 0.5em 0;
+}
+
+.lead ul,
+.lead ol {
+  text-align: left;
+  align-self: flex-start;
+  width: 100%;
+}
+
+/* ============================================
+   FRAGMENT ANIMATIONS
+   ============================================ */
+
+section ol {
+  list-style: none;
+  counter-reset: item;
+  padding-left: 1em;
+  margin: 0;
+}
+
+section ol li {
+  counter-increment: item;
+  position: relative;
+  padding-left: 0.5em;
+}
+
+section ol li::marker {
+  content: counter(item);
+  display: inline-block;
+  width: 2.5em;
+  margin-left: -3em;
+  padding-right: 0.5em;
+  text-align: right;
+  color: #999;
+  font-size: 0.8em;
+  font-family: var(--font-code);
+}
+
+li[data-bespoke-marp-fragment="inactive"],
+ol[data-bespoke-marp-fragment="inactive"],
+span[data-bespoke-marp-fragment="inactive"] {
+  visibility: visible !important;
+  opacity: 0.5 !important;
+  filter: blur(7px) !important;
+}
+
+span[data-bespoke-marp-fragment="inactive"].highblur {
+  visibility: visible !important;
+  opacity: 0.5 !important;
+  filter: blur(15px) !important;
+}
+
+figure[data-bespoke-marp-fragment="inactive"] {
+  visibility: visible !important;
+  opacity: 0.1 !important;
+  position: relative !important;
+}
+
+figure[data-bespoke-marp-fragment="inactive"]::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(90px) !important;
+  -webkit-backdrop-filter: blur(90px) !important;
+  border-radius: 8px !important;
+  border: 1.5px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 10 !important;
+  pointer-events: none !important;
+}
+
+li[data-answer="true"][data-bespoke-marp-fragment="inactive"] {
+  filter: blur(7px) !important;
+  opacity: 0.15 !important;
+  background-color: rgba(250, 160, 160, 0.95);
+}
+
+li[data-answer="true"][data-bespoke-marp-fragment="active"] {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* ============================================
+   CONTAINER COLUMNS
+   ============================================ */
+
+.cc {
+  display: flex;
+  gap: 1em;
+  align-items: center;
+}
+
+.cc > *:first-child {
+  flex: 0 0 calc(var(--col, 50) * 1%);
+}
+
+.cc > *:last-child {
+  flex: 0 0 calc((100 - var(--col, 50)) * 1%);
+}
+
+@media (max-width: 800px) {
+  .cc {
+    flex-wrap: wrap;
+  }
+  .cc > * {
+    flex: 1 1 100% !important;
+  }
+}
+
+/* ============================================
+   ICONS
+   ============================================ */
+
+iconify-icon {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 900px) {
+  section {
+    padding: 40px;
+    font-size: 1rem;
+  }
+
+  section h1 {
+    font-size: 2.2em;
+  }
+
+  section h2 {
+    font-size: 1.8em;
+  }
+
+  .tile-link {
+    width: 160px;
+    height: 120px;
+    font-size: 18px;
+  }
+
+  .tiles {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  section {
+    padding: 20px;
+  }
+
+  section h1 {
+    font-size: 1.8em;
+  }
+
+  section pre {
+    padding: 1em;
+    font-size: 0.8em;
+  }
+
+  .tiles {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tile-link {
+    width: 100%;
+    max-width: 280px;
+  }
+}

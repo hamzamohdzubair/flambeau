@@ -1,8 +1,8 @@
 ---
-theme: gaia2
-paginate: false
+title: Home
+theme: blank2
+paginate: true
 class: lead
-footer: ' '
 ---
 
 <!-- Google tag (gtag.js) -->
@@ -15,9 +15,7 @@ footer: ' '
   gtag('config', 'G-NLV7GHEJDK');
 </script>
 
-<i class="fa-regular fa-house"></i>
-
-###### Course Topics
+### <i class="fa-regular fa-house"></i>
 
 <div class="tiles">
   {{tile(Natural Science, natural/index.html, /assets/2025-10-19-00-42-10.png)}}

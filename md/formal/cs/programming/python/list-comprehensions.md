@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: List Comprehensions
+# List Comprehensions
 
 ---
 

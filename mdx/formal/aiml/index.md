@@ -1,5 +1,5 @@
 ---
-theme: gaia2
+theme: blank2
 paginate: true
 transition: slide
 class: lead
@@ -7,7 +7,11 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ---
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Font imports for all three font options -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 <link href="/styles/zoom.css" rel="stylesheet">
 
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
@@ -108,19 +112,19 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 <div class="figrow">
   <figure class="portrait">
   <img src="/assets/2025-10-05-09-49-36.png">
-  <figcaption>Free access: https://mml-book.github.io/book/mml-book.pdf</figcaption>
+  <figcaption><a class="underlined-link" href="https://mml-book.github.io/book/mml-book.pdf">Free access</a></figcaption>
 </figure>
   <figure class="portrait">
   <img src="/assets/2025-10-16-19-06-32.png">
-  <figcaption>Free access: https://www.statlearning.com/</figcaption>
+  <figcaption><a class="underlined-link" href="https://www.statlearning.com/">Free access</a></figcaption>
 </figure>
   <figure class="portrait">
   <img src="/assets/2025-10-05-09-08-25.png">
-  <figcaption>Free access: d2l.ai</figcaption>
+  <figcaption><a class="underlined-link" href="d2l.ai">Free access</a></figcaption>
 </figure>
   <figure class="portrait">
   <img src="/assets/2025-10-26-07-13-31.png">
-  <figcaption>Free access: https://www.mlsysbook.ai/</figcaption>
+  <figcaption><a class="underlined-link" href="https://www.mlsysbook.ai/">Free access</a></figcaption>
 </figure>
 </div>
 

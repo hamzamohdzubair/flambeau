@@ -28,6 +28,6 @@
 ### Resources
 
 <div class="figrow">
-  {{figw(300, ,/assets/2025-10-20-08-55-25.png)}}
+  {{ifw(300, ,/assets/2025-10-20-08-55-25.png)}}
 </div>
 

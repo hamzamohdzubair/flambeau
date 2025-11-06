@@ -6,17 +6,30 @@
 
 ---
 
+### Libraries
+
+<div class="tiles">
+  {{tile(, numpy/index.html, /assets/2025-10-19-00-46-48.png)}}
+  {{tile(, formal/cs/programming/python/pandas/index.html, /assets/2025-10-05-12-17-07.png)}}
+  {{tile(, formal/cs/programming/python/skl/index.html, /assets/2025-10-05-12-16-08.png)}}
+  {{tile(, formal/cs/programming/python/keras/index.html, /assets/2025-10-05-12-21-55.png)}}
+  {{tile(Tensorflow, formal/cs/programming/python/tf/index.html, /assets/2025-10-05-12-11-41.png)}}
+  {{tile(Pytorch, formal/cs/programming/python/pytorch/index.html, /assets/2025-10-05-12-12-25.png)}}
+</div>
+
+---
+
 ### Fundamentals - Basics
 
 <div class="tiles">
-  {{tile(Variables & Assignment, variables-assignment.html,)}}
-  {{tile(Data Types, data-types.html,)}}
-  {{tile(Arithmetic Operations, arithmetic-operations.html,)}}
-  {{tile(Comparison Operations, comparison-operations.html,)}}
-  {{tile(Logical Operations, logical-operations.html,)}}
-  {{tile(Type Conversion, type-conversion.html,)}}
-  {{tile(Input & Output, input-output.html,)}}
-  {{tile(Comments, comments.html,)}}
+  {{tile(Variables & Assignment, 1-variables-assignment.html,)}}
+  {{tile(Data Types, 1-data-types.html,)}}
+  {{tile(Arithmetic Operations, 1-arithmetic-operations.html,)}}
+  {{tile(Comparison Operations, 1-comparison-operations.html,)}}
+  {{tile(Logical Operations, 1-logical-operations.html,)}}
+  {{tile(Type Conversion, 1-type-conversion.html,)}}
+  {{tile(Input & Output, 1-input-output.html,)}}
+  {{tile(Comments, 1-comments.html,)}}
 </div>
 
 ---
@@ -141,23 +154,8 @@
 
 ---
 
-### Libraries
-
-<div class="tiles">
-  {{tile(, numpy/index.html, /assets/2025-10-19-00-46-48.png)}}
-  {{tile(, formal/cs/programming/python/pandas/index.html, /assets/2025-10-05-12-17-07.png)}}
-  {{tile(, formal/cs/programming/python/skl/index.html, /assets/2025-10-05-12-16-08.png)}}
-  {{tile(, formal/cs/programming/python/keras/index.html, /assets/2025-10-05-12-21-55.png)}}
-  {{tile(Tensorflow, formal/cs/programming/python/tf/index.html, /assets/2025-10-05-12-11-41.png)}}
-  {{tile(Pytorch, formal/cs/programming/python/pytorch/index.html, /assets/2025-10-05-12-12-25.png)}}
-</div>
-
----
 
 
 ### Resources
 
-<div class="figrow"><figure data-marpit-fragment style="width:600px;">
-  <img src="https://img.youtube.com/vi/GfH4QL4VqJ0/0.jpg">
-  <figcaption>source: https://www.youtube.com/watch?v=GfH4QL4VqJ0 </figcaption>
-</figure></div>
+{{iph(youtube,https://www.youtube.com/watch?v=GfH4QL4VqJ0, https://img.youtube.com/vi/GfH4QL4VqJ0/0.jpg )}}

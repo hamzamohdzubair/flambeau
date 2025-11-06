@@ -92,7 +92,7 @@ section a:hover {
    ============================================ */
 marp-pre {
   padding: 10px 10px !important;
-  margin: 0 !important;
+  margin: 5px 0px !important;
 }
 
 section pre {
@@ -406,8 +406,7 @@ section.lead {
 }
 
 section.lead ul,
-section.lead ol,
-section.lead code {
+section.lead ol {
   text-align: left !important;
   align-self: flex-start !important;
   width: auto !important;

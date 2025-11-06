@@ -2,7 +2,7 @@
 
 <!-- _class: lead -->
 
-###### CS
+### CS
 
 <div class="tiles">
   {{tile(Programming, programming/index.html, /assets/2025-09-30-11-29-04.png)}}

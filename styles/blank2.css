@@ -90,6 +90,10 @@ section a:hover {
 /* ============================================
    CODE BLOCKS - Glassmorphism
    ============================================ */
+marp-pre {
+  padding: 10px 10px !important;
+  margin: 0 !important;
+}
 
 section pre {
   background: rgba(255, 255, 255, 0.3);
@@ -99,11 +103,13 @@ section pre {
   border-radius: 8px;
   padding: 1.5em;
   margin: 1em 0;
-  overflow: auto;
+  overflow: hidden;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.1),
     inset 0 0 20px rgba(102, 126, 234, 0.1);
   font-size: 1.25em;
+  width: 80%;
+  text-align: left;
 }
 
 section code {
@@ -296,7 +302,7 @@ figure:has(iframe) figcaption {
   align-items: center;
   justify-items: center;
   width: 100%;
-  margin: 0.3em auto;
+  margin: 0.4em auto;
 }
 
 .figrow figure {
@@ -323,7 +329,7 @@ figure:has(iframe) figcaption {
   overflow: hidden;
   white-space: nowrap;
   text-align: center;
-  font-size: 0.9em;
+  font-size: 0.7em;
   color: var(--text-secondary);
   margin-top: 0.5em;
 }
@@ -399,11 +405,14 @@ section.lead {
   margin: 0.5em 0;
 }
 
-.lead ul,
-.lead ol {
-  text-align: left;
-  align-self: flex-start;
-  width: 100%;
+section.lead ul,
+section.lead ol,
+section.lead code {
+  text-align: left !important;
+  align-self: flex-start !important;
+  width: auto !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
 }
 
 /* ============================================

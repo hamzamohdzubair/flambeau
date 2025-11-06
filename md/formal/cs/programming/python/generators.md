@@ -9,7 +9,7 @@
 ### Generator Function Basics
 
 ```python
-#ans: generator with yield
+# generator with yield
 def count_up_to(n):
     count = 1
     while count <= n:
@@ -25,7 +25,7 @@ for num in count_up_to(3):
 ### Yield vs Return
 
 ```python
-#ans: yield pauses function
+# yield pauses function
 def simple_gen():
     yield 1
     yield 2
@@ -42,7 +42,7 @@ next(gen)
 ### Generator is Iterator
 
 ```python
-#ans: generator is an iterator
+# generator is an iterator
 def my_gen():
     yield 1
     yield 2
@@ -61,7 +61,7 @@ list(gen)
 ### Infinite Generator
 
 ```python
-#ans: infinite sequence
+# infinite sequence
 def infinite_counter():
     count = 0
     while True:
@@ -81,7 +81,7 @@ for i, num in enumerate(counter):
 ### Generator with Condition
 
 ```python
-#ans: filter in generator
+# filter in generator
 def even_numbers(n):
     for i in range(n):
         if i % 2 == 0:
@@ -95,7 +95,7 @@ list(even_numbers(10))
 ### Yield From
 
 ```python
-#ans: delegate to another generator
+# delegate to another generator
 def generator1():
     yield 1
     yield 2

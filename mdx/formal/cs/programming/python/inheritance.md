@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Basic Inheritance
 
 ```python
-#ans: base class
+# base class
 class Animal:
     def speak(self):
         return "Some sound"
@@ -51,7 +51,7 @@ Dog().speak()
 ### Inheriting Attributes
 
 ```python
-#ans: inherit __init__
+# inherit __init__
 class Animal:
     def __init__(self, name):
         self.name = name
@@ -66,7 +66,7 @@ Dog("Rex").name
 ### Using super()
 
 ```python
-#ans: call parent __init__
+# call parent __init__
 class Animal:
     def __init__(self, name):
         self.name = name
@@ -83,7 +83,7 @@ Dog("Rex", "Lab").name
 ### Override Methods
 
 ```python
-#ans: override parent method
+# override parent method
 class Animal:
     def speak(self):
         return "Sound"
@@ -99,7 +99,7 @@ Dog().speak()
 ### Call Parent Method
 
 ```python
-#ans: call parent from child
+# call parent from child
 class Animal:
     def speak(self):
         return "Sound"

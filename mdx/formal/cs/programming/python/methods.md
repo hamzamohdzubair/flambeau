@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Instance Methods
 
 ```python
-#ans: instance method
+# instance method
 class Calculator:
     def add(self, a, b):
         return a + b
@@ -48,7 +48,7 @@ calc.add(5, 3)
 ### Class Methods
 
 ```python
-#ans: class method
+# class method
 class Dog:
     count = 0
     def __init__(self):
@@ -65,7 +65,7 @@ Dog().get_count()
 ### Static Methods
 
 ```python
-#ans: static method
+# static method
 class MathUtils:
     @staticmethod
     def add(a, b):
@@ -79,7 +79,7 @@ MathUtils.add(5, 3)
 ### Method with Self
 
 ```python
-#ans: self accesses instance
+# self accesses instance
 class Person:
     def __init__(self, name):
         self.name = name

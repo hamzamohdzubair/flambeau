@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Converting to Integer
 
 ```python
-#ans: string to int
+# string to int
 int("42")
 #ans: 42
 int("100")
@@ -51,7 +51,7 @@ int(9.99)
 ### Converting to Float
 
 ```python
-#ans: string to float
+# string to float
 float("3.14")
 #ans: 3.14
 #ans: int to float
@@ -66,7 +66,7 @@ float(0)
 ### Converting to String
 
 ```python
-#ans: int to string
+# int to string
 str(42)
 #ans: "42"
 #ans: float to string
@@ -82,7 +82,7 @@ str(True)
 ### Converting to Boolean
 
 ```python
-#ans: number to bool
+# number to bool
 bool(1)
 #ans: True
 bool(0)
@@ -101,7 +101,7 @@ bool("text")
 ### Boolean from Other Types
 
 ```python
-#ans: list to bool
+# list to bool
 bool([])
 #ans: False
 bool([1, 2])

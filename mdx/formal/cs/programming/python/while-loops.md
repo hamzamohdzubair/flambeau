@@ -27,14 +27,14 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
 <!-- _class: lead invert -->
 
-#ans: While Loops
+While Loops
 
 ---
 
 ### Basic While Loop
 
 ```python
-#ans: while condition is True
+# while condition is True
 count = 0
 while count < 5:
     print(count)
@@ -47,7 +47,7 @@ while count < 5:
 ### While with Countdown
 
 ```python
-#ans: countdown
+# countdown
 x = 3
 while x > 0:
     print(x)
@@ -60,7 +60,7 @@ while x > 0:
 ### While with Break
 
 ```python
-#ans: infinite loop with break
+# infinite loop with break
 x = 0
 while True:
     x += 1
@@ -74,7 +74,7 @@ while True:
 ### While with Increment
 
 ```python
-#ans: increment by different values
+# increment by different values
 x = 0
 while x < 10:
     x += 2

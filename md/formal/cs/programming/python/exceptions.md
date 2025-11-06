@@ -9,7 +9,7 @@
 ### Common Exceptions - ValueError
 
 ```python
-#ans: ValueError - invalid value
+# ValueError - invalid value
 try:
     int("abc")
 except ValueError:
@@ -21,7 +21,7 @@ except ValueError:
 ### Common Exceptions - TypeError
 
 ```python
-#ans: TypeError - wrong type
+# TypeError - wrong type
 try:
     "2" + 2
 except TypeError:
@@ -33,7 +33,7 @@ except TypeError:
 ### Common Exceptions - KeyError
 
 ```python
-#ans: KeyError - missing key
+# KeyError - missing key
 try:
     d = {"a": 1}
     value = d["b"]
@@ -46,7 +46,7 @@ except KeyError:
 ### Common Exceptions - IndexError
 
 ```python
-#ans: IndexError - invalid index
+# IndexError - invalid index
 try:
     lst = [1, 2, 3]
     value = lst[10]
@@ -59,7 +59,7 @@ except IndexError:
 ### Common Exceptions - AttributeError
 
 ```python
-#ans: AttributeError - no attribute
+# AttributeError - no attribute
 try:
     x = 5
     x.append(1)
@@ -72,7 +72,7 @@ except AttributeError:
 ### File Exceptions
 
 ```python
-#ans: FileNotFoundError
+# FileNotFoundError
 try:
     with open("missing.txt") as f:
         pass
@@ -91,7 +91,7 @@ except PermissionError:
 ### Raising Exceptions
 
 ```python
-#ans: raise an exception
+# raise an exception
 def validate_age(age):
     if age < 0:
         raise ValueError("Age cannot be negative")
@@ -103,7 +103,7 @@ def validate_age(age):
 ### Re-raising Exceptions
 
 ```python
-#ans: re-raise same exception
+# re-raise same exception
 try:
     result = 10 / 0
 except ZeroDivisionError:

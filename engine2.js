@@ -20,7 +20,13 @@ module.exports = ({ marp }) =>
         .split(/\n(?!$)/) // Don't split at the trailing newline
         .map((line, index) => {
           const fragmentIndex = index + 1
-          return `<li data-marpit-fragment="${fragmentIndex}"><span>${line}</span></li>`
+
+
+          // Detect answer lines
+          const isAnswerLine = line.includes('#ans:')
+          const dataAttrs = isAnswerLine ? ' data-answer="true"' : ''
+          return `<li data-marpit-fragment="${fragmentIndex}"${dataAttrs}><span>${line}</span></li>`
+          // return `<li data-marpit-fragment="${fragmentIndex}"><span>${line}</span></li>`
         })
 
       return `<ol>${listItems.join('')}</ol>`

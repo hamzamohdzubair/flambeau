@@ -9,7 +9,7 @@
 ### Open and Read
 
 ```python
-#ans: open and read file
+# open and read file
 file = open("data.txt", "r")
 content = file.read()
 file.close()
@@ -20,7 +20,7 @@ file.close()
 ### Context Manager (Best Practice)
 
 ```python
-#ans: with statement
+# with statement
 with open("data.txt", "r") as file:
     content = file.read()
 #ans: file automatically closed
@@ -31,7 +31,7 @@ with open("data.txt", "r") as file:
 ### Read Lines
 
 ```python
-#ans: read all lines
+# read all lines
 with open("data.txt", "r") as file:
     lines = file.readlines()
 #ans: returns list of lines
@@ -42,7 +42,7 @@ with open("data.txt", "r") as file:
 ### Read Line by Line
 
 ```python
-#ans: iterate over lines
+# iterate over lines
 with open("data.txt", "r") as file:
     for line in file:
         print(line.strip())
@@ -53,7 +53,7 @@ with open("data.txt", "r") as file:
 ### Readline Method
 
 ```python
-#ans: read one line at a time
+# read one line at a time
 with open("data.txt", "r") as file:
     line1 = file.readline()
     line2 = file.readline()
@@ -64,7 +64,7 @@ with open("data.txt", "r") as file:
 ### Read with Limit
 
 ```python
-#ans: read n characters
+# read n characters
 with open("data.txt", "r") as file:
     content = file.read(10)
 #ans: first 10 characters

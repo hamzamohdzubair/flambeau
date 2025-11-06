@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Default Parameters
 
 ```python
-#ans: parameter with default value
+# parameter with default value
 def greet(name="Guest"):
     print(f"Hello, {name}!")
 greet()
@@ -48,7 +48,7 @@ greet("Alice")
 ### Multiple Defaults
 
 ```python
-#ans: multiple default parameters
+# multiple default parameters
 def create_user(name, age=0, city="Unknown"):
     return f"{name}, {age}, {city}"
 result = create_user("Alice")
@@ -60,7 +60,7 @@ result = create_user("Alice")
 ### Keyword Arguments
 
 ```python
-#ans: call with keyword arguments
+# call with keyword arguments
 def describe(animal, name):
     print(f"{animal} named {name}")
 describe(name="Rex", animal="dog")
@@ -72,7 +72,7 @@ describe(name="Rex", animal="dog")
 ### Variable Arguments (*args)
 
 ```python
-#ans: accept any number of arguments
+# accept any number of arguments
 def sum_all(*numbers):
     return sum(numbers)
 result = sum_all(1, 2, 3, 4)
@@ -84,7 +84,7 @@ result = sum_all(1, 2, 3, 4)
 ### Keyword Variable Arguments (**kwargs)
 
 ```python
-#ans: accept any keyword arguments
+# accept any keyword arguments
 def print_info(**info):
     for key, value in info.items():
         print(f"{key}: {value}")

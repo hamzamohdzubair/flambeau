@@ -9,7 +9,7 @@
 ### Basic If
 
 ```python
-#ans: simple if
+# simple if
 x = 10
 if x > 5:
     print("x is greater than 5")
@@ -21,7 +21,7 @@ if x > 5:
 ### If-Else
 
 ```python
-#ans: if with else
+# if with else
 age = 18
 if age >= 18:
     print("Adult")
@@ -35,7 +35,7 @@ else:
 ### If-Elif-Else
 
 ```python
-#ans: multiple conditions
+# multiple conditions
 score = 85
 if score >= 90:
     print("A")
@@ -53,7 +53,7 @@ else:
 ### Nested If
 
 ```python
-#ans: if inside if
+# if inside if
 x = 15
 if x > 10:
     if x < 20:
@@ -66,7 +66,7 @@ if x > 10:
 ### Multiple Elif
 
 ```python
-#ans: many elif branches
+# many elif branches
 num = 3
 if num == 1:
     print("One")

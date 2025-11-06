@@ -9,7 +9,7 @@
 ### Simple Class
 
 ```python
-#ans: define class
+# define class
 class Dog:
     pass
 #ans: create object
@@ -21,7 +21,7 @@ my_dog = Dog()
 ### Class with __init__
 
 ```python
-#ans: constructor
+# constructor
 class Dog:
     def __init__(self, name, age):
         self.name = name
@@ -35,7 +35,7 @@ dog = Dog("Rex", 3)
 ### Instance Attributes
 
 ```python
-#ans: access attributes
+# access attributes
 class Dog:
     def __init__(self, name):
         self.name = name
@@ -51,7 +51,7 @@ dog.name = "Max"
 ### Instance Methods
 
 ```python
-#ans: methods
+# methods
 class Dog:
     def __init__(self, name):
         self.name = name
@@ -67,7 +67,7 @@ dog.bark()
 ### Class Variables
 
 ```python
-#ans: class variable (shared)
+# class variable (shared)
 class Dog:
     species = "Canis familiaris"
     def __init__(self, name):

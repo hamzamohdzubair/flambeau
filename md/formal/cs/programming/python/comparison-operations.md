@@ -9,7 +9,7 @@
 ### Equality
 
 ```python
-#ans: equal to
+# equal to
 5 == 5
 #ans: True
 5 == 3
@@ -23,7 +23,7 @@
 ### Inequality
 
 ```python
-#ans: not equal to
+# not equal to
 5 != 3
 #ans: True
 5 != 5
@@ -37,7 +37,7 @@
 ### Greater Than / Less Than
 
 ```python
-#ans: greater than
+# greater than
 5 > 3
 #ans: True
 3 > 5
@@ -54,7 +54,7 @@
 ### Greater/Less or Equal
 
 ```python
-#ans: greater or equal
+# greater or equal
 5 >= 5
 #ans: True
 5 >= 3
@@ -71,7 +71,7 @@
 ### Chained Comparisons
 
 ```python
-#ans: chain comparisons
+# chain comparisons
 3 < 5 < 7
 #ans: True (both conditions)
 1 < 2 < 3 < 4

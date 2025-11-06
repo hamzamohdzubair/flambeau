@@ -9,7 +9,7 @@
 ### Basic Try-Except
 
 ```python
-#ans: catch any exception
+# catch any exception
 try:
     result = 10 / 0
 except:
@@ -21,7 +21,7 @@ except:
 ### Specific Exception
 
 ```python
-#ans: catch specific exception
+# catch specific exception
 try:
     result = 10 / 0
 except ZeroDivisionError:
@@ -33,7 +33,7 @@ except ZeroDivisionError:
 ### Exception Object
 
 ```python
-#ans: access exception details
+# access exception details
 try:
     result = 10 / 0
 except ZeroDivisionError as e:
@@ -45,7 +45,7 @@ except ZeroDivisionError as e:
 ### Multiple Except Blocks
 
 ```python
-#ans: handle different exceptions
+# handle different exceptions
 try:
     value = int(input())
     result = 10 / value
@@ -60,7 +60,7 @@ except ZeroDivisionError:
 ### Catch Multiple Exceptions
 
 ```python
-#ans: one handler for multiple
+# one handler for multiple
 try:
     # code
     pass
@@ -73,7 +73,7 @@ except (ValueError, TypeError):
 ### Try-Except-Else
 
 ```python
-#ans: else runs if no exception
+# else runs if no exception
 try:
     result = 10 / 2
 except ZeroDivisionError:
@@ -87,7 +87,7 @@ else:
 ### Try-Except-Finally
 
 ```python
-#ans: finally always runs
+# finally always runs
 try:
     file = open("data.txt")
 except FileNotFoundError:

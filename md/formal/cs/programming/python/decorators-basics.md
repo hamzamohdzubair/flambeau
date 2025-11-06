@@ -9,7 +9,7 @@
 ### Basic Decorator
 
 ```python
-#ans: simple decorator
+# simple decorator
 def my_decorator(func):
     def wrapper():
         print("Before")
@@ -30,7 +30,7 @@ say_hello()
 ### Decorator with Arguments
 
 ```python
-#ans: decorator for functions with args
+# decorator for functions with args
 def my_decorator(func):
     def wrapper(*args, **kwargs):
         print("Before")
@@ -50,7 +50,7 @@ add(5, 3)
 ### Manual Decoration
 
 ```python
-#ans: without @ syntax
+# without @ syntax
 def greet():
     print("Hello")
 greet = my_decorator(greet)
@@ -63,7 +63,7 @@ greet = my_decorator(greet)
 
 ```python
 from functools import wraps
-#ans: preserve function info
+# preserve function info
 def my_decorator(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

@@ -35,7 +35,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
 ```python
 import os
-#ans: check if exists
+# check if exists
 os.path.exists("file.txt")
 #ans: True or False
 #ans: check if file
@@ -52,7 +52,7 @@ os.path.isdir("folder")
 
 ```python
 import os
-#ans: file size
+# file size
 os.path.getsize("file.txt")
 #ans: size in bytes
 #ans: absolute path
@@ -66,7 +66,7 @@ os.path.abspath("file.txt")
 
 ```python
 import os
-#ans: join paths
+# join paths
 os.path.join("folder", "file.txt")
 #ans: folder/file.txt
 #ans: works across platforms
@@ -78,7 +78,7 @@ os.path.join("folder", "file.txt")
 
 ```python
 import os
-#ans: directory name
+# directory name
 os.path.dirname("/path/to/file.txt")
 #ans: "/path/to"
 #ans: base name
@@ -95,7 +95,7 @@ os.path.splitext("file.txt")
 
 ```python
 from pathlib import Path
-#ans: create path object
+# create path object
 path = Path("file.txt")
 #ans: check exists
 path.exists()
@@ -111,7 +111,7 @@ content = path.read_text()
 ```python
 from pathlib import Path
 path = Path("/folder/file.txt")
-#ans: name
+# name
 path.name
 #ans: "file.txt"
 #ans: stem

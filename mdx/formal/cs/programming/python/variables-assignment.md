@@ -27,14 +27,14 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
 <!-- _class: lead invert -->
 
-#ans: Variables & Assignment
+## Variables & Assignment
 
 ---
 
 ### Basic Assignment
 
 ```python
-#ans: variable assignment
+#variable assignment
 x = 5
 #ans: x is 5
 name = "Alice"
@@ -48,7 +48,7 @@ pi = 3.14
 ### Multiple Assignment
 
 ```python
-#ans: assign multiple variables
+#assign multiple variables
 a, b, c = 1, 2, 3
 #ans: a=1, b=2, c=3
 # what are the values?
@@ -61,7 +61,7 @@ x, y = 10, 20
 ### Swapping Values
 
 ```python
-#ans: traditional swap needs temp variable
+# traditional swap needs temp variable
 x, y = 5, 10
 temp = x
 x = y
@@ -78,7 +78,7 @@ x, y = y, x
 ### Chained Assignment
 
 ```python
-#ans: assign same value to multiple variables
+# assign same value to multiple variables
 x = y = z = 0
 #ans: x=0, y=0, z=0
 a = b = c = "same"

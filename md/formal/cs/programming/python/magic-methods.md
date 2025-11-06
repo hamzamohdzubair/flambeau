@@ -9,7 +9,7 @@
 ### __str__ and __repr__
 
 ```python
-#ans: string representation
+# string representation
 class Point:
     def __init__(self, x, y):
         self.x = x
@@ -27,7 +27,7 @@ print(Point(3, 4))
 ### __len__
 
 ```python
-#ans: len() support
+# len() support
 class MyList:
     def __init__(self, items):
         self.items = items
@@ -42,7 +42,7 @@ len(MyList([1, 2, 3]))
 ### __getitem__ and __setitem__
 
 ```python
-#ans: indexing support
+# indexing support
 class MyList:
     def __init__(self):
         self.items = []
@@ -61,7 +61,7 @@ ml[0]
 ### __add__ and __sub__
 
 ```python
-#ans: operator overloading
+# operator overloading
 class Vector:
     def __init__(self, x):
         self.x = x
@@ -76,7 +76,7 @@ Vector(5) + Vector(3)
 ### __eq__ and __lt__
 
 ```python
-#ans: comparison operators
+# comparison operators
 class Point:
     def __init__(self, x):
         self.x = x

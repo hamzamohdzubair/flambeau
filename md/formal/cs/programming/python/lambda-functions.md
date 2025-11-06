@@ -9,7 +9,7 @@
 ### Basic Lambda
 
 ```python
-#ans: lambda syntax
+# lambda syntax
 square = lambda x: x ** 2
 result = square(5)
 #ans: 25
@@ -20,7 +20,7 @@ result = square(5)
 ### Lambda with Multiple Parameters
 
 ```python
-#ans: multiple parameters
+# multiple parameters
 add = lambda x, y: x + y
 result = add(3, 4)
 #ans: 7
@@ -31,7 +31,7 @@ result = add(3, 4)
 ### Lambda in Sorted
 
 ```python
-#ans: lambda as key function
+# lambda as key function
 pairs = [(1, 'one'), (3, 'three'), (2, 'two')]
 sorted_pairs = sorted(pairs, key=lambda pair: pair[1])
 #ans: [(1, 'one'), (3, 'three'), (2, 'two')]
@@ -42,7 +42,7 @@ sorted_pairs = sorted(pairs, key=lambda pair: pair[1])
 ### Lambda in Map
 
 ```python
-#ans: lambda with map
+# lambda with map
 numbers = [1, 2, 3, 4, 5]
 squared = list(map(lambda x: x ** 2, numbers))
 #ans: [1, 4, 9, 16, 25]
@@ -53,7 +53,7 @@ squared = list(map(lambda x: x ** 2, numbers))
 ### Lambda in Filter
 
 ```python
-#ans: lambda with filter
+# lambda with filter
 numbers = [1, 2, 3, 4, 5]
 evens = list(filter(lambda x: x % 2 == 0, numbers))
 #ans: [2, 4]

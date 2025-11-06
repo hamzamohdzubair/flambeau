@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Simple Custom Exception
 
 ```python
-#ans: define custom exception
+# define custom exception
 class CustomError(Exception):
     pass
 #ans: raise it
@@ -46,7 +46,7 @@ raise CustomError("Something went wrong")
 ### Exception with Attributes
 
 ```python
-#ans: exception with data
+# exception with data
 class ValidationError(Exception):
     def __init__(self, field, message):
         self.field = field
@@ -59,7 +59,7 @@ class ValidationError(Exception):
 ### Using Custom Exception
 
 ```python
-#ans: raise custom exception
+# raise custom exception
 try:
     raise ValidationError("email", "Invalid format")
 except ValidationError as e:
@@ -72,7 +72,7 @@ except ValidationError as e:
 ### Exception Hierarchy
 
 ```python
-#ans: base exception
+# base exception
 class DatabaseError(Exception):
     pass
 #ans: specific exceptions

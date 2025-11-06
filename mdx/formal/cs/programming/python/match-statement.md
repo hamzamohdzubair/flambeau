@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Basic Match
 
 ```python
-#ans: match-case statement
+# match-case statement
 command = "start"
 match command:
     case "start":
@@ -51,7 +51,7 @@ match command:
 ### Match with Or Pattern
 
 ```python
-#ans: multiple values
+# multiple values
 status_code = 201
 match status_code:
     case 200 | 201:
@@ -68,7 +68,7 @@ match status_code:
 ### Match with Default
 
 ```python
-#ans: underscore is wildcard
+# underscore is wildcard
 x = 100
 match x:
     case 1:
@@ -85,7 +85,7 @@ match x:
 ### Match Without Default
 
 ```python
-#ans: no match, no output
+# no match, no output
 x = 5
 match x:
     case 1:

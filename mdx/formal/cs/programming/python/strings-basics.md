@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Creating Strings
 
 ```python
-#ans: string creation
+# string creation
 text = "Hello"
 text2 = 'World'
 multiline = """This is
@@ -47,7 +47,7 @@ string"""
 ### String Indexing
 
 ```python
-#ans: access characters
+# access characters
 text = "Hello"
 text[0]
 #ans: 'H'
@@ -62,7 +62,7 @@ text[1]
 ### String Slicing
 
 ```python
-#ans: slice strings
+# slice strings
 text = "Hello, World!"
 text[0:5]
 #ans: 'Hello'
@@ -77,7 +77,7 @@ text[:5]
 ### String Concatenation
 
 ```python
-#ans: combine strings
+# combine strings
 "Hello" + " " + "World"
 #ans: "Hello World"
 greeting = "Hello"
@@ -91,7 +91,7 @@ greeting + ", " + name
 ### String Repetition
 
 ```python
-#ans: repeat strings
+# repeat strings
 "Ha" * 3
 #ans: "HaHaHa"
 "=" * 10
@@ -103,7 +103,7 @@ greeting + ", " + name
 ### String Length
 
 ```python
-#ans: get length
+# get length
 len("Hello")
 #ans: 5
 len("")

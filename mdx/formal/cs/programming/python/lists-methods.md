@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Append
 
 ```python
-#ans: add to end
+# add to end
 fruits = ["apple", "banana"]
 fruits.append("cherry")
 #ans: ["apple", "banana", "cherry"]
@@ -45,7 +45,7 @@ fruits.append("cherry")
 ### Insert
 
 ```python
-#ans: insert at index
+# insert at index
 fruits = ["apple", "cherry"]
 fruits.insert(1, "banana")
 #ans: ["apple", "banana", "cherry"]
@@ -56,7 +56,7 @@ fruits.insert(1, "banana")
 ### Extend
 
 ```python
-#ans: add multiple items
+# add multiple items
 fruits = ["apple"]
 fruits.extend(["banana", "cherry"])
 #ans: ["apple", "banana", "cherry"]
@@ -67,7 +67,7 @@ fruits.extend(["banana", "cherry"])
 ### Remove
 
 ```python
-#ans: remove by value
+# remove by value
 fruits = ["apple", "banana", "cherry"]
 fruits.remove("banana")
 #ans: ["apple", "cherry"]
@@ -78,7 +78,7 @@ fruits.remove("banana")
 ### Pop
 
 ```python
-#ans: remove and return
+# remove and return
 fruits = ["apple", "banana", "cherry"]
 last = fruits.pop()
 #ans: last is "cherry"
@@ -92,7 +92,7 @@ first = fruits.pop(0)
 ### Sort
 
 ```python
-#ans: sort in place
+# sort in place
 numbers = [3, 1, 4, 1, 5]
 numbers.sort()
 #ans: [1, 1, 3, 4, 5]
@@ -105,7 +105,7 @@ numbers.sort(reverse=True)
 ### Reverse
 
 ```python
-#ans: reverse in place
+# reverse in place
 lst = [1, 2, 3]
 lst.reverse()
 #ans: [3, 2, 1]
@@ -116,7 +116,7 @@ lst.reverse()
 ### Count
 
 ```python
-#ans: count occurrences
+# count occurrences
 numbers = [1, 2, 3, 2, 4, 2]
 numbers.count(2)
 #ans: 3
@@ -127,7 +127,7 @@ numbers.count(2)
 ### Index
 
 ```python
-#ans: find index
+# find index
 fruits = ["apple", "banana", "cherry"]
 fruits.index("banana")
 #ans: 1
@@ -138,7 +138,7 @@ fruits.index("banana")
 ### Clear
 
 ```python
-#ans: remove all
+# remove all
 fruits = ["apple", "banana"]
 fruits.clear()
 #ans: []

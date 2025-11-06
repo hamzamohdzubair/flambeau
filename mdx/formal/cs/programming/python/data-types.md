@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Integer Type
 
 ```python
-#ans: integer
+# integer
 age = 25
 type(age)
 #ans: <class 'int'>
@@ -49,7 +49,7 @@ big_num = 1000000
 ### Float Type
 
 ```python
-#ans: float
+# float
 price = 19.99
 type(price)
 #ans: <class 'float'>
@@ -64,7 +64,7 @@ negative = -5.5
 ### String Type
 
 ```python
-#ans: string
+# string
 message = "Hello"
 type(message)
 #ans: <class 'str'>
@@ -80,7 +80,7 @@ line"""
 ### Boolean Type
 
 ```python
-#ans: boolean
+# boolean
 is_valid = True
 type(is_valid)
 #ans: <class 'bool'>
@@ -93,7 +93,7 @@ is_empty = False
 ### NoneType
 
 ```python
-#ans: None type
+# None type
 x = None
 type(x)
 #ans: <class 'NoneType'>
@@ -107,7 +107,7 @@ result = None
 ### Checking Types
 
 ```python
-#ans: type() function
+# type() function
 x = 5
 type(x)
 #ans: <class 'int'>

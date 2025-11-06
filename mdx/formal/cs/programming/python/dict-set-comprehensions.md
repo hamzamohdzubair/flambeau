@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Dict Comprehension Basic
 
 ```python
-#ans: basic dict comprehension
+# basic dict comprehension
 squares = {x: x**2 for x in range(5)}
 #ans: {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
 ```
@@ -44,7 +44,7 @@ squares = {x: x**2 for x in range(5)}
 ### Dict from Two Lists
 
 ```python
-#ans: zip two lists
+# zip two lists
 keys = ["a", "b", "c"]
 values = [1, 2, 3]
 d = {k: v for k, v in zip(keys, values)}
@@ -56,7 +56,7 @@ d = {k: v for k, v in zip(keys, values)}
 ### Dict with Condition
 
 ```python
-#ans: filter dict
+# filter dict
 numbers = range(10)
 even_squares = {x: x**2 for x in numbers
                         if x % 2 == 0}
@@ -68,7 +68,7 @@ even_squares = {x: x**2 for x in numbers
 ### Swap Keys and Values
 
 ```python
-#ans: swap dict
+# swap dict
 original = {"a": 1, "b": 2}
 swapped = {v: k for k, v in original.items()}
 #ans: {1: 'a', 2: 'b'}
@@ -79,7 +79,7 @@ swapped = {v: k for k, v in original.items()}
 ### Set Comprehension Basic
 
 ```python
-#ans: basic set comprehension
+# basic set comprehension
 squares = {x**2 for x in range(5)}
 #ans: {0, 1, 4, 9, 16}
 ```
@@ -89,7 +89,7 @@ squares = {x**2 for x in range(5)}
 ### Set Removes Duplicates
 
 ```python
-#ans: auto-removes duplicates
+# auto-removes duplicates
 numbers = [1, 2, 2, 3, 3, 3]
 unique = {x for x in numbers}
 #ans: {1, 2, 3}
@@ -100,7 +100,7 @@ unique = {x for x in numbers}
 ### Set with Condition
 
 ```python
-#ans: filter set
+# filter set
 evens = {x for x in range(10) if x % 2 == 0}
 #ans: {0, 2, 4, 6, 8}
 ```

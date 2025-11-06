@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### For-Else Basics
 
 ```python
-#ans: else runs if no break
+# else runs if no break
 for i in range(5):
     if i == 10:
         break
@@ -48,7 +48,7 @@ else:
 ### While-Else Basics
 
 ```python
-#ans: else runs after while completes
+# else runs after while completes
 count = 0
 while count < 3:
     print(count)
@@ -63,7 +63,7 @@ else:
 ### Break Prevents Else
 
 ```python
-#ans: break prevents else from running
+# break prevents else from running
 for i in range(5):
     if i == 3:
         break
@@ -77,7 +77,7 @@ else:
 ### Empty Loop with Else
 
 ```python
-#ans: else runs even if loop is empty
+# else runs even if loop is empty
 for i in range(0):
     pass
 else:

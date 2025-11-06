@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Variables and Assignment
 
 ```python
-#ans: variable assignment
+# variable assignment
 x = 5
 name = "Alice"
 pi = 3.14
@@ -104,7 +104,7 @@ y = (x := x + 1)
 ### Data Types
 
 ```python
-#ans: integer
+# integer
 age = 25
 type(age)
 #ans: <class 'int'>
@@ -175,7 +175,7 @@ x = bool([])
 ### Basic Operations
 
 ```python
-#ans: arithmetic operations
+# arithmetic operations
 10 + 5
 #ans: 15
 10 - 5
@@ -256,7 +256,7 @@ a is b
 ### Logical Operations
 
 ```python
-#ans: logical operators
+# logical operators
 True and False
 #ans: False
 True or False
@@ -323,7 +323,7 @@ not True or not False
 ### Type Conversion
 
 ```python
-#ans: to integer
+# to integer
 int("42")
 #ans: 42
 int(3.14)
@@ -402,7 +402,7 @@ int("FF", 16)
 ### User Input and Output
 
 ```python
-#ans: output
+# output
 print("Hello, World!")
 #ans: Hello, World!
 print("Age:", 25)
@@ -467,7 +467,7 @@ x = print("Hello")
 ### Comments
 
 ```python
-#ans: this is a single line comment
+# this is a single line comment
 """
 This is a
 multi-line comment

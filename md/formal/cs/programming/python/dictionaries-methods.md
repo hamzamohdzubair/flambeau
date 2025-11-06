@@ -9,7 +9,7 @@
 ### Update
 
 ```python
-#ans: update multiple items
+# update multiple items
 person = {"name": "Alice"}
 person.update({"age": 25, "city": "NYC"})
 #ans: {"name": "Alice", "age": 25, "city": "NYC"}
@@ -20,7 +20,7 @@ person.update({"age": 25, "city": "NYC"})
 ### Pop
 
 ```python
-#ans: remove and return value
+# remove and return value
 person = {"name": "Alice", "age": 25}
 age = person.pop("age")
 #ans: age is 25
@@ -32,7 +32,7 @@ age = person.pop("age")
 ### Popitem
 
 ```python
-#ans: remove and return last item
+# remove and return last item
 person = {"name": "Alice", "age": 25}
 item = person.popitem()
 #ans: item is ("age", 25)
@@ -43,7 +43,7 @@ item = person.popitem()
 ### Setdefault
 
 ```python
-#ans: get or set default
+# get or set default
 person = {"name": "Alice"}
 age = person.setdefault("age", 0)
 #ans: age is 0
@@ -55,7 +55,7 @@ age = person.setdefault("age", 0)
 ### Clear
 
 ```python
-#ans: remove all items
+# remove all items
 person = {"name": "Alice", "age": 25}
 person.clear()
 #ans: {}
@@ -66,7 +66,7 @@ person.clear()
 ### Copy
 
 ```python
-#ans: shallow copy
+# shallow copy
 person = {"name": "Alice"}
 person_copy = person.copy()
 #ans: person_copy is {"name": "Alice"}
@@ -77,7 +77,7 @@ person_copy = person.copy()
 ### Fromkeys
 
 ```python
-#ans: create dict from keys
+# create dict from keys
 keys = ["a", "b", "c"]
 d = dict.fromkeys(keys, 0)
 #ans: {"a": 0, "b": 0, "c": 0}

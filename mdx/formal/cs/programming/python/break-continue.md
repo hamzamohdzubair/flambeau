@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Break Statement
 
 ```python
-#ans: break exits the loop
+# break exits the loop
 for i in range(10):
     if i == 5:
         break
@@ -47,7 +47,7 @@ for i in range(10):
 ### Continue Statement
 
 ```python
-#ans: continue skips current iteration
+# continue skips current iteration
 for i in range(5):
     if i == 2:
         continue
@@ -60,7 +60,7 @@ for i in range(5):
 ### Break in While
 
 ```python
-#ans: break in while loop
+# break in while loop
 count = 0
 while True:
     count += 1
@@ -74,7 +74,7 @@ while True:
 ### Continue in While
 
 ```python
-#ans: continue in while
+# continue in while
 x = 0
 while x < 5:
     x += 1
@@ -89,7 +89,7 @@ while x < 5:
 ### Break in Nested Loop
 
 ```python
-#ans: break only exits inner loop
+# break only exits inner loop
 for i in range(3):
     for j in range(3):
         if j == 1:

@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Decorator with Parameters
 
 ```python
-#ans: decorator factory
+# decorator factory
 def repeat(times):
     def decorator(func):
         def wrapper(*args):
@@ -56,7 +56,7 @@ greet()
 
 ```python
 import time
-#ans: measure execution time
+# measure execution time
 def timer(func):
     def wrapper(*args, **kwargs):
         start = time.time()
@@ -76,7 +76,7 @@ def slow():
 
 ```python
 from functools import wraps
-#ans: simple cache
+# simple cache
 def cache(func):
     cached = {}
     @wraps(func)
@@ -99,7 +99,7 @@ def fibonacci(n):
 ### Authentication Decorator
 
 ```python
-#ans: check permission
+# check permission
 def require_auth(func):
     def wrapper(*args, **kwargs):
         if not is_authenticated():

@@ -9,7 +9,7 @@
 ### Basic Arithmetic
 
 ```python
-#ans: addition
+# addition
 10 + 5
 #ans: 15
 #ans: subtraction
@@ -25,7 +25,7 @@
 ### Division Operations
 
 ```python
-#ans: division (always returns float)
+# division (always returns float)
 10 / 5
 #ans: 2.0
 10 / 3
@@ -40,7 +40,7 @@
 ### Modulus
 
 ```python
-#ans: modulus (remainder)
+# modulus (remainder)
 10 % 3
 #ans: 1
 7 % 3
@@ -54,7 +54,7 @@
 ### Exponentiation
 
 ```python
-#ans: power/exponentiation
+# power/exponentiation
 10 ** 2
 #ans: 100
 2 ** 3
@@ -68,7 +68,7 @@
 ### Operator Precedence
 
 ```python
-#ans: PEMDAS rules apply
+# PEMDAS rules apply
 10 + 5 * 2
 #ans: 20 (multiply first)
 (10 + 5) * 2

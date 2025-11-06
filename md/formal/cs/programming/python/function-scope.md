@@ -9,7 +9,7 @@
 ### Global Scope
 
 ```python
-#ans: global variable
+# global variable
 x = 10
 def func():
     print(x)
@@ -22,7 +22,7 @@ func()
 ### Local Scope
 
 ```python
-#ans: local variable
+# local variable
 def func():
     y = 20
     print(y)
@@ -35,7 +35,7 @@ func()
 ### Global Keyword
 
 ```python
-#ans: modify global variable
+# modify global variable
 count = 0
 def increment():
     global count
@@ -49,7 +49,7 @@ increment()
 ### Nonlocal Keyword
 
 ```python
-#ans: modify enclosing scope
+# modify enclosing scope
 def outer():
     x = 10
     def inner():
@@ -66,7 +66,7 @@ result = outer()
 ### Shadowing
 
 ```python
-#ans: local shadows global
+# local shadows global
 x = 10
 def func():
     x = 5

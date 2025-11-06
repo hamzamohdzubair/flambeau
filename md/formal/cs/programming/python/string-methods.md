@@ -9,7 +9,7 @@
 ### Case Methods
 
 ```python
-#ans: upper and lower
+# upper and lower
 "hello".upper()
 #ans: "HELLO"
 "HELLO".lower()
@@ -25,7 +25,7 @@
 ### Strip Methods
 
 ```python
-#ans: remove whitespace
+# remove whitespace
 "  hello  ".strip()
 #ans: "hello"
 "  hello  ".lstrip()
@@ -39,7 +39,7 @@
 ### Split
 
 ```python
-#ans: split string
+# split string
 "apple,banana,cherry".split(",")
 #ans: ['apple', 'banana', 'cherry']
 "one two three".split()
@@ -51,7 +51,7 @@
 ### Join
 
 ```python
-#ans: join list to string
+# join list to string
 ",".join(["a", "b", "c"])
 #ans: "a,b,c"
 " ".join(["Hello", "World"])
@@ -63,7 +63,7 @@
 ### Find and Index
 
 ```python
-#ans: find substring
+# find substring
 "hello world".find("world")
 #ans: 6
 "hello world".find("xyz")
@@ -77,7 +77,7 @@
 ### Replace
 
 ```python
-#ans: replace substring
+# replace substring
 "hello world".replace("world", "Python")
 #ans: "hello Python"
 "aaa".replace("a", "b", 2)
@@ -89,7 +89,7 @@
 ### Startswith/Endswith
 
 ```python
-#ans: check start and end
+# check start and end
 "hello".startswith("he")
 #ans: True
 "hello".endswith("lo")
@@ -101,7 +101,7 @@
 ### Count
 
 ```python
-#ans: count occurrences
+# count occurrences
 "hello".count("l")
 #ans: 2
 "banana".count("a")

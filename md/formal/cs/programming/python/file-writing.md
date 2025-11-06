@@ -9,7 +9,7 @@
 ### Write Mode
 
 ```python
-#ans: write to file (overwrites)
+# write to file (overwrites)
 with open("output.txt", "w") as file:
     file.write("Hello, World!")
 ```
@@ -19,7 +19,7 @@ with open("output.txt", "w") as file:
 ### Write Multiple Lines
 
 ```python
-#ans: write several lines
+# write several lines
 with open("output.txt", "w") as file:
     file.write("Line 1\n")
     file.write("Line 2\n")
@@ -31,7 +31,7 @@ with open("output.txt", "w") as file:
 ### Writelines
 
 ```python
-#ans: write list of lines
+# write list of lines
 lines = ["Line 1\n", "Line 2\n", "Line 3\n"]
 with open("output.txt", "w") as file:
     file.writelines(lines)
@@ -42,7 +42,7 @@ with open("output.txt", "w") as file:
 ### Append Mode
 
 ```python
-#ans: append to existing file
+# append to existing file
 with open("output.txt", "a") as file:
     file.write("Appended line\n")
 ```
@@ -52,7 +52,7 @@ with open("output.txt", "a") as file:
 ### Write Returns Count
 
 ```python
-#ans: write returns character count
+# write returns character count
 with open("output.txt", "w") as file:
     count = file.write("Hello")
 #ans: count is 5

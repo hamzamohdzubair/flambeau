@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Simple Function
 
 ```python
-#ans: define and call function
+# define and call function
 def greet():
     print("Hello!")
 greet()
@@ -46,7 +46,7 @@ greet()
 ### Function with Parameter
 
 ```python
-#ans: function with one parameter
+# function with one parameter
 def greet_person(name):
     print(f"Hello, {name}!")
 greet_person("Alice")
@@ -58,7 +58,7 @@ greet_person("Alice")
 ### Function with Multiple Parameters
 
 ```python
-#ans: multiple parameters
+# multiple parameters
 def add(a, b):
     return a + b
 result = add(5, 3)
@@ -70,7 +70,7 @@ result = add(5, 3)
 ### Function with Return
 
 ```python
-#ans: return value
+# return value
 def square(x):
     return x ** 2
 result = square(5)
@@ -82,7 +82,7 @@ result = square(5)
 ### Function Without Return
 
 ```python
-#ans: no return (returns None)
+# no return (returns None)
 def print_message(msg):
     print(msg)
 result = print_message("Hi")

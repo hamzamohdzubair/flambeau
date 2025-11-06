@@ -9,7 +9,7 @@
 ### Property Decorator
 
 ```python
-#ans: @property for getter
+# @property for getter
 class Circle:
     def __init__(self, radius):
         self._radius = radius
@@ -25,7 +25,7 @@ Circle(5).radius
 ### Property Setter
 
 ```python
-#ans: @property.setter
+# @property.setter
 class Circle:
     def __init__(self, radius):
         self._radius = radius
@@ -44,7 +44,7 @@ class Circle:
 ### Computed Property
 
 ```python
-#ans: property with calculation
+# property with calculation
 class Circle:
     def __init__(self, radius):
         self._radius = radius
@@ -60,7 +60,7 @@ Circle(5).area
 ### Read-Only Property
 
 ```python
-#ans: property without setter
+# property without setter
 class Person:
     def __init__(self, name):
         self._name = name
@@ -76,7 +76,7 @@ person = Person("Alice")
 ### Property Deleter
 
 ```python
-#ans: @property.deleter
+# @property.deleter
 class Person:
     def __init__(self, name):
         self._name = name

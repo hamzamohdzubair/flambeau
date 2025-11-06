@@ -9,7 +9,7 @@
 ### Pass in If
 
 ```python
-#ans: placeholder for empty block
+# placeholder for empty block
 if True:
     pass
 #ans: nothing happens
@@ -20,7 +20,7 @@ if True:
 ### Pass in Function
 
 ```python
-#ans: empty function
+# empty function
 def my_function():
     pass
 #ans: function does nothing
@@ -31,7 +31,7 @@ def my_function():
 ### Pass in Class
 
 ```python
-#ans: empty class
+# empty class
 class MyClass:
     pass
 #ans: empty class definition
@@ -42,7 +42,7 @@ class MyClass:
 ### Pass in Loop
 
 ```python
-#ans: pass in loop
+# pass in loop
 for i in range(3):
     pass
 #ans: loop runs 3 times, does nothing
@@ -53,7 +53,7 @@ for i in range(3):
 ### Multiple Pass
 
 ```python
-#ans: multiple pass statements
+# multiple pass statements
 if True:
     pass
     pass

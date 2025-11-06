@@ -9,7 +9,7 @@
 ### Basic List Comprehension
 
 ```python
-#ans: basic comprehension
+# basic comprehension
 squares = [x**2 for x in range(5)]
 #ans: [0, 1, 4, 9, 16]
 ```
@@ -19,7 +19,7 @@ squares = [x**2 for x in range(5)]
 ### With Transformation
 
 ```python
-#ans: transform items
+# transform items
 words = ["hello", "world"]
 upper = [word.upper() for word in words]
 #ans: ['HELLO', 'WORLD']
@@ -30,7 +30,7 @@ upper = [word.upper() for word in words]
 ### With Condition (Filter)
 
 ```python
-#ans: filter with condition
+# filter with condition
 evens = [x for x in range(10) if x % 2 == 0]
 #ans: [0, 2, 4, 6, 8]
 ```
@@ -40,7 +40,7 @@ evens = [x for x in range(10) if x % 2 == 0]
 ### Multiple Conditions
 
 ```python
-#ans: multiple filters
+# multiple filters
 numbers = [x for x in range(20)
            if x % 2 == 0
            if x % 3 == 0]
@@ -52,7 +52,7 @@ numbers = [x for x in range(20)
 ### If-Else Expression
 
 ```python
-#ans: if-else (not filter)
+# if-else (not filter)
 result = ["even" if x % 2 == 0 else "odd"
           for x in range(5)]
 #ans: ['even', 'odd', 'even', 'odd', 'even']
@@ -63,7 +63,7 @@ result = ["even" if x % 2 == 0 else "odd"
 ### Nested Loops
 
 ```python
-#ans: nested loops
+# nested loops
 pairs = [(x, y) for x in range(3)
                 for y in range(2)]
 #ans: [(0,0), (0,1), (1,0), (1,1), (2,0), (2,1)]
@@ -74,7 +74,7 @@ pairs = [(x, y) for x in range(3)
 ### Flatten Nested List
 
 ```python
-#ans: flatten
+# flatten
 nested = [[1, 2], [3, 4], [5, 6]]
 flat = [item for sublist in nested
              for item in sublist]

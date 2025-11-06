@@ -9,7 +9,7 @@
 ### Basic Print
 
 ```python
-#ans: simple print
+# simple print
 print("Hello, World!")
 #ans: Hello, World!
 print("Python")
@@ -21,7 +21,7 @@ print("Python")
 ### Print Multiple Values
 
 ```python
-#ans: multiple arguments
+# multiple arguments
 print("Age:", 25)
 #ans: Age: 25
 print("Name:", "Alice", "Score:", 95)
@@ -33,7 +33,7 @@ print("Name:", "Alice", "Score:", 95)
 ### Print Separator
 
 ```python
-#ans: custom separator
+# custom separator
 print("a", "b", "c", sep="-")
 #ans: a-b-c
 print(1, 2, 3, sep=" | ")
@@ -45,7 +45,7 @@ print(1, 2, 3, sep=" | ")
 ### Print End Character
 
 ```python
-#ans: custom end character
+# custom end character
 print("Hello", end="")
 print("World")
 #ans: HelloWorld
@@ -59,7 +59,7 @@ print("Line2")
 ### Print Expressions
 
 ```python
-#ans: print with expression
+# print with expression
 print(5 + 3)
 #ans: 8
 x = 10

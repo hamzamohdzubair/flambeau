@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Creating Lists
 
 ```python
-#ans: create list
+# create list
 fruits = ["apple", "banana", "cherry"]
 numbers = [1, 2, 3, 4, 5]
 mixed = [1, "two", 3.0, True]
@@ -46,7 +46,7 @@ empty = []
 ### Accessing Elements
 
 ```python
-#ans: indexing
+# indexing
 fruits = ["apple", "banana", "cherry"]
 fruits[0]
 #ans: "apple"
@@ -61,7 +61,7 @@ fruits[1]
 ### Slicing
 
 ```python
-#ans: slice lists
+# slice lists
 numbers = [0, 1, 2, 3, 4, 5]
 numbers[1:4]
 #ans: [1, 2, 3]
@@ -76,7 +76,7 @@ numbers[3:]
 ### List Length
 
 ```python
-#ans: len() function
+# len() function
 fruits = ["apple", "banana", "cherry"]
 len(fruits)
 #ans: 3
@@ -89,7 +89,7 @@ len([])
 ### Modifying Elements
 
 ```python
-#ans: change element
+# change element
 fruits = ["apple", "banana", "cherry"]
 fruits[1] = "blueberry"
 #ans: fruits is ["apple", "blueberry", "cherry"]

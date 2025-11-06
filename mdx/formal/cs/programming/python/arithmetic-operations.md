@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Basic Arithmetic
 
 ```python
-#ans: addition
+# addition
 10 + 5
 #ans: 15
 #ans: subtraction
@@ -50,7 +50,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Division Operations
 
 ```python
-#ans: division (always returns float)
+# division (always returns float)
 10 / 5
 #ans: 2.0
 10 / 3
@@ -65,7 +65,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Modulus
 
 ```python
-#ans: modulus (remainder)
+# modulus (remainder)
 10 % 3
 #ans: 1
 7 % 3
@@ -79,7 +79,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Exponentiation
 
 ```python
-#ans: power/exponentiation
+# power/exponentiation
 10 ** 2
 #ans: 100
 2 ** 3
@@ -93,7 +93,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Operator Precedence
 
 ```python
-#ans: PEMDAS rules apply
+# PEMDAS rules apply
 10 + 5 * 2
 #ans: 20 (multiply first)
 (10 + 5) * 2

@@ -331,3 +331,16 @@ ol li::marker {
   font-size: 0.8em; /* Slightly smaller than main text */
   font-family: Menlo, Consolas, "Courier New", monospace;
 }
+
+/* Answer lines - stronger blur when inactive so you can identify them */
+li[data-answer="true"][data-bespoke-marp-fragment="inactive"] {
+  filter: blur(7px) !important;
+  opacity: 0.15 !important;
+  background-color: rgba(250, 160, 160, 0.95); /* subtle green tint */
+}
+
+/* Answer lines - normal display when active */
+li[data-answer="true"][data-bespoke-marp-fragment="active"] {
+  filter: none !important;
+  opacity: 1 !important;
+}

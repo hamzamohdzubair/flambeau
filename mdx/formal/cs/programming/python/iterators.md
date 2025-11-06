@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Iterator Protocol
 
 ```python
-#ans: get iterator
+# get iterator
 numbers = [1, 2, 3]
 iterator = iter(numbers)
 #ans: call next
@@ -52,7 +52,7 @@ next(iterator)
 ### For Loop Uses Iterators
 
 ```python
-#ans: for loop = iterator protocol
+# for loop = iterator protocol
 for num in [1, 2, 3]:
     print(num)
 #ans: equivalent to:
@@ -70,7 +70,7 @@ while True:
 ### Custom Iterator
 
 ```python
-#ans: iterator class
+# iterator class
 class Counter:
     def __init__(self, start, end):
         self.current = start
@@ -92,7 +92,7 @@ for num in Counter(0, 3):
 ### Iterable vs Iterator
 
 ```python
-#ans: iterable: has __iter__()
+# iterable: has __iter__()
 #ans: iterator: has __iter__() and __next__()
 #ans: list is iterable but not iterator
 numbers = [1, 2, 3]

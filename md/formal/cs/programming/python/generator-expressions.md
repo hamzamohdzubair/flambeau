@@ -9,7 +9,7 @@
 ### Basic Generator Expression
 
 ```python
-#ans: generator expression (lazy)
+# generator expression (lazy)
 gen = (x**2 for x in range(5))
 #ans: <generator object>
 list(gen)
@@ -21,7 +21,7 @@ list(gen)
 ### Generator vs List
 
 ```python
-#ans: list - all in memory
+# list - all in memory
 lst = [x**2 for x in range(1000)]
 #ans: generator - on demand
 gen = (x**2 for x in range(1000))
@@ -32,7 +32,7 @@ gen = (x**2 for x in range(1000))
 ### Iterating Generator
 
 ```python
-#ans: iterate once
+# iterate once
 gen = (x for x in range(3))
 for val in gen:
     print(val)
@@ -48,7 +48,7 @@ for val in gen:
 ### Generator in Functions
 
 ```python
-#ans: use in sum
+# use in sum
 sum(x**2 for x in range(10))
 #ans: 285
 #ans: use in max
@@ -61,7 +61,7 @@ max(x for x in range(10) if x % 2 == 0)
 ### Generator with Condition
 
 ```python
-#ans: filter with generator
+# filter with generator
 gen = (x for x in range(10) if x % 2 == 0)
 list(gen)
 #ans: [0, 2, 4, 6, 8]

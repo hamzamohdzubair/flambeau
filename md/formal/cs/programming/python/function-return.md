@@ -9,7 +9,7 @@
 ### Single Return
 
 ```python
-#ans: return single value
+# return single value
 def square(x):
     return x ** 2
 result = square(5)
@@ -21,7 +21,7 @@ result = square(5)
 ### Multiple Return Values
 
 ```python
-#ans: return multiple values (tuple)
+# return multiple values (tuple)
 def divide(a, b):
     quotient = a // b
     remainder = a % b
@@ -35,7 +35,7 @@ q, r = divide(17, 5)
 ### Early Return
 
 ```python
-#ans: return exits function immediately
+# return exits function immediately
 def is_even(n):
     if n % 2 == 0:
         return True
@@ -49,7 +49,7 @@ result = is_even(4)
 ### No Return (None)
 
 ```python
-#ans: function without return
+# function without return
 def print_msg(msg):
     print(msg)
 result = print_msg("Hi")
@@ -62,7 +62,7 @@ result = print_msg("Hi")
 ### Return in Loop
 
 ```python
-#ans: return exits function and loop
+# return exits function and loop
 def find_first_even(numbers):
     for num in numbers:
         if num % 2 == 0:

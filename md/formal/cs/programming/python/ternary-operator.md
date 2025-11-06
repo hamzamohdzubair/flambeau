@@ -9,7 +9,7 @@
 ### Basic Ternary
 
 ```python
-#ans: ternary syntax: value_if_true if condition else value_if_false
+# ternary syntax: value_if_true if condition else value_if_false
 age = 20
 status = "Adult" if age >= 18 else "Minor"
 #ans: status is "Adult"
@@ -20,7 +20,7 @@ status = "Adult" if age >= 18 else "Minor"
 ### Ternary with Numbers
 
 ```python
-#ans: ternary with numeric values
+# ternary with numeric values
 x = 10
 result = "Big" if x > 5 else "Small"
 #ans: result is "Big"
@@ -31,7 +31,7 @@ result = "Big" if x > 5 else "Small"
 ### Nested Ternary
 
 ```python
-#ans: ternary inside ternary
+# ternary inside ternary
 score = 85
 grade = "A" if score >= 90 else "B" if score >= 80 else "C"
 #ans: grade is "B"
@@ -42,7 +42,7 @@ grade = "A" if score >= 90 else "B" if score >= 80 else "C"
 ### Ternary in Assignment
 
 ```python
-#ans: use in variable assignment
+# use in variable assignment
 x = 5
 y = x * 2 if x > 3 else x + 2
 #ans: y is 10 (condition True)
@@ -53,7 +53,7 @@ y = x * 2 if x > 3 else x + 2
 ### Ternary in Print
 
 ```python
-#ans: use directly in print
+# use directly in print
 x = 10
 print("Even" if x % 2 == 0 else "Odd")
 #ans: Even

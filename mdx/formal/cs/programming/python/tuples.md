@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Creating Tuples
 
 ```python
-#ans: create tuple
+# create tuple
 point = (3, 5)
 rgb = (255, 128, 0)
 single = (42,)
@@ -47,7 +47,7 @@ empty = ()
 ### Accessing Elements
 
 ```python
-#ans: indexing tuples
+# indexing tuples
 point = (3, 5)
 point[0]
 #ans: 3
@@ -60,7 +60,7 @@ point[-1]
 ### Tuple Unpacking
 
 ```python
-#ans: unpack values
+# unpack values
 x, y = (3, 5)
 #ans: x=3, y=5
 r, g, b = (255, 128, 0)
@@ -72,7 +72,7 @@ r, g, b = (255, 128, 0)
 ### Tuples are Immutable
 
 ```python
-#ans: cannot modify
+# cannot modify
 point = (3, 5)
 #ans: point[0] = 10  # TypeError
 ```
@@ -82,7 +82,7 @@ point = (3, 5)
 ### Tuple Operations
 
 ```python
-#ans: concatenation
+# concatenation
 tuple1 = (1, 2)
 tuple2 = (3, 4)
 tuple1 + tuple2
@@ -97,7 +97,7 @@ tuple1 + tuple2
 ### Tuple Methods
 
 ```python
-#ans: count
+# count
 numbers = (1, 2, 3, 2, 4)
 numbers.count(2)
 #ans: 2

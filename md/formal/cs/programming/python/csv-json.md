@@ -10,7 +10,7 @@
 
 ```python
 import csv
-#ans: read CSV
+# read CSV
 with open("data.csv", "r") as file:
     reader = csv.reader(file)
     for row in reader:
@@ -24,7 +24,7 @@ with open("data.csv", "r") as file:
 
 ```python
 import csv
-#ans: read with headers
+# read with headers
 with open("data.csv", "r") as file:
     reader = csv.DictReader(file)
     for row in reader:
@@ -37,7 +37,7 @@ with open("data.csv", "r") as file:
 
 ```python
 import csv
-#ans: write CSV
+# write CSV
 data = [["Name", "Age"], ["Alice", 25]]
 with open("out.csv", "w", newline="") as file:
     writer = csv.writer(file)
@@ -50,7 +50,7 @@ with open("out.csv", "w", newline="") as file:
 
 ```python
 import json
-#ans: read JSON file
+# read JSON file
 with open("data.json", "r") as file:
     data = json.load(file)
 #ans: returns dict or list
@@ -62,7 +62,7 @@ with open("data.json", "r") as file:
 
 ```python
 import json
-#ans: write JSON file
+# write JSON file
 data = {"name": "Alice", "age": 25}
 with open("out.json", "w") as file:
     json.dump(data, file, indent=2)
@@ -74,7 +74,7 @@ with open("out.json", "w") as file:
 
 ```python
 import json
-#ans: to JSON string
+# to JSON string
 data = {"name": "Alice"}
 json_str = json.dumps(data)
 #ans: '{"name": "Alice"}'

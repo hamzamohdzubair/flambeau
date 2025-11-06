@@ -9,7 +9,7 @@
 ### AND Operator
 
 ```python
-#ans: and - both must be True
+# and - both must be True
 True and True
 #ans: True
 True and False
@@ -25,7 +25,7 @@ False and False
 ### OR Operator
 
 ```python
-#ans: or - at least one True
+# or - at least one True
 True or False
 #ans: True
 False or True
@@ -41,7 +41,7 @@ True or True
 ### NOT Operator
 
 ```python
-#ans: not - inverts boolean
+# not - inverts boolean
 not True
 #ans: False
 not False
@@ -55,7 +55,7 @@ not (5 > 3)
 ### Combining Conditions
 
 ```python
-#ans: combining with and
+# combining with and
 x = 10
 x > 5 and x < 15
 #ans: True
@@ -69,7 +69,7 @@ x < 5 or x > 8
 ### Short Circuit Evaluation
 
 ```python
-#ans: and stops at first False
+# and stops at first False
 False and (1/0)
 #ans: False (no error, doesn't evaluate 1/0)
 #ans: or stops at first True

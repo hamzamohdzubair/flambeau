@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Basic For Loop
 
 ```python
-#ans: iterate over range
+# iterate over range
 for i in range(5):
     print(i)
 #ans: 0
@@ -49,7 +49,7 @@ for i in range(5):
 ### Range with Start/Stop
 
 ```python
-#ans: range(start, stop)
+# range(start, stop)
 for i in range(2, 7):
     print(i)
 #ans: 2, 3, 4, 5, 6
@@ -60,7 +60,7 @@ for i in range(2, 7):
 ### Range with Step
 
 ```python
-#ans: range(start, stop, step)
+# range(start, stop, step)
 for i in range(0, 10, 2):
     print(i)
 #ans: 0, 2, 4, 6, 8
@@ -71,7 +71,7 @@ for i in range(0, 10, 2):
 ### Iterate Over List
 
 ```python
-#ans: iterate list items
+# iterate list items
 fruits = ["apple", "banana", "cherry"]
 for fruit in fruits:
     print(fruit)
@@ -85,7 +85,7 @@ for fruit in fruits:
 ### Iterate with Index
 
 ```python
-#ans: enumerate for index and value
+# enumerate for index and value
 fruits = ["apple", "banana"]
 for i, fruit in enumerate(fruits):
     print(i, fruit)
@@ -98,7 +98,7 @@ for i, fruit in enumerate(fruits):
 ### Iterate String
 
 ```python
-#ans: iterate over characters
+# iterate over characters
 for char in "abc":
     print(char)
 #ans: a

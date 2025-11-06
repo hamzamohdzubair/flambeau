@@ -9,7 +9,7 @@
 ### F-strings (Preferred)
 
 ```python
-#ans: basic f-string
+# basic f-string
 name = "Alice"
 age = 25
 f"Hello, {name}!"
@@ -23,7 +23,7 @@ f"{name} is {age} years old"
 ### F-strings with Expressions
 
 ```python
-#ans: expressions in f-strings
+# expressions in f-strings
 x = 10
 y = 20
 f"{x} + {y} = {x + y}"
@@ -35,7 +35,7 @@ f"{x} + {y} = {x + y}"
 ### F-strings Formatting
 
 ```python
-#ans: format specifiers
+# format specifiers
 pi = 3.14159
 f"{pi:.2f}"
 #ans: "3.14"
@@ -49,7 +49,7 @@ f"{num:05d}"
 ### Format Method
 
 ```python
-#ans: str.format()
+# str.format()
 "Hello, {}!".format("World")
 #ans: "Hello, World!"
 "{} + {} = {}".format(2, 3, 5)
@@ -61,7 +61,7 @@ f"{num:05d}"
 ### Format with Names
 
 ```python
-#ans: named placeholders
+# named placeholders
 "{name} is {age}".format(name="Alice", age=25)
 #ans: "Alice is 25"
 ```
@@ -71,7 +71,7 @@ f"{num:05d}"
 ### Old Style (%)
 
 ```python
-#ans: % formatting
+# % formatting
 "Hello, %s!" % "World"
 #ans: "Hello, World!"
 "%d + %d = %d" % (2, 3, 5)

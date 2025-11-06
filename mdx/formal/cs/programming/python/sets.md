@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Creating Sets
 
 ```python
-#ans: create set
+# create set
 fruits = {"apple", "banana", "cherry"}
 numbers = {1, 2, 3, 4, 5}
 empty = set()
@@ -46,7 +46,7 @@ empty = set()
 ### Adding Elements
 
 ```python
-#ans: add single item
+# add single item
 fruits = {"apple", "banana"}
 fruits.add("cherry")
 #ans: {"apple", "banana", "cherry"}
@@ -57,7 +57,7 @@ fruits.add("cherry")
 ### Removing Elements
 
 ```python
-#ans: remove (raises error if not found)
+# remove (raises error if not found)
 fruits = {"apple", "banana"}
 fruits.remove("apple")
 #ans: {"banana"}
@@ -71,7 +71,7 @@ fruits.discard("cherry")
 ### Set Operations - Union
 
 ```python
-#ans: union (combines all)
+# union (combines all)
 a = {1, 2, 3}
 b = {3, 4, 5}
 a | b
@@ -85,7 +85,7 @@ a.union(b)
 ### Set Operations - Intersection
 
 ```python
-#ans: intersection (common elements)
+# intersection (common elements)
 a = {1, 2, 3}
 b = {2, 3, 4}
 a & b
@@ -99,7 +99,7 @@ a.intersection(b)
 ### Set Operations - Difference
 
 ```python
-#ans: difference (in a but not b)
+# difference (in a but not b)
 a = {1, 2, 3}
 b = {2, 3, 4}
 a - b
@@ -113,7 +113,7 @@ a.difference(b)
 ### Set Operations - Symmetric Difference
 
 ```python
-#ans: symmetric diff (in either but not both)
+# symmetric diff (in either but not both)
 a = {1, 2, 3}
 b = {2, 3, 4}
 a ^ b

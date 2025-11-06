@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Creating Dictionaries
 
 ```python
-#ans: create dict
+# create dict
 person = {"name": "Alice", "age": 25}
 empty = {}
 scores = {"math": 90, "english": 85}
@@ -45,7 +45,7 @@ scores = {"math": 90, "english": 85}
 ### Accessing Values
 
 ```python
-#ans: access by key
+# access by key
 person = {"name": "Alice", "age": 25}
 person["name"]
 #ans: "Alice"
@@ -58,7 +58,7 @@ person["age"]
 ### Get Method
 
 ```python
-#ans: get with default
+# get with default
 person = {"name": "Alice"}
 person.get("age")
 #ans: None
@@ -71,7 +71,7 @@ person.get("age", 0)
 ### Adding/Updating
 
 ```python
-#ans: add new key
+# add new key
 person = {"name": "Alice"}
 person["age"] = 25
 #ans: {"name": "Alice", "age": 25}
@@ -85,7 +85,7 @@ person["age"] = 26
 ### Deleting Items
 
 ```python
-#ans: delete key
+# delete key
 person = {"name": "Alice", "age": 25}
 del person["age"]
 #ans: {"name": "Alice"}
@@ -96,7 +96,7 @@ del person["age"]
 ### Keys, Values, Items
 
 ```python
-#ans: get keys, values, items
+# get keys, values, items
 person = {"name": "Alice", "age": 25}
 person.keys()
 #ans: dict_keys(['name', 'age'])

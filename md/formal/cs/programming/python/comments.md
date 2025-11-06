@@ -9,7 +9,7 @@
 ### Single Line Comments
 
 ```python
-#ans: this is a single line comment
+# this is a single line comment
 x = 5
 #ans: another comment
 y = 10
@@ -20,7 +20,7 @@ y = 10
 ### Inline Comments
 
 ```python
-#ans: comment after code
+# comment after code
 x = 5  # inline comment
 name = "Alice"  # another inline
 ```
@@ -55,7 +55,7 @@ y = 10
 ### Comments Don't Execute
 
 ```python
-#ans: x = 10
+# x = 10
 x = 5
 #ans: x is 5 (commented line ignored)
 ```

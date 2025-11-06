@@ -35,7 +35,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
 ```python
 from itertools import count
-#ans: infinite counting
+# infinite counting
 for i in count(10, 2):
     print(i)
     if i > 20:
@@ -49,7 +49,7 @@ for i in count(10, 2):
 
 ```python
 from itertools import cycle
-#ans: infinite cycling
+# infinite cycling
 colors = ['red', 'green', 'blue']
 color_cycle = cycle(colors)
 for i, color in enumerate(color_cycle):
@@ -65,7 +65,7 @@ for i, color in enumerate(color_cycle):
 
 ```python
 from itertools import repeat
-#ans: repeat value
+# repeat value
 list(repeat(10, 3))
 #ans: [10, 10, 10]
 ```
@@ -76,7 +76,7 @@ list(repeat(10, 3))
 
 ```python
 from itertools import chain
-#ans: combine iterables
+# combine iterables
 list(chain([1, 2], [3, 4], [5, 6]))
 #ans: [1, 2, 3, 4, 5, 6]
 ```
@@ -87,7 +87,7 @@ list(chain([1, 2], [3, 4], [5, 6]))
 
 ```python
 from itertools import islice
-#ans: slice iterator
+# slice iterator
 list(islice(range(10), 2, 8, 2))
 #ans: [2, 4, 6]
 #ans: take first n
@@ -101,7 +101,7 @@ list(islice(count(), 5))
 
 ```python
 from itertools import product
-#ans: cartesian product
+# cartesian product
 list(product([1, 2], ['a', 'b']))
 #ans: [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')]
 ```
@@ -112,7 +112,7 @@ list(product([1, 2], ['a', 'b']))
 
 ```python
 from itertools import permutations
-#ans: all orderings
+# all orderings
 list(permutations([1, 2, 3], 2))
 #ans: [(1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2)]
 ```
@@ -123,7 +123,7 @@ list(permutations([1, 2, 3], 2))
 
 ```python
 from itertools import combinations
-#ans: unique selections
+# unique selections
 list(combinations([1, 2, 3, 4], 2))
 #ans: [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
 ```
@@ -235,7 +235,7 @@ list(combinations([3, 1, 2], 2))
 
 ```python
 from itertools import groupby
-#ans: group consecutive
+# group consecutive
 data = [1, 1, 2, 2, 2, 3]
 [(k, list(g)) for k, g in groupby(data)]
 #ans: [(1, [1, 1]), (2, [2, 2, 2]), (3, [3])]
@@ -247,7 +247,7 @@ data = [1, 1, 2, 2, 2, 3]
 
 ```python
 from itertools import zip_longest
-#ans: zip with fillvalue
+# zip with fillvalue
 list(zip_longest([1, 2], ['a', 'b', 'c'], fillvalue=0))
 #ans: [(1, 'a'), (2, 'b'), (0, 'c')]
 ```

@@ -34,7 +34,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Case Methods
 
 ```python
-#ans: upper and lower
+# upper and lower
 "hello".upper()
 #ans: "HELLO"
 "HELLO".lower()
@@ -50,7 +50,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Strip Methods
 
 ```python
-#ans: remove whitespace
+# remove whitespace
 "  hello  ".strip()
 #ans: "hello"
 "  hello  ".lstrip()
@@ -64,7 +64,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Split
 
 ```python
-#ans: split string
+# split string
 "apple,banana,cherry".split(",")
 #ans: ['apple', 'banana', 'cherry']
 "one two three".split()
@@ -76,7 +76,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Join
 
 ```python
-#ans: join list to string
+# join list to string
 ",".join(["a", "b", "c"])
 #ans: "a,b,c"
 " ".join(["Hello", "World"])
@@ -88,7 +88,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Find and Index
 
 ```python
-#ans: find substring
+# find substring
 "hello world".find("world")
 #ans: 6
 "hello world".find("xyz")
@@ -102,7 +102,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Replace
 
 ```python
-#ans: replace substring
+# replace substring
 "hello world".replace("world", "Python")
 #ans: "hello Python"
 "aaa".replace("a", "b", 2)
@@ -114,7 +114,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Startswith/Endswith
 
 ```python
-#ans: check start and end
+# check start and end
 "hello".startswith("he")
 #ans: True
 "hello".endswith("lo")
@@ -126,7 +126,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Count
 
 ```python
-#ans: count occurrences
+# count occurrences
 "hello".count("l")
 #ans: 2
 "banana".count("a")

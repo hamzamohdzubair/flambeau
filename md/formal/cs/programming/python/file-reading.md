@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: File Reading
+# File Reading
 
 ---
 

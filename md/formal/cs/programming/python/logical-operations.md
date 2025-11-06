@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Logical Operations
+# Logical Operations
 
 ---
 

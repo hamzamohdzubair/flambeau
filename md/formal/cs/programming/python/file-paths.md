@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: File Paths
+# File Paths
 
 ---
 

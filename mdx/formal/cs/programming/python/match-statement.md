@@ -31,7 +31,7 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
 <!-- _class: lead invert -->
 
-#ans: Match Statement (Python 3.10+)
+# Match Statement (Python 3.10+)
 
 ---
 

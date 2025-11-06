@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Function Basics
+# Function Basics
 
 ---
 

@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Ternary Operator
+# Ternary Operator
 
 ---
 

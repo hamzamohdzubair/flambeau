@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: String Basics
+# String Basics
 
 ---
 

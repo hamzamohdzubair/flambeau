@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Custom Exceptions
+# Custom Exceptions
 
 ---
 

@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Methods
+# Methods
 
 ---
 

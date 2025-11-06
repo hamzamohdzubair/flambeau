@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Generator Expressions
+# Generator Expressions
 
 ---
 

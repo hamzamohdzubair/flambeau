@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Inheritance
+# Inheritance
 
 ---
 

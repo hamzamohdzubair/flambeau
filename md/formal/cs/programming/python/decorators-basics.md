@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Decorators Basics
+# Decorators Basics
 
 ---
 

@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Decorators Advanced
+# Decorators Advanced
 
 ---
 

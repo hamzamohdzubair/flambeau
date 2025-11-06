@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Data Types
+# Data Types
 
 ---
 

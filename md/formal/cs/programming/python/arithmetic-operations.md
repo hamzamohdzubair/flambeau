@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Arithmetic Operations
+# Arithmetic Operations
 
 ---
 

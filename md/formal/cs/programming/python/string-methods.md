@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: String Methods
+# String Methods
 
 ---
 

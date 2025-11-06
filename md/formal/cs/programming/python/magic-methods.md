@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Magic Methods
+# Magic Methods
 
 ---
 

@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Classes & Objects
+# Classes & Objects
 
 ---
 

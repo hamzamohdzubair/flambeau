@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Input & Output
+# Input & Output
 
 ---
 

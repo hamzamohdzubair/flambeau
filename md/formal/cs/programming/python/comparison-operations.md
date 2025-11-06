@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Comparison Operations
+# Comparison Operations
 
 ---
 

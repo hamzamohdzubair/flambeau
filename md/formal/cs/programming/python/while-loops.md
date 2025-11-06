@@ -2,7 +2,7 @@
 
 {{title}}
 
-While Loops
+# While Loops
 
 ---
 

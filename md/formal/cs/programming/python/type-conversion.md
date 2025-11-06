@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Type Conversion
+# Type Conversion
 
 ---
 

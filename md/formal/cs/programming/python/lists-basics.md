@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Lists Basics
+# Lists Basics
 
 ---
 

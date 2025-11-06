@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Itertools
+# Itertools
 
 ---
 

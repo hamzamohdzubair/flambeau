@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Dictionaries Basics
+# Dictionaries Basics
 
 ---
 

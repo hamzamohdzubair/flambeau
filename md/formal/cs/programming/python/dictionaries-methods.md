@@ -2,7 +2,7 @@
 
 {{title}}
 
-#ans: Dictionaries Methods
+# Dictionaries Methods
 
 ---
 

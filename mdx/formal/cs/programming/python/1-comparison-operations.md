@@ -1,0 +1,204 @@
+---
+theme: blank2
+paginate: true
+transition: slide
+class: lead
+footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/index.html) [<iconify-icon icon="si:left-up-line" title="Back"></iconify-icon>](../index.html) [<iconify-icon icon="octicon:move-to-start-24" title="Start"></iconify-icon>](#1)'
+---
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Font imports for all three font options -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+<link href="/styles/zoom.css" rel="stylesheet">
+
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<script src="/scripts/zoom.js"></script>
+<script src="/scripts/navigation.js"></script>
+<script src="/scripts/backbutton.js"></script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NLV7GHEJDK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NLV7GHEJDK');
+</script>
+
+<!-- _class: lead invert -->
+
+# Comparison Operations
+
+---
+
+### Equality
+
+```python
+# equal to
+5 == 5
+#ans: True
+5 == 3
+#ans: False
+"hello" == "hello"
+#ans: True
+```
+
+---
+
+### Inequality
+
+```python
+# not equal to
+5 != 3
+#ans: True
+5 != 5
+#ans: False
+"a" != "b"
+#ans: True
+```
+
+---
+
+### Greater Than / Less Than
+
+```python
+# greater than
+5 > 3
+#ans: True
+3 > 5
+#ans: False
+#ans: less than
+5 < 3
+#ans: False
+3 < 5
+#ans: True
+```
+
+---
+
+### Greater/Less or Equal
+
+```python
+# greater or equal
+5 >= 5
+#ans: True
+5 >= 3
+#ans: True
+#ans: less or equal
+5 <= 3
+#ans: False
+5 <= 5
+#ans: True
+```
+
+---
+
+### Chained Comparisons
+
+```python
+# chain comparisons
+3 < 5 < 7
+#ans: True (both conditions)
+1 < 2 < 3 < 4
+#ans: True
+5 < 3 < 7
+#ans: False (first fails)
+```
+
+---
+
+### Exercises - Part 1
+
+```python
+# comparison chain?
+3 < 5 < 7
+#ans: True
+# what happens?
+5 < 3 < 7
+#ans: False (5 < 3 is False)
+```
+
+---
+
+### Exercises - Part 2
+
+```python
+# comparison with different types?
+5 == 5.0
+#ans: True
+# is vs ==?
+a = [1, 2]
+b = [1, 2]
+a == b
+#ans: True
+a is b
+#ans: False
+```
+
+---
+
+### Exercises - Part 3
+
+```python
+# what is result?
+"10" == 10
+#ans: False (different types)
+# string comparison?
+"apple" < "banana"
+#ans: True (lexicographic)
+```
+
+---
+
+### Exercises - Part 4
+
+```python
+# what about this?
+True == 1
+#ans: True
+False == 0
+#ans: True
+```
+
+---
+
+### Exercises - Part 5
+
+```python
+# chained equality?
+5 == 5 == 5
+#ans: True
+5 == 5 == 6
+#ans: False
+```
+
+---
+
+### Exercises - Part 6
+
+```python
+# None comparison?
+None == None
+#ans: True
+x = None
+x is None
+#ans: True
+```
+
+---
+
+### Exercises - Part 7
+
+```python
+# empty comparisons?
+[] == []
+#ans: True
+[] is []
+#ans: False
+"" == ""
+#ans: True
+```

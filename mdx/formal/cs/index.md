@@ -29,12 +29,39 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
   gtag('config', 'G-NLV7GHEJDK');
 </script>
 
-<!-- _class: lead -->
+<!-- _class: lead invert -->
 
-###### CS
+# Computer Science
+
+---
+
+### Core Topics
 
 <div class="tiles">
   <a class="tile-link" href="programming/index.html" style="--tile-bg-img:url('/assets/2025-09-30-11-29-04.png');">Programming</a>
-  <a class="tile-link" href="" style="--tile-bg-img:url('/assets/2025-10-19-23-45-28.png');">DSA</a>
-  <a class="tile-link" href="ops/index.html" style="--tile-bg-img:url('/assets/2025-10-19-09-04-51.png');">OPS</a>
+  <a class="tile-link" href="algorithms/index.html" style="--tile-bg-img:url('/assets/2025-10-19-23-45-28.png');">Algorithms</a>
+  <a class="tile-link" href="datastructures/index.html" style="--tile-bg-img:url('/assets/2025-10-19-23-45-28.png');">Data Structures</a>
+  <a class="tile-link" href="ops/index.html" style="--tile-bg-img:url('/assets/2025-10-19-09-04-51.png');">Operations</a>
+</div>
+
+---
+
+### Systems & Networks
+
+<div class="tiles">
+  <a class="tile-link" href="os/index.html" style="--tile-bg-img:url('$3');">Operating Systems</a>
+  <a class="tile-link" href="networks/index.html" style="--tile-bg-img:url('$3');">Computer Networks</a>
+  <a class="tile-link" href="databases/index.html" style="--tile-bg-img:url('$3');">Databases</a>
+  <a class="tile-link" href="distributed-systems/index.html" style="--tile-bg-img:url('$3');">Distributed Systems</a>
+</div>
+
+---
+
+### Theory
+
+<div class="tiles">
+  <a class="tile-link" href="theory/automata.html" style="--tile-bg-img:url('$3');">Automata Theory</a>
+  <a class="tile-link" href="theory/complexity.html" style="--tile-bg-img:url('$3');">Complexity Theory</a>
+  <a class="tile-link" href="theory/computability.html" style="--tile-bg-img:url('$3');">Computability</a>
+  <a class="tile-link" href="theory/formal-languages.html" style="--tile-bg-img:url('$3');">Formal Languages</a>
 </div>

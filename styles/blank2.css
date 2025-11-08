@@ -571,12 +571,13 @@ iconify-icon {
   }
 
   .tiles {
-    flex-direction: column;
-    align-items: center;
+    gap: 12px;
+    /* Keep grid layout, don't stack */
   }
 
   .tile-link {
-    width: 100%;
-    max-width: 280px;
+    width: 140px;
+    height: 90px;
+    font-size: 14px;
   }
 }

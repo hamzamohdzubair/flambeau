@@ -29,30 +29,26 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
   gtag('config', 'G-NLV7GHEJDK');
 </script>
 
-###### Social Science
-
-<div class="tiles">
-</div>
-
----
-
 <!-- _class: lead invert -->
 
 # Social Science
 
 ---
 
-### Contents
+### Disciplines
 
-1) The Small World Problem
+<div class="tiles">
+  <a class="tile-link" href="economics/index.html" style="--tile-bg-img:url('$3');">Economics</a>
+  <a class="tile-link" href="psychology/index.html" style="--tile-bg-img:url('$3');">Psychology</a>
+  <a class="tile-link" href="sociology/index.html" style="--tile-bg-img:url('$3');">Sociology</a>
+  <a class="tile-link" href="political-science/index.html" style="--tile-bg-img:url('$3');">Political Science</a>
+  <a class="tile-link" href="anthropology/index.html" style="--tile-bg-img:url('$3');">Anthropology</a>
+</div>
 
 ---
 
-## Small World Problem
+### Case Studies
 
----
-
-<figure data-marpit-fragment style="width:600px;">
-  <img src="assets/2025-10-03-23-02-41.png">
-  <figcaption>source: https://youtu.be/CYlon2tvywA?si=kRQWsiLuDQlBmedO</figcaption>
-</figure>
+<div class="tiles">
+  <a class="tile-link" href="small-world.html" style="--tile-bg-img:url('$3');">Small World Problem</a>
+</div>

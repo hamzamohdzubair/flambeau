@@ -24,4 +24,3 @@ class: lead
   <a class="tile-link" href="applied/index.html" style="--tile-bg-img:url('/assets/2025-10-03-22-57-34.png');">Applied Science</a>
   <a class="tile-link" href="humanities/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-41-13.png');">Humanities</a>
 </div>
-

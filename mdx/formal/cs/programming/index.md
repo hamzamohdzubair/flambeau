@@ -53,5 +53,5 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
   <a class="tile-link" href="rust/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-52-23.png');"></a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-02-11-56-23.png');"></a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-19-01-03-25.png');"></a>
-  <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-55-48.png');"></a>
+  <a class="tile-link" href="sql/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-55-48.png');"></a>
 </div>

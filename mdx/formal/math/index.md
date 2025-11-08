@@ -29,14 +29,31 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
   gtag('config', 'G-NLV7GHEJDK');
 </script>
 
-<!-- _class: lead -->
+<!-- _class: lead invert -->
 
-###### Math Topics
+# Mathematics
+
+---
+
+### Core Topics
 
 <div class="tiles">
+  <a class="tile-link" href="linalg/index.html" style="--tile-bg-img:url('/assets/2025-09-30-22-21-30.png');">Linear Algebra</a>
+  <a class="tile-link" href="calc/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-16-17.png');">Calculus</a>
   <a class="tile-link" href="dm/index.html" style="--tile-bg-img:url('/assets/2025-10-07-19-42-23.png');">Discrete Maths</a>
   <a class="tile-link" href="ag/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-13-40.png');">Analytic Geometry</a>
-  <a class="tile-link" href="probstats/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-10-12.png');">Prob Stats</a>
-  <a class="tile-link" href="la/index.html" style="--tile-bg-img:url('/assets/2025-09-30-22-21-30.png');">Linear Algebra</a>
-  <a class="tile-link" href="calc/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-16-17.png');">Calculus</a>
+  <a class="tile-link" href="probstats/index.html" style="--tile-bg-img:url('/assets/2025-09-30-23-10-12.png');">Probability & Statistics</a>
+</div>
+
+---
+
+### Advanced Topics
+
+<div class="tiles">
+  <a class="tile-link" href="diffeq/index.html" style="--tile-bg-img:url('$3');">Differential Equations</a>
+  <a class="tile-link" href="real-analysis/index.html" style="--tile-bg-img:url('$3');">Real Analysis</a>
+  <a class="tile-link" href="complex-analysis/index.html" style="--tile-bg-img:url('$3');">Complex Analysis</a>
+  <a class="tile-link" href="abstract-algebra/index.html" style="--tile-bg-img:url('$3');">Abstract Algebra</a>
+  <a class="tile-link" href="topology/index.html" style="--tile-bg-img:url('$3');">Topology</a>
+  <a class="tile-link" href="number-theory/index.html" style="--tile-bg-img:url('$3');">Number Theory</a>
 </div>

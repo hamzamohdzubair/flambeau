@@ -1,29 +1,25 @@
 {{yaml}}
 
-###### Social Science
-
-<div class="tiles">
-</div>
-
----
-
-<!-- _class: lead invert -->
+{{title}}
 
 # Social Science
 
 ---
 
-### Contents
+### Disciplines
 
-1) The Small World Problem
+<div class="tiles">
+  {{tile(Economics, economics/index.html,)}}
+  {{tile(Psychology, psychology/index.html,)}}
+  {{tile(Sociology, sociology/index.html,)}}
+  {{tile(Political Science, political-science/index.html,)}}
+  {{tile(Anthropology, anthropology/index.html,)}}
+</div>
 
 ---
 
-## Small World Problem
+### Case Studies
 
----
-
-<figure data-marpit-fragment style="width:600px;">
-  <img src="assets/2025-10-03-23-02-41.png">
-  <figcaption>source: https://youtu.be/CYlon2tvywA?si=kRQWsiLuDQlBmedO</figcaption>
-</figure>
+<div class="tiles">
+  {{tile(Small World Problem, small-world.html,)}}
+</div>

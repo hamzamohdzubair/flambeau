@@ -35,17 +35,30 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
 ---
 
+### Libraries
+
+<div class="tiles">
+  <a class="tile-link" href="numpy/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-46-48.png');"></a>
+  <a class="tile-link" href="formal/cs/programming/python/pandas/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-17-07.png');"></a>
+  <a class="tile-link" href="formal/cs/programming/python/skl/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-16-08.png');"></a>
+  <a class="tile-link" href="formal/cs/programming/python/keras/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-21-55.png');"></a>
+  <a class="tile-link" href="formal/cs/programming/python/tf/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-11-41.png');">Tensorflow</a>
+  <a class="tile-link" href="formal/cs/programming/python/pytorch/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-12-25.png');">Pytorch</a>
+</div>
+
+---
+
 ### Fundamentals - Basics
 
 <div class="tiles">
-  <a class="tile-link" href="variables-assignment.html" style="--tile-bg-img:url('$3');">Variables & Assignment</a>
-  <a class="tile-link" href="data-types.html" style="--tile-bg-img:url('$3');">Data Types</a>
-  <a class="tile-link" href="arithmetic-operations.html" style="--tile-bg-img:url('$3');">Arithmetic Operations</a>
-  <a class="tile-link" href="comparison-operations.html" style="--tile-bg-img:url('$3');">Comparison Operations</a>
-  <a class="tile-link" href="logical-operations.html" style="--tile-bg-img:url('$3');">Logical Operations</a>
-  <a class="tile-link" href="type-conversion.html" style="--tile-bg-img:url('$3');">Type Conversion</a>
-  <a class="tile-link" href="input-output.html" style="--tile-bg-img:url('$3');">Input & Output</a>
-  <a class="tile-link" href="comments.html" style="--tile-bg-img:url('$3');">Comments</a>
+  <a class="tile-link" href="1-variables-assignment.html" style="--tile-bg-img:url('$3');">Variables & Assignment</a>
+  <a class="tile-link" href="1-data-types.html" style="--tile-bg-img:url('$3');">Data Types</a>
+  <a class="tile-link" href="1-arithmetic-operations.html" style="--tile-bg-img:url('$3');">Arithmetic Operations</a>
+  <a class="tile-link" href="1-comparison-operations.html" style="--tile-bg-img:url('$3');">Comparison Operations</a>
+  <a class="tile-link" href="1-logical-operations.html" style="--tile-bg-img:url('$3');">Logical Operations</a>
+  <a class="tile-link" href="1-type-conversion.html" style="--tile-bg-img:url('$3');">Type Conversion</a>
+  <a class="tile-link" href="1-input-output.html" style="--tile-bg-img:url('$3');">Input & Output</a>
+  <a class="tile-link" href="1-comments.html" style="--tile-bg-img:url('$3');">Comments</a>
 </div>
 
 ---
@@ -170,23 +183,11 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
 ---
 
-### Libraries
-
-<div class="tiles">
-  <a class="tile-link" href="numpy/index.html" style="--tile-bg-img:url('/assets/2025-10-19-00-46-48.png');"></a>
-  <a class="tile-link" href="formal/cs/programming/python/pandas/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-17-07.png');"></a>
-  <a class="tile-link" href="formal/cs/programming/python/skl/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-16-08.png');"></a>
-  <a class="tile-link" href="formal/cs/programming/python/keras/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-21-55.png');"></a>
-  <a class="tile-link" href="formal/cs/programming/python/tf/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-11-41.png');">Tensorflow</a>
-  <a class="tile-link" href="formal/cs/programming/python/pytorch/index.html" style="--tile-bg-img:url('/assets/2025-10-05-12-12-25.png');">Pytorch</a>
-</div>
-
----
 
 
 ### Resources
 
-<div class="figrow"><figure data-marpit-fragment style="width:600px;">
+<figure class="portrait">
   <img src="https://img.youtube.com/vi/GfH4QL4VqJ0/0.jpg">
-  <figcaption>source: https://www.youtube.com/watch?v=GfH4QL4VqJ0 </figcaption>
-</figure></div>
+  <figcaption><a class="underlined-link" href="https://www.youtube.com/watch?v=GfH4QL4VqJ0">youtube</a></figcaption>
+</figure>

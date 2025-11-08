@@ -24,4 +24,3 @@ class: lead
   {{tile(Applied Science, applied/index.html, /assets/2025-10-03-22-57-34.png)}}
   {{tile(Humanities, humanities/index.html, /assets/2025-10-19-00-41-13.png)}}
 </div>
-

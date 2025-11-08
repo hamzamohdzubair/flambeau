@@ -24,5 +24,5 @@
   {{tile(, rust/index.html, /assets/2025-10-19-00-52-23.png)}}
   {{tile(, index.html, /assets/2025-10-02-11-56-23.png)}}
   {{tile(, index.html, /assets/2025-10-19-01-03-25.png)}}
-  {{tile(, index.html, /assets/2025-10-19-00-55-48.png)}}
+  {{tile(, sql/index.html, /assets/2025-10-19-00-55-48.png)}}
 </div>

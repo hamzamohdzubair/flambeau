@@ -85,8 +85,9 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Machine Learning Algorithms
 
 <div class="tiles">
+  <a class="tile-link" href="mlalgos/index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-44-23.png');">All ML Algorithms</a>
   <a class="tile-link" href="prob.html" style="--tile-bg-img:url('/assets/2025-10-08-22-44-23.png');">Probabilistic</a>
-  <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-41-32.png');">GLM</a>
+  <a class="tile-link" href="mlalgos/glm/index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-41-32.png');">GLM</a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-36-27.png');">Neighbours</a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-32-36.png');">Trees</a>
   <a class="tile-link" href="index.html" style="--tile-bg-img:url('/assets/2025-10-08-22-38-46.png');">SVM</a>
@@ -110,20 +111,20 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 ### Books
 
 <div class="figrow">
-  <figure class="portrait">
+  <figure style="width:200px;">
   <img src="/assets/2025-10-05-09-49-36.png">
   <figcaption><a class="underlined-link" href="https://mml-book.github.io/book/mml-book.pdf">Free access</a></figcaption>
 </figure>
-  <figure class="portrait">
+  <figure style="width:200px;">
   <img src="/assets/2025-10-16-19-06-32.png">
   <figcaption><a class="underlined-link" href="https://www.statlearning.com/">Free access</a></figcaption>
 </figure>
-  <figure class="portrait">
+  <figure style="width:230px;">
   <img src="/assets/2025-10-05-09-08-25.png">
   <figcaption><a class="underlined-link" href="d2l.ai">Free access</a></figcaption>
 </figure>
-  <figure class="portrait">
-  <img src="/assets/2025-10-26-07-13-31.png">
+  <figure style="width:220px;">
+  <img src="/assets/2025-11-07-11-35-17.png">
   <figcaption><a class="underlined-link" href="https://www.mlsysbook.ai/">Free access</a></figcaption>
 </figure>
 </div>

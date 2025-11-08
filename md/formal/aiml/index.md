@@ -56,8 +56,9 @@
 ### Machine Learning Algorithms
 
 <div class="tiles">
+  {{tile(All ML Algorithms, mlalgos/index.html, /assets/2025-10-08-22-44-23.png)}}
   {{tile(Probabilistic, prob.html, /assets/2025-10-08-22-44-23.png)}}
-  {{tile(GLM, index.html, /assets/2025-10-08-22-41-32.png)}}
+  {{tile(GLM, mlalgos/glm/index.html, /assets/2025-10-08-22-41-32.png)}}
   {{tile(Neighbours, index.html, /assets/2025-10-08-22-36-27.png)}}
   {{tile(Trees, index.html, /assets/2025-10-08-22-32-36.png)}}
   {{tile(SVM, index.html, /assets/2025-10-08-22-38-46.png )}}
@@ -81,10 +82,10 @@
 ### Books
 
 <div class="figrow">
-  {{iph(Free access, https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
-  {{iph(Free access, https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
-  {{iph(Free access, d2l.ai, /assets/2025-10-05-09-08-25.png)}}
-  {{iph(Free access, https://www.mlsysbook.ai/ , /assets/2025-10-26-07-13-31.png)}}
+  {{ihw(200,Free access, https://mml-book.github.io/book/mml-book.pdf, /assets/2025-10-05-09-49-36.png)}}
+  {{ihw(200,Free access, https://www.statlearning.com/, /assets/2025-10-16-19-06-32.png)}}
+  {{ihw(230,Free access, d2l.ai, /assets/2025-10-05-09-08-25.png)}}
+  {{ihw(220,Free access, https://www.mlsysbook.ai/ , /assets/2025-11-07-11-35-17.png)}}
 </div>
 
 

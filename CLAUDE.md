@@ -22,8 +22,8 @@ Flambeau is a Marp-based presentation system that generates HTML slide decks fro
    - Uses custom Marp engine (`engine2.js`) that modifies syntax highlighting
    - All code blocks are automatically wrapped in numbered lists with fragment animations
    - Lines with `#ans:` comment are marked with `data-answer="true"` attribute
-   - Uses custom themes from `styles/` directory (extends Gaia theme)
-   - Primary theme: `gaia2.css` with Font Awesome icons support
+   - Uses custom themes from `styles/` directory (extends default theme)
+   - Primary theme: `blank2.css` with Font Awesome icons support
 
 3. **Asset Copying**: Copies supporting files (assets, scripts, styles) to `docs/`
 
@@ -99,3 +99,35 @@ The `engine2.js` file customizes Marp's syntax highlighter:
 ## Utility Scripts
 
 - `fix-ans.js`: Utility to normalize `#ans:` comments to `#` in code blocks (first occurrence only per block)
+
+## Content Creation Guidelines
+
+When creating educational content (slides in `md/` directory):
+
+### Content Balance
+- **Concepts must be covered**: Include theory, mathematical formulas, algorithms, and explanations
+- **Code wherever possible**: Maximize coding examples and exercises throughout
+- **No restriction on exercise count**:
+  - Don't force exactly 5 exercise slides if there isn't enough content
+  - Go beyond 5 slides if there are many things to practice
+  - Let the content dictate the number of exercises
+
+### Code Block Formatting
+- **No empty lines**: Remove all empty lines within code blocks for compact presentation
+- **Answer marking with `#ans:`**:
+  - Mark the **first line where the answer starts**, not just the last line
+  - If a question asks "how to do X?", the answer likely starts on the next line - mark it with `#ans:`
+  - If multiple consecutive lines are part of the answer, mark **all of them** with `#ans:`
+  - Example:
+    ```python
+    # how to create a red image?
+    #ans: red = np.zeros((100, 100, 3), dtype=np.uint8)
+    #ans: red[:, :, 2] = 255
+    ```
+
+### File Structure
+Each topic file should follow this pattern:
+1. **Conceptual slides** (3-5 slides): Theory, math, algorithms, when/why to use
+2. **Code demonstration** (2-3 slides): Practical implementation examples
+3. **Exercises** (flexible count): Mix of conceptual questions and coding exercises
+- don't add apostrophe in tile text

@@ -1,0 +1,100 @@
+/* @theme am_blue */
+
+@import 'am';
+
+:root {
+  --color-code-bg: #e8f4f6;
+  --color-coverbg: #2c9cb1;
+  --color-few: #91a814;
+  --color-footer: #8c8c8c;
+  --color-main: #041d22;
+  --color-much: #1482a8;
+  --color-navbar-bg: #d0e9ee;
+  --color-navbar-font: rgb(108, 95, 91);
+  --color-quote: rgba(254, 176, 98, 0.1);
+  --color-title: rgb(255, 255, 255);
+  --color-trans: #72bdcb;
+  --filter-b: brightness(30%) contrast(70%) grayscale(100%);
+  --filter-c: brightness(0%) contrast(60%) grayscale(80%);
+  --filter-e: brightness(0%) contrast(70%) grayscale(100%);
+}
+
+
+
+/* Hamza's changes */
+
+.dashboard-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 48px;
+}
+
+/* Register the custom property so its numeric value can animate smoothly */
+@property --overlay-alpha {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.3;
+}
+
+.tile-link {
+  display: inline-block;
+  width: 200px;
+  height: 140px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.30);
+  /* Base fallback color sits beneath all images */
+  background-color: #498392;
+  /* Top layer is a transparent gradient; second is the image */
+  background-image:
+    linear-gradient(rgba(100, 100, 100, var(--overlay-alpha)),
+                    rgba(100, 100, 100, var(--overlay-alpha))),
+    var(--tile-bg-img, linear-gradient(#498392, #498392));
+  background-position: center, center;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
+  /* Animate the overlay amount (not the background-image itself) */
+  transition: --overlay-alpha 0.3s ease;
+}
+
+.tile-link:hover {
+  --overlay-alpha: 0.5; /* only the background is tinted */
+}
+
+i {
+  color: #455a64;
+}
+
+/* Add "Page" prefix and total page number */
+section::after {
+  content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
+}
+
+section::before {
+    content: "Hamza Mohd Zubair";
+    position: absolute;
+    bottom: 20px;
+    left: 50px;
+    right: 50px;
+    text-align: center;
+    font-size: 0.4em;
+    color: #666;
+    /* Add any other styling you want */
+}
+
+iframe {
+  transform: scale(0.75);       /* Scale down to 75% */
+  transform-origin: 0 0;        /* Scale from the top-left corner */
+  width: 125%;               /* Adjust width inversely to the scale */
+  height: 125%;              /* Adjust height inversely to the scale */
+  /* border: none;                 Optional: remove border */
+}

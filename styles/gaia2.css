@@ -1,0 +1,346 @@
+/* @theme gaia2 */
+
+@import "gaia";
+@import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
+
+/* svg[data-marpit-svg] { */
+/*   display: block; */
+/*   width: 100vw; */
+/*   height: 100vh; */
+/* } */
+
+section {
+  width: 1280px;
+  height: 730px;
+}
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 48px;
+}
+
+/* Register the custom property so its numeric value can animate smoothly */
+@property --overlay-alpha {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.3;
+}
+
+.tile-link {
+  width: 200px;
+  height: 140px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #ffe !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  padding: 0px 5px;
+
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  /* Base fallback color sits beneath all images */
+  background-color: #456;
+  /* Top layer is a transparent gradient; second is the image */
+  background-image:
+    linear-gradient(
+      rgba(100, 100, 100, var(--overlay-alpha)),
+      rgba(100, 100, 100, var(--overlay-alpha))
+    ),
+    var(--tile-bg-img, linear-gradient(#456, #456));
+  background-position: center, center;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
+  /* Animate the overlay amount (not the background-image itself) */
+  transition: --overlay-alpha 0.3s ease;
+}
+
+.tile-link:hover {
+  --overlay-alpha: 0.5; /* only the background is tinted */
+}
+
+footer i,
+footer a {
+  color: #ffe;
+}
+
+figure iframe {
+  width: 100%;
+  height: 500px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: inset 0 0px 5px rgba(0, 0, 0, 0.4);
+}
+
+figure:has(iframe) figcaption {
+  margin-top: 10px;
+  font-size: 0.4em;
+  text-align: center;
+}
+
+.underlined-link {
+  text-decoration: none;
+  color: #456;
+  border-bottom: 2px dashed #456;
+  text-decoration-skip-ink: auto; /* prevents underline through descenders */
+}
+
+/* from beam */
+
+h3:nth-of-type(1) {
+  position: absolute;
+  /* border-left: 2px solid #ffe; */
+  /* border-right: 2px solid #ffe; */
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0; /* reset default margins */
+  padding: 0.2em 0.5em; /* vertical & horizontal padding */
+  background-color: #456;
+  color: #ffe;
+  text-align: center; /* center the text */
+  line-height: 0.9em; /* vertically center text inside 1em height */
+  font-size: 0.9em;
+  font-weight: normal;
+}
+
+section::before {
+  content: "Hamza Zubair | hzubair.com";
+  position: absolute;
+  bottom: 0; /* Changed from 5px */
+  text-align: center;
+  font-size: 0.4em; /* Changed to match footer */
+  color: #ffe;
+  z-index: 2; /* Changed to sit above footer */
+  line-height: 40px; /* Added to match footer height */
+  left: 10px;
+  right: 10px;
+  pointer-events: none;
+}
+
+footer {
+  /* font-size: 0.7em; */
+  background-color: #456;
+  color: #ffe;
+  height: 40px;
+  line-height: 40px;
+  z-index: 1; /* Changed to sit below text */
+  display: flex;
+  /* justify-content: space-between; */
+  padding: 0px 10px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 300;
+  letter-spacing: -1px;
+}
+
+iconify-icon {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+section::after {
+  content: attr(data-marpit-pagination) " / " attr(data-marpit-pagination-total);
+  font-size: 0.7em;
+  color: #ffe;
+  height: 40px;
+  line-height: 40px;
+  position: absolute; /* Added */
+  padding: 0 10px;
+  z-index: 2; /* Added */
+  pointer-events: none;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 300;
+  letter-spacing: -1px;
+}
+
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+
+section.nob ul {
+  list-style: none;
+}
+
+/* .marpit-fragment-invisible { */
+/*   filter: blur(3px) !important; */
+/*   opacity: 0.5 !important; */
+/* } */
+
+li[data-bespoke-marp-fragment="inactive"],
+ol[data-bespoke-marp-fragment="inactive"],
+span[data-bespoke-marp-fragment="inactive"] {
+  visibility: visible !important;
+  opacity: 0.5 !important;
+  filter: blur(7px) !important;
+}
+
+span[data-bespoke-marp-fragment="inactive"].highblur {
+  visibility: visible !important;
+  opacity: 0.5 !important;
+  filter: blur(15px) !important;
+}
+
+figure[data-bespoke-marp-fragment="inactive"] {
+  visibility: visible !important;
+  opacity: 0.08 !important;
+  filter: blur(3px) contrast(0) brightness(2000)
+    drop-shadow(0px 0px 8px rgba(0, 0, 0, 1)) !important;
+}
+
+/* figure[data-bespoke-marp-fragment="inactive"] { */
+/*   visibility: visible !important; */
+/*   opacity: 1 !important; */
+/*   position: relative; */
+/* } */
+/**/
+/* figure[data-bespoke-marp-fragment="inactive"]::before { */
+/*   content: ""; */
+/*   position: absolute; */
+/*   top: 0; */
+/*   left: 0; */
+/*   right: 0; */
+/*   bottom: 0; */
+/*   background: #ffe; */
+/*   border-radius: 5px; */
+/*   box-shadow: */
+/*     inset 0px 0px 3px rgba(0, 0, 0, 0.5), */
+/*     inset 0px 0px 0px rgba(0, 0, 0, 0.3); */
+/*   z-index: 1; */
+/* } */
+/**/
+/* figure[data-bespoke-marp-fragment="inactive"] img, */
+/* figure[data-bespoke-marp-fragment="inactive"] iframe { */
+/*   opacity: 0 !important; */
+/* } */
+
+.figrow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  /* align-items: end; */
+  gap: 10px;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 8px;
+}
+
+.figrow figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.figrow img {
+  object-fit: cover;
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.4));
+  border-radius: 5px;
+}
+
+.portrait img {
+  aspect-ratio: 2/3;
+}
+
+.landscape img {
+  aspect-ratio: 16/9;
+}
+
+/* .figrow img { */
+/*   width: 100%; */
+/*   max-height: 400px; */
+/*   object-fit: contain; */
+/*   display: block; */
+/* } */
+
+.figrow figcaption {
+  width: 100%;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+  font-size: 0.4em;
+}
+
+.figrow figcaption:hover {
+  white-space: normal;
+  overflow: visible;
+}
+
+/* Container Columns */
+
+.cc {
+  display: flex;
+  gap: 1em;
+  align-items: center;
+}
+
+/* Default 50-50 split */
+.cc > *:first-child {
+  flex: 0 0 calc(var(--col, 50) * 1%);
+}
+
+.cc > *:last-child {
+  flex: 0 0 calc((100 - var(--col, 50)) * 1%);
+}
+
+/* Responsive stacking */
+@media (max-width: 800px) {
+  .cc {
+    flex-wrap: wrap;
+  }
+  .cc > * {
+    flex: 1 1 100% !important;
+  }
+}
+
+ol {
+  list-style: none;
+  counter-reset: item;
+  padding-left: 1em; /* Wider gutter for line numbers */
+  margin: 0; /* Align flush with container */
+}
+
+ol li {
+  counter-increment: item;
+  position: relative;
+  padding-left: 0.5em; /* Padding between number and content */
+}
+
+ol li::marker {
+  content: counter(item);
+  display: inline-block;
+  width: 2.5em; /* Fixed width for alignment */
+  margin-left: -3em; /* Pull into the gutter */
+  padding-right: 0.5em; /* Space between number and text */
+  text-align: right;
+  color: #999; /* Muted gray number color */
+  font-size: 0.8em; /* Slightly smaller than main text */
+  font-family: Menlo, Consolas, "Courier New", monospace;
+}
+
+/* Answer lines - stronger blur when inactive so you can identify them */
+li[data-answer="true"][data-bespoke-marp-fragment="inactive"] {
+  filter: blur(7px) !important;
+  opacity: 0.15 !important;
+  background-color: rgba(250, 160, 160, 0.95); /* subtle green tint */
+}
+
+/* Answer lines - normal display when active */
+li[data-answer="true"][data-bespoke-marp-fragment="active"] {
+  filter: none !important;
+  opacity: 1 !important;
+}

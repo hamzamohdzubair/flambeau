@@ -1,13 +1,6 @@
 {{yaml}}
 
-###### Applied Science
-
-<div class="tiles">
-</div>
-
----
-
-<!-- _class: lead invert -->
+{{title}}
 
 # Applied Science
 

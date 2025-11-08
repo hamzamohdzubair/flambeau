@@ -3,7 +3,7 @@ theme: blank2
 paginate: true
 transition: slide
 class: lead
-footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/index.html) [<iconify-icon icon="si:left-up-line" title="Back"></iconify-icon>](../index.html) [<iconify-icon icon="octicon:move-to-start-24" title="Start"></iconify-icon>](#1)'
+footer: '<span class="breadcrumb"></span>'
 ---
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,13 +28,6 @@ footer: '[<iconify-icon icon="hugeicons:home-11" title="Home"></iconify-icon>](/
 
   gtag('config', 'G-NLV7GHEJDK');
 </script>
-
-###### Applied Science
-
-<div class="tiles">
-</div>
-
----
 
 <!-- _class: lead invert -->
 

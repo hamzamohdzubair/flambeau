@@ -125,9 +125,25 @@ When creating educational content (slides in `md/` directory):
     #ans: red[:, :, 2] = 255
     ```
 
+### Non-Coding Content Formatting
+- **Use `*` for bullet lists** (not `-`) to enable fragment animations
+- **ALL list items are fragmented** by default for progressive reveal
+- **Answer marking with `ans:`**:
+  - Start answer list items with `ans:` prefix
+  - Questions and answers alternate in the list
+  - Engine automatically styles answer items with special blur/color when inactive
+  - Example:
+    ```markdown
+    * What is Newton's First Law?
+    * ans: Object at rest stays at rest unless acted upon by force
+    * What is acceleration?
+    * ans: Rate of change of velocity, a = Δv/Δt
+    ```
+
 ### File Structure
 Each topic file should follow this pattern:
 1. **Conceptual slides** (3-5 slides): Theory, math, algorithms, when/why to use
 2. **Code demonstration** (2-3 slides): Practical implementation examples
 3. **Exercises** (flexible count): Mix of conceptual questions and coding exercises
 - don't add apostrophe in tile text
+- remember, i will do testing at my end, you don't need to test

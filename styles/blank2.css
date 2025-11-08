@@ -203,6 +203,25 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* Breadcrumb Navigation */
+.breadcrumb {
+  display: inline-block;
+  font-size: 0.85em;
+  color: var(--text-secondary);
+}
+
+.breadcrumb a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
 /* ============================================
    TILES & CARDS - Navigation Grid
    ============================================ */

@@ -1,0 +1,1081 @@
+/* ==========================================================================
+   Flambeau deck styles. Every deck links this file and /deck/deck.js.
+   Slides fill the whole viewport (no letterboxing); type scales with it.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  --bg: #05060f;
+  --text: #f1f5f9;
+  --muted: #a8b3c7;
+  --faint: #64708f;
+  --violet: #8b5cf6;
+  --violet-soft: #a78bfa;
+  --pink: #ec4899;
+  --cyan: #22d3ee;
+  --green: #86efac;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  --gradient-text: linear-gradient(100deg, #c4b5fd 0%, #f0abfc 40%, #67e8f9 100%);
+  --glass: rgba(15, 18, 35, 0.6);
+  --glass-light: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.12);
+  --radius: 16px;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", var(--font);
+  --font-mono: "JetBrains Mono", ui-monospace, "Fira Code", monospace;
+  --bar-h: 3.4rem;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* One knob: everything is sized in rem, so slides scale with the window */
+  font-size: clamp(14px, 0.75vw + 0.8vh, 30px);
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.55;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Aurora backdrop shared by every slide */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -15%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(32% 40% at 12% 8%, rgba(124, 58, 237, 0.55), transparent 70%),
+    radial-gradient(30% 38% at 92% 95%, rgba(6, 182, 212, 0.4), transparent 70%),
+    radial-gradient(26% 30% at 65% 50%, rgba(236, 72, 153, 0.16), transparent 70%);
+  filter: blur(30px);
+  animation: aurora 26s ease-in-out infinite alternate;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
+  mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
+}
+
+@keyframes aurora {
+  to {
+    transform: translate(3%, 4%) rotate(5deg);
+  }
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.5);
+}
+
+a {
+  color: var(--violet-soft);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--cyan);
+}
+
+/* ==========================================================================
+   SLIDES
+   ========================================================================== */
+
+.slide {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  padding: calc(var(--bar-h) + 1.4rem) clamp(1.2rem, 6vw, 6rem) 3.2rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(3%) scale(0.985);
+  transition:
+    opacity 0.5s var(--ease),
+    transform 0.6s var(--ease),
+    visibility 0s linear 0.6s;
+}
+
+.slide.before {
+  transform: translateX(-3%) scale(0.985);
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.5s var(--ease),
+    transform 0.6s var(--ease),
+    visibility 0s;
+}
+
+/* Vertically centre the body of a slide below its title */
+.slide > :first-child {
+  margin-top: auto;
+}
+
+.slide > h2:first-of-type {
+  margin-top: 0;
+}
+
+.slide > h2:first-of-type + * {
+  margin-top: auto;
+}
+
+.slide > :last-child {
+  margin-bottom: auto;
+}
+
+.slide.top > h2:first-of-type + *,
+.slide.top > :first-child {
+  margin-top: 0;
+}
+
+/* Wide content gets the full width; prose stays readable */
+.slide > * {
+  max-width: 100%;
+}
+
+.slide > p,
+.slide > ul,
+.slide > ol,
+.slide > blockquote {
+  max-width: 62rem;
+}
+
+/* ---------- Headings ---------- */
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2.6rem, 6vw, 5.2rem);
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 2.1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+h3 {
+  font-size: 1.45rem;
+  font-weight: 500;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+h1,
+.slide > h2:first-of-type,
+.grad,
+.grad-each > * {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Gradient text is clipped to the element, so children that get their own
+   transform (GSAP word or letter animations) must carry it themselves:
+   give the heading class="grad-each" and wrap the pieces in spans. */
+.grad-each {
+  background: none;
+  color: inherit;
+}
+
+.grad-each > * {
+  display: inline-block;
+}
+
+/* Cover slide: big centred title */
+.slide.cover {
+  justify-content: center;
+  text-align: center;
+}
+
+.slide.cover > :first-child {
+  margin-top: 0;
+}
+
+.slide.cover > :last-child {
+  margin-bottom: 0;
+}
+
+.slide.cover .kicker {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.slide.cover p {
+  color: var(--muted);
+  font-size: 1.25rem;
+  max-width: 44rem;
+}
+
+/* Section divider slide */
+.slide.section {
+  justify-content: center;
+}
+
+.slide.section h2 {
+  font-size: 3.2rem;
+}
+
+/* ---------- Text ---------- */
+
+p {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--muted);
+}
+
+strong,
+b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+em {
+  color: #e9d5ff;
+}
+
+.lead {
+  font-size: 1.45rem;
+  color: var(--text);
+  text-align: center;
+}
+
+.muted {
+  color: var(--faint);
+}
+
+.center {
+  text-align: center;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding-left: 1.4em;
+  font-size: 1.15rem;
+  color: var(--muted);
+}
+
+li {
+  margin: 0.45em 0;
+}
+
+li::marker {
+  color: var(--violet-soft);
+}
+
+ol > li::marker {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+blockquote {
+  margin: 0;
+  padding: 0.9rem 1.4rem;
+  border-left: 3px solid var(--violet-soft);
+  border-radius: 0 12px 12px 0;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.14), transparent);
+  font-size: 1.2rem;
+  font-style: italic;
+  color: var(--text);
+}
+
+blockquote cite {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.85em;
+  font-style: normal;
+  color: var(--muted);
+}
+
+hr {
+  width: 100%;
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.5), transparent);
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.1em 0.45em;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--glass-light);
+}
+
+mark {
+  background: rgba(236, 72, 153, 0.3);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 0 0.2em;
+}
+
+/* ---------- Code ---------- */
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+:not(pre) > code {
+  padding: 0.12em 0.4em;
+  border-radius: 6px;
+  color: #f0abfc;
+  background: rgba(139, 92, 246, 0.14);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+pre {
+  margin: 0;
+  width: min(100%, 60rem);
+  padding: 1.1rem 1.3rem;
+  border-radius: var(--radius);
+  background: rgba(10, 12, 26, 0.78);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 24px 60px -16px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
+pre code {
+  display: block;
+  color: #e2e8f0;
+}
+
+/* Line-numbered code: deck.js wraps each line in .line */
+pre.lines code {
+  counter-reset: line;
+}
+
+pre .line {
+  display: block;
+  min-height: 1.6em;
+}
+
+pre.lines .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2em;
+  margin-right: 1em;
+  text-align: right;
+  color: #3b4566;
+  user-select: none;
+}
+
+/* Syntax colours (highlight.js classes) */
+.hljs-comment,
+.hljs-quote {
+  color: #6b7699;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-doctag {
+  color: #c4b5fd;
+}
+
+.hljs-string,
+.hljs-regexp {
+  color: #86efac;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-symbol {
+  color: #fdba74;
+}
+
+.hljs-title,
+.hljs-section {
+  color: #67e8f9;
+}
+
+.hljs-built_in,
+.hljs-type {
+  color: #f0abfc;
+}
+
+.hljs-meta {
+  color: #fbbf24;
+}
+
+.hljs-operator,
+.hljs-punctuation {
+  color: #94a3b8;
+}
+
+/* ---------- Media ---------- */
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+figure img,
+figure video {
+  display: block;
+  max-height: 60vh;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+figure img {
+  cursor: zoom-in;
+}
+
+figcaption {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* A row of figures that shares the width */
+.figs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: 1.2rem;
+  width: 100%;
+  align-items: start;
+}
+
+.figs figure img {
+  width: 100%;
+  max-height: 42vh;
+  object-fit: cover;
+}
+
+.figs.contain figure img {
+  object-fit: contain;
+}
+
+figure.landscape img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+figure.portrait img {
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+/* Embedded page or video */
+figure.frame {
+  width: 100%;
+}
+
+figure.frame iframe {
+  width: 100%;
+  height: 62vh;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* ---------- Layout helpers ---------- */
+
+.cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  width: 100%;
+  align-items: center;
+}
+
+.cols.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cols.top {
+  align-items: start;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  padding: 1.2rem 1.4rem;
+  border-radius: var(--radius);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.big {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2em 0.7em;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.1);
+  color: #a5f3fc;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  font-size: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(10, 12, 26, 0.6);
+}
+
+th,
+td {
+  padding: 0.55em 0.9em;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+th {
+  font-family: var(--font-display);
+  font-weight: 500;
+  background: rgba(139, 92, 246, 0.18);
+}
+
+tr:nth-child(2n) td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* ---------- Navigation tiles (index pages) ---------- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(12rem, 42vw), 1fr));
+  gap: 1rem;
+  width: min(100%, 64rem);
+}
+
+.tile {
+  --img: none;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 7.5rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(5, 6, 15, 0.05) 0%, rgba(5, 6, 15, 0.85) 100%),
+    var(--img) center / cover,
+    linear-gradient(135deg, #4c1d95, #0e7490);
+  box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.7);
+  transition:
+    transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease),
+    border-color 0.35s;
+}
+
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(6, 182, 212, 0.2));
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+
+.tile:hover {
+  color: #fff;
+  transform: translateY(-5px);
+  border-color: rgba(167, 139, 250, 0.7);
+  box-shadow: 0 22px 50px -14px rgba(139, 92, 246, 0.8);
+}
+
+.tile:hover::after {
+  opacity: 1;
+}
+
+.tile small {
+  display: block;
+  margin-top: 0.2rem;
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tile span {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   STEPS (fragments): revealed one at a time by deck.js
+   ========================================================================== */
+
+.step {
+  transition:
+    opacity 0.5s var(--ease),
+    transform 0.5s var(--ease),
+    filter 0.5s var(--ease);
+}
+
+.step:not(.shown) {
+  opacity: 0.12;
+  filter: blur(6px);
+  transform: translateY(0.6rem);
+}
+
+/* Variants via data-anim on the step */
+.step[data-anim="fade"]:not(.shown) {
+  filter: none;
+  transform: none;
+  opacity: 0;
+}
+
+.step[data-anim="left"]:not(.shown) {
+  opacity: 0;
+  filter: none;
+  transform: translateX(-2rem);
+}
+
+.step[data-anim="right"]:not(.shown) {
+  opacity: 0;
+  filter: none;
+  transform: translateX(2rem);
+}
+
+.step[data-anim="zoom"]:not(.shown) {
+  opacity: 0;
+  filter: none;
+  transform: scale(0.85);
+}
+
+.step[data-anim="hidden"]:not(.shown) {
+  opacity: 0;
+  filter: none;
+  transform: none;
+}
+
+/* Script-driven steps: CSS stays out of the way */
+.step[data-anim="none"],
+.step[data-anim="none"]:not(.shown) {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+
+/* Answers stay hidden behind a red blur until revealed */
+.answer:not(.shown) {
+  opacity: 0.25;
+  filter: blur(8px);
+  background: rgba(248, 113, 113, 0.35);
+  border-radius: 6px;
+}
+
+/* The step just revealed gets a soft highlight */
+pre .line.step.current {
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.18), transparent);
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   CHROME: top bar, progress, buttons, zoom overlay (built by deck.js)
+   ========================================================================== */
+
+.deck-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: var(--bar-h);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0 clamp(0.8rem, 2vw, 1.6rem);
+  font-size: 0.8rem;
+  background: linear-gradient(180deg, rgba(5, 6, 15, 0.85), rgba(5, 6, 15, 0));
+  transition:
+    opacity 0.4s,
+    transform 0.4s var(--ease);
+}
+
+.deck-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  padding: 0.35rem 0.75rem 0.35rem 0.4rem;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  transition: border-color 0.3s;
+}
+
+.deck-home:hover {
+  color: var(--text);
+  border-color: rgba(167, 139, 250, 0.7);
+}
+
+.deck-home i {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: url("https://hzubair.com/pic.png") center top / cover, var(--gradient);
+}
+
+.deck-home b {
+  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
+}
+
+.deck-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--faint);
+}
+
+.deck-crumbs a {
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.deck-crumbs a:hover {
+  color: var(--text);
+}
+
+.deck-crumbs .sep {
+  opacity: 0.5;
+}
+
+.deck-crumbs .here {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deck-tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+}
+
+.deck-count {
+  font-family: var(--font-mono);
+  color: var(--muted);
+  min-width: 4.5em;
+  text-align: right;
+}
+
+.deck-btn {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.3s,
+    background 0.3s,
+    opacity 0.3s;
+}
+
+.deck-btn:hover {
+  border-color: rgba(167, 139, 250, 0.7);
+  background: rgba(139, 92, 246, 0.25);
+}
+
+.deck-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.deck-btn svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.deck-nav {
+  position: fixed;
+  right: clamp(0.8rem, 2vw, 1.6rem);
+  bottom: 0.9rem;
+  z-index: 50;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.deck-progress {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 50;
+  height: 3px;
+  width: 100%;
+  background: var(--gradient);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.8);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.5s var(--ease);
+}
+
+/* A one-page deck (an index page) needs no counter or arrows */
+body.single .deck-count,
+body.single .deck-nav,
+body.single .deck-progress {
+  display: none;
+}
+
+/* Idle in fullscreen: chrome fades away */
+body.idle .deck-bar,
+body.idle .deck-nav {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.idle {
+  cursor: none;
+}
+
+.deck-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 4vh 4vw;
+  background: rgba(5, 6, 15, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  cursor: zoom-out;
+  transition: opacity 0.3s;
+}
+
+.deck-zoom.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.deck-zoom img {
+  width: 94vw;
+  height: 90vh;
+  object-fit: contain;
+  filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.8));
+  transform: scale(0.94);
+  transition: transform 0.35s var(--ease);
+}
+
+.deck-zoom.open img {
+  transform: none;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 760px) {
+  html {
+    font-size: 15px;
+  }
+
+  :root {
+    --bar-h: 3.2rem;
+  }
+
+  .slide {
+    padding: calc(var(--bar-h) + 1rem) 1rem 4.5rem;
+  }
+
+  h1 {
+    font-size: 2.6rem;
+  }
+
+  h2 {
+    font-size: 1.7rem;
+  }
+
+  .cols,
+  .cols.three {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-crumbs a,
+  .deck-crumbs .sep {
+    display: none;
+  }
+
+  .deck-home b {
+    display: none;
+  }
+
+  .deck-home {
+    padding: 0.35rem;
+  }
+
+  pre {
+    font-size: 0.8rem;
+    padding: 0.9rem;
+  }
+
+  .deck-nav .deck-btn {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body {
+    overflow: visible;
+  }
+
+  body::before,
+  body::after,
+  .deck-bar,
+  .deck-nav,
+  .deck-progress {
+    display: none;
+  }
+
+  .slide {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    height: 100vh;
+    page-break-after: always;
+    background: var(--bg);
+  }
+
+  .step:not(.shown),
+  .answer:not(.shown) {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    background: none;
+  }
+}

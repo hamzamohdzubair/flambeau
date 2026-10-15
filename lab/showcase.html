@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What a deck can do</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* Slide-specific styles live in the deck's own <style> */
+      #orbit canvas {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+      }
+
+      #orbit {
+        justify-content: flex-end;
+      }
+
+      #descent svg {
+        width: min(100%, 52rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      #descent .curve {
+        fill: none;
+        stroke: url(#curveGrad);
+        stroke-width: 4;
+      }
+
+      #descent .ball {
+        fill: #f0abfc;
+        filter: drop-shadow(0 0 12px #ec4899);
+      }
+
+      #descent .trail {
+        fill: #67e8f9;
+        opacity: 0.7;
+      }
+
+      #neurons .net {
+        width: min(100%, 46rem);
+      }
+
+      #neurons line {
+        stroke: rgba(167, 139, 250, 0.35);
+        stroke-width: 1.5;
+      }
+
+      #neurons circle {
+        fill: #0b0d1a;
+        stroke: #a78bfa;
+        stroke-width: 2.5;
+      }
+
+      #counter .big {
+        font-size: 7rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 1. Cover: GSAP staggers the title words in -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Flambeau · showcase</span>
+      <h1 class="grad-each"><span class="word">What</span> <span class="word">a</span> <span class="word">deck</span> <span class="word">can</span> <span class="word">do</span></h1>
+      <p>Plain HTML slides with steps, code, maths, GSAP motion graphics and three.js scenes.</p>
+    </section>
+
+    <!-- 2. Steps with different reveal animations -->
+    <section class="slide">
+      <h2>Steps reveal one at a time</h2>
+      <ul>
+        <li class="step">The default: fades up out of a blur</li>
+        <li class="step" data-anim="left">Slides in from the left</li>
+        <li class="step" data-anim="zoom">Zooms in</li>
+        <li class="step" data-anim="fade">Just fades</li>
+        <li class="answer">An answer stays hidden behind red until you reveal it</li>
+      </ul>
+    </section>
+
+    <!-- 3. Code with per-line steps and an answer line -->
+    <section class="slide">
+      <h2>Code, one line at a time</h2>
+      <pre class="steps"><code class="language-python">
+        import numpy as np
+
+        def softmax(z):
+            e = np.exp(z - z.max())
+            return e / e.sum()
+
+        softmax(np.array([2.0, 1.0, 0.1]))
+        # ans: array([0.659, 0.242, 0.099])
+      </code></pre>
+    </section>
+
+    <!-- 4. GSAP motion graphic: gradient descent rolling down a curve -->
+    <section class="slide" id="descent">
+      <h2>Gradient descent, animated</h2>
+      <svg viewBox="0 0 800 360" aria-label="A ball rolling down a loss curve to its minimum">
+        <defs>
+          <linearGradient id="curveGrad" x1="0" x2="1">
+            <stop offset="0" stop-color="#8b5cf6" />
+            <stop offset="0.5" stop-color="#ec4899" />
+            <stop offset="1" stop-color="#22d3ee" />
+          </linearGradient>
+        </defs>
+        <path class="curve" id="lossCurve" d="M 40 40 C 200 40, 260 330, 420 320 S 680 120, 760 60" />
+        <g class="trails"></g>
+        <circle class="ball" r="14" transform="translate(40 40)" />
+      </svg>
+      <p class="center">Each step moves downhill by the slope times the learning rate.</p>
+    </section>
+
+    <!-- 5. GSAP on step: a neural network lights up layer by layer -->
+    <section class="slide" id="neurons">
+      <h2>Signals through a network</h2>
+      <svg class="net" viewBox="0 0 600 300"></svg>
+      <p class="center">Press → to fire each layer.</p>
+      <span class="step" data-anim="none" data-step="1"></span>
+      <span class="step" data-anim="none" data-step="2"></span>
+      <span class="step" data-anim="none" data-step="3"></span>
+    </section>
+
+    <!-- 6. three.js scene behind the content -->
+    <section class="slide" id="orbit">
+      <canvas></canvas>
+      <h2>A three.js scene</h2>
+      <p class="center">Drag to orbit. It only renders while this slide is showing.</p>
+    </section>
+
+    <!-- 7. Maths with KaTeX -->
+    <section class="slide">
+      <h2>Maths renders itself</h2>
+      <p class="lead">$$P(y \mid \mathbf{x}) = \frac{P(\mathbf{x} \mid y)\,P(y)}{P(\mathbf{x})}$$</p>
+      <p class="step center">Naive Bayes assumes \(P(\mathbf{x} \mid y) = \prod_i P(x_i \mid y)\).</p>
+    </section>
+
+    <!-- 8. Layout helpers -->
+    <section class="slide">
+      <h2>Cards, columns and figures</h2>
+      <div class="cards">
+        <div class="card step"><h3>Steps</h3><p>Any element with <code>class="step"</code>.</p></div>
+        <div class="card step"><h3>Scenes</h3><p><code>Deck.scene()</code> hooks enter, leave and step.</p></div>
+        <div class="card step"><h3>Libraries</h3><p><code>Deck.load('gsap')</code> fetches on demand.</p></div>
+      </div>
+      <div class="figs">
+        <figure class="landscape"><img src="/assets/2025-10-18-19-56-26.png" alt="" /><figcaption>Click a picture to zoom</figcaption></figure>
+        <figure class="landscape"><img src="/assets/2025-10-19-00-42-10.png" alt="" /><figcaption>Figures share the row</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- 9. Counter: GSAP tweening a number on enter -->
+    <section class="slide cover" id="counter">
+      <span class="big grad">0</span>
+      <p>parameters in a small model, counted up when the slide appears</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".word"), { y: 60, opacity: 0, rotate: 6, stagger: 0.08, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.5, duration: 0.8 });
+        },
+      });
+
+      // Gradient descent along the SVG path
+      await Deck.load("gsapMotionPath");
+      Deck.scene("#descent", {
+        enter(slide) {
+          const ball = slide.querySelector(".ball");
+          const trails = slide.querySelector(".trails");
+          const path = slide.querySelector("#lossCurve");
+          trails.innerHTML = "";
+          const len = path.getTotalLength();
+          const tl = gsap.timeline();
+          // Big steps first, then smaller ones as the slope flattens
+          const stops = [0, 0.18, 0.3, 0.38, 0.43, 0.46, 0.475];
+          stops.forEach((t, k) => {
+            if (!k) return;
+            tl.to(ball, {
+              duration: 0.55,
+              ease: "power2.inOut",
+              motionPath: { path, start: stops[k - 1], end: t, align: path, alignOrigin: [0.5, 0.5] },
+              onComplete() {
+                const p = path.getPointAtLength(len * t);
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                dot.setAttribute("class", "trail");
+                dot.setAttribute("r", 5);
+                dot.setAttribute("cx", p.x);
+                dot.setAttribute("cy", p.y);
+                trails.appendChild(dot);
+                gsap.from(dot, { scale: 0, transformOrigin: "center", duration: 0.3 });
+              },
+            });
+          });
+          slide._tl = tl;
+        },
+        leave(slide) {
+          slide._tl?.kill();
+        },
+      });
+
+      // A small network drawn in SVG, fired layer by layer on each step
+      const layers = [3, 5, 5, 2];
+      const svg = document.querySelector("#neurons .net");
+      const ns = "http://www.w3.org/2000/svg";
+      const pos = layers.map((n, li) => Array.from({ length: n }, (_, k) => [70 + li * 153, 150 + (k - (n - 1) / 2) * 52]));
+      pos.slice(0, -1).forEach((col, li) =>
+        col.forEach(([x1, y1]) =>
+          pos[li + 1].forEach(([x2, y2]) => {
+            const l = document.createElementNS(ns, "line");
+            Object.entries({ x1, y1, x2, y2, "data-layer": li + 1 }).forEach(([k, v]) => l.setAttribute(k, v));
+            svg.appendChild(l);
+          })
+        )
+      );
+      pos.forEach((col, li) =>
+        col.forEach(([cx, cy]) => {
+          const c = document.createElementNS(ns, "circle");
+          Object.entries({ cx, cy, r: 15, "data-layer": li }).forEach(([k, v]) => c.setAttribute(k, v));
+          svg.appendChild(c);
+        })
+      );
+      const fire = (n, on) => {
+        if (n > 0) gsap.to(svg.querySelectorAll(`line[data-layer="${n}"]`), { stroke: on ? "#22d3ee" : "rgba(167,139,250,0.35)", strokeWidth: on ? 2.5 : 1.5, duration: 0.5, stagger: 0.01 });
+        gsap.to(svg.querySelectorAll(`circle[data-layer="${n}"]`), { fill: on ? "#8b5cf6" : "#0b0d1a", scale: on ? 1.15 : 1, transformOrigin: "center", duration: 0.4, delay: 0.25 });
+      };
+      Deck.scene("#neurons", {
+        enter() {
+          fire(0, true);
+        },
+        step: (slide, n) => fire(n, true),
+        unstep: (slide, n) => fire(n, false),
+      });
+
+      Deck.scene("#counter", {
+        enter(slide) {
+          const out = slide.querySelector(".big");
+          const obj = { v: 0 };
+          gsap.to(obj, { v: 124000000, duration: 2.2, ease: "power3.out", onUpdate: () => (out.textContent = Math.round(obj.v).toLocaleString()) });
+        },
+      });
+
+      // three.js: an icosahedron wrapped in a particle cloud
+      const THREE = await Deck.load("three");
+      const { OrbitControls } = await Deck.load("threeOrbit");
+      const slide = document.querySelector("#orbit");
+      const canvas = slide.querySelector("canvas");
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+      camera.position.set(0, 0, 6);
+      const controls = new OrbitControls(camera, canvas);
+      controls.enableZoom = false;
+
+      const mesh = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(1.6, 1),
+        new THREE.MeshStandardMaterial({ color: 0x8b5cf6, metalness: 0.3, roughness: 0.25, flatShading: true })
+      );
+      const wire = new THREE.LineSegments(new THREE.WireframeGeometry(mesh.geometry), new THREE.LineBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0.4 }));
+      mesh.add(wire);
+      scene.add(mesh);
+
+      const pts = new Float32Array(3000);
+      for (let i = 0; i < pts.length; i++) pts[i] = (Math.random() - 0.5) * 14;
+      const cloud = new THREE.Points(new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(pts, 3)), new THREE.PointsMaterial({ color: 0xf0abfc, size: 0.03 }));
+      scene.add(cloud);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+      const light = new THREE.PointLight(0x22d3ee, 40);
+      light.position.set(3, 3, 4);
+      scene.add(light);
+
+      let running = false;
+      function resize() {
+        const w = slide.clientWidth, h = slide.clientHeight;
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      function loop(t) {
+        if (!running) return;
+        mesh.rotation.y = t * 0.0004;
+        mesh.rotation.x = t * 0.0002;
+        cloud.rotation.y = -t * 0.00005;
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+      }
+      window.addEventListener("resize", resize);
+      Deck.scene("#orbit", {
+        enter() {
+          resize();
+          running = true;
+          requestAnimationFrame(loop);
+          gsap.from(mesh.scale, { x: 0.2, y: 0.2, z: 0.2, duration: 1.2, ease: "elastic.out(1, 0.5)" });
+        },
+        leave() {
+          running = false;
+        },
+      });
+    </script>
+  </body>
+</html>

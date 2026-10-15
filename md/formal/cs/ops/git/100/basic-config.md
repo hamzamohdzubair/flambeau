@@ -1,5 +1,0 @@
-{{yaml}}
-
-# GIT Basic Configuration
-
----

@@ -1,0 +1,43 @@
+name: Deploy slides
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # The decks are plain HTML: publish the repo as it is, minus repo-only files
+      - name: Collect site files
+        run: |
+          mkdir _site
+          rsync -a --exclude '.git' --exclude '.github' --exclude '_site' \
+            --exclude 'CLAUDE.md' --exclude '.gitignore' --exclude '.DS_Store' ./ _site/
+
+      - name: Install image optimization tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pngquant
+
+      - name: Compress PNGs
+        run: |
+          find _site/assets -type f -iname '*.png' \
+            -exec pngquant --force --quality=65-80 --skip-if-larger --ext .png --strip '{}' \;
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: ghp
+          force_orphan: true
+          cname: slides.hzubair.com

@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Perspective Transform</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.85rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 1.4rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 8rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 60rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      pre.ex {
+        width: min(100%, 64rem);
+        font-size: 0.95rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 0.95rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+      @media (max-width: 760px) {
+        .play {
+          grid-template-columns: 1fr;
+          gap: 0.8rem;
+        }
+
+        .codek {
+          grid-template-columns: 1fr;
+          gap: 1.4rem;
+        }
+
+        input[type="range"] {
+          width: 6.5rem;
+        }
+
+        pre.ex,
+        .qa pre {
+          font-size: 0.78rem;
+        }
+      }
+
+      #title svg {
+        width: min(24rem, 75vw);
+        height: auto;
+      }
+
+      #title .paper {
+        fill: rgba(241, 245, 249, 0.92);
+        stroke: #c4b5fd;
+        stroke-width: 2;
+      }
+
+      #title .txt {
+        stroke: #475569;
+        stroke-width: 3;
+        stroke-linecap: round;
+      }
+
+      #title .hd {
+        stroke: #7c3aed;
+        stroke-width: 7;
+        stroke-linecap: round;
+      }
+
+      #title .dot {
+        fill: #ec4899;
+      }
+
+      .pipe {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.8rem;
+        width: min(100%, 60rem);
+        counter-reset: s;
+      }
+
+      .pipe .card {
+        padding: 0.8rem 1rem;
+      }
+
+      .pipe .card h3 {
+        font-size: 1rem;
+      }
+
+      .pipe .card h3::before {
+        counter-increment: s;
+        content: counter(s) " · ";
+        color: var(--cyan);
+        font-family: var(--font-mono);
+      }
+
+      /* diagrams beside code */
+      .side svg {
+        width: min(20rem, 80vw);
+        height: auto;
+        overflow: visible;
+      }
+
+      .side svg text {
+        font: 13px var(--font-mono);
+        fill: var(--text);
+      }
+
+      .side .quad {
+        fill: rgba(139, 92, 246, 0.15);
+        stroke: #a78bfa;
+        stroke-width: 2;
+      }
+
+      .side .pt {
+        fill: #ec4899;
+      }
+
+      .side .meas {
+        stroke-width: 3;
+        stroke-linecap: round;
+        opacity: 0;
+      }
+
+      .side .tag-on {
+        fill: var(--green);
+      }
+
+      /* labs */
+      .lab {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+        gap: 1.4rem;
+        align-items: center;
+        width: min(100%, 66rem);
+      }
+
+      .lab .srcwrap {
+        position: relative;
+        touch-action: none;
+      }
+
+      .lab .srcwrap canvas {
+        display: block;
+        width: 100%;
+        border-radius: 12px;
+      }
+
+      .lab .srcwrap svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .lab .quadline {
+        fill: rgba(34, 211, 238, 0.12);
+        stroke: #22d3ee;
+        stroke-width: 2;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .lab .handle {
+        fill: #ec4899;
+        stroke: #fff;
+        stroke-width: 2;
+        vector-effect: non-scaling-stroke;
+        cursor: grab;
+      }
+
+      .lab .lbl {
+        font: 600 15px var(--font-mono);
+        fill: #fff;
+        paint-order: stroke;
+        stroke: #05060f;
+        stroke-width: 4px;
+        pointer-events: none;
+      }
+
+      .lab .right {
+        display: grid;
+        gap: 0.7rem;
+        justify-items: center;
+      }
+
+      .lab .right canvas {
+        max-width: 100%;
+        max-height: 46vh;
+        border-radius: 10px;
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.8);
+      }
+
+      .lab .mat {
+        grid-template-columns: repeat(3, auto);
+      }
+
+      .lab .mat > span {
+        min-width: 4.6rem;
+        height: 1.8rem;
+        font-size: 0.75rem;
+      }
+
+      @media (max-width: 760px) {
+        .pipe {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .lab {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <svg viewBox="0 0 320 240" aria-label="A tilted page straightening into a rectangle">
+        <polygon class="paper" points="" />
+        <g class="lines"></g>
+        <g class="dots"></g>
+      </svg>
+      <h1>Perspective Transform</h1>
+      <p>Four points in, a straight-on view out: scanning documents and looking at roads from above.</p>
+    </section>
+
+    <!-- ================================================================ document scanning -->
+    <section class="slide">
+      <h2>Document scanning</h2>
+      <div class="cols" style="width: min(100%, 60rem)">
+        <figure><img src="/assets/2025-10-22-18-33-22.png" alt="A loan application form photographed at an angle" /></figure>
+        <div>
+          <p><strong>Problem:</strong> a photo of a document taken from an angle.</p>
+          <p class="step"><strong>Solution:</strong> a perspective transform to a frontal view.</p>
+          <p class="step"><strong>Result:</strong> a rectangular, readable document.</p>
+        </div>
+      </div>
+      <div class="pipe">
+        <div class="card step"><h3>Detect corners</h3><p>Find the document's 4 corners.</p></div>
+        <div class="card step"><h3>Output rectangle</h3><p>Define where they should go.</p></div>
+        <div class="card step"><h3>Homography</h3><p>Compute the 3×3 matrix.</p></div>
+        <div class="card step"><h3>Warp</h3><p>Resample to the frontal view.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ corners -->
+    <section class="slide">
+      <h2>Finding document corners</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # threshold to binary
+        _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        # find contours
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # ans:
+        # find largest contour
+        largest = max(contours, key=cv2.contourArea)  # ans:
+        # approximate to polygon
+        epsilon = 0.02 * cv2.arcLength(largest, True)
+        approx = cv2.approxPolyDP(largest, epsilon, True)  # ans:
+        # ans: if len(approx) == 4, it's a rectangle (the document)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ order points -->
+    <section class="slide" id="order">
+      <h2>Ordering corner points</h2>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          # corners may be in any order: we need TL, TR, BR, BL
+          def order_points(pts):
+              rect = np.zeros((4, 2), dtype='float32')
+              # sum: TL has the smallest, BR the largest
+              s = pts.sum(axis=1)
+              rect[0] = pts[np.argmin(s)]  # top-left
+              rect[2] = pts[np.argmax(s)]  # bottom-right
+              # diff (y - x): TR has the smallest, BL the largest
+              diff = np.diff(pts, axis=1)
+              rect[1] = pts[np.argmin(diff)]  # top-right
+              rect[3] = pts[np.argmax(diff)]  # bottom-left
+              return rect
+          ordered_pts = order_points(approx.reshape(4, 2))  # ans:
+        </code></pre>
+        <div class="side">
+          <svg viewBox="0 0 300 240"></svg>
+          <p class="readout"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ output size -->
+    <section class="slide" id="size">
+      <h2>Computing the output size</h2>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          # compute width and height of output
+          (tl, tr, br, bl) = ordered_pts  # ans:
+          # width = max of top and bottom widths
+          widthA = np.sqrt((br[0] - bl[0])**2 + (br[1] - bl[1])**2)  # ans:
+          widthB = np.sqrt((tr[0] - tl[0])**2 + (tr[1] - tl[1])**2)  # ans:
+          maxWidth = int(max(widthA, widthB))  # ans:
+          # height = max of left and right heights
+          heightA = np.sqrt((tr[0] - br[0])**2 + (tr[1] - br[1])**2)  # ans:
+          heightB = np.sqrt((tl[0] - bl[0])**2 + (tl[1] - bl[1])**2)  # ans:
+          maxHeight = int(max(heightA, heightB))  # ans:
+        </code></pre>
+        <div class="side">
+          <svg viewBox="0 0 300 240"></svg>
+          <p class="readout"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ complete scan -->
+    <section class="slide">
+      <h2>Complete document scan</h2>
+      <pre class="steps"><code class="language-python">
+        # source points (detected corners)
+        src = ordered_pts
+        # destination points (rectangle)
+        dst = np.array([[0, 0],  # ans:
+                        [maxWidth - 1, 0],  # ans:
+                        [maxWidth - 1, maxHeight - 1],  # ans:
+                        [0, maxHeight - 1]], dtype='float32')  # ans:
+        # compute perspective transform
+        M = cv2.getPerspectiveTransform(src, dst)  # ans:
+        # apply transform
+        warped = cv2.warpPerspective(img, M, (maxWidth, maxHeight))  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ scanner lab -->
+    <section class="slide top" id="scan">
+      <h2>Scan it, live</h2>
+      <div class="lab">
+        <div class="srcwrap"><canvas width="960" height="641"></canvas><svg viewBox="0 0 960 641"></svg></div>
+        <div class="right">
+          <canvas class="out"></canvas>
+          <p class="readout"></p>
+          <div class="mat"></div>
+          <div class="chips" data-interactive><button class="chip ghost" data-act="shuffle">Shuffle the corner order</button><button class="chip ghost" data-act="reset">Reset</button></div>
+        </div>
+      </div>
+      <p class="muted center" style="font-size: 0.85rem">Drag the pink corners. Labels come from <code>order_points</code>, so the order you pick them in does not matter.</p>
+    </section>
+
+    <!-- ================================================================ bird's eye -->
+    <section class="slide">
+      <h2>Bird's eye view</h2>
+      <p class="lead"><strong>Purpose:</strong> a top-down view of a scene.</p>
+      <div class="cols top" style="width: min(100%, 56rem)">
+        <div class="card"><h3>Use cases</h3><ul><li class="step">Lane detection</li><li class="step">Parking assistance</li><li class="step">Sports analysis</li></ul></div>
+        <div class="card"><h3>Method: the same as a document scan</h3><ol><li class="step">Define a region of interest: a trapezoid on the road</li><li class="step">Map it to a rectangle: the top-down view</li></ol></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Bird's eye view example</h2>
+      <pre class="steps"><code class="language-python">
+        # road region (trapezoid)
+        h, w = img.shape[:2]
+        src = np.float32([[w*0.45, h*0.6],  # ans:
+                          [w*0.55, h*0.6],  # ans:
+                          [w*0.9, h],  # ans:
+                          [w*0.1, h]])  # ans:
+        # bird's eye view (rectangle)
+        dst = np.float32([[0, 0],  # ans:
+                          [w, 0],  # ans:
+                          [w, h],  # ans:
+                          [0, h]])  # ans:
+        # transform
+        M = cv2.getPerspectiveTransform(src, dst)
+        birds_eye = cv2.warpPerspective(img, M, (w, h))  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ road lab -->
+    <section class="slide top" id="road">
+      <h2>From the driver's seat to above</h2>
+      <div class="lab">
+        <div class="srcwrap"><canvas width="550" height="366"></canvas><svg viewBox="0 0 550 366"></svg></div>
+        <div class="right">
+          <canvas class="out" width="550" height="366"></canvas>
+          <p class="readout"></p>
+          <div class="chips" data-interactive><button class="chip" data-act="inv">Map it back (inverse)</button><button class="chip ghost" data-act="fit">Fitted trapezoid</button><button class="chip ghost" data-act="code">The code's trapezoid</button></div>
+        </div>
+      </div>
+      <p class="muted center" style="font-size: 0.85rem">The points keep the code's order, src[0] to src[3]. The fitted trapezoid's sides point at the vanishing point, so the lane lines come out parallel; the code's own trapezoid sits almost on this photo's horizon, so it magnifies a tiny patch. Drag a corner to see what a bad trapezoid does. (<code>order_points</code> would mislabel this wide trapezoid: its bottom-left corner has the smallest x + y.)</p>
+    </section>
+
+    <!-- ================================================================ inverse -->
+    <section class="slide">
+      <h2>Inverse perspective</h2>
+      <p class="lead"><strong>Purpose:</strong> map the bird's eye view back to the original perspective, using the inverse of the homography.</p>
+      <pre class="steps"><code class="language-python">
+        # forward transform
+        M = cv2.getPerspectiveTransform(src, dst)
+        birds_eye = cv2.warpPerspective(img, M, (w, h))
+        # inverse transform
+        M_inv = cv2.getPerspectiveTransform(dst, src)  # ans:
+        original = cv2.warpPerspective(birds_eye, M_inv, (w, h))  # ans:
+        # or use numpy inverse
+        M_inv = np.linalg.inv(M)  # ans:
+      </code></pre>
+      <p class="muted center">Anything the forward warp threw away (the sky, the verges) stays black: the inverse only undoes the geometry.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is a perspective transform used for?</p><p class="answer">Document scanning, bird's eye views, rectification.</p></div>
+        <div class="q"><p>How many points are needed?</p><p class="answer">4 point pairs (source and destination).</p></div>
+        <div class="q"><p>What is a homography?</p><p class="answer">A 3×3 perspective transformation matrix.</p></div>
+        <div class="q"><p>Why order the corner points?</p><p class="answer">To ensure the correct TL, TR, BR, BL correspondence.</p></div>
+        <div class="q"><p>What is a bird's eye view?</p><p class="answer">A top-down perspective of the scene.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>How do you compute the output rectangle size?</p><p class="answer">Measure the distances in the source and take the max width and height.</p></div>
+        <div class="q"><p>What is inverse perspective?</p><p class="answer">Transforming back from the warped view to the original.</p></div>
+        <div class="q"><p>How do you get the inverse homography?</p><p class="answer"><code>cv2.getPerspectiveTransform(dst, src)</code> or <code>np.linalg.inv(M)</code>.</p></div>
+        <div class="q"><p>The document scan steps?</p><p class="answer">Detect corners, order the points, compute the homography, warp.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # perspective transform with 4 points
+        pts1 = np.float32([[56, 65], [368, 52], [28, 387], [389, 390]])
+        pts2 = np.float32([[0, 0], [300, 0], [0, 300], [300, 300]])
+        M = cv2.getPerspectiveTransform(pts1, pts2)  # ans:
+        result = cv2.warpPerspective(img, M, (300, 300))  # ans:
+      </code></pre>
+      <p class="muted center">Here the points are listed TL, TR, BL, BR: any order works as long as both lists use the same one.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # order points function
+        def order_points(pts):
+            rect = np.zeros((4, 2), dtype='float32')
+            s = pts.sum(axis=1)
+            rect[0] = pts[np.argmin(s)]  # ans:
+            rect[2] = pts[np.argmax(s)]  # ans:
+            diff = np.diff(pts, axis=1)
+            rect[1] = pts[np.argmin(diff)]  # ans:
+            rect[3] = pts[np.argmax(diff)]  # ans:
+            return rect
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # bird's eye view transform
+        h, w = img.shape[:2]
+        src = np.float32([[w*0.45, h*0.6], [w*0.55, h*0.6], [w*0.9, h], [w*0.1, h]])
+        dst = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+        M = cv2.getPerspectiveTransform(src, dst)  # ans:
+        birds_eye = cv2.warpPerspective(img, M, (w, h))  # ans:
+        # inverse transform
+        M_inv = cv2.getPerspectiveTransform(dst, src)  # ans:
+        original = cv2.warpPerspective(birds_eye, M_inv, (w, h))  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      // ------------------------------------------------------------ homographies
+      function solve(A, b) {
+        const n = b.length;
+        const M = A.map((r, i) => [...r, b[i]]);
+        for (let c = 0; c < n; c++) {
+          let p = c;
+          for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+          [M[c], M[p]] = [M[p], M[c]];
+          if (Math.abs(M[c][c]) < 1e-12) return null;
+          for (let r = 0; r < n; r++) {
+            if (r === c) continue;
+            const f = M[r][c] / M[c][c];
+            for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k];
+          }
+        }
+        return M.map((r, i) => r[n] / r[i]);
+      }
+      // The system cv2.getPerspectiveTransform solves: 4 point pairs -> 3x3 matrix (h33 = 1)
+      function getPerspectiveTransform(src, dst) {
+        const A = [], b = [];
+        src.forEach(([x, y], i) => {
+          const [u, v] = dst[i];
+          A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]);
+          b.push(u);
+          A.push([0, 0, 0, x, y, 1, -v * x, -v * y]);
+          b.push(v);
+        });
+        const h = solve(A, b);
+        return h && [...h, 1];
+      }
+      const mapPoint = (H, [x, y]) => {
+        const z = H[6] * x + H[7] * y + H[8];
+        return [(H[0] * x + H[1] * y + H[2]) / z, (H[3] * x + H[4] * y + H[5]) / z];
+      };
+      // warpPerspective: each output pixel looks up src at Hinv * (x, y), bilinear, black outside
+      function warpPerspective(src, M, w, h) {
+        const out = new ImageData(w, h);
+        const Hi = getPerspectiveTransform([[0, 0], [1, 0], [1, 1], [0, 1]].map((p) => mapPoint(M, p)), [[0, 0], [1, 0], [1, 1], [0, 1]]);
+        if (!Hi) return out;
+        const sw = src.width, sh = src.height, d = src.data;
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++) {
+            const [sx, sy] = mapPoint(Hi, [x, y]);
+            const o = (y * w + x) * 4;
+            out.data[o + 3] = 255;
+            if (sx < 0 || sy < 0 || sx > sw - 1 || sy > sh - 1) continue;
+            const x0 = Math.floor(sx), y0 = Math.floor(sy), fx = sx - x0, fy = sy - y0;
+            const x1 = Math.min(x0 + 1, sw - 1), y1 = Math.min(y0 + 1, sh - 1);
+            for (let c = 0; c < 3; c++) {
+              const a = d[(y0 * sw + x0) * 4 + c], b = d[(y0 * sw + x1) * 4 + c], e = d[(y1 * sw + x0) * 4 + c], f = d[(y1 * sw + x1) * 4 + c];
+              out.data[o + c] = (a * (1 - fx) + b * fx) * (1 - fy) + (e * (1 - fx) + f * fx) * fy;
+            }
+          }
+        return out;
+      }
+      // order_points from the slides: TL, TR, BR, BL by sums and differences
+      function orderPoints(pts) {
+        const s = pts.map(([x, y]) => x + y), d = pts.map(([x, y]) => y - x);
+        const arg = (a, f) => a.indexOf(f(...a));
+        return [pts[arg(s, Math.min)], pts[arg(d, Math.min)], pts[arg(s, Math.max)], pts[arg(d, Math.max)]];
+      }
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        parent?.appendChild(e);
+        return e;
+      };
+      const lerp = (a, b, t) => a.map((p, i) => [p[0] + (b[i][0] - p[0]) * t, p[1] + (b[i][1] - p[1]) * t]);
+      const ptsAttr = (q) => q.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" ");
+
+      // ------------------------------------------------------------ cover: a tilted page straightens
+      {
+        const svg = document.querySelector("#title svg");
+        const paper = svg.querySelector(".paper");
+        const RECT = [[70, 20], [250, 20], [250, 220], [70, 220]];
+        const TILT = [[40, 70], [215, 18], [300, 175], [95, 228]];
+        const U = [[0, 0], [1, 0], [1, 1], [0, 1]];
+        const rows = [[0.12, 0.15, 0.88, "hd"], ...Array.from({ length: 7 }, (_, i) => [0.1, 0.32 + i * 0.09, i % 3 === 2 ? 0.6 : 0.9, "txt"])];
+        const lines = rows.map(([x0, y, x1, cls]) => el("line", { class: cls }, svg.querySelector(".lines")));
+        const dots = U.map(() => el("circle", { class: "dot", r: 6 }, svg.querySelector(".dots")));
+        const st = { t: 0 };
+        function draw() {
+          const q = lerp(TILT, RECT, st.t);
+          paper.setAttribute("points", ptsAttr(q));
+          const H = getPerspectiveTransform(U, q);
+          rows.forEach(([x0, y, x1], i) => {
+            const a = mapPoint(H, [x0, y]), b = mapPoint(H, [x1, y]);
+            lines[i].setAttribute("x1", a[0]);
+            lines[i].setAttribute("y1", a[1]);
+            lines[i].setAttribute("x2", b[0]);
+            lines[i].setAttribute("y2", b[1]);
+          });
+          dots.forEach((d, i) => (d.setAttribute("cx", q[i][0]), d.setAttribute("cy", q[i][1])));
+        }
+        draw();
+        let tl = null;
+        Deck.scene("#title", {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+            tl?.kill();
+            st.t = 0;
+            draw();
+            tl = gsap.timeline({ repeat: -1, repeatDelay: 1, delay: 0.6, yoyo: true }).to(st, { t: 1, duration: 1.8, ease: "power2.inOut", onUpdate: draw }).to({}, { duration: 1.2 });
+          },
+          leave: () => tl?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ order_points diagram
+      const QUAD = [[60, 70], [230, 30], [265, 200], [40, 190]]; // TL TR BR BL, in picture order
+      {
+        const sl = document.querySelector("#order");
+        const svg = sl.querySelector("svg");
+        el("polygon", { class: "quad", points: ptsAttr(QUAD) }, svg);
+        const shuffled = [QUAD[2], QUAD[0], QUAD[3], QUAD[1]];
+        const NAMES = ["TL", "TR", "BR", "BL"];
+        const labels = shuffled.map(([x, y]) => {
+          el("circle", { class: "pt", cx: x, cy: y, r: 6 }, svg);
+          return el("text", { x: x + (x < 150 ? -58 : 10), y: y + (y < 100 ? -12 : 22) }, svg);
+        });
+        const read = sl.querySelector(".readout");
+        function stage(n) {
+          // n: 0 = raw, 1 = sums, 2 = diffs, 3 = named
+          shuffled.forEach(([x, y], i) => {
+            const name = NAMES[QUAD.indexOf(shuffled[i])];
+            labels[i].textContent = n === 0 ? `pts[${i}]` : n === 1 ? `x+y=${x + y}` : n === 2 ? `y−x=${y - x}` : name;
+            labels[i].setAttribute("class", n === 3 || (n === 1 && (name === "TL" || name === "BR")) || (n === 2 && (name === "TR" || name === "BL")) ? "tag-on" : "");
+          });
+          read.innerHTML = ["Four corners, in whatever order the contour gave them", "Smallest sum → <b>TL</b>, largest → <b>BR</b>", "Smallest y−x → <b>TR</b>, largest → <b>BL</b>", "Ordered: TL, TR, BR, BL"][n];
+        }
+        stage(0);
+        Deck.scene("#order", {
+          enter: () => stage(0),
+          step: (slide, n) => stage(n >= 13 ? 3 : n >= 9 ? 2 : n >= 5 ? 1 : 0),
+          unstep: (slide, n) => stage(n - 1 >= 13 ? 3 : n - 1 >= 9 ? 2 : n - 1 >= 5 ? 1 : 0),
+        });
+      }
+
+      // ------------------------------------------------------------ output size diagram
+      {
+        const sl = document.querySelector("#size");
+        const svg = sl.querySelector("svg");
+        const [tl, tr, br, bl] = QUAD;
+        el("polygon", { class: "quad", points: ptsAttr(QUAD) }, svg);
+        QUAD.forEach(([x, y]) => el("circle", { class: "pt", cx: x, cy: y, r: 5 }, svg));
+        const seg = (a, b, color) => el("line", { class: "meas", x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: color }, svg);
+        const M = { wA: seg(bl, br, "#22d3ee"), wB: seg(tl, tr, "#22d3ee"), hA: seg(tr, br, "#fbbf24"), hB: seg(tl, bl, "#fbbf24") };
+        const len = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+        const read = sl.querySelector(".readout");
+        function stage(s) {
+          const on = { wA: s >= 4, wB: s >= 5, hA: s >= 8, hB: s >= 9 };
+          Object.entries(M).forEach(([k, l]) => gsap.to(l, { opacity: on[k] ? 1 : 0, duration: 0.4 }));
+          const parts = [];
+          if (s >= 4) parts.push(`widthA=${len(bl, br).toFixed(0)}`);
+          if (s >= 5) parts.push(`widthB=${len(tl, tr).toFixed(0)}`);
+          if (s >= 6) parts.push(`maxWidth=<b>${Math.floor(Math.max(len(bl, br), len(tl, tr)))}</b>`);
+          if (s >= 8) parts.push(`heightA=${len(tr, br).toFixed(0)}`);
+          if (s >= 9) parts.push(`heightB=${len(tl, bl).toFixed(0)}`);
+          if (s >= 10) parts.push(`maxHeight=<b>${Math.floor(Math.max(len(tr, br), len(tl, bl)))}</b>`);
+          read.innerHTML = parts.join(" · ") || "&nbsp;";
+        }
+        Deck.scene("#size", { enter: () => stage(0), step: (sl, n) => stage(n), unstep: (sl, n) => stage(n - 1) });
+      }
+
+      // ------------------------------------------------------------ draggable quad lab (shared)
+      function quadLab(sl, { image, W, H, start, order = true, onRender }) {
+        start = start.map((p) => [...p]);
+        const cv = sl.querySelector(".srcwrap canvas");
+        const svg = sl.querySelector(".srcwrap svg");
+        const ctx = cv.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(image, 0, 0, W, H);
+        const src = ctx.getImageData(0, 0, W, H);
+        let pts = start.map((p) => [...p]);
+        const poly = el("polygon", { class: "quadline" }, svg);
+        const handles = pts.map(() => el("circle", { class: "handle", r: Math.round(W / 70) }, svg));
+        const labels = pts.map(() => el("text", { class: "lbl", style: `font-size:${Math.round(W / 40)}px` }, svg));
+        let raf = 0;
+        function render() {
+          raf = 0;
+          const ordered = order ? orderPoints(pts) : pts;
+          poly.setAttribute("points", ptsAttr(ordered));
+          pts.forEach((p, i) => {
+            handles[i].setAttribute("cx", p[0]);
+            handles[i].setAttribute("cy", p[1]);
+            const name = order ? ["TL", "TR", "BR", "BL"][ordered.indexOf(p)] || "?" : `src[${i}]`;
+            labels[i].textContent = name;
+            labels[i].setAttribute("x", p[0] + W / 50);
+            labels[i].setAttribute("y", p[1] - W / 60);
+          });
+          onRender(src, ordered);
+        }
+        const schedule = () => raf || (raf = requestAnimationFrame(render));
+        let drag = -1;
+        svg.addEventListener("pointerdown", (e) => {
+          const r = svg.getBoundingClientRect();
+          const px = ((e.clientX - r.left) / r.width) * W, py = ((e.clientY - r.top) / r.height) * H;
+          let best = -1, bd = 1e9;
+          pts.forEach((p, i) => {
+            const d = Math.hypot(p[0] - px, p[1] - py);
+            if (d < bd) (bd = d), (best = i);
+          });
+          if (bd < W / 12) {
+            drag = best;
+            svg.setPointerCapture(e.pointerId);
+          }
+        });
+        svg.addEventListener("pointermove", (e) => {
+          if (drag < 0) return;
+          const r = svg.getBoundingClientRect();
+          pts[drag][0] = clamp(((e.clientX - r.left) / r.width) * W, 0, W - 1);
+          pts[drag][1] = clamp(((e.clientY - r.top) / r.height) * H, 0, H - 1);
+          schedule();
+        });
+        svg.addEventListener("pointerup", () => (drag = -1));
+        return {
+          render,
+          reset(to = start) {
+            pts.forEach((p, i) => ((p[0] = to[i][0]), (p[1] = to[i][1])));
+            schedule();
+          },
+          shuffle() {
+            pts = [pts[2], pts[0], pts[3], pts[1]];
+            schedule();
+          },
+        };
+      }
+
+      // ------------------------------------------------------------ document scanner
+      {
+        const sl = document.querySelector("#scan");
+        const W = 960, H = 641;
+        const doc = await loadImage("/assets/2025-10-22-18-33-22.png");
+        const out = sl.querySelector("canvas.out");
+        const read = sl.querySelector(".readout");
+        const mat = sl.querySelector(".mat");
+        const START = [[0.2016, 0.298], [0.797, 0.018], [0.992, 0.749], [0.428, 0.996]].map(([x, y]) => [x * W, y * H]);
+        const f2 = (v) => (Math.abs(v) < 0.0005 ? "0" : Math.abs(v) < 0.01 ? v.toExponential(1) : (+v.toFixed(2)).toString());
+        const lab = quadLab(sl, {
+          image: doc, W, H, start: START,
+          onRender(src, [tl, tr, br, bl]) {
+            const len = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+            let mw = Math.floor(Math.max(len(bl, br), len(tl, tr))), mh = Math.floor(Math.max(len(tr, br), len(tl, bl)));
+            // keep the preview small enough to stay interactive
+            const k = Math.min(1, 520 / Math.max(mw, mh));
+            const ow = Math.max(2, Math.round(mw * k)), oh = Math.max(2, Math.round(mh * k));
+            const M = getPerspectiveTransform([tl, tr, br, bl], [[0, 0], [ow - 1, 0], [ow - 1, oh - 1], [0, oh - 1]]);
+            if (!M) return;
+            show(out, warpPerspective(src, M, ow, oh));
+            const Mfull = getPerspectiveTransform([tl, tr, br, bl], [[0, 0], [mw - 1, 0], [mw - 1, mh - 1], [0, mh - 1]]);
+            mat.innerHTML = Mfull.map((v) => `<span>${f2(v)}</span>`).join("");
+            read.innerHTML = `maxWidth=<b>${mw}</b>, maxHeight=<b>${mh}</b> · M = getPerspectiveTransform(src, dst):`;
+          },
+        });
+        sl.querySelector("[data-act=shuffle]").addEventListener("click", lab.shuffle);
+        sl.querySelector("[data-act=reset]").addEventListener("click", lab.reset);
+        lab.render();
+      }
+
+      // ------------------------------------------------------------ bird's eye
+      {
+        const sl = document.querySelector("#road");
+        const W = 550, H = 366;
+        const road = await loadImage("/assets/2025-10-08-22-41-32.png");
+        const out = sl.querySelector("canvas.out");
+        const read = sl.querySelector(".readout");
+        const invBtn = sl.querySelector("[data-act=inv]");
+        let inverse = false;
+        const CODE = [[W * 0.45, H * 0.6], [W * 0.55, H * 0.6], [W * 0.9, H - 1], [W * 0.1, H - 1]];
+        // the same bottom corners, with the top edge lower down, on lines through the vanishing point
+        const START = [[W * 0.346, H * 0.72], [W * 0.654, H * 0.72], [W * 0.9, H - 1], [W * 0.1, H - 1]];
+        const lab = quadLab(sl, {
+          image: road, W, H, start: START, order: false,
+          onRender(src, q) {
+            const dst = [[0, 0], [W, 0], [W, H], [0, H]];
+            const M = getPerspectiveTransform(q, dst);
+            if (!M) return;
+            const birds = warpPerspective(src, M, W, H);
+            if (inverse) {
+              const Minv = getPerspectiveTransform(dst, q);
+              show(out, warpPerspective(birds, Minv, W, H));
+              read.innerHTML = `original = warpPerspective(birds_eye, <b>M_inv</b>, (w, h))`;
+            } else {
+              show(out, birds);
+              read.innerHTML = `birds_eye = warpPerspective(img, <b>M</b>, (w, h))`;
+            }
+          },
+        });
+        invBtn.addEventListener("click", () => {
+          inverse = !inverse;
+          invBtn.classList.toggle("on", inverse);
+          invBtn.textContent = inverse ? "Show the bird's eye view" : "Map it back (inverse)";
+          lab.render();
+        });
+        sl.querySelector("[data-act=fit]").addEventListener("click", () => lab.reset(START));
+        sl.querySelector("[data-act=code]").addEventListener("click", () => lab.reset(CODE));
+        lab.render();
+      }
+    </script>
+  </body>
+</html>

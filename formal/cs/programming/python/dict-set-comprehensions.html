@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dict and Set Comprehensions</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      pre code,
+      .pipe {
+        font-variant-ligatures: none;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 28rem);
+      }
+
+      /* The answer waits for the pipeline to finish */
+      pre .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      /* ---------- Comprehension pipeline: items flow from the source, through the filter and the expression, into the result ---------- */
+      .pipe {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        gap: 1.6rem;
+        width: min(100%, 66rem);
+        font-family: var(--font-mono);
+      }
+
+      .stage {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 0.9rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      .stage + .stage::before {
+        content: "→";
+        position: absolute;
+        left: -1.3rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--faint);
+        font-size: 1.2rem;
+      }
+
+      .stage h4 {
+        margin: 0;
+        font: 600 0.68rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .stage > code {
+        margin: auto 0;
+        color: var(--text);
+        font-size: 1rem;
+        white-space: nowrap;
+      }
+
+      .stage.src,
+      .stage.dst {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .stage.gate {
+        border-color: rgba(251, 191, 36, 0.45);
+      }
+
+      .stage.expr {
+        border-color: rgba(34, 211, 238, 0.45);
+      }
+
+      .stage.dst {
+        border-color: rgba(167, 139, 250, 0.6);
+      }
+
+      .stage .items {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.35rem;
+        min-height: 2rem;
+      }
+
+      .tok {
+        display: inline-block;
+        padding: 0.18rem 0.5rem;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.45);
+        background: rgba(139, 92, 246, 0.14);
+        font-size: 0.9rem;
+        white-space: nowrap;
+        transition:
+          opacity 0.3s,
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .src .tok.done {
+        opacity: 0.35;
+      }
+
+      .src .tok.cur {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.22);
+      }
+
+      .dst .tok {
+        border-color: rgba(240, 171, 252, 0.55);
+        background: rgba(236, 72, 153, 0.16);
+      }
+
+      .dst.set .tok {
+        border-radius: 999px;
+      }
+
+      .tok.flying {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 3;
+        pointer-events: none;
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.3);
+      }
+
+      .tok.rejected {
+        border-color: var(--red);
+        background: rgba(248, 113, 113, 0.3);
+      }
+
+      .pipe-note {
+        min-height: 1.4em;
+        margin: 0;
+        color: var(--cyan);
+        font-size: 0.95rem;
+        text-align: center;
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      .replay {
+        padding: 0.2rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.8rem var(--font);
+        cursor: pointer;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      @media (max-width: 760px) {
+        .pipe {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .stage + .stage::before {
+          content: "↓";
+          left: 50%;
+          top: -1.05rem;
+          transform: translateX(-50%);
+        }
+
+        .stage {
+          padding: 0.45rem 0.6rem;
+        }
+
+        .tok {
+          font-size: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · comprehensions</span>
+      <h1 class="grad-each"><span>Dict</span> <span>&amp;</span> <span>Set</span> <span>Comprehensions</span></h1>
+      <p>Build a whole dictionary or set in one line: take items from an iterable, optionally filter them, and transform each one.</p>
+    </section>
+
+    <!-- ================================================================ dict basic -->
+    <section class="slide" id="dict-basic">
+      <h2>Dict comprehension</h2>
+      <pre><code class="language-python">
+        # basic dict comprehension
+        squares = {x: x**2 for x in range(5)}
+        # ans: {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <!-- ================================================================ zip -->
+    <section class="slide" id="dict-zip">
+      <h2>Dict from two lists</h2>
+      <pre><code class="language-python">
+        # zip two lists
+        keys = ["a", "b", "c"]
+        values = [1, 2, 3]
+        d = {k: v for k, v in zip(keys, values)}
+        # ans: {'a': 1, 'b': 2, 'c': 3}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <!-- ================================================================ condition -->
+    <section class="slide" id="dict-if">
+      <h2>Dict with a condition</h2>
+      <pre><code class="language-python">
+        # filter dict
+        numbers = range(10)
+        even_squares = {x: x**2 for x in numbers
+                                if x % 2 == 0}
+        # ans: {0: 0, 2: 4, 4: 16, 6: 36, 8: 64}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <!-- ================================================================ swap -->
+    <section class="slide" id="dict-swap">
+      <h2>Swap keys and values</h2>
+      <pre><code class="language-python">
+        # swap dict
+        original = {"a": 1, "b": 2}
+        swapped = {v: k for k, v in original.items()}
+        # ans: {1: 'a', 2: 'b'}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <!-- ================================================================ set basic -->
+    <section class="slide" id="set-basic">
+      <h2>Set comprehension</h2>
+      <pre><code class="language-python">
+        # basic set comprehension
+        squares = {x**2 for x in range(5)}
+        # ans: {0, 1, 4, 9, 16}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <!-- ================================================================ set dups -->
+    <section class="slide" id="set-dups">
+      <h2>A set removes duplicates</h2>
+      <pre><code class="language-python">
+        # auto-removes duplicates
+        numbers = [1, 2, 2, 3, 3, 3]
+        unique = {x for x in numbers}
+        # ans: {1, 2, 3}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <!-- ================================================================ set if -->
+    <section class="slide" id="set-if">
+      <h2>Set with a condition</h2>
+      <pre><code class="language-python">
+        # filter set
+        evens = {x for x in range(10) if x % 2 == 0}
+        # ans: {0, 2, 4, 6, 8}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the result, then press → to run the comprehension and check.</p>
+    </section>
+
+    <section class="slide" id="ex1">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        # dict comprehension?
+        {x: x*2 for x in range(3)}
+        # ans: {0: 0, 1: 2, 2: 4}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <section class="slide" id="ex2">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # dict from pairs?
+        pairs = [("a", 1), ("b", 2)]
+        {k: v for k, v in pairs}
+        # ans: {'a': 1, 'b': 2}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <section class="slide" id="ex3">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        # dict with if-else?
+        {x: "even" if x % 2 == 0 else "odd"
+         for x in range(3)}
+        # ans: {0: 'even', 1: 'odd', 2: 'even'}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # nested dict?
+        {i: {j: i*j for j in range(2)}
+            for i in range(2)}
+        # ans: {0: {0: 0, 1: 0}, 1: {0: 0, 1: 1}}
+      </code></pre>
+      <p class="hint step">The inner comprehension runs once for each <code>i</code>, building that key's value.</p>
+    </section>
+
+    <section class="slide" id="ex5">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        # set comprehension duplicates?
+        {x % 3 for x in range(10)}
+        # ans: {0, 1, 2} (only unique values)
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        # set vs list comprehension?
+        [x for x in [1,2,2,3]]
+        # ans: [1, 2, 2, 3]
+        {x for x in [1,2,2,3]}
+        # ans: {1, 2, 3}
+      </code></pre>
+    </section>
+
+    <section class="slide" id="ex7">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # dict filter values?
+        d = {"a": 1, "b": 2, "c": 3}
+        {k: v for k, v in d.items() if v &gt; 1}
+        # ans: {'b': 2, 'c': 3}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <section class="slide" id="ex8">
+      <h2>Exercise 8</h2>
+      <pre><code class="language-python">
+        # dict transform values?
+        d = {"a": 1, "b": 2}
+        {k: v*2 for k, v in d.items()}
+        # ans: {'a': 2, 'b': 4}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+    </section>
+
+    <section class="slide" id="ex9">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # set from string?
+        {c for c in "hello"}
+        # ans: {'h', 'e', 'l', 'o'}
+      </code></pre>
+      <div class="pipe"></div>
+      <p class="pipe-note"></p>
+      <p class="hint step">A set has no order, so Python may print these letters in any order.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre class="steps"><code class="language-python">
+        # empty dict vs set?
+        {}  # dict
+        {x for x in []}  # set()
+      </code></pre>
+      <p class="hint step">Empty braces always mean an empty dict; an empty set prints as <code>set()</code>.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3><code>{k: v for ...}</code></h3><p>A colon makes a dict. A repeated key keeps the last value.</p></div>
+        <div class="card step"><h3><code>{x for ...}</code></h3><p>No colon makes a set: duplicates disappear, order is not kept.</p></div>
+        <div class="card step"><h3><code>if</code> at the end</h3><p>Filters which items get in.</p></div>
+        <div class="card step"><h3><code>a if c else b</code> in front</h3><p>Chooses the value for every item; nothing is filtered out.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const STEP = 0.75; // seconds per item
+
+      // ------------------------------------------------------------ the pipeline
+      // pipeline(slide, { from, src: [shown items], expr, gate?, keep?(i), out(i), kind: "dict"|"set", key?(i) })
+      // plays when the slide's answer is revealed; the answer waits for it
+      function pipeline(sel, cfg) {
+        const slide = document.querySelector(sel);
+        const pipe = slide.querySelector(".pipe");
+        const note = slide.querySelector(".pipe-note");
+        const ans = slide.querySelector(".line.answer");
+        const n = cfg.src.length;
+        pipe.innerHTML =
+          `<div class="stage src"><h4>${esc(cfg.from)}</h4><div class="items">${cfg.src.map((s) => `<span class="tok">${esc(s)}</span>`).join("")}</div></div>` +
+          (cfg.gate ? `<div class="stage gate"><h4>filter</h4><code>${esc(cfg.gate)}</code></div>` : "") +
+          `<div class="stage expr"><h4>expression</h4><code>${esc(cfg.expr)}</code></div>` +
+          `<div class="stage dst ${cfg.kind}"><h4>${cfg.kind}</h4><div class="items"></div></div>`;
+        const srcToks = [...pipe.querySelectorAll(".src .tok")];
+        const dst = pipe.querySelector(".dst .items");
+        const gate = pipe.querySelector(".gate");
+        const expr = pipe.querySelector(".expr");
+        const keep = cfg.keep || (() => true);
+        const key = cfg.key || ((i) => (cfg.kind === "set" ? cfg.out(i) : cfg.out(i).split(":")[0]));
+        let tl;
+        const btn = document.createElement("button");
+        btn.className = "replay";
+        btn.type = "button";
+        btn.textContent = "Replay";
+        btn.addEventListener("click", () => play(false));
+        note.after(btn);
+        btn.hidden = true;
+
+        // what the result holds after item i, and the note for that item
+        function resultAfter(k) {
+          const out = new Map();
+          for (let i = 0; i <= k; i++) if (keep(i)) out.set(key(i), cfg.out(i));
+          return out;
+        }
+        function fill(k) {
+          dst.innerHTML = [...resultAfter(k).values()].map((v) => `<span class="tok">${esc(v)}</span>`).join("");
+          srcToks.forEach((t, i) => {
+            t.classList.toggle("done", i <= k);
+            t.classList.remove("cur");
+          });
+        }
+        function reset() {
+          tl?.kill();
+          pipe.querySelectorAll(".flying").forEach((f) => f.remove());
+          fill(-1);
+          note.textContent = "";
+          btn.hidden = true;
+        }
+        const centre = (el, tok) => {
+          const p = pipe.getBoundingClientRect();
+          const r = el.getBoundingClientRect();
+          return { x: r.left - p.left + r.width / 2 - tok.offsetWidth / 2, y: r.top - p.top + r.height / 2 - tok.offsetHeight / 2 };
+        };
+        function play(instant) {
+          reset();
+          btn.hidden = false;
+          if (instant) return fill(n - 1);
+          tl = gsap.timeline();
+          for (let i = 0; i < n; i++) {
+            const t0 = i * STEP;
+            tl.call(() => {
+              fill(i - 1);
+              srcToks[i].classList.add("cur");
+              const tok = document.createElement("span");
+              tok.className = "tok flying";
+              tok.textContent = cfg.src[i];
+              pipe.appendChild(tok);
+              const sub = gsap.timeline();
+              tl.add(sub, tl.time());
+              const at = (el) => centre(el, tok);
+              sub.set(tok, at(srcToks[i]));
+              if (gate) {
+                sub.to(tok, { ...at(gate), duration: 0.22, ease: "power1.inOut" });
+                if (!keep(i)) {
+                  sub.call(() => {
+                    tok.classList.add("rejected");
+                    note.textContent = `${cfg.src[i]}: ${cfg.gate} is False, skipped`;
+                  });
+                  sub.to(tok, { y: "+=40", opacity: 0, duration: 0.3, ease: "power1.in", onComplete: () => tok.remove() });
+                  return;
+                }
+              }
+              sub.to(tok, { ...at(expr), duration: 0.22, ease: "power1.inOut" });
+              sub.call(() => {
+                tok.textContent = cfg.out(i);
+                note.textContent = `${cfg.src[i]} → ${cfg.out(i)}`;
+              });
+              const before = resultAfter(i - 1);
+              const dup = before.has(key(i));
+              sub.call(() => {
+                // the real chip takes its place in the result; the flying copy lands on it
+                const after = resultAfter(i);
+                dst.innerHTML = [...after.values()].map((v) => `<span class="tok">${esc(v)}</span>`).join("");
+                const idx = [...after.keys()].indexOf(key(i));
+                const target = dst.children[idx];
+                gsap.set(target, { opacity: dup ? 1 : 0 });
+                gsap.to(tok, {
+                  ...centre(target, tok),
+                  duration: 0.25,
+                  ease: "power1.inOut",
+                  onComplete: () => {
+                    tok.remove();
+                    gsap.set(target, { opacity: 1 });
+                    if (dup) {
+                      note.textContent = cfg.kind === "set" ? `${cfg.out(i)} is already in the set` : `key ${key(i)} already there: value replaced`;
+                      gsap.fromTo(target, { scale: 1.4 }, { scale: 1, duration: 0.35, ease: "back.out(3)" });
+                    }
+                  },
+                });
+              }, null, "+=0.05");
+            }, null, t0);
+          }
+          tl.call(() => {
+            fill(n - 1);
+            note.textContent = "";
+          }, null, n * STEP + 0.1);
+        }
+        if (ans) ans.style.setProperty("--ans-delay", n * STEP + 0.2 + "s");
+        Deck.scene(slide, {
+          enter: reset,
+          leave: reset,
+          step: (s, k, els, d) => els.includes(ans) && queueMicrotask(() => play(d?.dir < 0 || Deck.step > k)),
+          unstep: (s, k, els) => els.includes(ans) && reset(),
+        });
+      }
+
+      const range = (n) => Array.from({ length: n }, (_, i) => i);
+      const r5 = range(5).map(String);
+      const r10 = range(10).map(String);
+
+      pipeline("#dict-basic", { from: "x in range(5)", src: r5, expr: "x: x**2", out: (i) => `${i}: ${i * i}`, kind: "dict" });
+      pipeline("#dict-zip", { from: "zip(keys, values)", src: ["('a', 1)", "('b', 2)", "('c', 3)"], expr: "k: v", out: (i) => `'${"abc"[i]}': ${i + 1}`, kind: "dict" });
+      pipeline("#dict-if", { from: "x in numbers", src: r10, gate: "x % 2 == 0", keep: (i) => i % 2 === 0, expr: "x: x**2", out: (i) => `${i}: ${i * i}`, kind: "dict" });
+      pipeline("#dict-swap", { from: "original.items()", src: ["('a', 1)", "('b', 2)"], expr: "v: k", out: (i) => `${i + 1}: '${"ab"[i]}'`, kind: "dict" });
+      pipeline("#set-basic", { from: "x in range(5)", src: r5, expr: "x**2", out: (i) => String(i * i), kind: "set" });
+      const dups = [1, 2, 2, 3, 3, 3];
+      pipeline("#set-dups", { from: "x in numbers", src: dups.map(String), expr: "x", out: (i) => String(dups[i]), kind: "set" });
+      pipeline("#set-if", { from: "x in range(10)", src: r10, gate: "x % 2 == 0", keep: (i) => i % 2 === 0, expr: "x", out: (i) => String(i), kind: "set" });
+
+      pipeline("#ex1", { from: "x in range(3)", src: ["0", "1", "2"], expr: "x: x*2", out: (i) => `${i}: ${i * 2}`, kind: "dict" });
+      pipeline("#ex2", { from: "pairs", src: ["('a', 1)", "('b', 2)"], expr: "k: v", out: (i) => `'${"ab"[i]}': ${i + 1}`, kind: "dict" });
+      pipeline("#ex3", { from: "x in range(3)", src: ["0", "1", "2"], expr: 'x: "even" if ... else "odd"', out: (i) => `${i}: '${i % 2 ? "odd" : "even"}'`, kind: "dict" });
+      pipeline("#ex5", { from: "x in range(10)", src: r10, expr: "x % 3", out: (i) => String(i % 3), kind: "set" });
+      pipeline("#ex7", { from: "d.items()", src: ["('a', 1)", "('b', 2)", "('c', 3)"], gate: "v > 1", keep: (i) => i > 0, expr: "k: v", out: (i) => `'${"abc"[i]}': ${i + 1}`, kind: "dict" });
+      pipeline("#ex8", { from: "d.items()", src: ["('a', 1)", "('b', 2)"], expr: "k: v*2", out: (i) => `'${"ab"[i]}': ${(i + 1) * 2}`, kind: "dict" });
+      pipeline("#ex9", { from: 'c in "hello"', src: ["'h'", "'e'", "'l'", "'l'", "'o'"], expr: "c", out: (i) => `'${"hello"[i]}'`, kind: "set" });
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.1, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Git Beginner Course</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .hub {
+        gap: 1.6rem;
+      }
+
+      .hub .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .hub h1 {
+        text-align: center;
+      }
+
+      .hub > p.muted {
+        max-width: 40rem;
+        text-align: center;
+      }
+
+      .hub .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      .hub .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      .hub .group h3 span {
+        margin-right: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .hub .tile {
+        min-height: 5.6rem;
+      }
+
+      .hub .tiles.big .tile {
+        min-height: 9rem;
+        font-size: 1.3rem;
+      }
+
+      .hub .soon {
+        opacity: 0.45;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide top hub" id="hub">
+      <span class="kicker">Git 100</span>
+      <h1>Git Beginner Course</h1>
+
+      <div class="group">
+        <div class="tiles big">
+          <a class="tile" href="basic-config.html"><span>Basic Configuration<small>Who you are, and your defaults</small></span></a>
+          <a class="tile" href="workflow.html"><span>Basic Workflow<small>add, commit, push, fetch, pull</small></span></a>
+          <a class="tile" href="divergence-conflict.html"><span>Divergence and Conflicts<small>When two people commit at once</small></span></a>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

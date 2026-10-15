@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dictionaries Basics</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Memory view: variables drawn as boxes that move when the code changes them ---------- */
+      .mv {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        min-width: min(100%, 22rem);
+        padding: 1.1rem 1.2rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-family: var(--font-mono);
+        font-variant-ligatures: none;
+      }
+
+      .mv-var {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+
+      .mv-name {
+        min-width: 4.5rem;
+        text-align: right;
+        color: var(--violet-soft);
+      }
+
+      .mv-eq {
+        color: var(--faint);
+      }
+
+      .mv-items {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+        padding-bottom: 0.2rem;
+      }
+
+      .mv-items::before,
+      .mv-items::after {
+        color: var(--faint);
+        font-size: 1.3rem;
+      }
+
+      .mv-items.list::before {
+        content: "[";
+      }
+
+      .mv-items.list::after {
+        content: "]";
+      }
+
+      .mv-items.tuple::before {
+        content: "(";
+      }
+
+      .mv-items.tuple::after {
+        content: ")";
+      }
+
+      .mv-items.dict::before,
+      .mv-items.set::before {
+        content: "{";
+      }
+
+      .mv-items.dict::after,
+      .mv-items.set::after {
+        content: "}";
+      }
+
+      .mv-items.val::before,
+      .mv-items.val::after {
+        content: none;
+      }
+
+      .mv-cell {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.65rem;
+        border-radius: 10px;
+        border: 1px solid rgba(167, 139, 250, 0.45);
+        background: rgba(139, 92, 246, 0.13);
+        white-space: nowrap;
+        transition:
+          border-color 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1rem;
+      }
+
+      .mv-items.set .mv-cell {
+        border-radius: 999px;
+        border-color: rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .mv-items.tuple .mv-cell {
+        border-style: dashed;
+      }
+
+      .mv-cell .k {
+        color: #a5f3fc;
+      }
+
+      .mv-cell .k::after {
+        content: ":";
+        color: var(--faint);
+      }
+
+      .mv-cell small {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1.15rem;
+        font-size: 0.68rem;
+        text-align: center;
+        color: var(--faint);
+      }
+
+      .mv-cell small.nx {
+        bottom: -2.1rem;
+        color: #c27a92;
+      }
+
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2rem;
+      }
+
+      .mv-cell.hl {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.24);
+        box-shadow: 0 0 18px -4px rgba(34, 211, 238, 0.8);
+      }
+
+      .mv-cell.ghost {
+        position: absolute;
+        margin: 0;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .mv-empty {
+        color: var(--faint);
+        font-size: 0.85rem;
+      }
+
+      .mv-note {
+        min-height: 1.4em;
+        margin: 0;
+        font-family: var(--font);
+        font-size: 0.95rem;
+        color: var(--cyan);
+        text-align: center;
+      }
+
+      .duo {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: center;
+        width: min(100%, 72rem);
+      }
+
+      .duo pre {
+        width: auto;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: min(100%, 60rem);
+      }
+
+      .stack pre {
+        width: auto;
+        max-width: 100%;
+      }
+
+      @media (max-width: 760px) {
+        .duo {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.8rem;
+        }
+
+        .mv {
+          padding: 0.7rem;
+          gap: 0.6rem;
+          font-size: 0.8rem;
+        }
+
+        .mv-name {
+          min-width: 0;
+        }
+
+        .mv-cell {
+          padding: 0.2rem 0.45rem;
+        }
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+      }
+
+      /* ---------- Hash table: keys are hashed to pick a bucket ---------- */
+      #hash .stmt {
+        min-height: 1.6em;
+        font: 500 1.35rem var(--font-mono);
+        font-variant-ligatures: none;
+      }
+
+      .hv-pipe {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        min-height: 3rem;
+        font-family: var(--font-mono);
+      }
+
+      .hv-pipe .fn {
+        padding: 0.4rem 0.9rem;
+        border-radius: 10px;
+        border: 1px dashed rgba(167, 139, 250, 0.6);
+        color: var(--muted);
+      }
+
+      .hv-pipe .fn b {
+        color: var(--amber);
+        font-weight: 500;
+      }
+
+      .keychip {
+        display: inline-block;
+        padding: 0.3rem 0.7rem;
+        border-radius: 10px;
+        border: 1px solid rgba(34, 211, 238, 0.6);
+        background: rgba(34, 211, 238, 0.14);
+        color: #a5f3fc;
+        font-family: var(--font-mono);
+        white-space: nowrap;
+      }
+
+      .keychip i {
+        font-style: normal;
+        color: var(--text);
+      }
+
+      .buckets {
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 0.5rem;
+        width: min(100%, 62rem);
+      }
+
+      .bucket {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        min-height: 6rem;
+        padding: 0.5rem 0.3rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        font-family: var(--font-mono);
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .bucket > small {
+        color: var(--faint);
+      }
+
+      .bucket.look {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.12);
+      }
+
+      .bucket.miss {
+        border-color: var(--red);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .bucket .keychip {
+        font-size: 0.8rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.25rem 0.4rem;
+      }
+
+      .hv-note {
+        min-height: 1.5em;
+        color: var(--cyan);
+        text-align: center;
+      }
+
+      .hv-note.err {
+        color: var(--red);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .buckets {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        #hash .stmt {
+          font-size: 1rem;
+        }
+
+        .hv-pipe {
+          font-size: 0.85rem;
+          gap: 0.5rem;
+        }
+
+        .bucket {
+          min-height: 4.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · collections</span>
+      <h1 class="grad-each"><span>Dictionaries</span> <span>Basics</span></h1>
+      <p>Store values under names (keys) and look them up instantly.</p>
+    </section>
+
+    <!-- ================================================================ create -->
+    <section class="slide" id="create">
+      <h2>Creating dictionaries</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # create dict
+          person = {"name": "Alice", "age": 25}
+          empty = {}
+          scores = {"math": 90, "english": 85}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+      <p class="hint step">Each entry is a <code>key: value</code> pair; keys are unique.</p>
+    </section>
+
+    <!-- ================================================================ access -->
+    <section class="slide" id="access">
+      <h2>Accessing values</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # access by key
+          person = {"name": "Alice", "age": 25}
+          person["name"]
+          # ans: "Alice"
+          person["age"]
+          # ans: 25
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ hashing -->
+    <section class="slide" id="hash">
+      <h2>How a dict finds a key so fast</h2>
+      <p class="stmt"></p>
+      <div class="hv-pipe"><span class="src"></span><span class="fn">hash(key) % 8 → <b class="idx">?</b></span></div>
+      <div class="buckets"></div>
+      <p class="hv-note"></p>
+      <p class="hint">A simplified picture: the key's hash picks a slot, so Python jumps straight there instead of searching every entry.</p>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <!-- ================================================================ get -->
+    <section class="slide" id="get">
+      <h2>The get method</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # get with default
+          person = {"name": "Alice"}
+          person.get("age")
+          # ans: None
+          person.get("age", 0)
+          # ans: 0
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ add / update -->
+    <section class="slide" id="add">
+      <h2>Adding and updating</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # add new key
+          person = {"name": "Alice"}
+          person["age"] = 25
+          # ans: {"name": "Alice", "age": 25}
+          # update existing
+          person["age"] = 26
+          # ans: {"name": "Alice", "age": 26}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+      <p class="hint">The same syntax adds a key that is missing and replaces the value of a key that exists.</p>
+    </section>
+
+    <!-- ================================================================ delete -->
+    <section class="slide" id="del">
+      <h2>Deleting items</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # delete key
+          person = {"name": "Alice", "age": 25}
+          del person["age"]
+          # ans: {"name": "Alice"}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ views -->
+    <section class="slide" id="views">
+      <h2>Keys, values, items</h2>
+      <div class="stack">
+        <pre class="steps"><code class="language-python">
+          # get keys, values, items
+          person = {"name": "Alice", "age": 25}
+          person.keys()
+          # ans: dict_keys(['name', 'age'])
+          person.values()
+          # ans: dict_values(['Alice', 25])
+          person.items()
+          # ans: dict_items([('name', 'Alice'), ('age', 25)])
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the result, then reveal it.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        # what is the value?
+        d = {"a": 1, "b": 2}
+        d["a"]
+        # ans: 1
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # key not found?
+        d = {"a": 1}
+        d["b"]
+        # ans: KeyError
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        # get vs brackets?
+        d = {"a": 1}
+        d.get("b")
+        # ans: None
+        d["b"]
+        # ans: KeyError
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # adding new key?
+        d = {"a": 1}
+        d["b"] = 2
+        # ans: {"a": 1, "b": 2}
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        # updating value?
+        d = {"a": 1}
+        d["a"] = 10
+        # ans: {"a": 10}
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        # membership test?
+        d = {"a": 1, "b": 2}
+        "a" in d
+        # ans: True
+        1 in d
+        # ans: False (checks keys, not values)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # dict length?
+        d = {"a": 1, "b": 2, "c": 3}
+        len(d)
+        # ans: 3
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre><code class="language-python">
+        # empty dict check?
+        d = {}
+        bool(d)
+        # ans: False
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # nested dict?
+        d = {"user": {"name": "Alice", "age": 25}}
+        d["user"]["name"]
+        # ans: "Alice"
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # dict from pairs?
+        pairs = [("a", 1), ("b", 2)]
+        d = dict(pairs)
+        # ans: {"a": 1, "b": 2}
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3><code>d[key]</code></h3><p>Reads a value; a missing key raises <code>KeyError</code>.</p></div>
+        <div class="card step"><h3><code>d.get(key, default)</code></h3><p>Never raises: returns the default, or <code>None</code>.</p></div>
+        <div class="card step"><h3><code>d[key] = value</code></h3><p>Adds a new key or replaces an existing value. <code>del d[key]</code> removes it.</p></div>
+        <div class="card step"><h3><code>in</code> and <code>len</code></h3><p>Both look at keys, not values. An empty dict is falsy.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ memory view
+      // memview(slide, ops, opts) draws variables as boxes in the slide's .mv and
+      // replays ops as the lines of its <pre class="steps"> are revealed:
+      // ops[n](S) runs once line n is showing. Boxes keep their identity, so
+      // inserting, removing and sorting animate (FLIP).
+      // S.list(name, ["'a'", ...]) / S.tuple / S.set / S.dict(name, [["'k'", "v"], ...]) / S.val(name, "v")
+      // S.items(name) the mutable item array; S.item(v, k) a new item; S.del(name)
+      // S.hl(name, i or key, ...) highlight; S.note("text") caption under the boxes
+      function memview(sel, ops, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        const box = slide.querySelector(".mv");
+        box.classList.toggle("neg", !!opts.neg);
+        const pre = slide.querySelector("pre.steps");
+        const lines = pre ? [...pre.querySelectorAll(".line")] : [];
+        const escH = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        function compute(n) {
+          let uid = 0;
+          const vars = new Map();
+          const S = {
+            hlIds: new Set(),
+            text: "",
+            item: (v, k) => ({ id: "c" + uid++, v: String(v), k }),
+            make(t, name, vals) {
+              vars.set(name, { t, items: vals.map((v) => (t === "dict" ? S.item(v[1], v[0]) : S.item(v))) });
+              return vars.get(name).items;
+            },
+            list: (name, vals) => S.make("list", name, vals),
+            tuple: (name, vals) => S.make("tuple", name, vals),
+            set: (name, vals) => S.make("set", name, vals),
+            dict: (name, pairs) => S.make("dict", name, pairs),
+            val: (name, v) => S.make("val", name, [v]),
+            items: (name) => vars.get(name).items,
+            del: (name) => vars.delete(name),
+            has: (name) => vars.has(name),
+            hl(name, ...which) {
+              const its = vars.get(name).items;
+              for (const w of which) {
+                const it = typeof w === "number" ? its[w < 0 ? its.length + w : w] : its.find((x) => x.k === w);
+                if (it) S.hlIds.add(it.id);
+              }
+            },
+            note: (t) => (S.text = t),
+          };
+          for (let i = 0; i <= n; i++) {
+            if (!ops[i]) continue;
+            // highlights and notes describe only the newest line
+            S.hlIds = new Set();
+            S.text = "";
+            ops[i](S);
+          }
+          return { vars, hl: S.hlIds, note: S.text };
+        }
+
+        function render(n, anim) {
+          const st = compute(n);
+          const oldRects = new Map();
+          const oldNodes = new Map();
+          const oldVals = new Map();
+          box.querySelectorAll(".ghost").forEach((g) => g.remove());
+          box.querySelectorAll("[data-id]").forEach((e) => {
+            oldRects.set(e.dataset.id, e.getBoundingClientRect());
+            oldNodes.set(e.dataset.id, e);
+            oldVals.set(e.dataset.id, e.querySelector(".v")?.textContent);
+          });
+          let html = "";
+          for (const [name, { t, items }] of st.vars) {
+            const cells = items
+              .map((it, i) => {
+                const hl = st.hl.has(it.id) ? " hl" : "";
+                if (t === "dict") return `<div class="mv-cell kv${hl}" data-id="${it.id}"><span class="k">${escH(it.k)}</span><span class="v">${escH(it.v)}</span></div>`;
+                const ix = t === "list" || t === "tuple" ? `<small class="ix">${i}</small>` + (opts.neg ? `<small class="nx">${i - items.length}</small>` : "") : "";
+                return `<div class="mv-cell${hl}" data-id="${it.id}"><span class="v">${escH(it.v)}</span>${ix}</div>`;
+              })
+              .join("");
+            html += `<div class="mv-var"><span class="mv-name">${escH(name)}</span><span class="mv-eq">=</span><div class="mv-items ${t}">${cells || (t === "set" ? "" : "")}</div></div>`;
+          }
+          if (!st.vars.size) html = `<span class="mv-empty">${opts.empty || "no variables yet"}</span>`;
+          html += `<p class="mv-note">${escH(st.note)}</p>`;
+          box.innerHTML = html;
+          if (!anim) return;
+          const base = box.getBoundingClientRect();
+          box.querySelectorAll("[data-id]").forEach((e) => {
+            const r0 = oldRects.get(e.dataset.id);
+            if (!r0) return gsap.from(e, { scale: 0.3, opacity: 0, duration: 0.45, ease: "back.out(2)" });
+            const r1 = e.getBoundingClientRect();
+            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: r0.left - r1.left, y: r0.top - r1.top, duration: 0.6, ease: "power2.inOut" });
+            if (oldVals.get(e.dataset.id) !== e.querySelector(".v")?.textContent) gsap.fromTo(e, { backgroundColor: "rgba(236,72,153,0.5)" }, { backgroundColor: "rgba(139,92,246,0.13)", duration: 0.9, clearProps: "backgroundColor" });
+          });
+          for (const [id, node] of oldNodes) {
+            if (box.querySelector(`[data-id="${id}"]`)) continue;
+            const r = oldRects.get(id);
+            node.classList.add("ghost");
+            node.classList.remove("hl");
+            Object.assign(node.style, { left: r.left - base.left + "px", top: r.top - base.top + "px", width: r.width + "px" });
+            box.appendChild(node);
+            gsap.to(node, { opacity: 0, y: 28, scale: 0.7, duration: 0.55, ease: "power1.in", onComplete: () => node.remove() });
+          }
+          const note = box.querySelector(".mv-note");
+          if (st.note) gsap.from(note, { opacity: 0, y: 6, duration: 0.3 });
+        }
+
+        const shown = () => {
+          let n = 0;
+          lines.forEach((l, i) => l.classList.contains("shown") && (n = i + 1));
+          return n;
+        };
+        const M = { render, refresh: (anim) => render(shown(), anim) };
+        Deck.scene(slide, {
+          enter: () => render(0, false),
+          step: (s, n, els, d) => queueMicrotask(() => M.refresh(d?.dir > 0 && Deck.step === n)),
+          unstep: () => queueMicrotask(() => M.refresh(false)),
+        });
+        return M;
+      }
+
+      const find = (S, name, k) => S.items(name).find((it) => it.k === k);
+      const ALICE = [["'name'", "'Alice'"], ["'age'", "25"]];
+
+      memview("#create", {
+        2: (S) => S.dict("person", ALICE),
+        3: (S) => (S.dict("empty", []), S.note("{} is an empty dict")),
+        4: (S) => S.dict("scores", [["'math'", "90"], ["'english'", "85"]]),
+      });
+      memview("#access", {
+        2: (S) => S.dict("person", ALICE),
+        4: (S) => (S.hl("person", "'name'"), S.note("key 'name' → 'Alice'")),
+        6: (S) => (S.hl("person", "'age'"), S.note("key 'age' → 25")),
+      });
+      memview("#get", {
+        2: (S) => S.dict("person", [["'name'", "'Alice'"]]),
+        4: (S) => S.note("no 'age' key: get() returns None instead of raising an error"),
+        6: (S) => S.note("no 'age' key: the default 0 is returned"),
+      });
+      memview("#add", {
+        2: (S) => S.dict("person", [["'name'", "'Alice'"]]),
+        4: (S) => (S.items("person").push(S.item("25", "'age'")), S.hl("person", "'age'"), S.note("'age' was missing: added")),
+        7: (S) => ((find(S, "person", "'age'").v = "26"), S.hl("person", "'age'"), S.note("'age' exists: value replaced")),
+      });
+      memview("#del", {
+        2: (S) => S.dict("person", ALICE),
+        4: (S) => (S.items("person").pop(), S.note("the key and its value are gone")),
+      });
+      memview("#views", {
+        2: (S) => S.dict("person", ALICE),
+        4: (S) => (S.hl("person", "'name'", "'age'"), S.note("the keys")),
+        6: (S) => (S.hl("person", "'name'", "'age'"), S.note("the values")),
+        8: (S) => (S.hl("person", "'name'", "'age'"), S.note("each (key, value) pair as a tuple")),
+      });
+
+      // ------------------------------------------------------------ hash table
+      {
+        const slide = document.querySelector("#hash");
+        const N = 8;
+        const grid = slide.querySelector(".buckets");
+        grid.innerHTML = Array.from({ length: N }, (_, i) => `<div class="bucket" data-i="${i}"><small>${i}</small></div>`).join("");
+        const buckets = [...grid.children];
+        // [statement, key, value, bucket, kind]; the bucket numbers stand in for real hashes
+        const BEATS = [
+          ['person["name"] = "Alice"', "'name'", "'Alice'", 3, "put"],
+          ['person["age"] = 25', "'age'", "25", 6, "put"],
+          ['person["city"] = "NYC"', "'city'", "'NYC'", 1, "put"],
+          ['person["age"]', "'age'", "25", 6, "get"],
+          ['person["salary"]', "'salary'", "", 4, "miss"],
+        ];
+        const stmt = slide.querySelector(".stmt");
+        const src = slide.querySelector(".src");
+        const idx = slide.querySelector(".idx");
+        const note = slide.querySelector(".hv-note");
+        let tl;
+        const chip = (k, v) => `<span class="keychip">${k}${v ? `<i>${v}</i>` : ""}</span>`;
+
+        function render(n, animate) {
+          tl?.kill();
+          gsap.set([src, idx, note, ...buckets], { clearProps: "transform,opacity" });
+          buckets.forEach((b) => {
+            b.classList.remove("look", "miss");
+            b.querySelectorAll(".keychip").forEach((c) => c.remove());
+          });
+          // entries stored by the put beats so far
+          BEATS.slice(0, n).forEach(([, k, v, i, kind]) => kind === "put" && buckets[i].insertAdjacentHTML("beforeend", chip(k, v)));
+          const beat = BEATS[n - 1];
+          note.classList.remove("err");
+          if (!beat) {
+            stmt.textContent = "person = {}";
+            src.innerHTML = "";
+            idx.textContent = "?";
+            note.textContent = "8 empty slots";
+            return;
+          }
+          const [code, k, v, i, kind] = beat;
+          stmt.textContent = code;
+          src.innerHTML = chip(k);
+          idx.textContent = i;
+          const target = buckets[i];
+          note.textContent = kind === "put" ? `stored in slot ${i}` : kind === "get" ? `slot ${i} holds 'age' → 25` : `slot ${i} is empty → KeyError: 'salary'`;
+          note.classList.toggle("err", kind === "miss");
+          if (kind !== "put") target.classList.add(kind === "get" ? "look" : "miss");
+          if (!animate) return;
+          tl = gsap.timeline();
+          tl.from(src, { opacity: 0, x: -30, duration: 0.35 });
+          tl.from(idx, { opacity: 0, scale: 2, duration: 0.35, ease: "back.out(2)" });
+          if (kind === "put") {
+            const placed = target.querySelector(".keychip:last-child");
+            const a = src.getBoundingClientRect();
+            const b = placed.getBoundingClientRect();
+            tl.from(placed, { x: a.left - b.left, y: a.top - b.top, duration: 0.7, ease: "power2.inOut" });
+          } else {
+            tl.from(target, { scale: 1.12, duration: 0.4, ease: "back.out(3)" });
+          }
+          tl.from(note, { opacity: 0, duration: 0.3 });
+        }
+
+        Deck.scene(slide, {
+          enter: () => render(0, false),
+          leave: () => tl?.kill(),
+          step: (s, n, els, d) => queueMicrotask(() => render(Deck.step, d?.dir > 0 && Deck.step === n)),
+          unstep: () => queueMicrotask(() => render(Deck.step, false)),
+        });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

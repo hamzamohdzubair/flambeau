@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Motion in 1D</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .defs {
+        display: grid;
+        gap: 1rem;
+        width: min(100%, 52rem);
+      }
+
+      .defs .card p {
+        margin: 0.2rem 0 0;
+      }
+
+      .defs .card ul {
+        margin: 0.4rem 0 0;
+      }
+
+      .tag {
+        font: 500 0.75rem var(--font-mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      /* ---------- Walk: distance vs displacement ---------- */
+      .track {
+        width: min(100%, 56rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      .track .axis {
+        stroke: rgba(255, 255, 255, 0.45);
+        stroke-width: 2;
+      }
+
+      .track .tick {
+        stroke: rgba(255, 255, 255, 0.35);
+      }
+
+      .track .tl {
+        fill: var(--muted);
+        font: 14px var(--font-mono);
+        text-anchor: middle;
+      }
+
+      .track .path {
+        fill: none;
+        stroke: var(--violet-soft);
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+
+      .track .disp {
+        stroke: var(--cyan);
+        stroke-width: 5;
+        marker-end: url(#arrowC);
+      }
+
+      .track .walker {
+        fill: #f0abfc;
+        filter: drop-shadow(0 0 10px #ec4899);
+      }
+
+      .track .lbl {
+        font: 600 15px var(--font);
+      }
+
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem 3rem;
+        font-size: 1.15rem;
+      }
+
+      .stats b {
+        font: 600 1.5rem var(--font-mono);
+      }
+
+      .stats .d1 b {
+        color: var(--violet-soft);
+      }
+
+      .stats .d2 b {
+        color: var(--cyan);
+      }
+
+      /* ---------- Kinematic equations ---------- */
+      #eqs .cols {
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        align-items: center;
+        width: min(100%, 62rem);
+      }
+
+      #eqs ol li {
+        margin: 0.4rem 0;
+        font-size: 1.15rem;
+      }
+
+      /* ---------- Simulator ---------- */
+      #sim .stage {
+        display: grid;
+        gap: 0.8rem;
+        width: min(100%, 64rem);
+      }
+
+      #sim .road {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+      }
+
+      #sim .road .axis {
+        stroke: rgba(255, 255, 255, 0.4);
+        stroke-width: 2;
+      }
+
+      #sim .road .tl {
+        fill: var(--muted);
+        font: 13px var(--font-mono);
+        text-anchor: middle;
+      }
+
+      #sim .car rect {
+        fill: url(#carGrad);
+        filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8));
+      }
+
+      #sim .varrow {
+        stroke: var(--cyan);
+        stroke-width: 4;
+        marker-end: url(#arrowC);
+      }
+
+      #sim .aarrow {
+        stroke: var(--amber);
+        stroke-width: 4;
+        marker-end: url(#arrowA);
+      }
+
+      #sim .graphs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      #sim .graph {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      #sim .graph .ax {
+        stroke: rgba(255, 255, 255, 0.3);
+      }
+
+      #sim .graph .zero {
+        stroke: rgba(255, 255, 255, 0.15);
+        stroke-dasharray: 4 4;
+      }
+
+      #sim .graph .full {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.12);
+        stroke-width: 2;
+      }
+
+      #sim .graph .trace {
+        fill: none;
+        stroke-width: 3;
+      }
+
+      #sim .graph.gx .trace {
+        stroke: var(--violet-soft);
+      }
+
+      #sim .graph.gv .trace {
+        stroke: var(--cyan);
+      }
+
+      #sim .graph .tan {
+        stroke: var(--pink);
+        stroke-width: 2;
+      }
+
+      #sim .graph .pt {
+        fill: #fff;
+      }
+
+      #sim .graph text {
+        fill: var(--muted);
+        font: 13px var(--font-mono);
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem 1.2rem;
+        font-size: 0.92rem;
+        color: var(--muted);
+      }
+
+      .controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-mono);
+      }
+
+      .controls output {
+        min-width: 4.2rem;
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: min(10rem, 30vw);
+        accent-color: var(--violet);
+      }
+
+      .chip {
+        padding: 0.3rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.85rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover,
+      .chip.on {
+        border-color: var(--violet-soft);
+        color: var(--text);
+        background: rgba(139, 92, 246, 0.3);
+      }
+
+      .readout {
+        font: 0.95rem var(--font-mono);
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout .x {
+        color: var(--violet-soft);
+      }
+
+      .readout .v {
+        color: var(--cyan);
+      }
+
+      .readout .a {
+        color: var(--amber);
+      }
+
+      /* ---------- Exercises ---------- */
+      .qa {
+        display: grid;
+        gap: 0.9rem;
+        width: min(100%, 54rem);
+      }
+
+      .qa > div {
+        display: grid;
+        gap: 0.3rem;
+      }
+
+      .qa .q {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .qa .answer {
+        margin: 0 0 0 1.2rem;
+        color: var(--green);
+      }
+
+      @media (max-width: 760px) {
+        #eqs .cols {
+          grid-template-columns: 1fr;
+        }
+
+        #sim .graphs {
+          grid-template-columns: 1fr 1fr;
+          gap: 0.4rem;
+        }
+
+        .qa .q {
+          font-size: 1rem;
+        }
+
+        .qa .answer {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <marker id="arrowC" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#22d3ee" /></marker>
+        <marker id="arrowA" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#fbbf24" /></marker>
+        <linearGradient id="carGrad" x1="0" x2="1"><stop offset="0" stop-color="#8b5cf6" /><stop offset="1" stop-color="#22d3ee" /></linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Physics · kinematics</span>
+      <h1 class="grad-each"><span>Motion</span> <span>in</span> <span>1D</span></h1>
+      <p>Position, displacement, velocity and acceleration along a straight line, and the four equations that tie them together.</p>
+    </section>
+
+    <!-- ================================================================ position -->
+    <section class="slide" id="position">
+      <h2>Position and displacement</h2>
+      <div class="cards">
+        <div class="card"><span class="tag">Position · x</span><p>Location of an object relative to an origin.</p></div>
+        <div class="card step" data-step="1"><span class="tag">Displacement · Δx</span><p>Change in position: \( \Delta x = x_2 - x_1 \). A <strong>vector</strong>: has direction, can be positive, negative or zero.</p></div>
+        <div class="card step" data-step="2"><span class="tag">Distance</span><p>Total path length travelled. A <strong>scalar</strong>: no direction, always positive or zero.</p></div>
+      </div>
+    </section>
+
+    <section class="slide" id="walk">
+      <h2>Walk 5 m forward, then 3 m back</h2>
+      <svg class="track" viewBox="0 0 800 190" aria-label="A walker on a number line goes from 0 to 5 metres, then back to 2 metres">
+        <g class="ticks"></g>
+        <path class="path p1" />
+        <path class="path p2" />
+        <line class="disp" />
+        <text class="lbl l1" fill="#a78bfa"></text>
+        <text class="lbl l2" fill="#22d3ee"></text>
+        <circle class="walker" r="12" />
+      </svg>
+      <div class="stats">
+        <span class="d1">distance <b class="vd">0 m</b></span>
+        <span class="d2">displacement <b class="vx">0 m</b></span>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <p class="center muted step">Distance adds up every metre walked; displacement only cares where you ended up.</p>
+    </section>
+
+    <!-- ================================================================ velocity -->
+    <section class="slide">
+      <h2>Velocity</h2>
+      <div class="defs">
+        <div class="card step"><span class="tag">Average velocity</span><p>Displacement over time: \( v_{avg} = \dfrac{\Delta x}{\Delta t} \), in m/s. A vector quantity.</p></div>
+        <div class="card step"><span class="tag">Instantaneous velocity</span><p>Velocity at a specific instant: the limit as \( \Delta t \to 0 \), i.e. the <strong>slope of the position-time graph</strong>.</p></div>
+        <div class="card step"><span class="tag">Speed</span><p>The magnitude of velocity: a scalar.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ acceleration -->
+    <section class="slide">
+      <h2>Acceleration</h2>
+      <div class="defs">
+        <div class="card step"><span class="tag">Average acceleration</span><p>Change in velocity over time: \( a_{avg} = \dfrac{\Delta v}{\Delta t} \), in m/s². A vector quantity.</p></div>
+        <div class="card step"><span class="tag">Instantaneous acceleration</span><p>Acceleration at a specific instant: the <strong>slope of the velocity-time graph</strong>.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ equations -->
+    <section class="slide" id="eqs">
+      <h2>Kinematic equations</h2>
+      <div class="cols">
+        <div>
+          <p class="muted">For <strong>constant acceleration</strong>:</p>
+          <ol>
+            <li class="step">\( v = v_0 + at \)</li>
+            <li class="step">\( x = x_0 + v_0 t + \tfrac{1}{2}at^2 \)</li>
+            <li class="step">\( v^2 = v_0^2 + 2a(x - x_0) \)</li>
+            <li class="step">\( x = x_0 + \tfrac{1}{2}(v_0 + v)\,t \)</li>
+          </ol>
+        </div>
+        <div class="card step">
+          <h3>Where</h3>
+          <p>\( v_0 \) initial velocity<br />\( v \) final velocity<br />\( a \) acceleration<br />\( t \) time<br />\( x \) position</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ simulator -->
+    <section class="slide top" id="sim">
+      <h2>See it move</h2>
+      <div class="stage">
+        <svg class="road" viewBox="0 0 800 110" aria-label="An object moving along a line, with its velocity arrow in cyan and acceleration arrow in amber">
+          <g class="ticks"></g>
+          <line class="aarrow" />
+          <line class="varrow" />
+          <g class="car"><rect x="-18" y="-12" width="36" height="24" rx="8" /></g>
+        </svg>
+        <div class="graphs">
+          <svg class="graph gx" viewBox="0 0 380 190" aria-label="Position against time"><path class="full" /><path class="trace" /><line class="tan" /><circle class="pt" r="5" /></svg>
+          <svg class="graph gv" viewBox="0 0 380 190" aria-label="Velocity against time"><path class="full" /><path class="trace" /><circle class="pt" r="5" /></svg>
+        </div>
+        <p class="readout"></p>
+        <div class="controls" data-interactive>
+          <label>v₀ <input type="range" name="v0" min="-20" max="30" step="1" value="30" /><output></output></label>
+          <label>a <input type="range" name="a" min="-10" max="10" step="0.5" value="-5" /><output></output></label>
+          <button class="chip play">▶ play</button>
+        </div>
+        <div class="controls" data-interactive>
+          <button class="chip preset" data-v0="30" data-a="-5" data-t="6">braking car</button>
+          <button class="chip preset" data-v0="0" data-a="10" data-t="2">dropped ball</button>
+          <button class="chip preset" data-v0="0" data-a="2" data-t="10">train from rest</button>
+          <button class="chip preset" data-v0="10" data-a="0" data-t="6">constant velocity</button>
+          <button class="chip preset" data-v0="-12" data-a="4" data-t="6">backwards, slowing</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer each question before revealing it.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 1</h2>
+      <div class="qa">
+        <div><p class="q step">What is displacement?</p><p class="answer">Change in position, Δx = x₂ − x₁: a vector quantity</p></div>
+        <div><p class="q step">What is the difference between distance and displacement?</p><p class="answer">Distance is total path length (scalar); displacement is change in position (vector)</p></div>
+        <div><p class="q step">If you walk 5 m forward then 3 m backward, what is your displacement?</p><p class="answer">2 m forward (5 m − 3 m)</p></div>
+        <div><p class="q step">What is your total distance travelled?</p><p class="answer">8 m (5 m + 3 m)</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 2</h2>
+      <div class="qa">
+        <div><p class="q step">What is average velocity?</p><p class="answer">Displacement divided by time, v<sub>avg</sub> = Δx / Δt</p></div>
+        <div><p class="q step">A car travels 100 m in 5 s. What is its average velocity?</p><p class="answer">v<sub>avg</sub> = 100 m / 5 s = 20 m/s</p></div>
+        <div><p class="q step">What does the slope of a position-time graph represent?</p><p class="answer">Instantaneous velocity</p></div>
+        <div><p class="q step">What is acceleration?</p><p class="answer">Rate of change of velocity, a = Δv / Δt</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 3</h2>
+      <div class="qa">
+        <div><p class="q step">A car accelerates from 0 to 20 m/s in 4 seconds. What is its acceleration?</p><p class="answer">a = (20 − 0) / 4 = 5 m/s²</p></div>
+        <div><p class="q step">What does positive acceleration mean?</p><p class="answer">Velocity is increasing in the positive direction</p></div>
+        <div><p class="q step">Can an object have negative velocity and positive acceleration?</p><p class="answer">Yes: it is moving backwards but slowing down (try "backwards, slowing" in the simulator)</p></div>
+        <div><p class="q step">What is the slope of a velocity-time graph?</p><p class="answer">Acceleration</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 4</h2>
+      <div class="qa">
+        <div><p class="q step">Which kinematic equation relates v, v₀, a and t?</p><p class="answer">v = v₀ + at</p></div>
+        <div><p class="q step">A ball drops from rest. After 2 s, what is its velocity? (g = 10 m/s²)</p><p class="answer">v = 0 + (10)(2) = 20 m/s downward</p></div>
+        <div><p class="q step">How far does it fall?</p><p class="answer">x = ½at² = ½(10)(2²) = 20 m</p></div>
+        <div><p class="q step">A car going 30 m/s brakes with a = −5 m/s². How long does it take to stop?</p><p class="answer">0 = 30 + (−5)t, so t = 6 s</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 5</h2>
+      <div class="qa">
+        <div><p class="q step">Using v² = v₀² + 2ax, find the stopping distance for the car above.</p><p class="answer">0² = 30² + 2(−5)x, so x = 900 / 10 = 90 m</p></div>
+        <div><p class="q step">What does constant velocity mean?</p><p class="answer">Acceleration is zero: v = v₀</p></div>
+        <div><p class="q step">If a = 0, which equation simplifies to x = v₀t?</p><p class="answer">x = x₀ + v₀t + ½at² becomes x = x₀ + v₀t when a = 0</p></div>
+        <div><p class="q step">Can displacement be zero while distance is not?</p><p class="answer">Yes, if you return to the starting point (a round trip)</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 6</h2>
+      <div class="qa">
+        <div><p class="q step">A train accelerates at 2 m/s² for 10 s, starting from rest. Final velocity?</p><p class="answer">v = 0 + 2(10) = 20 m/s</p></div>
+        <div><p class="q step">How far does it travel?</p><p class="answer">x = ½(2)(10²) = 100 m</p></div>
+        <div><p class="q step">Average velocity during this motion?</p><p class="answer">v<sub>avg</sub> = (0 + 20) / 2 = 10 m/s, or x / t = 100 / 10 = 10 m/s</p></div>
+        <div><p class="q step">What is free fall?</p><p class="answer">Motion under gravity only: a = g ≈ 9.8 m/s² downward</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        parent?.appendChild(e);
+        return e;
+      };
+
+      // ================================================================ the walk
+      {
+        const slide = document.querySelector("#walk");
+        const svg = slide.querySelector(".track");
+        const X = (m) => 100 + m * 95; // metres to px
+        const Y = 120;
+        const ticks = svg.querySelector(".ticks");
+        el("line", { class: "axis", x1: X(-0.8), x2: X(6.8), y1: Y, y2: Y }, ticks);
+        for (let m = 0; m <= 6; m++) {
+          el("line", { class: "tick", x1: X(m), x2: X(m), y1: Y - 8, y2: Y + 8 }, ticks);
+          el("text", { class: "tl", x: X(m), y: Y + 30 }, ticks).textContent = m + " m";
+        }
+        const walker = svg.querySelector(".walker");
+        const p1 = svg.querySelector(".p1"), p2 = svg.querySelector(".p2"), disp = svg.querySelector(".disp");
+        const l1 = svg.querySelector(".l1"), l2 = svg.querySelector(".l2");
+        const vd = slide.querySelector(".vd"), vx = slide.querySelector(".vx");
+        const st = { pos: 0, dist: 0 };
+        function render() {
+          const fwd = Math.min(st.dist, 5), back = Math.max(0, st.dist - 5);
+          walker.setAttribute("cx", X(st.pos));
+          walker.setAttribute("cy", Y);
+          p1.setAttribute("d", fwd > 0 ? `M${X(0)},${Y - 48} H${X(fwd)}` : "");
+          p2.setAttribute("d", back > 0 ? `M${X(5)},${Y - 66} H${X(5 - back)}` : "");
+          const show = Math.abs(st.pos) > 0.05;
+          Object.entries({ x1: X(0), y1: Y - 26, x2: X(st.pos), y2: Y - 26 }).forEach(([k, v]) => disp.setAttribute(k, v));
+          disp.style.opacity = show ? 1 : 0;
+          l1.setAttribute("x", X(5) + 10); l1.setAttribute("y", Y - 72);
+          l1.textContent = st.dist > 0.05 ? "path" : "";
+          l2.setAttribute("x", X(st.pos / 2)); l2.setAttribute("y", Y - 34); l2.setAttribute("text-anchor", "middle");
+          l2.textContent = show ? "Δx" : "";
+          vd.textContent = st.dist.toFixed(1).replace(".0", "") + " m";
+          vx.textContent = (st.pos >= 0 ? "+" : "") + st.pos.toFixed(1).replace(".0", "") + " m";
+        }
+        render();
+        let tl = null;
+        const targets = [{ pos: 0, dist: 0 }, { pos: 5, dist: 5 }, { pos: 2, dist: 8 }];
+        function go(instant) {
+          const k = Math.min(Deck.step, 2);
+          tl?.kill();
+          if (instant) {
+            Object.assign(st, targets[k]);
+            render();
+          } else tl = gsap.to(st, { ...targets[k], duration: 1.6, ease: "power1.inOut", onUpdate: render });
+        }
+        Deck.scene("#walk", {
+          enter: () => queueMicrotask(() => go(true)),
+          step: (s, n, els, d) => queueMicrotask(() => go(d.dir < 0)),
+          unstep: () => queueMicrotask(() => go(true)),
+          leave: () => tl?.kill(),
+        });
+      }
+
+      // ================================================================ simulator
+      {
+        const slide = document.querySelector("#sim");
+        const road = slide.querySelector(".road");
+        const gx = slide.querySelector(".gx"), gv = slide.querySelector(".gv");
+        const [iv, ia] = slide.querySelectorAll("input");
+        const [ov, oa] = slide.querySelectorAll("output");
+        const playBtn = slide.querySelector(".play");
+        const readout = slide.querySelector(".readout");
+        const car = road.querySelector(".car"), varrow = road.querySelector(".varrow"), aarrow = road.querySelector(".aarrow");
+        const P = { v0: 30, a: -5, T: 6 };
+        const clock = { t: 0 };
+        let tw = null;
+        let range, X, gScale;
+
+        const xAt = (t) => P.v0 * t + 0.5 * P.a * t * t;
+        const vAt = (t) => P.v0 + P.a * t;
+        const nice = (v) => (Math.abs(v) < 0.005 ? "0.0" : v.toFixed(1));
+
+        function setup() {
+          // Range of positions reached in [0, T], padded
+          let lo = 0, hi = 0;
+          for (let i = 0; i <= 60; i++) {
+            const x = xAt((P.T * i) / 60);
+            lo = Math.min(lo, x);
+            hi = Math.max(hi, x);
+          }
+          if (hi - lo < 10) hi = lo + 10;
+          const pad = (hi - lo) * 0.06;
+          range = [lo - pad, hi + pad];
+          X = (x) => 40 + ((x - range[0]) / (range[1] - range[0])) * 720;
+          // Road ticks
+          const tk = road.querySelector(".ticks");
+          tk.replaceChildren();
+          el("line", { class: "axis", x1: 40, x2: 760, y1: 80, y2: 80 }, tk);
+          const step = [5, 10, 20, 25, 50][[5, 10, 20, 25, 50].findIndex((s) => (range[1] - range[0]) / s <= 10)] || 50;
+          for (let m = Math.ceil(range[0] / step) * step; m <= range[1]; m += step) {
+            el("line", { class: "axis", x1: X(m), x2: X(m), y1: 74, y2: 86 }, tk);
+            el("text", { class: "tl", x: X(m), y: 104 }, tk).textContent = m + " m";
+          }
+          // Graph scales
+          const vs = [P.v0, vAt(P.T), 0];
+          gScale = {
+            x: [range[0], range[1]],
+            v: [Math.min(...vs) - 2, Math.max(...vs) + 2],
+          };
+          drawFull(gx, xAt, gScale.x, "x (m)");
+          drawFull(gv, vAt, gScale.v, "v (m/s)");
+        }
+
+        const GW = 380, GH = 190, gm = { l: 44, r: 12, t: 14, b: 26 };
+        const gxp = (t) => gm.l + (t / P.T) * (GW - gm.l - gm.r);
+        const gyp = (val, [lo, hi]) => GH - gm.b - ((val - lo) / (hi - lo)) * (GH - gm.t - gm.b);
+
+        function drawFull(svg, f, dom, name) {
+          svg.querySelectorAll(".ax, .zero, text").forEach((e) => e.remove());
+          el("line", { class: "ax", x1: gm.l, x2: gm.l, y1: gm.t, y2: GH - gm.b }, svg);
+          el("line", { class: "ax", x1: gm.l, x2: GW - gm.r, y1: GH - gm.b, y2: GH - gm.b }, svg);
+          if (dom[0] < 0 && dom[1] > 0) el("line", { class: "zero", x1: gm.l, x2: GW - gm.r, y1: gyp(0, dom), y2: gyp(0, dom) }, svg);
+          el("text", { x: 6, y: gm.t + 10 }, svg).textContent = name;
+          el("text", { x: GW - gm.r - 44, y: GH - 6 }, svg).textContent = "t (s)";
+          el("text", { x: gm.l + 4, y: GH - 6 }, svg).textContent = "0";
+          el("text", { x: GW - gm.r - 88, y: GH - 6 }, svg).textContent = P.T + "s";
+          const d = Array.from({ length: 81 }, (_, i) => {
+            const t = (P.T * i) / 80;
+            return `${i ? "L" : "M"}${gxp(t).toFixed(1)},${gyp(f(t), dom).toFixed(1)}`;
+          }).join("");
+          svg.querySelector(".full").setAttribute("d", d);
+        }
+
+        function render() {
+          const t = clock.t, x = xAt(t), v = vAt(t);
+          car.setAttribute("transform", `translate(${X(x)},80)`);
+          const vlen = Math.max(-140, Math.min(140, v * 4));
+          Object.entries({ x1: X(x), y1: 46, x2: X(x) + vlen, y2: 46 }).forEach(([k, val]) => varrow.setAttribute(k, val));
+          varrow.style.opacity = Math.abs(vlen) > 6 ? 1 : 0;
+          const alen = P.a * 8;
+          Object.entries({ x1: X(x), y1: 30, x2: X(x) + alen, y2: 30 }).forEach(([k, val]) => aarrow.setAttribute(k, val));
+          aarrow.style.opacity = Math.abs(alen) > 6 ? 1 : 0;
+          for (const [svg, f, dom] of [[gx, xAt, gScale.x], [gv, vAt, gScale.v]]) {
+            const n = Math.max(1, Math.round((t / P.T) * 80));
+            const d = Array.from({ length: n + 1 }, (_, i) => {
+              const ti = (t * i) / n;
+              return `${i ? "L" : "M"}${gxp(ti).toFixed(1)},${gyp(f(ti), dom).toFixed(1)}`;
+            }).join("");
+            svg.querySelector(".trace").setAttribute("d", d);
+            const pt = svg.querySelector(".pt");
+            pt.setAttribute("cx", gxp(t));
+            pt.setAttribute("cy", gyp(f(t), dom));
+          }
+          // Tangent on x(t): its slope is the velocity right now
+          const tan = gx.querySelector(".tan"), dt = P.T * 0.12;
+          const [t1, t2] = [t - dt, t + dt];
+          Object.entries({ x1: gxp(t1), y1: gyp(x - v * dt, gScale.x), x2: gxp(t2), y2: gyp(x + v * dt, gScale.x) }).forEach(([k, val]) => tan.setAttribute(k, val));
+          readout.innerHTML = `t = ${t.toFixed(2)} s   <span class="x">x = ${nice(x)} m</span>   <span class="v">v = ${nice(v)} m/s</span>   <span class="a">a = ${nice(P.a)} m/s²</span>   <span style="color:var(--pink)">pink line: slope of x(t) = v</span>`;
+        }
+
+        function syncInputs() {
+          iv.value = P.v0;
+          ia.value = P.a;
+          ov.textContent = P.v0 + " m/s";
+          oa.textContent = P.a + " m/s²";
+        }
+
+        function stop() {
+          tw?.kill();
+          tw = null;
+          playBtn.textContent = "▶ play";
+          playBtn.classList.remove("on");
+        }
+
+        function play() {
+          stop();
+          clock.t = 0;
+          playBtn.textContent = "■ stop";
+          playBtn.classList.add("on");
+          tw = gsap.to(clock, { t: P.T, duration: Math.min(P.T, 6), ease: "none", onUpdate: render, onComplete: stop });
+        }
+
+        function load(v0, a, T) {
+          stop();
+          Object.assign(P, { v0, a, T });
+          syncInputs();
+          setup();
+          clock.t = 0;
+          render();
+          slide.querySelectorAll(".preset").forEach((b) => b.classList.toggle("on", +b.dataset.v0 === v0 && +b.dataset.a === a && +b.dataset.t === T));
+        }
+
+        iv.addEventListener("input", () => (load(+iv.value, P.a, 6), (clock.t = P.T), render()));
+        ia.addEventListener("input", () => (load(P.v0, +ia.value, 6), (clock.t = P.T), render()));
+        playBtn.addEventListener("click", () => (tw ? stop() : play()));
+        slide.querySelectorAll(".preset").forEach((b) => b.addEventListener("click", () => (load(+b.dataset.v0, +b.dataset.a, +b.dataset.t), play())));
+        load(30, -5, 6);
+        Deck.scene("#sim", { enter: () => play(), leave: () => stop() });
+      }
+    </script>
+  </body>
+</html>

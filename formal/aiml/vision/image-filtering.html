@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Image Filtering</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chip {
+        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      .chip.ghost { border-style: dashed; }
+      canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
+      .codeside { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2.4rem; align-items: center; width: min(100%, 66rem); }
+      .codeside pre { width: 100%; }
+      .codeside .side { display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; }
+      .codeside .side p { font-size: 0.9rem; }
+
+      /* kernel matrices (built by script from data-k) */
+      .kgrid { --kc: 2.4rem; position: relative; display: inline-grid; gap: 4px; padding: 6px; border-radius: 12px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); font-family: var(--font-mono); }
+      .kgrid b { display: grid; place-items: center; width: var(--kc); height: var(--kc); border-radius: 6px; font-size: calc(var(--kc) * 0.36); font-weight: 500; color: var(--text); }
+      .kgrid .div { position: absolute; right: -0.2rem; bottom: -1.5rem; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+      .kside { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.6rem; align-items: center; width: min(100%, 60rem); }
+      .kside .kgrid { margin-bottom: 1.4rem; }
+
+      /* cover */
+      #title canvas { width: min(30rem, 84vw); }
+      #title .split { position: relative; }
+      #title .split span { position: absolute; bottom: 0.5rem; font: 500 0.75rem var(--font-mono); color: #fff; background: rgba(5, 6, 15, 0.7); padding: 0.1rem 0.45rem; border-radius: 4px; }
+
+      /* gaussian profile */
+      .prof { width: min(100%, 26rem); }
+      .prof svg { width: 100%; overflow: visible; }
+      .prof text { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); }
+      .sl { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr) 3rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.9rem; margin: 0.4rem 0; }
+      .sl input { width: 100%; accent-color: var(--violet); }
+      .sl output { color: var(--cyan); text-align: right; }
+
+      /* median sort */
+      #slide-median .stage { position: relative; width: min(100%, 40rem); height: 17.5rem; margin: 0 auto; }
+      #slide-median .cell, #slide-median .lab { left: 0; top: 0; }
+      #slide-median .cell { position: absolute; display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 8px; font: 500 0.95rem var(--font-mono); border: 1px solid rgba(255, 255, 255, 0.15); }
+      #slide-median .lab { position: absolute; font: 500 0.8rem var(--font-mono); color: var(--muted); }
+      #slide-median ol { font-size: 1rem; }
+
+      /* bilateral weights */
+      .bw { display: grid; grid-template-columns: repeat(4, auto); gap: 0.6rem 1rem; align-items: center; justify-content: center; }
+      .bw figure { margin: 0; }
+      .bw canvas { width: min(9rem, 20vw); aspect-ratio: 1; image-rendering: pixelated; border-radius: 8px; border: 1px solid var(--border); }
+      .bw .op { font-size: 1.4rem; color: var(--faint); }
+
+      /* playground */
+      .play { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; width: min(100%, 62rem); }
+      .under { display: grid; gap: 0.6rem; justify-items: center; width: min(100%, 62rem); }
+      .under .sl { width: min(100%, 26rem); }
+
+      /* exercises */
+      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
+      .qa .q { display: grid; gap: 0.5rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
+      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
+      .qa pre { width: 100%; font-size: 0.92rem; }
+      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
+
+      @media (max-width: 760px) {
+        .codeside, .kside { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; justify-items: center; }
+        .bw { grid-template-columns: repeat(2, auto); }
+        .bw .op { display: none; }
+        .bw canvas { width: min(8rem, 36vw); }
+        .play { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
+        #slide-median .stage { height: 14rem; }
+        #slide-median .cell { width: 2.1rem; height: 2.1rem; font-size: 0.75rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <div class="split">
+        <canvas class="photo" width="620" height="349" aria-label="A noisy photo being cleaned by a filter, left to right"></canvas>
+        <span style="right: 0.5rem">noisy</span><span style="left: 0.5rem">median 5×5</span>
+      </div>
+      <h1>Image Filtering</h1>
+      <p>Change each pixel using its neighbours: smooth away noise, keep the edges, or bring them out.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide">
+      <h2>What is image filtering?</h2>
+      <p class="lead"><strong>Image filtering</strong> applies a mathematical operation to each pixel based on its <strong>neighbourhood</strong>.</p>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3>Noise reduction</h3><p>Smoothing.</p></div>
+        <div class="card step"><h3>Edge enhancement</h3><p>Sharpening.</p></div>
+        <div class="card step"><h3>Feature detection</h3><p>Gradients, edges.</p></div>
+        <div class="card step"><h3>Preprocessing</h3><p>For other algorithms.</p></div>
+      </div>
+      <p class="step center lead"><strong>Key idea:</strong> output pixel = f(input pixel + its neighbours)</p>
+    </section>
+
+    <!-- ================================================================ types -->
+    <section class="slide">
+      <h2>Types of filters</h2>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step">
+          <h3>Smoothing (low-pass)</h3>
+          <ul>
+            <li><strong>Box / average:</strong> simple averaging</li>
+            <li><strong>Gaussian:</strong> weighted averaging</li>
+            <li><strong>Median:</strong> replaces with the median value</li>
+          </ul>
+        </div>
+        <div class="card step">
+          <h3>Sharpening (high-pass)</h3>
+          <ul>
+            <li>Enhances edges and details</li>
+            <li>The opposite of smoothing</li>
+          </ul>
+        </div>
+        <div class="card step">
+          <h3>Edge detection</h3>
+          <ul>
+            <li>Sobel, Prewitt, Scharr</li>
+            <li>Detect boundaries and gradients</li>
+          </ul>
+          <p class="muted">See <a href="edge-detection.html">Edge Detection</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ box -->
+    <section class="slide">
+      <h2>Averaging (box) filter</h2>
+      <div class="kside">
+        <div class="kgrid" data-k="1 1 1|1 1 1|1 1 1" data-div="9"></div>
+        <ul>
+          <li><strong>Formula:</strong> each output pixel = the average of its neighbourhood.</li>
+          <li class="step"><strong>Effect:</strong> smooths the image and reduces noise, but also blurs edges.</li>
+          <li class="step"><strong>Trade-off:</strong> a larger kernel means more smoothing, and more blur.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================================================================ blur code -->
+    <section class="slide">
+      <h2>Blur filter in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        # simple averaging blur
+        blurred = cv2.blur(img, (5, 5))
+        # ans: a 5x5 kernel: averages 25 pixels
+        # what does the kernel size mean?
+        # (5, 5) means 5 rows x 5 columns
+        # ans: larger kernel = more blur
+        # blur with different kernel sizes
+        blur3 = cv2.blur(img, (3, 3))
+        blur7 = cv2.blur(img, (7, 7))
+        # ans: blur3 &lt; blur7 (7x7 blurs more)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ gaussian -->
+    <section class="slide" id="slide-gauss">
+      <h2>Gaussian blur</h2>
+      <div class="kside">
+        <div class="kgrid" data-k="1 2 1|2 4 2|1 2 1" data-div="16"></div>
+        <div>
+          <p><strong>Gaussian kernel:</strong> weights the centre pixel more than the edges.</p>
+          <p class="step"><strong>Advantages over the box filter:</strong></p>
+          <ul>
+            <li class="step">A more natural blur (mimics optical blur)</li>
+            <li class="step">Preserves edges better</li>
+            <li class="step">Fewer ringing artefacts</li>
+          </ul>
+        </div>
+      </div>
+      <div class="prof step" data-interactive>
+        <svg viewBox="0 0 360 150" aria-label="Weights of a 1-D Gaussian kernel compared with a box kernel"></svg>
+        <label class="sl">sigma <input type="range" min="0.4" max="4" step="0.1" value="1" /><output>1.0</output></label>
+      </div>
+    </section>
+
+    <!-- ================================================================ gaussian code -->
+    <section class="slide">
+      <h2>Gaussian blur in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # gaussian blur
+        gaussian = cv2.GaussianBlur(img, (5, 5), 0)
+        # ans: 5x5 kernel, sigma=0 (computed from the kernel size)
+        # what is sigma?
+        # ans: the standard deviation: it controls blur strength
+        # ans: larger sigma = more blur
+        # gaussian with a specific sigma
+        gaussian = cv2.GaussianBlur(img, (5, 5), sigmaX=2.0)
+        # ans: sigma=2.0 controls the spread of the gaussian
+        # kernel size must be odd
+        gaussian = cv2.GaussianBlur(img, (4, 4), 0)
+        # ans: ERROR! the kernel size must be odd (3, 5, 7, ...)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ median -->
+    <section class="slide" id="slide-median">
+      <h2>Median filter</h2>
+      <p class="lead center">Replace each pixel with the <strong>median</strong> of its neighbourhood.</p>
+      <div class="stage" aria-label="Nine neighbourhood values sorted into a row; the middle one replaces the noisy centre pixel"></div>
+      <ol>
+        <li class="step" data-anim="fade">Sort all the pixels in the neighbourhood</li>
+        <li class="step" data-anim="fade">Pick the middle value (the median)</li>
+        <li class="step" data-anim="fade">Replace the centre pixel with it</li>
+      </ol>
+      <p class="step center"><strong>Advantage:</strong> excellent for salt-and-pepper noise: it ignores outliers. <strong>Disadvantage:</strong> slower than linear filters.</p>
+    </section>
+
+    <!-- ================================================================ median code -->
+    <section class="slide">
+      <h2>Median filter in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # median blur (good for salt-and-pepper noise)
+        median = cv2.medianBlur(img, 5)
+        # ans: 5x5 window: the median of 25 pixels
+        # kernel size must be odd, and a single value
+        median = cv2.medianBlur(img, 7)
+        # ans: a 7x7 window
+        # why median for noise?
+        # ans: outliers (noise) don't affect the median
+        # ans: preserves edges while removing noise
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ bilateral -->
+    <section class="slide" id="slide-bil">
+      <h2>Bilateral filter</h2>
+      <p class="lead center">Smooths while <strong>preserving edges</strong>.</p>
+      <ul>
+        <li class="step">It considers both <strong>spatial distance</strong> and <strong>intensity difference</strong>.</li>
+        <li class="step">Pixels far away, or with a very different intensity, get less weight.</li>
+      </ul>
+      <div class="bw step">
+        <figure><canvas class="w0" width="9" height="9"></canvas><figcaption>patch on an edge</figcaption></figure>
+        <figure><canvas class="w1" width="9" height="9"></canvas><figcaption>spatial weight</figcaption></figure>
+        <figure><canvas class="w2" width="9" height="9"></canvas><figcaption>intensity weight</figcaption></figure>
+        <figure><canvas class="w3" width="9" height="9"></canvas><figcaption>weight = spatial × intensity</figcaption></figure>
+      </div>
+      <p class="step center"><strong>Use case:</strong> noise reduction that keeps sharp edges, e.g. portrait smoothing.</p>
+    </section>
+
+    <!-- ================================================================ bilateral code -->
+    <section class="slide">
+      <h2>Bilateral filter in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # bilateral filter (edge-preserving)
+        bilateral = cv2.bilateralFilter(img, 9, 75, 75)
+        # ans: d=9 (diameter), sigmaColor=75, sigmaSpace=75
+        # what is d?
+        # ans: the diameter of the pixel neighbourhood
+        # what is sigmaColor?
+        # ans: the filter sigma in colour space (intensity difference)
+        # what is sigmaSpace?
+        # ans: the filter sigma in coordinate space (spatial distance)
+        # when to use bilateral?
+        # ans: noise reduction with edge preservation
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ playground -->
+    <section class="slide" id="slide-play">
+      <h2>Every filter, on a real photo</h2>
+      <div class="play">
+        <figure><canvas class="photo src" width="400" height="225"></canvas><figcaption class="srcname">input</figcaption></figure>
+        <figure><canvas class="photo dst" width="400" height="225"></canvas><figcaption class="name">output</figcaption></figure>
+      </div>
+      <div class="under" data-interactive>
+        <div class="chips noise">
+          <button class="chip ghost on" data-n="none">No noise</button>
+          <button class="chip ghost" data-n="gauss">Gaussian noise</button>
+          <button class="chip ghost" data-n="sp">Salt &amp; pepper</button>
+        </div>
+        <div class="chips filt">
+          <button class="chip" data-f="none">None</button>
+          <button class="chip" data-f="blur">cv2.blur</button>
+          <button class="chip on" data-f="gauss">GaussianBlur</button>
+          <button class="chip" data-f="median">medianBlur</button>
+          <button class="chip" data-f="bilateral">bilateralFilter</button>
+        </div>
+        <label class="sl">ksize / d <input type="range" min="3" max="9" step="2" value="5" /><output>5</output></label>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What does smoothing do?</p><p class="answer">Averages each neighbourhood: reduces noise, blurs the image.</p></div>
+        <div class="q"><p>What is the difference between blur and Gaussian blur?</p><p class="answer">Gaussian weights the centre more, which looks more natural.</p></div>
+        <div class="q"><p>Which filter for salt-and-pepper noise?</p><p class="answer">The median filter: it removes outliers.</p></div>
+        <div class="q"><p>Why is the bilateral filter special?</p><p class="answer">It preserves edges while smoothing.</p></div>
+        <div class="q"><p>What is the kernel size?</p><p class="answer">The neighbourhood size, e.g. 3×3 or 5×5.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What does a larger kernel mean?</p><p class="answer">More smoothing, more blur, slower processing.</p></div>
+        <div class="q"><p>Why must the kernel size be odd?</p><p class="answer">It needs a centre pixel: a symmetric neighbourhood.</p></div>
+        <div class="q"><p>What is sigma in a Gaussian?</p><p class="answer">The standard deviation: it controls the blur strength.</p></div>
+        <div class="q"><p>What is the trade-off of smoothing?</p><p class="answer">It reduces noise but also blurs edges and details.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # apply a 3x3 averaging blur
+        blurred = cv2.blur(img, (3, 3))  # ans:
+        # apply a 7x7 gaussian blur
+        gaussian = cv2.GaussianBlur(img, (7, 7), 0)  # ans:
+        # apply a median filter with kernel 5
+        median = cv2.medianBlur(img, 5)  # ans:
+        # apply a bilateral filter
+        bilateral = cv2.bilateralFilter(img, 9, 75, 75)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # gaussian blur with sigma=3
+        gaussian = cv2.GaussianBlur(img, (0, 0), sigmaX=3)  # ans:
+        # ans: kernel size (0, 0) is computed from sigma
+        # compare blur strengths
+        blur_small = cv2.blur(img, (3, 3))
+        blur_large = cv2.blur(img, (9, 9))
+        # ans: blur_large is much more blurred
+        # apply a median blur on grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        median = cv2.medianBlur(gray, 5)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="steps"><code class="language-python">
+        # what happens with an even kernel size?
+        blurred = cv2.blur(img, (4, 4))
+        # ans: works for blur, but not for GaussianBlur / medianBlur
+        # which is faster: median or gaussian?
+        # ans: gaussian (a linear filter) is faster than median
+        # bilateral with a large sigmaColor?
+        bilateral = cv2.bilateralFilter(img, 9, 150, 75)
+        # ans: smooths more aggressively across similar colours
+        # bilateral with a large sigmaSpace?
+        bilateral = cv2.bilateralFilter(img, 9, 75, 150)
+        # ans: pixels farther away count more
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 6 · mixed</h2>
+      <pre class="steps"><code class="language-python">
+        # multiple blurs in sequence
+        blur1 = cv2.GaussianBlur(img, (5, 5), 0)
+        blur2 = cv2.GaussianBlur(blur1, (5, 5), 0)
+        # ans: double blur = more smoothing
+        # can you blur an already blurred image?
+        # ans: yes: the blur accumulates
+        # blur only one channel
+        img[:, :, 0] = cv2.blur(img[:, :, 0], (5, 5))
+        # ans: blurs only the blue channel
+      </code></pre>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      // ------------------------------------------------------------ kernel matrices
+      function paintKernel(el, rows, div) {
+        const k = rows.map((r) => r.map(Number));
+        const max = Math.max(...k.flat().map(Math.abs)) || 1;
+        el.style.gridTemplateColumns = `repeat(${k[0].length}, var(--kc))`;
+        el.innerHTML = k.flat().map((w) => {
+          const a = 0.12 + 0.6 * (Math.abs(w) / max);
+          const bg = w > 0 ? `rgba(139,92,246,${a})` : w < 0 ? `rgba(34,211,238,${a})` : "rgba(255,255,255,0.04)";
+          return `<b style="background:${bg}">${w < 0 ? "−" + -w : w}</b>`;
+        }).join("") + (div ? `<span class="div">÷ ${div}</span>` : "");
+      }
+      document.querySelectorAll(".kgrid[data-k]").forEach((el) => paintKernel(el, el.dataset.k.split("|").map((r) => r.trim().split(/\s+/)), el.dataset.div));
+
+      // ------------------------------------------------------------ image helpers
+      async function loadPixels(src, w) {
+        const im = new Image();
+        im.src = src;
+        await im.decode();
+        const h = Math.round((im.naturalHeight / im.naturalWidth) * w);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const x = c.getContext("2d", { willReadFrequently: true });
+        x.drawImage(im, 0, 0, w, h);
+        return x.getImageData(0, 0, w, h);
+      }
+      const refl = (v, m) => (v < 0 ? -v : v >= m ? 2 * m - v - 2 : v);
+      function rng(seed) { return () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296); }
+      function addNoise(img, kind) {
+        const out = new ImageData(new Uint8ClampedArray(img.data), img.width, img.height);
+        const d = out.data, r = rng(7);
+        if (kind === "sp") {
+          for (let p = 0; p < d.length; p += 4) {
+            const u = r();
+            if (u < 0.04) d[p] = d[p + 1] = d[p + 2] = 0;
+            else if (u < 0.08) d[p] = d[p + 1] = d[p + 2] = 255;
+          }
+        } else if (kind === "gauss") {
+          for (let p = 0; p < d.length; p += 4) {
+            const n = Math.sqrt(-2 * Math.log(r() + 1e-9)) * Math.cos(2 * Math.PI * r()) * 22;
+            d[p] += n; d[p + 1] += n; d[p + 2] += n;
+          }
+        }
+        return out;
+      }
+      // Separable 1-D kernel pass (horizontal then vertical), reflect-101 borders
+      function separable(img, k) {
+        const { width: W, height: H, data: s } = img;
+        const h = (k.length - 1) / 2;
+        const tmp = new Float32Array(s.length), out = new ImageData(W, H);
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (let c = 0; c < 3; c++) {
+          let a = 0;
+          for (let i = 0; i < k.length; i++) a += k[i] * s[(y * W + refl(x + i - h, W)) * 4 + c];
+          tmp[(y * W + x) * 4 + c] = a;
+        }
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+          const o = (y * W + x) * 4;
+          for (let c = 0; c < 3; c++) {
+            let a = 0;
+            for (let i = 0; i < k.length; i++) a += k[i] * tmp[(refl(y + i - h, H) * W + x) * 4 + c];
+            out.data[o + c] = a;
+          }
+          out.data[o + 3] = 255;
+        }
+        return out;
+      }
+      function gaussK(n, sigma) {
+        if (!sigma) sigma = 0.3 * ((n - 1) * 0.5 - 1) + 0.8; // OpenCV's default for sigma=0
+        const h = (n - 1) / 2, k = [];
+        for (let i = -h; i <= h; i++) k.push(Math.exp(-(i * i) / (2 * sigma * sigma)));
+        const s = k.reduce((a, b) => a + b, 0);
+        return k.map((v) => v / s);
+      }
+      function median(img, n) {
+        const { width: W, height: H, data: s } = img;
+        const h = (n - 1) / 2, out = new ImageData(W, H), buf = new Uint8Array(n * n);
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+          const o = (y * W + x) * 4;
+          for (let c = 0; c < 3; c++) {
+            let m = 0;
+            for (let j = -h; j <= h; j++) {
+              const row = refl(y + j, H) * W;
+              for (let i = -h; i <= h; i++) buf[m++] = s[(row + refl(x + i, W)) * 4 + c];
+            }
+            buf.sort();
+            out.data[o + c] = buf[(n * n - 1) >> 1];
+          }
+          out.data[o + 3] = 255;
+        }
+        return out;
+      }
+      function bilateral(img, d, sc, ss) {
+        const { width: W, height: H, data: s } = img;
+        const h = (d - 1) / 2, out = new ImageData(W, H);
+        const cw = new Float32Array(3 * 256);
+        for (let i = 0; i < cw.length; i++) cw[i] = Math.exp(-(i * i) / (2 * sc * sc));
+        const sw = [];
+        for (let j = -h; j <= h; j++) for (let i = -h; i <= h; i++) sw.push(i * i + j * j <= h * h ? Math.exp(-(i * i + j * j) / (2 * ss * ss)) : 0);
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+          const o = (y * W + x) * 4;
+          let r = 0, g = 0, b = 0, wsum = 0, m = 0;
+          for (let j = -h; j <= h; j++) {
+            const row = refl(y + j, H) * W;
+            for (let i = -h; i <= h; i++, m++) {
+              if (!sw[m]) continue;
+              const q = (row + refl(x + i, W)) * 4;
+              const diff = Math.abs(s[q] - s[o]) + Math.abs(s[q + 1] - s[o + 1]) + Math.abs(s[q + 2] - s[o + 2]);
+              const w = sw[m] * cw[diff];
+              r += w * s[q]; g += w * s[q + 1]; b += w * s[q + 2]; wsum += w;
+            }
+          }
+          out.data[o] = r / wsum; out.data[o + 1] = g / wsum; out.data[o + 2] = b / wsum; out.data[o + 3] = 255;
+        }
+        return out;
+      }
+      function draw(canvas, img) {
+        canvas.width = img.width; canvas.height = img.height;
+        canvas.getContext("2d").putImageData(img, 0, 0);
+      }
+      const PHOTO = loadPixels("/assets/2025-10-09-22-21-33.png", 400);
+
+      // ------------------------------------------------------------ cover: noisy photo cleaned by a median, wiping across
+      const cover = document.querySelector("#title canvas");
+      let coverImgs = null, coverTl = null;
+      PHOTO.then((img) => {
+        const noisy = addNoise(img, "sp");
+        coverImgs = [noisy, median(noisy, 5)];
+        paintCover(0.5);
+      });
+      function paintCover(f) {
+        if (!coverImgs) return;
+        const [a, b] = coverImgs, W = a.width, H = a.height, cut = Math.round(W * f);
+        cover.width = W; cover.height = H;
+        const ctx = cover.getContext("2d");
+        ctx.putImageData(a, 0, 0);
+        ctx.putImageData(b, 0, 0, 0, 0, cut, H);
+        ctx.fillStyle = "#22d3ee";
+        ctx.fillRect(cut - 1, 0, 2, H);
+      }
+      Deck.scene("#title", {
+        enter() {
+          const st = { f: 0.05 };
+          coverTl?.kill();
+          coverTl = gsap.to(st, { f: 0.95, duration: 3, ease: "sine.inOut", yoyo: true, repeat: -1, onUpdate: () => paintCover(st.f) });
+        },
+        leave() { coverTl?.kill(); },
+      });
+
+      // ------------------------------------------------------------ gaussian profile
+      const gs = document.querySelector("#slide-gauss");
+      const svg = gs.querySelector("svg");
+      const N = 9;
+      svg.innerHTML =
+        `<line x1="10" y1="120" x2="350" y2="120" stroke="rgba(255,255,255,0.25)"/>` +
+        Array.from({ length: N }, (_, i) => `<rect class="gb" x="${22 + i * 37}" width="26" rx="3" fill="#8b5cf6"/><rect class="bb" x="${22 + i * 37}" width="26" height="2" fill="#22d3ee"/><text x="${35 + i * 37}" y="138" text-anchor="middle">${i - 4}</text>`).join("") +
+        `<path class="curve" fill="none" stroke="#f0abfc" stroke-width="2"/><text x="350" y="14" text-anchor="end" fill="#67e8f9">— box (1/9 each)</text><text x="350" y="30" text-anchor="end" fill="#c4b5fd">■ gaussian</text>`;
+      const gIn = gs.querySelector("input");
+      const gb = [...svg.querySelectorAll(".gb")], bb = [...svg.querySelectorAll(".bb")];
+      const yOf = (w) => 120 - w * 360;
+      function paintProfile(sigma, animate) {
+        const k = gaussK(N, sigma);
+        k.forEach((w, i) => {
+          const at = { y: yOf(w), height: 120 - yOf(w) };
+          animate ? gsap.to(gb[i], { attr: at, duration: 0.35 }) : gsap.set(gb[i], { attr: at });
+          gsap.set(bb[i], { attr: { y: yOf(1 / N) - 1 } });
+        });
+        let d = "";
+        for (let x = -4.5; x <= 4.5; x += 0.1) {
+          const w = Math.exp(-(x * x) / (2 * sigma * sigma)) / k.reduce((a, b, i) => a + Math.exp(-((i - 4) ** 2) / (2 * sigma * sigma)), 0);
+          d += (d ? "L" : "M") + (35 + (x + 4) * 37).toFixed(1) + "," + yOf(w).toFixed(1);
+        }
+        svg.querySelector(".curve").setAttribute("d", d);
+        gs.querySelector("output").textContent = (+sigma).toFixed(1);
+      }
+      gIn.addEventListener("input", () => paintProfile(+gIn.value, false));
+      paintProfile(1, false);
+
+      // ------------------------------------------------------------ median sort animation
+      const ms = document.querySelector("#slide-median");
+      const stage = ms.querySelector(".stage");
+      const VALS = [52, 55, 61, 59, 255, 58, 63, 57, 54];
+      const cells = VALS.map((v, i) => {
+        const el = document.createElement("div");
+        el.className = "cell";
+        el.textContent = v;
+        el.style.background = `rgb(${v},${v},${v})`;
+        el.style.color = v > 140 ? "#05060f" : "#f1f5f9";
+        stage.appendChild(el);
+        return el;
+      });
+      const outCell = document.createElement("div");
+      outCell.className = "cell";
+      stage.appendChild(outCell);
+      stage.insertAdjacentHTML("beforeend", `<span class="lab l-in">neighbourhood</span><span class="lab l-sort">sorted</span><span class="lab l-out">output pixel</span>`);
+      const order = VALS.map((v, i) => i).sort((a, b) => VALS[a] - VALS[b]);
+      function layout() {
+        const cw = cells[0].offsetWidth, g = cw + 4, W = stage.clientWidth;
+        const x0 = (W - 6 * g) / 2;
+        return {
+          cw, g,
+          grid: (r, c) => ({ x: x0 + c * g, y: 24 + r * g }),
+          row: (k) => ({ x: (W - 9 * g) / 2 + k * g, y: 24 + 3 * g + 34 }),
+          out: { x: x0 + 5 * g, y: 24 + g },
+          labIn: { x: x0, y: 0 },
+          labOut: { x: x0 + 4.5 * g, y: 0 },
+          labSort: { x: (W - 9 * g) / 2, y: 24 + 3 * g + 10 },
+        };
+      }
+      let mState = -1;
+      function medianState(n, animate) {
+        mState = n;
+        const L = layout();
+        const dur = animate ? 0.7 : 0;
+        gsap.killTweensOf([...cells, outCell]);
+        cells.forEach((el, i) => {
+          const rank = order.indexOf(i);
+          const pos = n >= 1 ? L.row(rank) : L.grid(Math.floor(i / 3), i % 3);
+          const mid = n >= 2 && rank === 4;
+          gsap.to(el, { ...pos, duration: dur, delay: animate && n === 1 ? rank * 0.06 : 0, ease: "power2.inOut", scale: mid ? 1.2 : 1, opacity: n >= 2 && !mid ? 0.35 : 1, boxShadow: mid ? "0 0 22px rgba(236,72,153,0.9)" : "none" });
+        });
+        if (n >= 3) {
+          outCell.textContent = 58;
+          gsap.set(outCell, { background: "rgb(58,58,58)", color: "#f1f5f9" });
+          if (animate) gsap.fromTo(outCell, { ...L.row(4), scale: 1.2 }, { ...L.out, scale: 1.3, duration: 0.8, ease: "power2.inOut" });
+          else gsap.set(outCell, { ...L.out, scale: 1.3 });
+        } else {
+          outCell.textContent = 255;
+          gsap.set(outCell, { ...L.out, scale: 1.3, background: "rgb(255,255,255)", color: "#05060f" });
+        }
+        const labs = ms.querySelectorAll(".lab");
+        gsap.set(labs[0], L.labIn);
+        gsap.set(labs[1], { ...L.labSort, opacity: n >= 1 ? 1 : 0 });
+        gsap.set(labs[2], L.labOut);
+        cells[4].style.outline = n < 1 ? "2px solid #ec4899" : "none";
+      }
+      const listSteps = [...ms.querySelectorAll("ol li")];
+      let burst = 0, burstT = null;
+      const shownCount = () => listSteps.filter((li) => li.classList.contains("shown")).length;
+      Deck.scene("#slide-median", {
+        enter() { medianState(shownCount(), false); },
+        // steps can arrive in a burst (↓, links): only animate a single forward step
+        step(slide, n, els, d) {
+          burst++;
+          clearTimeout(burstT);
+          burstT = setTimeout(() => { medianState(shownCount(), burst === 1 && !(d && d.dir < 0)); burst = 0; }, 0);
+        },
+        unstep() { medianState(shownCount(), false); },
+      });
+      window.addEventListener("resize", () => mState >= 0 && medianState(mState, false));
+
+      // ------------------------------------------------------------ bilateral weights on an edge patch
+      (function () {
+        const bs = document.querySelector("#slide-bil");
+        const P = [], S = [], I = [], B = [];
+        for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) {
+          const v = x + 0.4 * (y - 4) < 5 ? 60 : 200;
+          P.push(v + ((x * 7 + y * 13) % 11) - 5);
+        }
+        const c = P[40];
+        for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) {
+          const s = Math.exp(-((x - 4) ** 2 + (y - 4) ** 2) / (2 * 2.5 ** 2));
+          const i = Math.exp(-((P[y * 9 + x] - c) ** 2) / (2 * 30 ** 2));
+          S.push(s); I.push(i); B.push(s * i);
+        }
+        const paint = (cls, arr, map) => {
+          const cv = bs.querySelector(cls), ctx = cv.getContext("2d"), im = ctx.createImageData(9, 9);
+          arr.forEach((v, k) => { const [r, g, b] = map(v); im.data.set([r, g, b, 255], k * 4); });
+          ctx.putImageData(im, 0, 0);
+        };
+        const heat = (v) => [40 + 99 * v, 30 + 62 * v, 60 + 186 * v];
+        paint(".w0", P, (v) => [v, v, v]);
+        paint(".w1", S, heat);
+        paint(".w2", I, heat);
+        paint(".w3", B.map((v) => v / Math.max(...B)), heat);
+      })();
+
+      // ------------------------------------------------------------ playground
+      const ps = document.querySelector("#slide-play");
+      const src = ps.querySelector(".src"), dst = ps.querySelector(".dst");
+      const kIn = ps.querySelector("input");
+      let base = null, noisy = null, noise = "none", filt = "gauss";
+      const LABEL = {
+        none: () => "no filter",
+        blur: (k) => `cv2.blur(img, (${k}, ${k}))`,
+        gauss: (k) => `cv2.GaussianBlur(img, (${k}, ${k}), 0)`,
+        median: (k) => `cv2.medianBlur(img, ${k})`,
+        bilateral: (k) => `cv2.bilateralFilter(img, ${k}, 75, 75)`,
+      };
+      function run() {
+        if (!base) return;
+        const k = +kIn.value;
+        ps.querySelector("output").textContent = k;
+        noisy = noise === "none" ? base : addNoise(base, noise);
+        draw(src, noisy);
+        ps.querySelector(".srcname").textContent = { none: "input", gauss: "input + gaussian noise", sp: "input + salt & pepper noise" }[noise];
+        const out = filt === "none" ? noisy : filt === "blur" ? separable(noisy, Array(k).fill(1 / k)) : filt === "gauss" ? separable(noisy, gaussK(k)) : filt === "median" ? median(noisy, k) : bilateral(noisy, k, 75, 75);
+        draw(dst, out);
+        ps.querySelector(".name").textContent = LABEL[filt](k);
+        gsap.fromTo(dst, { opacity: 0.4 }, { opacity: 1, duration: 0.4 });
+      }
+      ps.querySelector(".under").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        if (b.dataset.n) { noise = b.dataset.n; ps.querySelectorAll("[data-n]").forEach((x) => x.classList.toggle("on", x === b)); }
+        if (b.dataset.f) { filt = b.dataset.f; ps.querySelectorAll("[data-f]").forEach((x) => x.classList.toggle("on", x === b)); }
+        run();
+      });
+      kIn.addEventListener("change", run);
+      kIn.addEventListener("input", () => (ps.querySelector("output").textContent = kIn.value));
+      PHOTO.then((img) => { base = img; run(); });
+
+      // A short tour on entry: salt & pepper, then the median fixes it
+      let tour = null;
+      Deck.scene("#slide-play", {
+        enter() {
+          const seq = ['[data-n="sp"]', '[data-f="gauss"]', '[data-f="median"]'];
+          let k = 0;
+          const next = () => {
+            if (!base) return (tour = gsap.delayedCall(0.5, next));
+            ps.querySelector(seq[k]).click();
+            if (++k < seq.length) tour = gsap.delayedCall(2, next);
+          };
+          tour = gsap.delayedCall(1, next);
+          ps.querySelector(".under").addEventListener("pointerdown", () => tour?.kill(), { once: true });
+        },
+        leave() { tour?.kill(); },
+      });
+    </script>
+  </body>
+</html>

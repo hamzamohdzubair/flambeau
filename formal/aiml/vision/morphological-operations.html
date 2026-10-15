@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Morphological Operations</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.85rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 1.4rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 8rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 60rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      pre.ex {
+        width: min(100%, 64rem);
+        font-size: 0.95rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 0.95rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+      @media (max-width: 760px) {
+        .play {
+          grid-template-columns: 1fr;
+          gap: 0.8rem;
+        }
+
+        .codek {
+          grid-template-columns: 1fr;
+          gap: 1.4rem;
+        }
+
+        input[type="range"] {
+          width: 6.5rem;
+        }
+
+        pre.ex,
+        .qa pre {
+          font-size: 0.78rem;
+        }
+      }
+
+      /* ---------- Cover ---------- */
+      #title canvas {
+        width: min(26rem, 80vw);
+        border-radius: 12px;
+        image-rendering: pixelated;
+      }
+
+      /* ---------- Grid demo ---------- */
+      #grid-demo {
+        --cell: min(2.1rem, 6.6vw, 4.6vh);
+      }
+
+      .mgr {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem 2.4rem;
+      }
+
+      .mgr h4 {
+        margin: 0 0 0.4rem;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        text-align: center;
+      }
+
+      .bin {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(12, var(--cell));
+        gap: 2px;
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+      }
+
+      .bin span {
+        width: var(--cell);
+        height: var(--cell);
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.06);
+        transition: background 0.2s, opacity 0.2s;
+      }
+
+      .bin span.on {
+        background: #e2e8f0;
+      }
+
+      .bin.out span.pending {
+        opacity: 0.25;
+      }
+
+      .bin.out span.now {
+        outline: 2px solid var(--pink);
+        outline-offset: -2px;
+      }
+
+      .bin.out span.changed.on {
+        background: #86efac;
+      }
+
+      .bin.out span.changed:not(.on) {
+        background: rgba(248, 113, 113, 0.55);
+      }
+
+      .bin .win {
+        position: absolute;
+        left: 0;
+        top: 0;
+        border: 3px solid var(--cyan);
+        border-radius: 6px;
+        box-shadow: 0 0 18px rgba(34, 211, 238, 0.8);
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .rule {
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        text-align: center;
+        min-height: 2.6em;
+      }
+
+      .rule b {
+        color: var(--pink);
+      }
+
+      /* ---------- Before / after strips ---------- */
+      .strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+        width: min(100%, 64rem);
+      }
+
+      .strip.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: min(100%, 50rem);
+      }
+
+      .strip canvas {
+        width: 100%;
+        border-radius: 10px;
+        background: #000;
+      }
+
+      .strip figcaption code {
+        font-size: 0.8em;
+      }
+
+      .opcols .strip.two {
+        grid-template-columns: 1fr;
+        width: min(100%, 24rem);
+        justify-self: center;
+      }
+
+      .opcols {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: center;
+        width: min(100%, 66rem);
+      }
+
+      .opcols pre {
+        width: 100%;
+        font-size: 0.9rem;
+      }
+
+      /* ---------- Structuring elements ---------- */
+      .ses {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .se {
+        display: inline-grid;
+        gap: 3px;
+        padding: 5px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+      }
+
+      .se b {
+        display: grid;
+        place-items: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        font: 400 0.7rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .se b.on {
+        background: rgba(139, 92, 246, 0.75);
+        color: #fff;
+      }
+
+      /* ---------- Playground ---------- */
+      #play .play {
+        width: min(100%, 60rem);
+      }
+
+      #play canvas.img {
+        background: #000;
+      }
+
+      #play .rows {
+        display: grid;
+        gap: 0.6rem;
+        justify-items: center;
+      }
+
+      @media (max-width: 760px) {
+        #grid-demo {
+          --cell: min(1.5rem, 6.8vw);
+        }
+
+        .strip {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .opcols {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas class="cov" width="500" height="288"></canvas>
+      <h1>Morphological Operations</h1>
+      <p>Shrink, grow, clean and outline shapes by sliding a small shape over the image.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide">
+      <h2>What are morphological operations?</h2>
+      <p class="lead"><strong>Morphological operations</strong> process images based on <em>shapes</em>. They work on binary (black/white) or grayscale images.</p>
+      <div class="cols top" style="width: min(100%, 58rem)">
+        <div class="card">
+          <h3>Structuring element</h3>
+          <p>A small kernel that defines the neighbourhood shape: rectangle, ellipse, cross or custom.</p>
+          <div class="ses se-mini" style="margin-top: 0.8rem; justify-content: flex-start"></div>
+        </div>
+        <div class="card">
+          <h3>Applications</h3>
+          <ul>
+            <li class="step">Noise removal</li>
+            <li class="step">Shape analysis</li>
+            <li class="step">Object extraction</li>
+            <li class="step">Skeletonization</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ grid demo -->
+    <section class="slide" id="grid-demo">
+      <h2>Erosion and dilation</h2>
+      <div class="mgr">
+        <div><h4>Input</h4><div class="bin in"><div class="win"></div></div></div>
+        <div><h4 class="oname">Erosion: min</h4><div class="bin out"></div></div>
+      </div>
+      <p class="rule"></p>
+      <div class="chips" data-interactive>
+        <button class="chip on" data-op="erode">Erosion</button>
+        <button class="chip" data-op="dilate">Dilation</button>
+        <button class="chip ghost" data-act="toggle">Pause</button>
+        <button class="chip ghost" data-act="step">Step</button>
+        <button class="chip ghost" data-act="finish">Finish</button>
+      </div>
+      <div class="cards" style="width: min(100%, 56rem)">
+        <div class="card"><h3>Erosion: <code>min(neighbourhood)</code></h3><p>Shrinks bright regions, removes small white noise, disconnects objects.</p></div>
+        <div class="card"><h3>Dilation: <code>max(neighbourhood)</code></h3><p>Expands bright regions, fills small holes, connects nearby objects.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ erosion code -->
+    <section class="slide">
+      <h2>Erosion</h2>
+      <div class="opcols">
+        <pre class="steps"><code class="language-python">
+          import cv2
+          import numpy as np
+          # binary image
+          _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+          # create structuring element
+          kernel = np.ones((5, 5), np.uint8)  # ans:
+          # ans: can also use cv2.getStructuringElement()
+          # erosion
+          eroded = cv2.erode(binary, kernel, iterations=1)  # ans:
+          # ans: iterations: number of times to apply
+          # effect: shrinks white regions, removes small noise
+          # ans: larger kernel or more iterations = more erosion
+        </code></pre>
+        <div class="strip two" data-op="erode">
+          <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
+          <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption><code>cv2.erode</code>, 5×5</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Dilation</h2>
+      <div class="opcols">
+        <pre class="steps"><code class="language-python">
+          # dilation
+          dilated = cv2.dilate(binary, kernel, iterations=1)  # ans:
+          # effect: expands white regions, fills small holes
+          # ans: larger kernel or more iterations = more dilation
+          # multiple iterations
+          dilated = cv2.dilate(binary, kernel, iterations=3)
+          # ans: equivalent to applying it 3 times
+        </code></pre>
+        <div class="strip two" data-op="dilate">
+          <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
+          <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption><code>cv2.dilate</code>, 5×5</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ opening -->
+    <section class="slide">
+      <h2>Opening</h2>
+      <p class="lead"><strong>Opening</strong> = erosion followed by dilation.</p>
+      <div class="strip" data-seq="open">
+        <figure><canvas data-a></canvas><figcaption>binary, with white specks</figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-b></canvas><figcaption>① erode: specks vanish, shapes shrink</figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-c></canvas><figcaption>② dilate: shapes grow back, specks stay gone</figcaption></figure>
+      </div>
+      <ul class="step" style="font-size: 1.05rem">
+        <li>Removes small white noise and breaks thin connections, while preserving the shape of large objects.</li>
+        <li><strong>Use case:</strong> noise removal without shrinking objects.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Opening in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        kernel = np.ones((5, 5), np.uint8)
+        # opening = erosion + dilation
+        opening = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)  # ans:
+        # equivalent to:
+        eroded = cv2.erode(binary, kernel)  # ans:
+        opening = cv2.dilate(eroded, kernel)  # ans:
+        # removes small white noise, preserves large shapes
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ closing -->
+    <section class="slide">
+      <h2>Closing</h2>
+      <p class="lead"><strong>Closing</strong> = dilation followed by erosion.</p>
+      <div class="strip" data-seq="close">
+        <figure><canvas data-a></canvas><figcaption>binary, with black holes</figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-b></canvas><figcaption>① dilate: holes fill, shapes grow</figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-c></canvas><figcaption>② erode: shapes shrink back, holes stay filled</figcaption></figure>
+      </div>
+      <ul class="step" style="font-size: 1.05rem">
+        <li>Fills small holes, connects nearby objects, closes gaps.</li>
+        <li><strong>Use case:</strong> fill holes in objects, connect broken parts.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Closing in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # closing = dilation + erosion
+        closing = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)  # ans:
+        # equivalent to:
+        dilated = cv2.dilate(binary, kernel)  # ans:
+        closing = cv2.erode(dilated, kernel)  # ans:
+        # fills small black holes in white regions
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ gradient -->
+    <section class="slide">
+      <h2>Morphological gradient</h2>
+      <p class="lead"><strong>Gradient</strong> = dilation − erosion. It outlines the edges of objects.</p>
+      <div class="opcols">
+        <pre class="steps"><code class="language-python">
+          # morphological gradient
+          gradient = cv2.morphologyEx(binary, cv2.MORPH_GRADIENT, kernel)  # ans:
+          # equivalent to:
+          dilated = cv2.dilate(binary, kernel)  # ans:
+          eroded = cv2.erode(binary, kernel)  # ans:
+          gradient = dilated - eroded  # ans:
+          # highlights object boundaries
+        </code></pre>
+        <div class="strip two" data-op="gradient">
+          <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
+          <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption>gradient</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ top hat -->
+    <section class="slide">
+      <h2>Top hat</h2>
+      <p class="lead"><strong>Top hat</strong> = image − opening(image). It extracts small <em>bright</em> features.</p>
+      <div class="opcols">
+        <pre class="steps"><code class="language-python">
+          # top hat
+          tophat = cv2.morphologyEx(gray, cv2.MORPH_TOPHAT, kernel)  # ans:
+          # extracts bright regions smaller than the kernel
+          # ans: useful for bright objects on a dark background
+        </code></pre>
+        <div class="strip two" data-op="tophat" data-gray>
+          <figure><canvas data-src></canvas><figcaption>gray</figcaption></figure>
+          <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption>top hat, 9×9</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ black hat -->
+    <section class="slide">
+      <h2>Black hat</h2>
+      <p class="lead"><strong>Black hat</strong> = closing(image) − image. It extracts small <em>dark</em> features.</p>
+      <div class="opcols">
+        <pre class="steps"><code class="language-python">
+          # black hat
+          blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)  # ans:
+          # extracts dark regions smaller than the kernel
+          # ans: useful for dark objects on a bright background
+        </code></pre>
+        <div class="strip two" data-op="blackhat" data-gray>
+          <figure><canvas data-src></canvas><figcaption>gray</figcaption></figure>
+          <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption>black hat, 9×9</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ structuring elements -->
+    <section class="slide">
+      <h2>Structuring elements</h2>
+      <div class="opcols">
+        <pre class="steps"><code class="language-python">
+          # rectangular kernel
+          rect = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))  # ans:
+          # elliptical kernel
+          ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))  # ans:
+          # cross-shaped kernel
+          cross = cv2.getStructuringElement(cv2.MORPH_CROSS, (5, 5))  # ans:
+          # custom kernel
+          custom = np.array([[0, 1, 0],
+                             [1, 1, 1],
+                             [0, 1, 0]], np.uint8)
+          # ans: cross-shaped, like a 3x3 MORPH_CROSS
+        </code></pre>
+        <div class="ses se-big"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ playground -->
+    <section class="slide top" id="play">
+      <h2>Morphology playground</h2>
+      <div class="play">
+        <figure><canvas class="img src"></canvas><figcaption class="sname">binary</figcaption></figure>
+        <figure><canvas class="img dst"></canvas><figcaption class="dname"></figcaption></figure>
+      </div>
+      <div class="rows">
+        <div class="chips ops" data-interactive>
+          <button class="chip on" data-op="erode">Erode</button>
+          <button class="chip" data-op="dilate">Dilate</button>
+          <button class="chip" data-op="open">Open</button>
+          <button class="chip" data-op="close">Close</button>
+          <button class="chip" data-op="gradient">Gradient</button>
+          <button class="chip" data-op="tophat">Top hat</button>
+          <button class="chip" data-op="blackhat">Black hat</button>
+        </div>
+        <div class="chips shapes" data-interactive>
+          <button class="chip on" data-shape="rect">MORPH_RECT</button>
+          <button class="chip" data-shape="ellipse">MORPH_ELLIPSE</button>
+          <button class="chip" data-shape="cross">MORPH_CROSS</button>
+          <button class="chip ghost" data-src="toggle">Use the grayscale photo</button>
+        </div>
+        <div class="ctl" data-interactive>
+          <label>kernel <input type="range" name="k" min="1" max="8" value="2" /><output></output></label>
+          <label>iterations <input type="range" name="it" min="1" max="4" value="1" /><output></output></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is erosion?</p><p class="answer">It shrinks bright regions: each pixel becomes its neighbourhood minimum.</p></div>
+        <div class="q"><p>What is dilation?</p><p class="answer">It expands bright regions: each pixel becomes its neighbourhood maximum.</p></div>
+        <div class="q"><p>What is opening?</p><p class="answer">Erosion then dilation; it removes noise.</p></div>
+        <div class="q"><p>What is closing?</p><p class="answer">Dilation then erosion; it fills holes.</p></div>
+        <div class="q"><p>What is the morphological gradient?</p><p class="answer">Dilation minus erosion; it outlines edges.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>When to use opening?</p><p class="answer">To remove small white noise while preserving object shape.</p></div>
+        <div class="q"><p>When to use closing?</p><p class="answer">To fill small holes and connect broken parts.</p></div>
+        <div class="q"><p>What is top hat?</p><p class="answer">img − opening: it extracts small bright features.</p></div>
+        <div class="q"><p>What is black hat?</p><p class="answer">closing − img: it extracts small dark features.</p></div>
+        <div class="q"><p>The effect of a larger kernel?</p><p class="answer">A more aggressive operation that affects larger structures.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # erosion with 3x3 kernel
+        kernel = np.ones((3, 3), np.uint8)
+        eroded = cv2.erode(binary, kernel, iterations=1)  # ans:
+        # dilation with 5x5 kernel
+        kernel = np.ones((5, 5), np.uint8)
+        dilated = cv2.dilate(binary, kernel, iterations=1)  # ans:
+        # opening
+        kernel = np.ones((5, 5), np.uint8)
+        opening = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # closing
+        kernel = np.ones((5, 5), np.uint8)
+        closing = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)  # ans:
+        # morphological gradient
+        gradient = cv2.morphologyEx(binary, cv2.MORPH_GRADIENT, kernel)  # ans:
+        # elliptical kernel
+        ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))  # ans:
+        result = cv2.morphologyEx(binary, cv2.MORPH_OPEN, ellipse)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # top hat with 9x9 kernel
+        kernel = np.ones((9, 9), np.uint8)
+        tophat = cv2.morphologyEx(gray, cv2.MORPH_TOPHAT, kernel)  # ans:
+        # black hat
+        blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)  # ans:
+        # multiple erosions
+        kernel = np.ones((3, 3), np.uint8)
+        eroded = cv2.erode(binary, kernel, iterations=3)  # ans:
+        # cross-shaped structuring element
+        cross = cv2.getStructuringElement(cv2.MORPH_CROSS, (5, 5))  # ans:
+        result = cv2.morphologyEx(binary, cv2.MORPH_OPEN, cross)  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      // ------------------------------------------------------------ morphology on arrays
+      // Structuring elements the way cv2.getStructuringElement builds them
+      function structuringElement(shape, k) {
+        const m = Array.from({ length: k }, () => new Array(k).fill(shape === "rect" ? 1 : 0));
+        const c = Math.floor(k / 2);
+        if (shape === "cross") for (let i = 0; i < k; i++) m[c][i] = m[i][c] = 1;
+        if (shape === "ellipse") {
+          const r = c, inv = 1 / (r * r);
+          for (let i = 0; i < k; i++) {
+            const dy = i - r;
+            if (Math.abs(dy) > r) continue;
+            const dx = r ? Math.round(c * Math.sqrt((r * r - dy * dy) * inv)) : 0;
+            for (let j = Math.max(c - dx, 0); j < Math.min(c + dx + 1, k); j++) m[i][j] = 1;
+          }
+        }
+        return m;
+      }
+      // Erode (min) or dilate (max) a w x h array with a structuring element.
+      // Pixels outside the image are ignored, like OpenCV's default border.
+      function morphPass(src, w, h, se, isMax) {
+        const c = Math.floor(se.length / 2);
+        const offs = [];
+        se.forEach((row, i) => row.forEach((v, j) => v && offs.push([j - c, i - c])));
+        const out = new Float32Array(w * h);
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++) {
+            let best = isMax ? -1 : 256;
+            for (const [dx, dy] of offs) {
+              const xx = x + dx, yy = y + dy;
+              if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+              const v = src[yy * w + xx];
+              if (isMax ? v > best : v < best) best = v;
+            }
+            out[y * w + x] = best;
+          }
+        return out;
+      }
+      const erode = (a, w, h, se, it = 1) => {
+        for (let i = 0; i < it; i++) a = morphPass(a, w, h, se, false);
+        return a;
+      };
+      const dilate = (a, w, h, se, it = 1) => {
+        for (let i = 0; i < it; i++) a = morphPass(a, w, h, se, true);
+        return a;
+      };
+      const sub = (a, b) => a.map((v, i) => Math.max(0, v - b[i]));
+      function morphologyEx(op, a, w, h, se, it = 1) {
+        switch (op) {
+          case "erode": return erode(a, w, h, se, it);
+          case "dilate": return dilate(a, w, h, se, it);
+          case "open": return dilate(erode(a, w, h, se, it), w, h, se, it);
+          case "close": return erode(dilate(a, w, h, se, it), w, h, se, it);
+          case "gradient": return sub(dilate(a, w, h, se, it), erode(a, w, h, se, it));
+          case "tophat": return sub(a, morphologyEx("open", a, w, h, se, it));
+          case "blackhat": return sub(morphologyEx("close", a, w, h, se, it), a);
+        }
+        return a;
+      }
+      const gsap = await Deck.load("gsap");
+
+      // ------------------------------------------------------------ structuring element grids
+      function drawSE(el, m, label) {
+        const fig = document.createElement("figure");
+        fig.innerHTML = `<div class="se" style="grid-template-columns: repeat(${m.length}, auto)">${m.flat().map((v) => `<b class="${v ? "on" : ""}">${v}</b>`).join("")}</div><figcaption>${label}</figcaption>`;
+        el.appendChild(fig);
+      }
+      ["rect", "ellipse", "cross"].forEach((s) => {
+        drawSE(document.querySelector(".se-big"), structuringElement(s, 5), `MORPH_${s.toUpperCase()}`);
+        drawSE(document.querySelector(".se-mini"), structuringElement(s, 5), s);
+      });
+
+      // ------------------------------------------------------------ images
+      // Binary: the coloured shapes and symbols of a puzzle picture, plus specks and holes
+      const shapes = await loadImage("/assets/2025-10-24-12-40-55.png");
+      const BW = 500, BH = 288;
+      const sg = toGray(readPixels(shapes, BW, BH));
+      let seed = 42;
+      const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      const clean = sg.map((v) => (v > 60 ? 255 : 0));
+      const specks = clean.slice(), holes = clean.slice(), both = clean.slice();
+      for (let i = 0; i < 900; i++) {
+        const x = Math.floor(rand() * (BW - 2)), y = Math.floor(rand() * (BH - 2));
+        const sz = rand() < 0.7 ? 1 : 2;
+        const k = y * BW + x;
+        const target = clean[k] ? [holes, both] : [specks, both];
+        const val = clean[k] ? 0 : 255;
+        for (const arr of target) for (let j = 0; j < sz; j++) for (let i2 = 0; i2 < sz; i2++) arr[(y + j) * BW + x + i2] = val;
+      }
+      // Grayscale photo for top hat / black hat
+      const dolls = await loadImage("/assets/2025-10-16-19-17-39.png");
+      const GW = 480, GH = 270;
+      const dg = toGray(readPixels(dolls, GW, GH));
+
+      const paint = (c, a, w, h) => show(c, grayToImage(a, w, h));
+      const SE5 = structuringElement("rect", 5), SE9 = structuringElement("rect", 9);
+
+      // Cover: the noisy binary picture cleaned by opening, then closing
+      {
+        const c = document.querySelector("#title canvas");
+        const frames = [both, morphologyEx("open", both, BW, BH, structuringElement("ellipse", 5)), morphologyEx("close", morphologyEx("open", both, BW, BH, structuringElement("ellipse", 5)), BW, BH, structuringElement("ellipse", 5))];
+        let k = 0, timer = null;
+        const flip = () => {
+          paint(c, frames[k], BW, BH);
+          gsap.fromTo(c, { opacity: 0.6 }, { opacity: 1, duration: 0.5 });
+          k = (k + 1) % frames.length;
+          timer = gsap.delayedCall(1.4, flip);
+        };
+        paint(c, both, BW, BH);
+        Deck.scene("#title", {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+            k = 0;
+            timer?.kill();
+            timer = gsap.delayedCall(0.8, flip);
+          },
+          leave: () => timer?.kill(),
+        });
+      }
+
+      // Before/after strips on the code slides
+      document.querySelectorAll(".strip[data-op]").forEach((s) => {
+        const gray = s.hasAttribute("data-gray");
+        const [src, w, h] = gray ? [dg, GW, GH] : [s.dataset.op === "dilate" ? holes : s.dataset.op === "erode" ? specks : clean, BW, BH];
+        paint(s.querySelector("[data-src]"), src, w, h);
+        paint(s.querySelector("[data-res]"), morphologyEx(s.dataset.op, src, w, h, gray ? SE9 : SE5), w, h);
+      });
+      // Opening / closing sequences
+      {
+        const o = document.querySelector('[data-seq="open"]');
+        const e = erode(specks, BW, BH, SE5);
+        paint(o.querySelector("[data-a]"), specks, BW, BH);
+        paint(o.querySelector("[data-b]"), e, BW, BH);
+        paint(o.querySelector("[data-c]"), dilate(e, BW, BH, SE5), BW, BH);
+        const c = document.querySelector('[data-seq="close"]');
+        const d = dilate(holes, BW, BH, SE5);
+        paint(c.querySelector("[data-a]"), holes, BW, BH);
+        paint(c.querySelector("[data-b]"), d, BW, BH);
+        paint(c.querySelector("[data-c]"), erode(d, BW, BH, SE5), BW, BH);
+      }
+
+      // ------------------------------------------------------------ grid demo
+      {
+        const sl = document.querySelector("#grid-demo");
+        const R = 8, C = 12;
+        const IMG = [
+          "000000000000",
+          "011110000010",
+          "011111000000",
+          "011011100000",
+          "011111111100",
+          "001111011100",
+          "000000011100",
+          "000100000000",
+        ].map((r) => [...r].map(Number));
+        const gIn = sl.querySelector(".bin.in"), gOut = sl.querySelector(".bin.out");
+        const win = gIn.querySelector(".win");
+        IMG.flat().forEach((v) => gIn.insertAdjacentHTML("beforeend", `<span class="${v ? "on" : ""}"></span>`));
+        for (let i = 0; i < R * C; i++) gOut.insertAdjacentHTML("beforeend", "<span></span>");
+        const ins = [...gIn.querySelectorAll("span")], outs = [...gOut.querySelectorAll("span")];
+        const rule = sl.querySelector(".rule");
+        let op = "erode", pos = -1, playing = false, timer = null;
+        const result = (p) => {
+          const r = Math.floor(p / C), c = p % C;
+          const vals = [];
+          for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) if (r + j >= 0 && r + j < R && c + i >= 0 && c + i < C) vals.push(IMG[r + j][c + i]);
+          return { vals, v: op === "erode" ? Math.min(...vals) : Math.max(...vals) };
+        };
+        function reset() {
+          pos = -1;
+          outs.forEach((o) => (o.className = "pending"));
+          gsap.set(win, { opacity: 0 });
+          rule.innerHTML = "&nbsp;";
+          sl.querySelector(".oname").textContent = op === "erode" ? "Erosion: min" : "Dilation: max";
+        }
+        function place(p) {
+          const r = Math.floor(p / C), c = p % C;
+          const a = ins[Math.max(0, r - 1) * C + Math.max(0, c - 1)], b = ins[Math.min(R - 1, r + 1) * C + Math.min(C - 1, c + 1)];
+          gsap.to(win, { x: a.offsetLeft - 3, y: a.offsetTop - 3, width: b.offsetLeft + b.offsetWidth - a.offsetLeft + 6, height: b.offsetTop + b.offsetHeight - a.offsetTop + 6, opacity: 1, duration: 0.12 });
+        }
+        function setOut(p, v) {
+          const o = outs[p];
+          o.className = (v ? "on" : "") + (v !== IMG[Math.floor(p / C)][p % C] ? " changed" : "");
+        }
+        function tick() {
+          pos++;
+          if (pos >= R * C) {
+            if (playing) timer = gsap.delayedCall(2.5, () => (reset(), tick()));
+            return;
+          }
+          const { vals, v } = result(pos);
+          place(pos);
+          setOut(pos, v);
+          outs.forEach((o, i) => o.classList.toggle("now", i === pos));
+          rule.innerHTML = `${op === "erode" ? "min" : "max"}(${vals.join(" ")}) = <b>${v}</b>`;
+          if (playing) timer = gsap.delayedCall(pos % C === 0 ? 0.4 : 0.14, tick);
+        }
+        function finish() {
+          pause();
+          for (let p = 0; p < R * C; p++) setOut(p, result(p).v);
+          pos = R * C;
+          gsap.set(win, { opacity: 0 });
+          rule.innerHTML = `green: became white · red: became black`;
+        }
+        const tbtn = sl.querySelector('[data-act="toggle"]');
+        function play() {
+          playing = true;
+          tbtn.textContent = "Pause";
+          timer?.kill();
+          timer = gsap.delayedCall(0.3, tick);
+        }
+        function pause() {
+          playing = false;
+          tbtn.textContent = "Play";
+          timer?.kill();
+        }
+        sl.querySelector(".chips").addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          if (b.dataset.op) {
+            op = b.dataset.op;
+            sl.querySelectorAll("[data-op]").forEach((x) => x.classList.toggle("on", x === b));
+            reset();
+            play();
+          } else if (b.dataset.act === "toggle") playing ? pause() : (pos >= R * C - 1 && reset(), play());
+          else if (b.dataset.act === "step") pause(), pos >= R * C - 1 && reset(), tick();
+          else if (b.dataset.act === "finish") finish();
+        });
+        Deck.scene("#grid-demo", {
+          enter() {
+            reset();
+            play();
+          },
+          leave: pause,
+        });
+      }
+
+      // ------------------------------------------------------------ playground
+      {
+        const sl = document.querySelector("#play");
+        const src = sl.querySelector("canvas.src"), dst = sl.querySelector("canvas.dst");
+        const inputs = Object.fromEntries([...sl.querySelectorAll("input")].map((i) => [i.name, i]));
+        let op = "erode", shape = "rect", useGray = false, raf = 0;
+        const CV = { erode: "cv2.erode", dilate: "cv2.dilate", open: "MORPH_OPEN", close: "MORPH_CLOSE", gradient: "MORPH_GRADIENT", tophat: "MORPH_TOPHAT", blackhat: "MORPH_BLACKHAT" };
+        function render() {
+          raf = 0;
+          const k = 2 * +inputs.k.value + 1, it = +inputs.it.value;
+          sl.querySelector('[name="k"] + output').textContent = `${k}×${k}`;
+          sl.querySelector('[name="it"] + output').textContent = it;
+          const [a, w, h] = useGray ? [dg, GW, GH] : [both, BW, BH];
+          paint(src, a, w, h);
+          paint(dst, morphologyEx(op, a, w, h, structuringElement(shape, k), it), w, h);
+          sl.querySelector(".sname").textContent = useGray ? "gray" : "binary (with specks and holes)";
+          sl.querySelector(".dname").textContent = `${CV[op]}, ${k}×${k} ${shape}, iterations=${it}`;
+        }
+        const schedule = () => raf || (raf = requestAnimationFrame(render));
+        sl.addEventListener("input", schedule);
+        chipGroup(sl.querySelector(".ops"), "button", (b) => ((op = b.dataset.op), schedule()));
+        sl.querySelector(".shapes").addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          if (b.dataset.src) {
+            useGray = !useGray;
+            b.textContent = useGray ? "Use the binary picture" : "Use the grayscale photo";
+          } else {
+            shape = b.dataset.shape;
+            sl.querySelectorAll("[data-shape]").forEach((x) => x.classList.toggle("on", x === b));
+          }
+          schedule();
+        });
+        render();
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Terminology</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- What is AI? ---------- */
+      #what-ai .big {
+        font-size: clamp(2.4rem, 7vw, 4.6rem);
+        text-align: center;
+      }
+
+      /* ---------- Definitions ---------- */
+      .defs {
+        display: grid;
+        gap: 1rem;
+        width: min(100%, 60rem);
+      }
+
+      .defs blockquote {
+        margin: 0;
+      }
+
+      /* ---------- Flow diagram: programming vs ML vs GenAI ---------- */
+      .flow {
+        width: min(100%, 56rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      .flow .arrow {
+        stroke: var(--violet-soft);
+        stroke-width: 2.5;
+        fill: none;
+      }
+
+      .flow .box {
+        fill: rgba(15, 18, 35, 0.85);
+        stroke-width: 3;
+      }
+
+      .flow text {
+        font-family: var(--font-display);
+        font-size: 24px;
+        fill: var(--text);
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+
+      .flow .tok.pattern text {
+        fill: #f9a8d4;
+        font-weight: 600;
+      }
+
+      .flow .tok rect {
+        fill: rgba(139, 92, 246, 0.16);
+        stroke: rgba(167, 139, 250, 0.5);
+      }
+
+      .flow .tok.pattern rect {
+        fill: rgba(236, 72, 153, 0.18);
+        stroke: rgba(236, 72, 153, 0.7);
+      }
+
+      .flow .boxlabel {
+        font-size: 26px;
+        font-weight: 600;
+      }
+
+      .mode-note {
+        min-height: 1.6em;
+        text-align: center;
+      }
+
+      #genai .figs img {
+        max-height: 9vh;
+        background: #fff;
+      }
+
+      /* ---------- Nested rings ---------- */
+      #rings svg {
+        width: min(100%, 40rem, 62vh);
+        height: auto;
+      }
+
+      #rings circle {
+        stroke-width: 2.5;
+      }
+
+      #rings text {
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 600;
+        text-anchor: middle;
+        fill: var(--text);
+      }
+
+      #rings .ring:not(.on),
+      #rings .sym:not(.on) {
+        opacity: 0;
+      }
+
+      .figs.white img {
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Introduction to AI/ML</span>
+      <h1 class="grad-each"><span>Terminology</span></h1>
+      <p>Intelligence, AI, ML, GenAI and data science: what the words mean and how they relate.</p>
+    </section>
+    <section class="slide">
+      <h2>What is intelligence?</h2>
+      <div class="figs contain">
+        <figure class="step"><img src="/assets/2025-10-08-16-14-52.png" alt="Definitions of intelligence by Binet, Wechsler, Wagnon and Sternberg" /></figure>
+        <figure class="step"><img src="/assets/2025-10-08-16-15-51.png" alt="Intelligence as an emergent system's ability to respond to its environment, from Future Minds by Richard Yonck" /></figure>
+      </div>
+    </section>
+    <section class="slide">
+      <h2>What is intelligence?</h2>
+      <figure class="step">
+        <img src="/assets/2025-10-08-15-05-35.png" alt="How psychologists define intelligence: the ability to learn, to recognise problems and to solve problems" />
+        <figcaption>Source: <a href="https://www.verywellmind.com">verywellmind.com</a></figcaption>
+      </figure>
+    </section>
+    <section class="slide" id="what-ai">
+      <h2>What is AI?</h2>
+      <p class="step big grad" data-anim="zoom">An attempt at mimicry of human intelligence</p>
+    </section>
+    <section class="slide">
+      <h2>Level of mimicry</h2>
+      <figure class="step"><img src="/assets/2025-10-03-14-20-49.png" alt="Artificial narrow intelligence, then general intelligence, then super intelligence" /><figcaption><a href="https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg">Source</a></figcaption></figure>
+    </section>
+    <section class="slide">
+      <h2>Have we made ASI?</h2>
+      <div class="figs contain">
+        <figure class="step"><img src="/assets/2025-10-08-16-25-07.png" alt="ChatGPT 4o says there are two Rs in strawberry" /><figcaption><a href="https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png">Source</a></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-08-16-27-19.png" alt="ChatGPT 5 thinks for 11 seconds and says the letter R has 3 strawberries" /><figcaption><a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&amp;s">Source</a></figcaption></figure>
+      </div>
+    </section>
+    <section class="slide">
+      <h2>What is ML?</h2>
+      <div class="defs">
+        <blockquote class="step">A computer program is said to learn from experience <strong>E</strong> with respect to some class of tasks <strong>T</strong> and performance measure <strong>P</strong>, if its performance at tasks in <strong>T</strong>, as measured by <strong>P</strong>, improves with experience <strong>E</strong>.<cite>— Tom Mitchell (1997)</cite></blockquote>
+        <blockquote class="step">The field of study that gives computers the ability to learn <u>without being explicitly programmed</u>.<cite>— Arthur Samuel (1959)</cite></blockquote>
+        <blockquote class="step">Finding patterns.<cite>— History</cite></blockquote>
+      </div>
+    </section>
+    <section class="slide" id="mlvsprog">
+      <h2>ML vs programming</h2>
+      <svg class="flow" viewBox="0 0 860 300" aria-label="A program turns input and a pattern into output; machine learning turns input and output into a pattern"></svg>
+      <p class="mode-note"></p>
+      <span class="step" data-anim="none"></span>
+    </section>
+    <section class="slide" id="genai">
+      <h2>What is GenAI?</h2>
+      <svg class="flow" viewBox="0 0 860 300" aria-label="Generative AI turns a pattern into new inputs and outputs"></svg>
+      <p class="mode-note"></p>
+      <span class="step" data-anim="none"></span>
+      <div class="figs contain white step">
+        <figure><img src="/assets/2025-10-24-16-14-41.png" alt="Sketch: input and pattern go into a normal program, output comes out" /></figure>
+        <figure><img src="/assets/2025-10-24-16-22-07.png" alt="Sketch: input and output go into an ML program, a pattern comes out" /></figure>
+        <figure><img src="/assets/2025-10-24-16-29-22.png" alt="Sketch: a pattern goes into a GenAI program, input and output come out" /></figure>
+      </div>
+    </section>
+    <section class="slide" id="rings">
+      <h2>How are these terms related?</h2>
+      <svg viewBox="0 0 600 600" aria-label="Nested circles: AI contains ML, which contains neural networks, deep learning and generative AI">
+        <g class="ring" data-r="0"><circle cx="300" cy="300" r="290" fill="rgba(139,92,246,0.10)" stroke="#8b5cf6" /><text x="300" y="52">Artificial Intelligence</text></g>
+        <g class="sym" data-r="0"><circle cx="98" cy="205" r="50" fill="rgba(240,171,252,0.16)" stroke="#f0abfc" /><text x="98" y="200" style="font-size: 17px">Symbolic</text><text x="98" y="222" style="font-size: 17px">AI</text></g>
+        <g class="ring" data-r="1"><circle cx="340" cy="345" r="225" fill="rgba(34,211,238,0.09)" stroke="#22d3ee" /><text x="340" y="160">Machine Learning</text></g>
+        <g class="ring" data-r="2"><circle cx="365" cy="390" r="160" fill="rgba(236,72,153,0.10)" stroke="#ec4899" /><text x="365" y="272">Neural Networks</text></g>
+        <g class="ring" data-r="3"><circle cx="380" cy="428" r="105" fill="rgba(251,191,36,0.10)" stroke="#fbbf24" /><text x="380" y="372">Deep Learning</text></g>
+        <g class="ring" data-r="4"><circle cx="388" cy="460" r="52" fill="rgba(134,239,172,0.18)" stroke="#86efac" /><text x="388" y="456" style="font-size: 17px">Generative</text><text x="388" y="477" style="font-size: 17px">AI</text></g>
+      </svg>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+    <section class="slide">
+      <h2>The same picture, from two sources</h2>
+      <div class="figs contain">
+        <figure class="step"><img src="/assets/2025-10-07-22-42-13.png" alt="The AI Universe: nested circles from artificial intelligence down to generative AI" /><figcaption><a href="https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101">Source</a></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-07-22-57-05.png" alt="Artificial intelligence containing machine learning, deep learning and symbolic AI" /><figcaption><a href="https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174">Source</a></figcaption></figure>
+      </div>
+    </section>
+    <section class="slide">
+      <h2>What about data science?</h2>
+      <div class="figs contain">
+        <figure class="step"><img src="/assets/2025-10-08-12-44-46.png" alt="Venn diagram: data science overlapping AI, ML and deep learning" /></figure>
+        <figure class="step"><img src="/assets/2025-10-08-12-45-11.png" alt="Nested ovals: data science containing AI, ML and deep learning" /></figure>
+        <figure class="step"><img src="/assets/2025-10-08-12-46-10.png" alt="Data science where AI meets maths, statistics, visualisation and EDA" /></figure>
+      </div>
+      <p class="step center">There is no single agreed picture: different authors draw the boundary differently.</p>
+    </section>
+    <section class="slide">
+      <h2>ML foundations and pillars</h2>
+      <figure class="step">
+        <img src="/assets/2025-10-08-13-03-46.png" alt="Machine learning as a temple: regression, dimensionality reduction, density estimation and classification on foundations of linear algebra, probability, optimisation and more" />
+        <figcaption>Source: Deisenroth, M. P., Faisal, A. A., &amp; Ong, C. S. (2020). <em>Mathematics for Machine Learning</em>. Cambridge University Press.</figcaption>
+      </figure>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1 span, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // ---------- Flow diagram: the same three tokens, rearranged ----------
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        parent?.appendChild(e);
+        return e;
+      };
+      // Slots: left top / left bottom / left middle, right top / right bottom / right middle
+      const SLOT = { lt: [95, 95], lb: [95, 205], lm: [95, 150], rt: [765, 95], rb: [765, 205], rm: [765, 150] };
+      const MODES = [
+        { box: "Program", input: "lt", pattern: "lb", output: "rm", note: "Programming: we write the pattern (the rules); the computer produces the output." },
+        { box: "ML program", input: "lt", output: "lb", pattern: "rm", note: "Machine learning: we give inputs and outputs; the computer finds the pattern." },
+        { box: "GenAI program", pattern: "lm", input: "rt", output: "rb", note: "Generative AI: from a learned pattern, the computer produces new inputs and outputs." },
+      ];
+      function buildFlow(svg, uid) {
+        const defs = el("defs", {}, svg);
+        const g = el("linearGradient", { id: "flowGrad" + uid, x1: 0, x2: 1 }, defs);
+        el("stop", { offset: 0, "stop-color": "#8b5cf6" }, g);
+        el("stop", { offset: 1, "stop-color": "#22d3ee" }, g);
+        const m = el("marker", { id: "arrowHead" + uid, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" }, defs);
+        el("path", { d: "M0 0 L10 5 L0 10 z", fill: "#a78bfa" }, m);
+        const arrows = el("g", {}, svg);
+        el("rect", { class: "box", x: 330, y: 85, width: 200, height: 130, rx: 22, stroke: `url(#flowGrad${uid})` }, svg);
+        const label = el("text", { class: "boxlabel", x: 430, y: 150 }, svg);
+        const toks = {};
+        for (const name of ["input", "output", "pattern"]) {
+          const t = el("g", { class: "tok " + name }, svg);
+          el("rect", { x: -70, y: -24, width: 140, height: 48, rx: 12 }, t);
+          el("text", { x: 0, y: 2 }, t).textContent = name[0].toUpperCase() + name.slice(1);
+          toks[name] = t;
+        }
+        return { svg, arrows, label, toks, uid, mode: -1 };
+      }
+      function drawArrows(f, mode) {
+        f.arrows.innerHTML = "";
+        const M = MODES[mode];
+        const left = Object.values(M).filter((s) => typeof s === "string" && s[0] === "l" && s.length === 2);
+        const right = Object.values(M).filter((s) => typeof s === "string" && s[0] === "r" && s.length === 2);
+        const mk = `url(#arrowHead${f.uid})`;
+        left.forEach((s) => el("path", { class: "arrow", "marker-end": mk, d: `M ${SLOT[s][0] + 78} ${SLOT[s][1]} L 322 ${SLOT[s][1] < 150 ? 125 : SLOT[s][1] > 150 ? 175 : 150}` }, f.arrows));
+        right.forEach((s) => el("path", { class: "arrow", "marker-end": mk, d: `M 538 ${SLOT[s][1] < 150 ? 125 : SLOT[s][1] > 150 ? 175 : 150} L ${SLOT[s][0] - 80} ${SLOT[s][1]}` }, f.arrows));
+      }
+      function setMode(f, mode, note, animate) {
+        if (f.mode === mode) return;
+        f.mode = mode;
+        const M = MODES[mode];
+        const d = animate ? 0.9 : 0;
+        gsap.to(f.arrows, { opacity: 0, duration: d * 0.3, onComplete: () => { drawArrows(f, mode); gsap.to(f.arrows, { opacity: 1, duration: d * 0.4 }); } });
+        for (const name of ["input", "output", "pattern"]) {
+          const [x, y] = SLOT[M[name]];
+          gsap.to(f.toks[name], { x, y, duration: d, ease: "power3.inOut" });
+        }
+        gsap.to(f.label, { opacity: 0, duration: d * 0.3, onComplete: () => { f.label.textContent = M.box; gsap.to(f.label, { opacity: 1, duration: d * 0.4 }); } });
+        if (animate) gsap.fromTo(f.toks.pattern, { scale: 1 }, { scale: 1.15, yoyo: true, repeat: 1, duration: 0.35, delay: d, transformOrigin: "center" });
+        note.textContent = M.note;
+      }
+      for (const [id, from, to] of [["#mlvsprog", 0, 1], ["#genai", 1, 2]]) {
+        const slide = document.querySelector(id);
+        const f = buildFlow(slide.querySelector(".flow"), id.slice(1));
+        const note = slide.querySelector(".mode-note");
+        setMode(f, from, note, false);
+        Deck.scene(id, {
+          enter: () => setMode(f, from, note, false),
+          step: (s, n, els, detail) => n === 1 && setMode(f, to, note, !(detail && detail.dir < 0)),
+          unstep: (s, n) => n === 1 && setMode(f, from, note, false),
+        });
+      }
+
+      // ---------- Nested rings: AI > ML > NN > DL > GenAI ----------
+      const rings = document.querySelector("#rings");
+      const showRings = (k, animate) => {
+        rings.querySelectorAll(".ring, .sym").forEach((g) => {
+          const on = +g.dataset.r <= k;
+          if (on && !g.classList.contains("on") && animate) gsap.fromTo(g, { scale: 0.6, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.4)", clearProps: "all" });
+          g.classList.toggle("on", on);
+        });
+      };
+      Deck.scene("#rings", {
+        enter: () => showRings(Deck.step, true),
+        step: (s, n, els, d) => showRings(n, d.dir > 0),
+        unstep: (s, n) => showRings(n - 1, false),
+      });
+    </script>
+  </body>
+</html>

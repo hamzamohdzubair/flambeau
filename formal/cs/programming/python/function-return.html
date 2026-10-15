@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Function Return Values</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tutor: code beside a live call stack and output ---------- */
+      .tutor {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 1fr);
+        gap: 1.4rem;
+        width: min(100%, 66rem);
+        align-items: start;
+      }
+
+      .tutor pre {
+        width: 100%;
+        font-size: 1.1rem;
+      }
+
+      .tutor .line {
+        border-radius: 4px;
+        transition:
+          background 0.3s,
+          box-shadow 0.3s,
+          opacity 0.3s;
+      }
+
+      .tutor pre.live .line:not(.ran):not(.answer):not(.cmt) {
+        opacity: 0.45;
+      }
+
+      .tutor pre.live .line.ran {
+        background: rgba(139, 92, 246, 0.13);
+      }
+
+      .tutor pre .line.now {
+        opacity: 1;
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.32), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      .tutor .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.7em;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: var(--amber);
+        border: 1px solid rgba(251, 191, 36, 0.45);
+        background: rgba(251, 191, 36, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        min-width: 0;
+      }
+
+      .mh {
+        font: 500 0.68rem var(--font-mono);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .stack,
+      .shelf {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.45rem;
+      }
+
+      .shelf-wrap {
+        display: none;
+      }
+
+      .tutor.has-shelf .shelf-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+
+      .shelf:empty::after {
+        content: "none";
+        font: 0.8rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .frame {
+        padding: 0.45rem 0.75rem 0.55rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0d0f20;
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s,
+          opacity 0.3s;
+      }
+
+      .frame.top {
+        border-color: rgba(34, 211, 238, 0.75);
+        box-shadow: 0 0 22px -6px rgba(34, 211, 238, 0.55);
+      }
+
+      .frame.paused {
+        border-style: dashed;
+        border-color: rgba(167, 139, 250, 0.55);
+        opacity: 0.8;
+      }
+
+      .frame .fn {
+        font: 600 0.82rem var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .frame[data-id="global"] .fn {
+        color: var(--faint);
+      }
+
+      .frame .vars {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 0.8rem;
+        font: 0.95rem/1.55 var(--font-mono);
+      }
+
+      .frame .row {
+        display: contents;
+      }
+
+      .frame .k {
+        color: var(--muted);
+      }
+
+      .frame .v {
+        color: var(--text);
+        overflow-wrap: anywhere;
+        border-radius: 4px;
+      }
+
+      .frame .ret {
+        margin-top: 0.3rem;
+        font: 0.85rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .frame .ret b,
+      .flychip {
+        display: inline-block;
+        padding: 0 0.55em;
+        border-radius: 999px;
+        font: 600 0.9rem/1.6 var(--font-mono);
+        color: #fff;
+        background: rgba(236, 72, 153, 0.35);
+        border: 1px solid var(--pink);
+      }
+
+      .flychip {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        box-shadow: 0 0 18px rgba(236, 72, 153, 0.7);
+      }
+
+      .console {
+        min-height: 2.4rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.45);
+        font: 0.95rem/1.5 var(--font-mono);
+        color: var(--green);
+        white-space: pre-wrap;
+      }
+
+      .tutor.no-out .out-h,
+      .tutor.no-out .console {
+        display: none;
+      }
+
+      .console .echo {
+        color: var(--cyan);
+      }
+
+      .console .err {
+        color: var(--red);
+      }
+
+      .ctl {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.2rem;
+      }
+
+      .ctl button {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 600 0.9rem var(--font);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .ctl button:hover {
+        color: var(--text);
+        border-color: rgba(167, 139, 250, 0.7);
+      }
+
+      .ctl span {
+        margin-left: 0.3rem;
+        font: 0.75rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .tutor {
+          grid-template-columns: 1fr;
+          gap: 0.8rem;
+        }
+
+        .tutor pre {
+          font-size: 0.82rem;
+        }
+
+        .frame .vars,
+        .console {
+          font-size: 0.82rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · functions</span>
+      <h1 class="grad-each"><span>Function</span> <span>Return</span> <span>Values</span></h1>
+      <p>How a function hands a value back to its caller, and what you get when it doesn't.</p>
+    </section>
+
+    <!-- ================================================================ how to read -->
+    <section class="slide" id="howto">
+      <h2>Watching a call</h2>
+      <div class="cards" style="width: min(100%, 58rem)">
+        <div class="card step"><h3>Frames</h3><p>Each call gets its own <strong>frame</strong>: a box holding that call's local variables. Calling pushes a frame on the stack.</p></div>
+        <div class="card step"><h3>return</h3><p><code>return</code> ends the call. Its value (pink) travels back to the line that made the call, and the frame is thrown away.</p></div>
+        <div class="card step"><h3>Controls</h3><p>Each trace plays when you press →. Use <strong>‹ ▶ ›</strong> under the frames to step through it again.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ single -->
+    <section class="slide" id="single">
+      <h2>Single return</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # return single value
+          def square(x):
+              return x ** 2
+
+          result = square(5)
+          # ans: result is 25
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ multiple -->
+    <section class="slide" id="multi">
+      <h2>Multiple return values</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # return multiple values (tuple)
+          def divide(a, b):
+              quotient = a // b
+              remainder = a % b
+              return quotient, remainder
+
+          q, r = divide(17, 5)
+          # ans: q=3, r=2
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint">Python packs the two values into one tuple, and the assignment unpacks it.</p>
+    </section>
+
+    <!-- ================================================================ early -->
+    <section class="slide" id="early">
+      <h2>Early return</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # return exits function immediately
+          def is_even(n):
+              if n % 2 == 0:
+                  return True
+              return False
+
+          result = is_even(4)
+          # ans: True
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint">Line 5 never runs: the call is already over.</p>
+    </section>
+
+    <!-- ================================================================ none -->
+    <section class="slide" id="none">
+      <h2>No return gives None</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # function without return
+          def print_msg(msg):
+              print(msg)
+
+          result = print_msg("Hi")
+          # ans: Hi (printed)
+          # ans: result is None
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint">Printing is not returning: falling off the end of a function returns <code>None</code>.</p>
+    </section>
+
+    <!-- ================================================================ loop -->
+    <section class="slide" id="loop">
+      <h2>Return in a loop</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # return exits function and loop
+          def find_first_even(numbers):
+              for num in numbers:
+                  if num % 2 == 0:
+                      return num
+
+          result = find_first_even([1, 3, 4, 5])
+          # ans: 4
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint"><code>return</code> leaves the loop and the function at once: 5 is never looked at.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the result, then press → to run the code and check.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # what is returned?
+          def func():
+              x = 5
+
+          func()
+          # ans: None
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # unpacking return values?
+          def func():
+              return 1, 2, 3
+
+          a, b, c = func()
+          # ans: a=1, b=2, c=3
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # what happens?
+          def func():
+              return 1, 2, 3
+
+          x = func()
+          # ans: x is (1, 2, 3), a tuple
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # early return?
+          def func(x):
+              if x &gt; 5:
+                  return "Big"
+              return "Small"
+
+          func(10)
+          # ans: "Big"
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # return in else?
+          def func(x):
+              if x &gt; 0:
+                  return "Positive"
+              else:
+                  return "Non-positive"
+
+          func(-5)
+          # ans: "Non-positive"
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e6">
+      <h2>Exercise 6</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # multiple returns?
+          def func(x):
+              return x
+              return x + 1
+
+          func(5)
+          # ans: 5 (the second return is never reached)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # return nothing?
+          def func():
+              return
+
+          func()
+          # ans: None
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e8">
+      <h2>Exercise 8</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # return in try?
+          def func():
+              try:
+                  return 1
+              finally:
+                  return 2
+
+          func()
+          # ans: 2 (finally overrides)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e9">
+      <h2>Exercise 9</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # conditional return?
+          def func(x):
+              if x:
+                  return x * 2
+
+          func(0)
+          # ans: None (condition False, no return)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e10">
+      <h2>Exercise 10</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # return expression?
+          def func(a, b):
+              return a + b if a &gt; b else a - b
+
+          func(5, 3)
+          # ans: 8
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3><code>return</code> ends the call</h3><p>Nothing after it runs, not even the rest of a loop.</p></div>
+        <div class="card step"><h3>Many values, one tuple</h3><p><code>return a, b</code> returns the tuple <code>(a, b)</code>; unpack it with <code>x, y = f()</code>.</p></div>
+        <div class="card step"><h3>No return means None</h3><p>A bare <code>return</code>, or reaching the end, gives <code>None</code>. Printing is not returning.</p></div>
+        <div class="card step"><h3><code>finally</code> wins</h3><p>A <code>return</code> in <code>finally</code> replaces the one in <code>try</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ Tutor
+      // A trace is built by "running" the code by hand: set variables, call and
+      // return, then L(line) snapshots the state after that line ran.
+      const STEP = 0.85; // seconds per beat when playing
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function trace() {
+        const st = [{ id: "global", v: {} }];
+        const beats = [];
+        let at;
+        const top = () => [...st].reverse().find((f) => !f.p);
+        const find = (id) => st.find((f) => f.id === id);
+        const t = {
+          beats,
+          at(n) { at = n; return t; },
+          set(k, v, id) { (id ? find(id) : top()).v[k] = String(v); return t; },
+          call(id, vars = {}) { st.push({ id, v: Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, String(v)])) }); return t; },
+          ret() { st.splice(st.indexOf(top()), 1); return t; },
+          pause(id) { (id ? find(id) : top()).p = true; return t; },
+          resume(id) { const f = find(id); f.p = false; st.splice(st.indexOf(f), 1); st.push(f); return t; },
+          drop(id) { st.splice(st.indexOf(find(id)), 1); return t; },
+          L(l, o = {}) {
+            beats.push({ l, at, ...o, rid: o.r !== undefined ? top().id : null, s: st.map((f) => ({ id: f.id, v: { ...f.v }, p: !!f.p })) });
+            at = undefined;
+            return t;
+          },
+        };
+        return t;
+      }
+
+      function fly(text, from, to) {
+        const chip = document.createElement("span");
+        chip.className = "flychip";
+        chip.textContent = text;
+        document.body.appendChild(chip);
+        gsap.set(chip, { left: from.left, top: from.top });
+        gsap.to(chip, {
+          left: to.left,
+          top: to.top,
+          duration: 0.6,
+          ease: "power2.inOut",
+          onComplete: () => gsap.to(chip, { opacity: 0, duration: 0.25, onComplete: () => chip.remove() }),
+        });
+      }
+
+      function Tutor(slide, beats) {
+        const root = slide.querySelector(".tutor");
+        const pre = root.querySelector("pre");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const mem = root.querySelector(".mem");
+        mem.innerHTML = `<div class="mh">Frames</div><div class="stack"></div>
+          <div class="shelf-wrap"><div class="mh">Paused generators</div><div class="shelf"></div></div>
+          <div class="mh out-h">Output</div><div class="console"></div>
+          <div class="ctl" data-interactive><button data-do="back" title="Step back">‹</button><button data-do="play" title="Play from the start">▶</button><button data-do="fwd" title="Step forward">›</button><span></span></div>`;
+        const stack = mem.querySelector(".stack"), shelf = mem.querySelector(".shelf"), con = mem.querySelector(".console"), cnt = mem.querySelector(".ctl span");
+        root.classList.toggle("no-out", !beats.some((b) => b.o !== undefined || b.e !== undefined || b.err));
+        root.classList.toggle("has-shelf", beats.some((b) => b.s.some((f) => f.p)));
+        let a = 1;
+        for (const b of beats) a = b.at = b.at ?? a;
+        const frames = new Map();
+        let k = 0, tl = null, seen = 0, pending = null;
+
+        function makeFrame(id) {
+          const el = document.createElement("div");
+          el.className = "frame";
+          el.dataset.id = id;
+          el.innerHTML = `<div class="fn">${esc(id.split("#")[0])}</div><div class="vars"></div><div class="ret" hidden><span class="rl">return</span> <b></b></div>`;
+          return el;
+        }
+
+        function render(n, anim) {
+          const prev = k ? beats[k - 1] : null;
+          k = n;
+          cnt.textContent = `${n} / ${beats.length}`;
+          const b = n ? beats[n - 1] : null;
+          const state = b ? b.s : [{ id: "global", v: {}, p: false }];
+
+          // code lines
+          const ran = new Set(beats.slice(0, n).map((x) => x.l));
+          pre.classList.toggle("live", n > 0);
+          lines.forEach((el, i) => {
+            el.classList.toggle("now", !!b && b.l === i + 1);
+            el.classList.toggle("ran", ran.has(i + 1));
+            el.querySelector(".tb")?.remove();
+          });
+          if (b && (b.c !== undefined || b.n)) {
+            const tb = document.createElement("span");
+            tb.className = "tb" + (b.c === undefined ? "" : b.c ? " t" : " f");
+            tb.textContent = b.c === undefined ? b.n : (b.n ? b.n + " → " : "") + (b.c ? "True" : "False");
+            lines[b.l - 1].appendChild(tb);
+            if (anim) gsap.from(tb, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+
+          // remember where things were, for FLIP and the flying return value
+          const before = new Map([...frames].map(([id, el]) => [id, el.getBoundingClientRect()]));
+          const retEl = [...root.querySelectorAll(".ret")].find((r) => !r.hidden);
+          const retRect = anim && retEl ? retEl.querySelector("b").getBoundingClientRect() : null;
+          const retText = retEl?.querySelector("b").textContent;
+
+          // frames that are gone
+          const ids = new Set(state.map((f) => f.id));
+          for (const [id, el] of frames) {
+            if (ids.has(id)) continue;
+            frames.delete(id);
+            if (anim) {
+              const r = el.getBoundingClientRect();
+              const ghost = el.cloneNode(true);
+              Object.assign(ghost.style, { position: "fixed", left: r.left + "px", top: r.top + "px", width: r.width + "px", margin: 0, zIndex: 40 });
+              document.body.appendChild(ghost);
+              gsap.to(ghost, { opacity: 0, y: -24, scale: 0.92, duration: 0.35, ease: "power1.out", onComplete: () => ghost.remove() });
+            }
+            el.remove();
+          }
+
+          // frames that stay or arrive, in order
+          const changed = [];
+          const topId = [...state].reverse().find((f) => !f.p)?.id;
+          for (const f of state) {
+            let el = frames.get(f.id);
+            const isNew = !el;
+            if (isNew) frames.set(f.id, (el = makeFrame(f.id)));
+            (f.p ? shelf : stack).appendChild(el);
+            el.classList.toggle("paused", f.p);
+            el.classList.toggle("top", f.id === topId && state.length > 1);
+            const vars = el.querySelector(".vars");
+            const keys = Object.keys(f.v);
+            vars.querySelectorAll(".row").forEach((r) => keys.includes(r.dataset.k) || r.remove());
+            for (const key of keys) {
+              let row = vars.querySelector(`.row[data-k="${CSS.escape(key)}"]`);
+              const val = f.v[key];
+              if (!row) {
+                row = document.createElement("div");
+                row.className = "row";
+                row.dataset.k = key;
+                row.innerHTML = `<span class="k">${esc(key)}</span><span class="v"></span>`;
+                vars.appendChild(row);
+              }
+              const v = row.querySelector(".v");
+              if (v.textContent !== val) {
+                if (!isNew) changed.push(v);
+                v.textContent = val;
+              }
+            }
+            const ret = el.querySelector(".ret");
+            ret.hidden = !(b && b.rid === f.id);
+            if (!ret.hidden) {
+              ret.querySelector(".rl").textContent = b.rl || "return";
+              ret.querySelector("b").textContent = b.r;
+              if (anim) gsap.fromTo(ret, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 });
+            }
+          }
+
+          // output
+          const out = [];
+          for (const x of beats.slice(0, n)) {
+            for (const t of [].concat(x.o ?? [])) out.push(`<div>${esc(t)}</div>`);
+            if (x.e !== undefined) out.push(`<div class="echo">→ ${esc(x.e)}</div>`);
+            if (x.err) out.push(`<div class="err">${esc(x.err)}</div>`);
+          }
+          const grew = out.length > con.children.length;
+          const old = con.children.length;
+          con.innerHTML = out.join("");
+
+          for (const el of frames.values()) {
+            gsap.killTweensOf(el);
+            gsap.set(el, { x: 0, y: 0, opacity: 1, scale: 1 });
+          }
+          if (!anim) return;
+          // where a returned or yielded value lands (measured before anything moves)
+          const newLines = [...con.children].slice(old);
+          // delivered: the frame that showed the value has returned or paused
+          const was = prev && state.find((f) => f.id === prev.rid);
+          const delivered = retRect && prev && prev.rid && (!was || was.p);
+          const target = changed[0] || (grew ? newLines[0] : null) || (b && (lines[b.l - 1].querySelector(".tb") || lines[b.l - 1]));
+          const toRect = delivered && target ? target.getBoundingClientRect() : null;
+          for (const [id, el] of frames) {
+            const r0 = before.get(id);
+            if (!r0) {
+              gsap.fromTo(el, { opacity: 0, y: -16, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power2.out" });
+              continue;
+            }
+            const r1 = el.getBoundingClientRect();
+            const dx = r0.left - r1.left, dy = r0.top - r1.top;
+            if (Math.abs(dx) + Math.abs(dy) > 1) gsap.fromTo(el, { x: dx, y: dy }, { x: 0, y: 0, duration: 0.5, ease: "power2.inOut" });
+          }
+          let delay = 0;
+          if (toRect) {
+            fly(retText, retRect, toRect);
+            delay = 0.55;
+          }
+          changed.forEach((v) => gsap.fromTo(v, { backgroundColor: "rgba(236,72,153,0.4)" }, { backgroundColor: "rgba(236,72,153,0)", duration: 1.1, delay, immediateRender: false }));
+          if (newLines.length) gsap.fromTo(newLines, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.3, delay, stagger: 0.1 });
+        }
+
+        const stop = () => { tl?.kill(); tl = null; };
+        function playTo(t) {
+          stop();
+          const from = k;
+          tl = gsap.timeline();
+          for (let i = from + 1; i <= t; i++) tl.call(() => render(i, true), null, (i - from - 1) * STEP);
+        }
+        const target = () => beats.filter((x) => x.at <= Deck.step).length;
+        function sync(dir) {
+          const t = target();
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          if (dir < 0 || jump > 1 || t < k) { stop(); render(t, false); }
+          else if (t > k) playTo(t);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each answer waits for its part of the trace to play
+        const steps = [...slide.querySelectorAll(".step")];
+        steps.forEach((el, i) => el.style.setProperty("--ans-delay", beats.filter((x) => x.at === i + 1).length * STEP + "s"));
+
+        mem.querySelector(".ctl").addEventListener("click", (e) => {
+          const d = e.target.closest("button")?.dataset.do;
+          if (d === "back") { stop(); render(Math.max(0, k - 1), false); }
+          if (d === "fwd") { stop(); if (k < beats.length) render(k + 1, true); }
+          if (d === "play") { stop(); render(0, false); playTo(beats.length); }
+        });
+
+        Deck.scene(slide, {
+          enter() { stop(); seen = 0; render(0, false); },
+          leave() { stop(); render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        // reserve the tallest state's height so the slide never jumps
+        let tallest = 0;
+        for (let i = 1; i <= beats.length; i++) {
+          render(i, false);
+          tallest = Math.max(tallest, mem.getBoundingClientRect().height);
+        }
+        mem.style.minHeight = tallest + "px";
+        render(0, false);
+      }
+      const tutor = (id, t) => Tutor(document.getElementById(id), t.beats);
+
+      // ================================================================ traces
+      // The first beats (before any answer is shown) play on the first →.
+      tutor("single", trace()
+        .set("square", "function").L(2)
+        .L(5)
+        .call("square", { x: 5 }).L(3, { r: 25 })
+        .ret().set("result", 25).L(5));
+
+      tutor("multi", trace()
+        .set("divide", "function").L(2)
+        .L(7)
+        .call("divide", { a: 17, b: 5 }).set("quotient", 3).L(3)
+        .set("remainder", 2).L(4)
+        .L(5, { r: "(3, 2)" })
+        .ret().set("q", 3).set("r", 2).L(7));
+
+      tutor("early", trace()
+        .set("is_even", "function").L(2)
+        .L(7)
+        .call("is_even", { n: 4 }).L(3, { c: true, n: "4 % 2 == 0" })
+        .L(4, { r: "True" })
+        .ret().set("result", "True").L(7));
+
+      tutor("none", trace()
+        .set("print_msg", "function").L(2)
+        .L(5)
+        .call("print_msg", { msg: "'Hi'" }).L(3, { o: "Hi" })
+        .at(2).L(3, { r: "None", n: "end of function" })
+        .ret().set("result", "None").L(5));
+
+      tutor("loop", trace()
+        .set("find_first_even", "function").L(2)
+        .L(7)
+        .call("find_first_even", { numbers: "[1, 3, 4, 5]" }).set("num", 1).L(3)
+        .L(4, { c: false, n: "1 % 2 == 0" })
+        .set("num", 3).L(3)
+        .L(4, { c: false, n: "3 % 2 == 0" })
+        .set("num", 4).L(3)
+        .L(4, { c: true, n: "4 % 2 == 0" })
+        .L(5, { r: 4 })
+        .ret().set("result", 4).L(7));
+
+      // exercises: a bare call shows its value as → (what the REPL would echo)
+      tutor("e1", trace()
+        .set("func", "function").L(2)
+        .L(5)
+        .call("func").set("x", 5).L(3)
+        .L(3, { r: "None", n: "end of function" })
+        .ret().L(5, { e: "None" }));
+
+      tutor("e2", trace()
+        .set("func", "function").L(2)
+        .L(5)
+        .call("func").L(3, { r: "(1, 2, 3)" })
+        .ret().set("a", 1).set("b", 2).set("c", 3).L(5));
+
+      tutor("e3", trace()
+        .set("func", "function").L(2)
+        .L(5)
+        .call("func").L(3, { r: "(1, 2, 3)" })
+        .ret().set("x", "(1, 2, 3)").L(5));
+
+      tutor("e4", trace()
+        .set("func", "function").L(2)
+        .L(7)
+        .call("func", { x: 10 }).L(3, { c: true, n: "10 > 5" })
+        .L(4, { r: "'Big'" })
+        .ret().L(7, { e: "'Big'" }));
+
+      tutor("e5", trace()
+        .set("func", "function").L(2)
+        .L(8)
+        .call("func", { x: -5 }).L(3, { c: false, n: "-5 > 0" })
+        .L(5)
+        .L(6, { r: "'Non-positive'" })
+        .ret().L(8, { e: "'Non-positive'" }));
+
+      tutor("e6", trace()
+        .set("func", "function").L(2)
+        .L(6)
+        .call("func", { x: 5 }).L(3, { r: 5 })
+        .ret().L(6, { e: 5 }));
+
+      tutor("e7", trace()
+        .set("func", "function").L(2)
+        .L(5)
+        .call("func").L(3, { r: "None" })
+        .ret().L(5, { e: "None" }));
+
+      tutor("e8", trace()
+        .set("func", "function").L(2)
+        .L(8)
+        .call("func").L(3)
+        .L(4, { r: 1 })
+        .L(5, { n: "finally still runs", r: 1 })
+        .L(6, { r: 2 })
+        .ret().L(8, { e: 2 }));
+
+      tutor("e9", trace()
+        .set("func", "function").L(2)
+        .L(6)
+        .call("func", { x: 0 }).L(3, { c: false, n: "0 is falsy" })
+        .L(3, { r: "None", n: "end of function" })
+        .ret().L(6, { e: "None" }));
+
+      tutor("e10", trace()
+        .set("func", "function").L(2)
+        .L(5)
+        .call("func", { a: 5, b: 3 }).L(3, { c: true, n: "5 > 3", r: 8 })
+        .ret().L(5, { e: 8 }));
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

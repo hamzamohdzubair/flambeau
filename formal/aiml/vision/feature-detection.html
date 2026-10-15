@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feature Detection</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chip {
+        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      .chip.ghost { border-style: dashed; }
+      canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
+      figure figcaption { font-family: var(--font-mono); }
+      .sl { display: grid; grid-template-columns: 8.4rem minmax(0, 1fr) 3.2rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.85rem; margin: 0.25rem 0; }
+      .sl input { width: 100%; accent-color: var(--violet); }
+      .sl output { color: var(--cyan); text-align: right; }
+
+      .katex-display { font-size: 1.35em; }
+      /* cover */
+      #title canvas { width: min(30rem, 84vw); }
+
+      /* patch shift */
+      .shift { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; width: min(100%, 56rem); }
+      .shift figure { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+      .shift svg { width: 100%; max-width: 12rem; }
+      .shift figcaption b { color: var(--text); font-family: var(--font); }
+
+      /* lambda plane */
+      .lam { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 64rem); }
+      .lam svg { width: 100%; max-width: 22rem; overflow: visible; margin: 0 auto; display: block; }
+      .lam svg text { font-family: var(--font-mono); font-size: 12px; fill: var(--muted); }
+
+      /* FAST circle */
+      .fast { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.4rem; align-items: center; width: min(100%, 64rem); }
+      .fgrid { --fc: min(1.75rem, 6.4vw, 4vh); display: grid; grid-template-columns: repeat(7, var(--fc)); gap: 3px; padding: 6px; border-radius: 12px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.75); }
+      .fgrid span { position: relative; display: grid; place-items: center; width: var(--fc); height: var(--fc); border-radius: 4px; font: 500 calc(var(--fc) * 0.36) var(--font-mono); color: transparent; }
+      .fgrid span.ring { outline: 2px solid rgba(255, 255, 255, 0.25); outline-offset: -2px; color: rgba(255, 255, 255, 0.65); }
+      .fgrid span.p { outline: 2px solid var(--pink); outline-offset: -2px; color: #fff; }
+      .fgrid span.br { outline-color: #fbbf24; box-shadow: 0 0 10px rgba(251, 191, 36, 0.7); }
+      .fgrid span.dk { outline-color: var(--cyan); box-shadow: 0 0 10px rgba(34, 211, 238, 0.7); }
+      .fverdict { font-family: var(--font-mono); font-size: 1rem; min-height: 3em; }
+      .fverdict b { color: var(--pink); }
+
+      /* labs */
+      .lab { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1.8rem; align-items: center; width: min(100%, 72rem); }
+      .lab .ctl { display: grid; gap: 0.6rem; }
+      .lab .count { font-family: var(--font-mono); color: var(--muted); font-size: 0.9rem; }
+
+      /* blobs */
+      .blob { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 68rem); }
+      .blob svg { width: 100%; border-radius: 12px; background: rgba(226, 232, 240, 0.92); }
+      .blob svg text { font-family: var(--font-mono); font-size: 10px; fill: #0f172a; }
+
+      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
+      .qa .q { display: grid; gap: 0.4rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
+      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
+      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
+
+      @media (max-width: 760px) {
+        .shift { gap: 0.6rem; }
+        .lam, .fast, .lab, .blob { grid-template-columns: minmax(0, 1fr); gap: 1rem; justify-items: center; }
+        .lab .ctl, .blob > div { width: 100%; }
+        .sl { grid-template-columns: 6.6rem minmax(0, 1fr) 2.8rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas class="photo" width="400" height="225" aria-label="Shapes with their detected corners lighting up"></canvas>
+      <h1>Feature Detection</h1>
+      <p>Find the points an algorithm can recognise again: corners, blobs and edges.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide">
+      <h2>What are features?</h2>
+      <p class="lead"><strong>Feature:</strong> a distinctive pattern in an image that can be reliably detected.</p>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Corners</h3><p>Where edges intersect: a high gradient in several directions.</p></div>
+        <div class="card step"><h3>Blobs</h3><p>Regions that differ from their surroundings.</p></div>
+        <div class="card step"><h3>Edges</h3><p>Boundaries between regions.</p></div>
+      </div>
+      <p class="step center"><strong>Why detect features?</strong> Object recognition · image matching · tracking · 3-D reconstruction · image stitching</p>
+    </section>
+
+    <!-- ================================================================ corners -->
+    <section class="slide" id="slide-shift">
+      <h2>Corner detection</h2>
+      <p class="lead center"><strong>Corner:</strong> a point where two edges meet: intensity changes in several directions.</p>
+      <div class="shift">
+        <figure><svg viewBox="0 0 120 120"><rect width="120" height="120" rx="8" fill="#334155" /><rect class="win" x="40" y="40" width="40" height="40" rx="4" fill="none" stroke="#22d3ee" stroke-width="3" /></svg><figcaption><b>Flat:</b> no change in any direction</figcaption></figure>
+        <figure><svg viewBox="0 0 120 120"><rect width="120" height="120" rx="8" fill="#334155" /><rect x="60" width="60" height="120" fill="#e2e8f0" /><rect class="win" x="40" y="40" width="40" height="40" rx="4" fill="none" stroke="#22d3ee" stroke-width="3" /></svg><figcaption><b>Edge:</b> change only across the edge</figcaption></figure>
+        <figure><svg viewBox="0 0 120 120"><rect width="120" height="120" rx="8" fill="#334155" /><rect x="60" y="60" width="60" height="60" fill="#e2e8f0" /><rect class="win" x="40" y="40" width="40" height="40" rx="4" fill="none" stroke="#22d3ee" stroke-width="3" /></svg><figcaption><b>Corner:</b> change in every direction</figcaption></figure>
+      </div>
+      <ul>
+        <li class="step"><strong>Properties:</strong> high gradient in several directions; locally unique; repeatable (detected consistently); invariant to rotation.</li>
+        <li class="step"><strong>Use case:</strong> tracking, matching, calibration.</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ harris -->
+    <section class="slide">
+      <h2>Harris corner detector</h2>
+      <p class="lead center">Measures "corner-ness" from the gradients in a small window.</p>
+      <div class="cols">
+        <div class="step">
+          <p><strong>Gradient matrix</strong> (summed over the window):</p>
+          $$M = \sum \begin{bmatrix} I_x^2 & I_x I_y \\ I_x I_y & I_y^2 \end{bmatrix}$$
+        </div>
+        <div class="step">
+          <p><strong>Corner response:</strong></p>
+          $$R = \det(M) - k \cdot \operatorname{trace}(M)^2$$
+        </div>
+      </div>
+      <p class="step center lead"><strong>R &gt; threshold</strong> → corner detected.</p>
+      <p class="step center muted">\(\det(M) = \lambda_1 \lambda_2\) and \(\operatorname{trace}(M) = \lambda_1 + \lambda_2\), where \(\lambda_1, \lambda_2\) are the eigenvalues of \(M\): how strongly intensity changes along the two main directions.</p>
+    </section>
+
+    <!-- ================================================================ harris code -->
+    <section class="slide">
+      <h2>Harris corners in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = np.float32(gray)
+        # detect harris corners
+        corners = cv2.cornerHarris(gray, blockSize=2, ksize=3, k=0.04)  # ans:
+        # blockSize: neighbourhood size
+        # ans: size of the window the gradients are summed over
+        # ksize: Sobel kernel size
+        # ans: for computing the gradients (3, 5, 7)
+        # k: Harris parameter
+        # ans: typically 0.04-0.06, a sensitivity parameter
+        # threshold to mark corners
+        corners = cv2.dilate(corners, None)
+        img[corners &gt; 0.01 * corners.max()] = [0, 0, 255]
+        # ans: marks corners in red where the response &gt; threshold
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ shi-tomasi + lambda plane -->
+    <section class="slide" id="slide-lam">
+      <h2>Shi-Tomasi corner detector</h2>
+      <div class="lam">
+        <div>
+          <p><strong>Shi-Tomasi:</strong> an improved Harris, better for tracking.</p>
+          <p class="step lead">\(R = \min(\lambda_1, \lambda_2)\)</p>
+          <ul>
+            <li class="step"><strong>Advantage:</strong> more reliable corner selection.</li>
+            <li class="step"><strong>Use case:</strong> optical flow, tracking.</li>
+          </ul>
+          <div class="chips step" data-interactive style="justify-content: flex-start">
+            <button class="chip" data-m="harris">Harris region</button>
+            <button class="chip on" data-m="shi">Shi-Tomasi region</button>
+          </div>
+        </div>
+        <svg class="plane" viewBox="-30 -10 260 260" aria-label="The plane of eigenvalues lambda 1 and lambda 2 split into flat, edge and corner regions"></svg>
+      </div>
+    </section>
+
+    <!-- ================================================================ shi-tomasi code -->
+    <section class="slide">
+      <h2>Shi-Tomasi in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # detect good features to track
+        corners = cv2.goodFeaturesToTrack(gray, maxCorners=100,
+                                          qualityLevel=0.01, minDistance=10)  # ans:
+        # maxCorners: maximum number to return
+        # ans: the 100 strongest corners
+        # qualityLevel: minimum quality (0-1)
+        # ans: 0.01 keeps corners &gt; 1% of the best one
+        # minDistance: minimum pixel distance between corners
+        # ans: at least 10 pixels apart
+        # draw corners
+        for corner in corners:  # ans:
+            x, y = corner.ravel()  # ans:
+            cv2.circle(img, (int(x), int(y)), 3, (0, 255, 0), -1)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ FAST -->
+    <section class="slide" id="slide-fast">
+      <h2>FAST corner detector</h2>
+      <p class="lead center"><strong>FAST:</strong> Features from Accelerated Segment Test.</p>
+      <div class="fast">
+        <div style="display: grid; justify-items: center; gap: 0.8rem">
+          <div class="fgrid"></div>
+          <div class="chips" data-interactive>
+            <button class="chip on" data-c="0">Corner</button>
+            <button class="chip" data-c="1">Edge</button>
+          </div>
+        </div>
+        <div>
+          <ol>
+            <li>Pick a pixel <em>p</em> with intensity \(I_p\).</li>
+            <li>Consider the circle of 16 pixels around <em>p</em>.</li>
+            <li>If <em>N</em> contiguous pixels are all brighter than \(I_p + t\), or all darker than \(I_p - t\) → corner.</li>
+            <li><em>N</em> is typically 12 (FAST-12).</li>
+          </ol>
+          <p class="fverdict"></p>
+          <p class="step"><strong>Advantage:</strong> very fast, real-time capable.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ FAST code -->
+    <section class="slide">
+      <h2>FAST in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # create a FAST detector
+        fast = cv2.FastFeatureDetector_create()  # ans:
+        # detect keypoints
+        keypoints = fast.detect(gray, None)  # ans:
+        # draw keypoints
+        img_kp = cv2.drawKeypoints(img, keypoints, None, color=(0, 255, 0))  # ans:
+        # adjust the threshold
+        fast.setThreshold(30)
+        # ans: higher threshold = fewer, stronger corners
+        # control non-max suppression
+        fast.setNonmaxSuppression(True)
+        # ans: removes adjacent weak corners
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ corner lab -->
+    <section class="slide" id="slide-lab">
+      <h2>Three corner detectors, live</h2>
+      <div class="lab">
+        <figure><canvas class="photo" width="400" height="225"></canvas><figcaption class="call"></figcaption></figure>
+        <div class="ctl" data-interactive>
+          <div class="chips" style="justify-content: flex-start">
+            <button class="chip on" data-img="shapes">Shapes</button>
+            <button class="chip" data-img="photo">Photo</button>
+          </div>
+          <div class="chips" style="justify-content: flex-start">
+            <button class="chip on" data-m="harris">cornerHarris</button>
+            <button class="chip" data-m="shi">goodFeaturesToTrack</button>
+            <button class="chip" data-m="fast">FAST</button>
+          </div>
+          <div class="sliders"></div>
+          <p class="count"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ blobs -->
+    <section class="slide" id="slide-blob">
+      <h2>Blob detection</h2>
+      <div class="blob">
+        <svg viewBox="0 0 400 240" aria-label="Dark shapes of different sizes and circularity; those passing the filters are ringed"></svg>
+        <div>
+          <p><strong>Blob:</strong> a region significantly different from its surroundings.</p>
+          <p><code>SimpleBlobDetector</code> finds bright or dark roughly circular regions, filtered by colour, size (area), circularity, convexity and inertia.</p>
+          <div data-interactive>
+            <label class="sl">minArea <input type="range" min="0" max="3000" step="50" value="100" data-k="area" /><output></output></label>
+            <label class="sl">minCircularity <input type="range" min="0" max="1" step="0.05" value="0.8" data-k="circ" /><output></output></label>
+          </div>
+          <p class="muted" style="font-size: 0.85rem">Circularity = 4π · area / perimeter²: 1 for a circle, about 0.785 for a square.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ blob code -->
+    <section class="slide">
+      <h2>Blob detection in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # create a blob detector with default params
+        detector = cv2.SimpleBlobDetector_create()  # ans:
+        # detect blobs
+        keypoints = detector.detect(gray)  # ans:
+        # draw blobs
+        img_blobs = cv2.drawKeypoints(img, keypoints, None, (0, 0, 255),
+            cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)  # ans:
+        # custom parameters
+        params = cv2.SimpleBlobDetector_Params()
+        params.filterByArea = True
+        params.minArea = 100
+        params.maxArea = 5000
+        params.filterByCircularity = True
+        params.minCircularity = 0.8
+        detector = cv2.SimpleBlobDetector_create(params)  # ans:
+        # ans: detects circular blobs of 100-5000 pixels, circularity &gt; 0.8
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is a corner?</p><p class="answer">A point with a high gradient in several directions.</p></div>
+        <div class="q"><p>Why detect features?</p><p class="answer">Object recognition, matching, tracking, stitching.</p></div>
+        <div class="q"><p>What does Harris detect?</p><p class="answer">Corners, using the gradient matrix.</p></div>
+        <div class="q"><p>What is the difference between Harris and Shi-Tomasi?</p><p class="answer">Shi-Tomasi uses min(λ1, λ2), which is better for tracking.</p></div>
+        <div class="q"><p>What is FAST?</p><p class="answer">A fast corner detector that tests a circle of pixels.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is a blob?</p><p class="answer">A region significantly different from its surroundings.</p></div>
+        <div class="q"><p>What is the <code>k</code> parameter in Harris?</p><p class="answer">The sensitivity, typically 0.04-0.06.</p></div>
+        <div class="q"><p>What is <code>qualityLevel</code> in <code>goodFeaturesToTrack</code>?</p><p class="answer">The minimum quality, as a fraction (0-1) of the best corner.</p></div>
+        <div class="q"><p>Why is FAST fast?</p><p class="answer">A simple comparison test; no gradient computation.</p></div>
+        <div class="q"><p>What does the <code>minDistance</code> parameter do?</p><p class="answer">It keeps corners at least N pixels apart.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # detect Harris corners
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = np.float32(gray)
+        corners = cv2.cornerHarris(gray, 2, 3, 0.04)  # ans:
+        # detect Shi-Tomasi corners
+        corners = cv2.goodFeaturesToTrack(gray, 100, 0.01, 10)  # ans:
+        # create a FAST detector
+        fast = cv2.FastFeatureDetector_create()  # ans:
+        keypoints = fast.detect(gray, None)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # detect blobs
+        detector = cv2.SimpleBlobDetector_create()  # ans:
+        keypoints = detector.detect(gray)  # ans:
+        # draw Harris corners
+        corners = cv2.cornerHarris(gray, 2, 3, 0.04)
+        corners = cv2.dilate(corners, None)
+        img[corners &gt; 0.01 * corners.max()] = [0, 0, 255]  # ans:
+        # draw Shi-Tomasi corners
+        corners = cv2.goodFeaturesToTrack(gray, 100, 0.01, 10)
+        for corner in corners:  # ans:
+            x, y = corner.ravel()  # ans:
+            cv2.circle(img, (int(x), int(y)), 3, (255, 0, 0), -1)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="steps"><code class="language-python">
+        # adjust the FAST threshold
+        fast = cv2.FastFeatureDetector_create()
+        fast.setThreshold(50)  # ans:
+        keypoints = fast.detect(gray, None)  # ans:
+        # detect the top 50 Shi-Tomasi corners
+        corners = cv2.goodFeaturesToTrack(gray, 50, 0.01, 10)  # ans:
+        # custom blob parameters
+        params = cv2.SimpleBlobDetector_Params()
+        params.filterByArea = True  # ans:
+        params.minArea = 50  # ans:
+        params.maxArea = 1000  # ans:
+        detector = cv2.SimpleBlobDetector_create(params)  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      // ------------------------------------------------------------ images
+      function shapesCanvas() {
+        const c = document.createElement("canvas");
+        c.width = 400; c.height = 225;
+        const x = c.getContext("2d");
+        x.fillStyle = "#1e293b"; x.fillRect(0, 0, 400, 225);
+        x.fillStyle = "#e2e8f0"; x.fillRect(30, 40, 90, 70);
+        x.fillStyle = "#a78bfa"; x.beginPath(); x.moveTo(170, 150); x.lineTo(230, 40); x.lineTo(280, 160); x.closePath(); x.fill();
+        x.fillStyle = "#67e8f9"; x.beginPath(); x.arc(340, 70, 34, 0, 7); x.fill();
+        x.fillStyle = "#f472b6"; x.save(); x.translate(90, 175); x.rotate(0.5); x.fillRect(-35, -20, 70, 40); x.restore();
+        x.fillStyle = "#fbbf24"; x.beginPath();
+        for (let i = 0; i < 10; i++) { const r = i % 2 ? 14 : 32, a = (i * Math.PI) / 5 - Math.PI / 2; x.lineTo(340 + r * Math.cos(a), 170 + r * Math.sin(a)); }
+        x.closePath(); x.fill();
+        return x.getImageData(0, 0, 400, 225);
+      }
+      async function photoData(src, w) {
+        const im = new Image();
+        im.src = src;
+        await im.decode();
+        const h = Math.round((im.naturalHeight / im.naturalWidth) * w);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const x = c.getContext("2d", { willReadFrequently: true });
+        x.drawImage(im, 0, 0, w, h);
+        return x.getImageData(0, 0, w, h);
+      }
+      const toGray = (d) => { const g = new Float32Array(d.width * d.height); for (let i = 0; i < g.length; i++) g[i] = 0.299 * d.data[i * 4] + 0.587 * d.data[i * 4 + 1] + 0.114 * d.data[i * 4 + 2]; return g; };
+      const refl = (v, m) => (v < 0 ? -v : v >= m ? 2 * m - v - 2 : v);
+
+      // Structure tensor: Sobel gradients summed over a box window
+      function tensor(g, W, H, block = 3) {
+        const gx = new Float32Array(W * H), gy = new Float32Array(W * H);
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+          const p = (dx, dy) => g[refl(y + dy, H) * W + refl(x + dx, W)];
+          gx[y * W + x] = (p(1, -1) + 2 * p(1, 0) + p(1, 1) - p(-1, -1) - 2 * p(-1, 0) - p(-1, 1)) / 8;
+          gy[y * W + x] = (p(-1, 1) + 2 * p(0, 1) + p(1, 1) - p(-1, -1) - 2 * p(0, -1) - p(1, -1)) / 8;
+        }
+        const A = new Float32Array(W * H), B = new Float32Array(W * H), C = new Float32Array(W * H), r = (block - 1) >> 1;
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+          let a = 0, b = 0, c = 0;
+          for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) { const q = refl(y + j, H) * W + refl(x + i, W); a += gx[q] * gx[q]; b += gx[q] * gy[q]; c += gy[q] * gy[q]; }
+          A[y * W + x] = a; B[y * W + x] = b; C[y * W + x] = c;
+        }
+        return { A, B, C };
+      }
+      function harris(T, k) { return T.A.map((a, i) => a * T.C[i] - T.B[i] * T.B[i] - k * (a + T.C[i]) ** 2); }
+      function minEig(T) { return T.A.map((a, i) => (a + T.C[i]) / 2 - Math.sqrt(((a - T.C[i]) / 2) ** 2 + T.B[i] ** 2)); }
+      function dilate3(R, W, H) {
+        const out = new Float32Array(W * H);
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let m = -Infinity; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) m = Math.max(m, R[refl(y + j, H) * W + refl(x + i, W)]); out[y * W + x] = m; }
+        return out;
+      }
+      function goodFeatures(T, W, H, maxC, q, minD) {
+        const E = minEig(T), D = dilate3(E, W, H);
+        let max = 0;
+        for (const v of E) max = Math.max(max, v);
+        const cand = [];
+        for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const i = y * W + x; if (E[i] > q * max && E[i] === D[i]) cand.push([E[i], x, y]); }
+        cand.sort((a, b) => b[0] - a[0]);
+        const out = [];
+        for (const c of cand) {
+          if (out.every((o) => (o[1] - c[1]) ** 2 + (o[2] - c[2]) ** 2 >= minD * minD)) out.push(c);
+          if (out.length >= maxC) break;
+        }
+        return out;
+      }
+      const CIRCLE = [[0, -3], [1, -3], [2, -2], [3, -1], [3, 0], [3, 1], [2, 2], [1, 3], [0, 3], [-1, 3], [-2, 2], [-3, 1], [-3, 0], [-3, -1], [-2, -2], [-1, -3]];
+      function fastDetect(g, W, H, t, nms, N = 9) {
+        const score = new Float32Array(W * H), pts = [];
+        for (let y = 3; y < H - 3; y++) for (let x = 3; x < W - 3; x++) {
+          const p = g[y * W + x];
+          const s = CIRCLE.map(([dx, dy]) => { const v = g[(y + dy) * W + x + dx]; return v > p + t ? 1 : v < p - t ? -1 : 0; });
+          let best = 0;
+          for (const sign of [1, -1]) { let run = 0; for (let k = 0; k < 32; k++) { run = s[k % 16] === sign ? run + 1 : 0; best = Math.max(best, run); } }
+          if (best >= N) {
+            score[y * W + x] = CIRCLE.reduce((a, [dx, dy]) => a + Math.max(0, Math.abs(g[(y + dy) * W + x + dx] - p) - t), 0);
+            pts.push([x, y]);
+          }
+        }
+        if (!nms) return pts;
+        return pts.filter(([x, y]) => { const v = score[y * W + x]; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) if ((i || j) && score[(y + j) * W + x + i] > v) return false; return true; });
+      }
+
+      const SHAPES = shapesCanvas();
+      const PHOTO = photoData("/assets/2025-10-09-22-21-33.png", 400);
+
+      // ------------------------------------------------------------ cover: corners pop onto the shapes
+      (function () {
+        const cv = document.querySelector("#title canvas"), ctx = cv.getContext("2d");
+        const W = 400, H = 225, T = tensor(toGray(SHAPES), W, H, 3);
+        const pts = goodFeatures(T, W, H, 40, 0.05, 12);
+        const st = { n: 0 };
+        let tl = null;
+        function paint() {
+          ctx.putImageData(SHAPES, 0, 0);
+          pts.slice(0, Math.floor(st.n)).forEach(([v, x, y]) => {
+            ctx.beginPath(); ctx.arc(x, y, 5, 0, 7);
+            ctx.strokeStyle = "#ec4899"; ctx.lineWidth = 2.5; ctx.stroke();
+          });
+        }
+        Deck.scene("#title", {
+          enter() { st.n = 0; tl?.kill(); tl = gsap.to(st, { n: pts.length, duration: 2.4, delay: 0.5, ease: "none", onUpdate: paint }); paint(); },
+          leave() { tl?.kill(); },
+        });
+      })();
+
+      // ------------------------------------------------------------ flat / edge / corner windows
+      let shiftTl = null;
+      Deck.scene("#slide-shift", {
+        enter(slide) {
+          shiftTl?.kill();
+          const wins = slide.querySelectorAll(".win");
+          shiftTl = gsap.timeline({ repeat: -1 });
+          [[16, 0], [0, 16], [-16, 0], [0, -16], [12, 12], [-12, -12]].forEach(([x, y]) => shiftTl.to(wins, { x, y, duration: 0.45, ease: "power1.inOut" }).to(wins, { x: 0, y: 0, duration: 0.45, ease: "power1.inOut" }));
+        },
+        leave() { shiftTl?.kill(); },
+      });
+
+      // ------------------------------------------------------------ lambda plane
+      (function () {
+        const ls = document.querySelector("#slide-lam");
+        const svg = ls.querySelector("svg.plane");
+        const S = 200; // plot size; lambda in 0..1
+        const P = (l1, l2) => [l1 * S, S - l2 * S];
+        // Harris R = l1 l2 - k (l1 + l2)^2 = t: boundary curves
+        const k = 0.05, t = 0.06;
+        // R >= t between the two roots of k*l2^2 - (1-2k)*l1*l2 + k*l1^2 + t = 0
+        const lo = [], hi = [];
+        for (let a = 0.005; a <= 1.0001; a += 0.005) {
+          const B = (1 - 2 * k) * a, disc = B * B - 4 * k * (k * a * a + t);
+          if (disc < 0) continue;
+          const r1 = (B - Math.sqrt(disc)) / (2 * k), r2 = (B + Math.sqrt(disc)) / (2 * k);
+          if (r1 > 1) continue;
+          lo.push(P(a, Math.max(0, r1))); hi.push(P(a, Math.min(1, r2)));
+        }
+        const hd = "M" + lo.map((p) => p.join(",")).join("L") + "L" + hi.reverse().map((p) => p.join(",")).join("L");
+        const m = 0.25;
+        svg.innerHTML = `
+          <rect x="0" y="0" width="${S}" height="${S}" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.2)"/>
+          <path class="rg harris" d="${hd} Z" fill="rgba(236,72,153,0.35)" stroke="#ec4899" stroke-width="2"/>
+          <path class="rg shi" d="M${P(m, 1).join(",")} L${P(m, m).join(",")} L${P(1, m).join(",")} L${P(1, 1).join(",")} Z" fill="rgba(34,211,238,0.3)" stroke="#22d3ee" stroke-width="2"/>
+          <text x="${S / 2}" y="${S + 22}" text-anchor="middle">λ1 →</text>
+          <text x="-14" y="${S / 2}" transform="rotate(-90 -14 ${S / 2})" text-anchor="middle">λ2 →</text>
+          <text x="22" y="${S - 14}" fill="#e2e8f0">flat</text>
+          <text x="${S - 62}" y="${S - 14}" fill="#e2e8f0">edge</text>
+          <text x="8" y="22" fill="#e2e8f0">edge</text>
+          <text x="${S - 70}" y="34" fill="#e2e8f0" font-size="15">corner</text>`;
+        const show = (mname, animate) => {
+          ls.querySelectorAll("[data-m]").forEach((c) => c.classList.toggle("on", c.dataset.m === mname));
+          gsap.to(svg.querySelector(".harris"), { opacity: mname === "harris" ? 1 : 0.08, duration: animate ? 0.5 : 0 });
+          gsap.to(svg.querySelector(".shi"), { opacity: mname === "shi" ? 1 : 0.08, duration: animate ? 0.5 : 0 });
+        };
+        show("shi", false);
+        ls.querySelector(".chips").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) show(b.dataset.m, true); });
+      })();
+
+      // ------------------------------------------------------------ FAST circle
+      (function () {
+        const fs = document.querySelector("#slide-fast");
+        const grid = fs.querySelector(".fgrid");
+        const verdict = fs.querySelector(".fverdict");
+        // two 7x7 patches: a corner (bright block in one quadrant) and an edge
+        const mk = (f) => Array.from({ length: 49 }, (_, i) => f(i % 7 - 3, Math.floor(i / 7) - 3));
+        const PATCHES = [mk((x, y) => ((x >= 1 && y >= 1) || (x === 0 && y === 0) ? 200 : 60)), mk((x, y) => (x >= 0 ? 200 : 60))];
+        const cellsEl = Array.from({ length: 49 }, () => grid.appendChild(document.createElement("span")));
+        const ringIdx = CIRCLE.map(([dx, dy]) => (dy + 3) * 7 + dx + 3);
+        let which = 0, tl = null;
+        const T = 20;
+        function draw(p) {
+          PATCHES[p].forEach((v, i) => { cellsEl[i].style.background = `rgb(${v},${v},${v + 10})`; cellsEl[i].className = ""; cellsEl[i].textContent = ""; });
+          ringIdx.forEach((i, k) => { cellsEl[i].classList.add("ring"); cellsEl[i].textContent = k + 1; });
+          cellsEl[24].classList.add("p"); cellsEl[24].textContent = "p";
+        }
+        function run() {
+          tl?.kill();
+          draw(which);
+          const P = PATCHES[which], Ip = P[24];
+          // darker run counted from where it starts
+          const signs = ringIdx.map((i) => (P[i] > Ip + T ? 1 : P[i] < Ip - T ? -1 : 0));
+          let best = 0, run = 0;
+          for (let k = 0; k < 32; k++) { run = signs[k % 16] === -1 ? run + 1 : 0; best = Math.max(best, Math.min(16, run)); }
+          verdict.innerHTML = `I<sub>p</sub> = ${Ip}, t = ${T}: checking the circle…`;
+          tl = gsap.timeline({ delay: 0.6 });
+          ringIdx.forEach((i, k) => tl.call(() => { cellsEl[i].classList.add(signs[k] === -1 ? "dk" : signs[k] === 1 ? "br" : "x"); }, null, k * 0.18));
+          tl.call(() => {
+            verdict.innerHTML = best >= 12 ? `${best} contiguous pixels darker than ${Ip - T} → <b>corner</b>` : `only ${best} contiguous darker pixels (need 12) → <b>not a corner</b>`;
+          }, null, 16 * 0.18 + 0.2);
+          tl.call(() => { which = 1 - which; fs.querySelectorAll("[data-c]").forEach((c) => c.classList.toggle("on", +c.dataset.c === which)); run(); }, null, 16 * 0.18 + 3.2);
+        }
+        fs.querySelector(".chips").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; which = +b.dataset.c; fs.querySelectorAll("[data-c]").forEach((c) => c.classList.toggle("on", c === b)); run(); });
+        draw(0);
+        Deck.scene("#slide-fast", { enter: run, leave() { tl?.kill(); } });
+      })();
+
+      // ------------------------------------------------------------ corner lab
+      (function () {
+        const cs = document.querySelector("#slide-lab");
+        const cv = cs.querySelector("canvas"), ctx = cv.getContext("2d");
+        const sliders = cs.querySelector(".sliders");
+        const CTL = {
+          harris: [["k", 0.02, 0.2, 0.01, 0.04], ["threshold × max", 0.001, 0.2, 0.001, 0.01]],
+          shi: [["maxCorners", 5, 300, 5, 100], ["qualityLevel", 0.001, 0.3, 0.001, 0.01], ["minDistance", 1, 40, 1, 10]],
+          fast: [["threshold", 5, 80, 1, 20], ["nonmaxSuppression", 0, 1, 1, 1]],
+        };
+        let imgName = "shapes", method = "harris", data = SHAPES, cache = {};
+        function buildSliders() {
+          sliders.innerHTML = CTL[method].map(([n, a, b, s, v]) => `<label class="sl">${n} <input type="range" min="${a}" max="${b}" step="${s}" value="${v}" /><output>${v}</output></label>`).join("");
+          sliders.querySelectorAll("input").forEach((i) => i.addEventListener("input", () => { i.nextElementSibling.textContent = i.value; run(); }));
+        }
+        function vals() { return [...sliders.querySelectorAll("input")].map((i) => +i.value); }
+        function run() {
+          const W = data.width, H = data.height;
+          const key = imgName;
+          if (!cache[key]) { const g = toGray(data); cache[key] = { g, T: tensor(g, W, H, 3) }; }
+          const { g, T } = cache[key];
+          ctx.putImageData(data, 0, 0);
+          const v = vals();
+          let n = 0, call = "";
+          if (method === "harris") {
+            const R = dilate3(harris(T, v[0]), W, H);
+            let max = 0; for (const r of R) max = Math.max(max, r);
+            const im = ctx.getImageData(0, 0, W, H);
+            for (let i = 0; i < R.length; i++) if (R[i] > v[1] * max) { im.data[i * 4] = 255; im.data[i * 4 + 1] = 0; im.data[i * 4 + 2] = 0; n++; }
+            ctx.putImageData(im, 0, 0);
+            call = `cv2.cornerHarris(gray, 2, 3, ${v[0]}); corners > ${v[1]} * max`;
+            cs.querySelector(".count").textContent = `${n} pixels marked red`;
+          } else if (method === "shi") {
+            const pts = goodFeatures(T, W, H, v[0], v[1], v[2]);
+            pts.forEach(([, x, y]) => { ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fillStyle = "#22c55e"; ctx.fill(); });
+            call = `cv2.goodFeaturesToTrack(gray, ${v[0]}, ${v[1]}, ${v[2]})`;
+            cs.querySelector(".count").textContent = `${pts.length} corners`;
+          } else {
+            const pts = fastDetect(g, W, H, v[0], !!v[1]);
+            pts.forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 1.2; ctx.stroke(); });
+            call = `FAST threshold=${v[0]}, nonmax=${v[1] ? "True" : "False"}`;
+            cs.querySelector(".count").textContent = `${pts.length} keypoints (OpenCV's default type tests 9 of 16 contiguous pixels)`;
+          }
+          cs.querySelector(".call").textContent = call;
+        }
+        cs.querySelector(".ctl").addEventListener("click", async (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          if (b.dataset.img) {
+            imgName = b.dataset.img;
+            cs.querySelectorAll("[data-img]").forEach((c) => c.classList.toggle("on", c === b));
+            data = imgName === "shapes" ? SHAPES : await PHOTO;
+          } else if (b.dataset.m) {
+            method = b.dataset.m;
+            cs.querySelectorAll("[data-m]").forEach((c) => c.classList.toggle("on", c === b));
+            buildSliders();
+          }
+          run();
+        });
+        buildSliders();
+        run();
+      })();
+
+      // ------------------------------------------------------------ blob filters
+      (function () {
+        const bs = document.querySelector("#slide-blob");
+        const svg = bs.querySelector("svg");
+        const BL = [
+          { d: "M80 70 m-38 0 a38 38 0 1 0 76 0 a38 38 0 1 0 -76 0", area: Math.PI * 38 * 38, per: 2 * Math.PI * 38, c: [80, 70], r: 44 },
+          { d: "M190 60 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0", area: Math.PI * 144, per: 2 * Math.PI * 12, c: [190, 60], r: 17 },
+          { d: "M260 40 h60 v60 h-60 z", area: 3600, per: 240, c: [290, 70], r: 46 },
+          { d: "M340 160 m-45 0 a45 22 0 1 0 90 0 a45 22 0 1 0 -90 0", area: Math.PI * 45 * 22, per: Math.PI * (3 * 67 - Math.sqrt((3 * 45 + 22) * (45 + 3 * 22))), c: [340, 160], r: 50 },
+          { d: "M120 205 l14 -42 l14 42 l-36 -26 h44 z", area: 0, per: 0, c: [134, 186], r: 30, star: true },
+          { d: "M215 175 m-25 0 a25 25 0 1 0 50 0 a25 25 0 1 0 -50 0", area: Math.PI * 625, per: 2 * Math.PI * 25, c: [215, 175], r: 31 },
+          { d: "M40 160 h50 v12 h-50 z", area: 600, per: 124, c: [65, 166], r: 32 },
+        ];
+        BL[4].area = 520; BL[4].per = 190; // a five-point star: small area for its perimeter
+        svg.innerHTML = BL.map((b, i) => `<path d="${b.d}" fill="#0f172a" fill-rule="nonzero"/><circle class="ring" data-i="${i}" cx="${b.c[0]}" cy="${b.c[1]}" r="${b.r}" fill="none" stroke="#dc2626" stroke-width="3" opacity="0"/><text x="${b.c[0]}" y="${b.c[1] + b.r + 11}" text-anchor="middle">${(4 * Math.PI * b.area / b.per ** 2).toFixed(2)}</text>`).join("");
+        const ins = Object.fromEntries([...bs.querySelectorAll("input")].map((i) => [i.dataset.k, i]));
+        function apply(animate) {
+          const minA = +ins.area.value, minC = +ins.circ.value;
+          ins.area.nextElementSibling.textContent = minA;
+          ins.circ.nextElementSibling.textContent = (+minC).toFixed(2);
+          BL.forEach((b, i) => {
+            const ok = b.area >= minA && b.area <= 5000 && (4 * Math.PI * b.area) / b.per ** 2 >= minC;
+            gsap.to(svg.querySelector(`.ring[data-i="${i}"]`), { opacity: ok ? 1 : 0, scale: ok ? 1 : 0.6, transformOrigin: "50% 50%", duration: animate ? 0.35 : 0 });
+          });
+        }
+        Object.values(ins).forEach((i) => i.addEventListener("input", () => apply(true)));
+        apply(false);
+      })();
+    </script>
+  </body>
+</html>

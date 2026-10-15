@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Limitations of AI</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #contents ol {
+        font-size: 1.6rem;
+        font-family: var(--font-display);
+        color: var(--text);
+      }
+
+      /* ---------- How bias gets in ---------- */
+      #howbias svg {
+        width: min(100%, 60rem);
+        height: auto;
+        max-height: 58vh;
+      }
+
+      #howbias text {
+        font-family: var(--font);
+        font-size: 16px;
+        fill: var(--muted);
+        text-anchor: middle;
+      }
+
+      #howbias .head {
+        font-family: var(--font-display);
+        font-size: 19px;
+        fill: var(--text);
+      }
+
+      #howbias .panel {
+        fill: rgba(15, 18, 35, 0.7);
+        stroke: var(--border);
+      }
+
+      #howbias .model {
+        fill: rgba(139, 92, 246, 0.2);
+        stroke: var(--violet-soft);
+        stroke-width: 2;
+      }
+
+      #howbias .flow {
+        stroke: var(--faint);
+        stroke-width: 2;
+        stroke-dasharray: 6 6;
+      }
+
+      #howbias .bar {
+        rx: 4;
+      }
+
+      #howbias .legend {
+        display: flex;
+        gap: 1.4rem;
+        justify-content: center;
+        font-size: 0.9rem;
+      }
+
+      #howbias .legend i {
+        display: inline-block;
+        width: 0.8rem;
+        height: 0.8rem;
+        margin-right: 0.4rem;
+        border-radius: 50%;
+        vertical-align: -0.05rem;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · Extra topics</span>
+      <h1>Limitations of AI</h1>
+      <p>A model learns the patterns in its data, including the ones we would rather it didn't.</p>
+    </section>
+
+    <section class="slide" id="contents">
+      <h2>Contents</h2>
+      <ol>
+        <li>Bias</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <h2>Bias</h2>
+      <figure class="step">
+        <img src="/assets/2025-10-22-17-48-07.png" alt="BBC: Amazon scrapped 'sexist AI' tool" />
+        <figcaption>Bias in hiring: <a href="https://www.bbc.com/news/technology-45809919">bbc.com/news/technology-45809919</a></figcaption>
+      </figure>
+    </section>
+
+    <section class="slide" id="howbias">
+      <h2>How bias gets in</h2>
+      <svg viewBox="0 0 900 360" aria-label="Past hiring data, mostly men, trains a model that then scores new women applicants lower">
+        <rect class="panel" x="10" y="40" width="270" height="290" rx="16" />
+        <text class="head" x="145" y="72">Past hires (training data)</text>
+        <g class="past"></g>
+        <rect class="model" x="370" y="135" width="160" height="100" rx="18" />
+        <text class="head" x="450" y="180">Model</text>
+        <text x="450" y="206" class="mtext">learns the pattern</text>
+        <line class="flow" x1="285" y1="185" x2="365" y2="185" />
+        <line class="flow" x1="535" y1="185" x2="615" y2="185" />
+        <rect class="panel" x="620" y="40" width="270" height="290" rx="16" />
+        <text class="head" x="755" y="72">New applicants: score</text>
+        <g class="new"></g>
+      </svg>
+      <p class="legend"><span><i style="background: #22d3ee"></i>man</span><span><i style="background: #ec4899"></i>woman</span><span class="muted">An illustration, not Amazon's real data</span></p>
+      <p class="center step" data-step="1" data-anim="fade">Most past hires were men, so "looks like a man" becomes part of the pattern.</p>
+      <p class="center step" data-step="2" data-anim="fade">Equally qualified women now score lower. Nobody programmed the bias: it was learned.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent, text) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        if (text) e.textContent = text;
+        parent?.appendChild(e);
+        return e;
+      };
+      const M = "#22d3ee", F = "#ec4899";
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      const slide = document.querySelector("#howbias");
+      // 24 past hires: 20 men, 4 women
+      const past = slide.querySelector(".past");
+      const pastDots = Array.from({ length: 24 }, (_, i) => el("circle", { cx: 55 + (i % 6) * 36, cy: 115 + Math.floor(i / 6) * 50, r: 13, fill: [3, 10, 16, 21].includes(i) ? F : M }, past));
+      // 6 equally qualified applicants, scored
+      const nw = slide.querySelector(".new");
+      const apps = [M, F, M, F, F, M].map((c, i) => {
+        const y = 110 + i * 36;
+        el("circle", { cx: 655, cy: y, r: 11, fill: c }, nw);
+        const bar = el("rect", { class: "bar", x: 680, y: y - 9, width: 0, height: 18, fill: c, opacity: 0.8 }, nw);
+        return { bar, score: c === M ? 180 : 70 };
+      });
+      const model = slide.querySelector(".model");
+
+      let tl = null;
+      function show(n, animate) {
+        tl?.kill();
+        tl = gsap.timeline();
+        const d = animate ? 1 : 0;
+        if (n >= 1 && !(animate && n === 1)) {
+          tl.set(pastDots, { x: 0, opacity: 0.35 });
+        } else if (n >= 1) {
+          tl.fromTo(pastDots, { x: 0, opacity: 1 }, { x: 330, opacity: 0, duration: d * 0.9, stagger: d * 0.02, ease: "power2.in" });
+          tl.to(model, { attr: { fill: "rgba(139,92,246,0.45)" }, duration: d * 0.3, yoyo: true, repeat: animate ? 1 : 0 });
+          tl.set(pastDots, { x: 0, opacity: 0.35 });
+        } else {
+          tl.set(pastDots, { x: 0, opacity: 1 });
+        }
+        apps.forEach((a, i) => tl.to(a.bar, { attr: { width: n >= 2 ? a.score : 0 }, duration: d * 0.6, ease: "power2.out" }, n >= 2 ? (animate ? "<0.08" : 0) : 0));
+        if (!animate) tl.progress(1);
+      }
+      show(0, false);
+      Deck.scene("#howbias", {
+        enter: () => show(Deck.step, false),
+        step: (s, n, e, d) => show(n, d.dir > 0),
+        unstep: (s, n) => show(n - 1, false),
+        leave: () => tl?.progress(1),
+      });
+    </script>
+  </body>
+</html>

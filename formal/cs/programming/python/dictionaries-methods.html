@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dictionary Methods</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Memory view: variables drawn as boxes that move when the code changes them ---------- */
+      .mv {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        min-width: min(100%, 22rem);
+        padding: 1.1rem 1.2rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-family: var(--font-mono);
+        font-variant-ligatures: none;
+      }
+
+      .mv-var {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+
+      .mv-name {
+        min-width: 4.5rem;
+        text-align: right;
+        color: var(--violet-soft);
+      }
+
+      .mv-eq {
+        color: var(--faint);
+      }
+
+      .mv-items {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+        padding-bottom: 0.2rem;
+      }
+
+      .mv-items::before,
+      .mv-items::after {
+        color: var(--faint);
+        font-size: 1.3rem;
+      }
+
+      .mv-items.list::before {
+        content: "[";
+      }
+
+      .mv-items.list::after {
+        content: "]";
+      }
+
+      .mv-items.tuple::before {
+        content: "(";
+      }
+
+      .mv-items.tuple::after {
+        content: ")";
+      }
+
+      .mv-items.dict::before,
+      .mv-items.set::before {
+        content: "{";
+      }
+
+      .mv-items.dict::after,
+      .mv-items.set::after {
+        content: "}";
+      }
+
+      .mv-items.val::before,
+      .mv-items.val::after {
+        content: none;
+      }
+
+      .mv-cell {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.65rem;
+        border-radius: 10px;
+        border: 1px solid rgba(167, 139, 250, 0.45);
+        background: rgba(139, 92, 246, 0.13);
+        white-space: nowrap;
+        transition:
+          border-color 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1rem;
+      }
+
+      .mv-items.set .mv-cell {
+        border-radius: 999px;
+        border-color: rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .mv-items.tuple .mv-cell {
+        border-style: dashed;
+      }
+
+      .mv-cell .k {
+        color: #a5f3fc;
+      }
+
+      .mv-cell .k::after {
+        content: ":";
+        color: var(--faint);
+      }
+
+      .mv-cell small {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1.15rem;
+        font-size: 0.68rem;
+        text-align: center;
+        color: var(--faint);
+      }
+
+      .mv-cell small.nx {
+        bottom: -2.1rem;
+        color: #c27a92;
+      }
+
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2rem;
+      }
+
+      .mv-cell.hl {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.24);
+        box-shadow: 0 0 18px -4px rgba(34, 211, 238, 0.8);
+      }
+
+      .mv-cell.ghost {
+        position: absolute;
+        margin: 0;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .mv-empty {
+        color: var(--faint);
+        font-size: 0.85rem;
+      }
+
+      .mv-note {
+        min-height: 1.4em;
+        margin: 0;
+        font-family: var(--font);
+        font-size: 0.95rem;
+        color: var(--cyan);
+        text-align: center;
+      }
+
+      .duo {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: center;
+        width: min(100%, 72rem);
+      }
+
+      .duo pre {
+        width: auto;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: min(100%, 60rem);
+      }
+
+      .stack pre {
+        width: auto;
+        max-width: 100%;
+      }
+
+      @media (max-width: 760px) {
+        .duo {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.8rem;
+        }
+
+        .mv {
+          padding: 0.7rem;
+          gap: 0.6rem;
+          font-size: 0.8rem;
+        }
+
+        .mv-name {
+          min-width: 0;
+        }
+
+        .mv-cell {
+          padding: 0.2rem 0.45rem;
+        }
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+      }
+
+      /* ---------- Shallow copy: two dicts, one shared list ---------- */
+      .refs {
+        width: min(100%, 44rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      .refs text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 20px;
+        dominant-baseline: central;
+        font-variant-ligatures: none;
+      }
+
+      .refs .nm {
+        fill: var(--violet-soft);
+        text-anchor: end;
+      }
+
+      .refs rect.obj {
+        fill: rgba(139, 92, 246, 0.13);
+        stroke: rgba(167, 139, 250, 0.6);
+        stroke-width: 2;
+      }
+
+      .refs rect.cell {
+        fill: rgba(34, 211, 238, 0.1);
+        stroke: rgba(34, 211, 238, 0.6);
+        stroke-width: 2;
+      }
+
+      .refs .arrow {
+        fill: none;
+        stroke: rgba(167, 139, 250, 0.8);
+        stroke-width: 2.5;
+        marker-end: url(#refhead);
+      }
+
+      .refs .arrow.shared {
+        stroke: var(--pink);
+      }
+
+      .refs .dot {
+        fill: var(--pink);
+      }
+
+      .refs .lbl {
+        fill: var(--muted);
+        font-family: var(--font);
+        font-size: 14px;
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · collections</span>
+      <h1 class="grad-each"><span>Dictionary</span> <span>Methods</span></h1>
+      <p>Update, remove, look up with defaults, copy and build dictionaries with their built-in methods.</p>
+    </section>
+
+    <!-- ================================================================ update -->
+    <section class="slide" id="update">
+      <h2>update</h2>
+      <div class="stack">
+        <pre class="steps"><code class="language-python">
+          # update multiple items
+          person = {"name": "Alice"}
+          person.update({"age": 25, "city": "NYC"})
+          # ans: {"name": "Alice", "age": 25, "city": "NYC"}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ pop -->
+    <section class="slide" id="pop">
+      <h2>pop</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # remove and return value
+          person = {"name": "Alice", "age": 25}
+          age = person.pop("age")
+          # ans: age is 25
+          # ans: person is {"name": "Alice"}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ popitem -->
+    <section class="slide" id="popitem">
+      <h2>popitem</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # remove and return last item
+          person = {"name": "Alice", "age": 25}
+          item = person.popitem()
+          # ans: item is ("age", 25)
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+      <p class="hint">"Last" means the most recently inserted pair: dictionaries remember insertion order.</p>
+    </section>
+
+    <!-- ================================================================ setdefault -->
+    <section class="slide" id="setdefault">
+      <h2>setdefault</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # get or set default
+          person = {"name": "Alice"}
+          age = person.setdefault("age", 0)
+          # ans: age is 0
+          # ans: person is {"name": "Alice", "age": 0}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ clear -->
+    <section class="slide" id="clear">
+      <h2>clear</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # remove all items
+          person = {"name": "Alice", "age": 25}
+          person.clear()
+          # ans: {}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ copy -->
+    <section class="slide" id="copy">
+      <h2>copy</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # shallow copy
+          person = {"name": "Alice"}
+          person_copy = person.copy()
+          # ans: person_copy is {"name": "Alice"}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+      <p class="hint">A new dictionary: adding keys to one does not affect the other. (Exercise 7 shows the catch.)</p>
+    </section>
+
+    <!-- ================================================================ fromkeys -->
+    <section class="slide" id="fromkeys">
+      <h2>fromkeys</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # create dict from keys
+          keys = ["a", "b", "c"]
+          d = dict.fromkeys(keys, 0)
+          # ans: {"a": 0, "b": 0, "c": 0}
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the result, then reveal it.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        # update behavior?
+        d = {"a": 1}
+        d.update({"b": 2, "a": 10})
+        # ans: {"a": 10, "b": 2}
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # pop with default?
+        d = {"a": 1}
+        d.pop("b", 0)
+        # ans: 0
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        # pop without default?
+        d = {"a": 1}
+        d.pop("b")
+        # ans: KeyError
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # setdefault existing key?
+        d = {"a": 1}
+        d.setdefault("a", 10)
+        # ans: 1 (doesn't change existing)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        # popitem on empty?
+        d = {}
+        d.popitem()
+        # ans: KeyError
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        # fromkeys default?
+        keys = ["a", "b"]
+        d = dict.fromkeys(keys)
+        # ans: {"a": None, "b": None}
+      </code></pre>
+    </section>
+
+    <section class="slide" id="ex7">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # copy is shallow?
+        d = {"a": [1, 2]}
+        d2 = d.copy()
+        d2["a"].append(3)
+        # ans: d is {"a": [1, 2, 3]}
+      </code></pre>
+      <svg class="refs" viewBox="0 0 700 270" aria-label="d and d2 are two different dictionaries, but both of their 'a' values point to the same list, so appending through d2 changes what d sees">
+        <defs>
+          <marker id="refhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="rgba(240,171,252,0.9)" />
+          </marker>
+        </defs>
+        <g class="g-d">
+          <text class="nm" x="60" y="60">d</text>
+          <path class="arrow" d="M70 60 L128 60" />
+          <rect class="obj" x="130" y="35" width="150" height="50" rx="10" />
+          <text x="148" y="60">{'a': </text>
+          <circle class="dot" cx="240" cy="60" r="6" />
+          <text x="256" y="60">}</text>
+        </g>
+        <g class="g-list">
+          <path class="arrow shared a1" d="M246 60 C 330 60, 360 135, 418 135" />
+          <rect class="obj" x="420" y="105" width="250" height="60" rx="10" />
+          <rect class="cell" x="436" y="115" width="60" height="40" rx="6" />
+          <text x="466" y="135" text-anchor="middle">1</text>
+          <rect class="cell" x="510" y="115" width="60" height="40" rx="6" />
+          <text x="540" y="135" text-anchor="middle">2</text>
+          <g class="c3">
+            <rect class="cell" x="584" y="115" width="60" height="40" rx="6" />
+            <text x="614" y="135" text-anchor="middle">3</text>
+          </g>
+          <text class="lbl" x="545" y="190" text-anchor="middle">one list object</text>
+        </g>
+        <g class="g-d2">
+          <text class="nm" x="60" y="210">d2</text>
+          <path class="arrow" d="M70 210 L128 210" />
+          <rect class="obj" x="130" y="185" width="150" height="50" rx="10" />
+          <text x="148" y="210">{'a': </text>
+          <circle class="dot" cx="240" cy="210" r="6" />
+          <text x="256" y="210">}</text>
+          <path class="arrow shared a2" d="M246 210 C 330 210, 360 135, 418 135" />
+          <text class="lbl" x="205" y="258" text-anchor="middle">a new dict, same value</text>
+        </g>
+      </svg>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre><code class="language-python">
+        # clear return?
+        d = {"a": 1}
+        result = d.clear()
+        # ans: result is None
+        # ans: d is {}
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # update from pairs?
+        d = {"a": 1}
+        d.update([("b", 2), ("c", 3)])
+        # ans: {"a": 1, "b": 2, "c": 3}
+      </code></pre>
+    </section>
+
+    <section class="slide" id="ex10">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # multiple setdefault?
+        d = {}
+        d.setdefault("a", []).append(1)
+        d.setdefault("a", []).append(2)
+        # ans: {"a": [1, 2]}
+      </code></pre>
+      <p class="hint step">The first call stores a new empty list and returns it; the second finds that same list and returns it. A handy way to group values.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3><code>update</code></h3><p>Adds or overwrites many pairs, from a dict or a list of pairs.</p></div>
+        <div class="card step"><h3><code>pop</code> / <code>popitem</code></h3><p>Remove and return; a missing key (or an empty dict) raises <code>KeyError</code> unless <code>pop</code> has a default.</p></div>
+        <div class="card step"><h3><code>setdefault</code></h3><p>Returns the value if the key exists, otherwise stores and returns the default.</p></div>
+        <div class="card step"><h3><code>clear</code> / <code>copy</code> / <code>fromkeys</code></h3><p><code>clear</code> returns <code>None</code>; <code>copy</code> is shallow; <code>fromkeys</code> defaults every value to <code>None</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ memory view
+      // memview(slide, ops, opts) draws variables as boxes in the slide's .mv and
+      // replays ops as the lines of its <pre class="steps"> are revealed:
+      // ops[n](S) runs once line n is showing. Boxes keep their identity, so
+      // inserting, removing and sorting animate (FLIP).
+      // S.list(name, ["'a'", ...]) / S.tuple / S.set / S.dict(name, [["'k'", "v"], ...]) / S.val(name, "v")
+      // S.items(name) the mutable item array; S.item(v, k) a new item; S.del(name)
+      // S.hl(name, i or key, ...) highlight; S.note("text") caption under the boxes
+      function memview(sel, ops, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        const box = slide.querySelector(".mv");
+        box.classList.toggle("neg", !!opts.neg);
+        const pre = slide.querySelector("pre.steps");
+        const lines = pre ? [...pre.querySelectorAll(".line")] : [];
+        const escH = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        function compute(n) {
+          let uid = 0;
+          const vars = new Map();
+          const S = {
+            hlIds: new Set(),
+            text: "",
+            item: (v, k) => ({ id: "c" + uid++, v: String(v), k }),
+            make(t, name, vals) {
+              vars.set(name, { t, items: vals.map((v) => (t === "dict" ? S.item(v[1], v[0]) : S.item(v))) });
+              return vars.get(name).items;
+            },
+            list: (name, vals) => S.make("list", name, vals),
+            tuple: (name, vals) => S.make("tuple", name, vals),
+            set: (name, vals) => S.make("set", name, vals),
+            dict: (name, pairs) => S.make("dict", name, pairs),
+            val: (name, v) => S.make("val", name, [v]),
+            items: (name) => vars.get(name).items,
+            del: (name) => vars.delete(name),
+            has: (name) => vars.has(name),
+            hl(name, ...which) {
+              const its = vars.get(name).items;
+              for (const w of which) {
+                const it = typeof w === "number" ? its[w < 0 ? its.length + w : w] : its.find((x) => x.k === w);
+                if (it) S.hlIds.add(it.id);
+              }
+            },
+            note: (t) => (S.text = t),
+          };
+          for (let i = 0; i <= n; i++) {
+            if (!ops[i]) continue;
+            // highlights and notes describe only the newest line
+            S.hlIds = new Set();
+            S.text = "";
+            ops[i](S);
+          }
+          return { vars, hl: S.hlIds, note: S.text };
+        }
+
+        function render(n, anim) {
+          const st = compute(n);
+          const oldRects = new Map();
+          const oldNodes = new Map();
+          const oldVals = new Map();
+          box.querySelectorAll(".ghost").forEach((g) => g.remove());
+          box.querySelectorAll("[data-id]").forEach((e) => {
+            oldRects.set(e.dataset.id, e.getBoundingClientRect());
+            oldNodes.set(e.dataset.id, e);
+            oldVals.set(e.dataset.id, e.querySelector(".v")?.textContent);
+          });
+          let html = "";
+          for (const [name, { t, items }] of st.vars) {
+            const cells = items
+              .map((it, i) => {
+                const hl = st.hl.has(it.id) ? " hl" : "";
+                if (t === "dict") return `<div class="mv-cell kv${hl}" data-id="${it.id}"><span class="k">${escH(it.k)}</span><span class="v">${escH(it.v)}</span></div>`;
+                const ix = t === "list" || t === "tuple" ? `<small class="ix">${i}</small>` + (opts.neg ? `<small class="nx">${i - items.length}</small>` : "") : "";
+                return `<div class="mv-cell${hl}" data-id="${it.id}"><span class="v">${escH(it.v)}</span>${ix}</div>`;
+              })
+              .join("");
+            html += `<div class="mv-var"><span class="mv-name">${escH(name)}</span><span class="mv-eq">=</span><div class="mv-items ${t}">${cells || (t === "set" ? "" : "")}</div></div>`;
+          }
+          if (!st.vars.size) html = `<span class="mv-empty">${opts.empty || "no variables yet"}</span>`;
+          html += `<p class="mv-note">${escH(st.note)}</p>`;
+          box.innerHTML = html;
+          if (!anim) return;
+          const base = box.getBoundingClientRect();
+          box.querySelectorAll("[data-id]").forEach((e) => {
+            const r0 = oldRects.get(e.dataset.id);
+            if (!r0) return gsap.from(e, { scale: 0.3, opacity: 0, duration: 0.45, ease: "back.out(2)" });
+            const r1 = e.getBoundingClientRect();
+            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: r0.left - r1.left, y: r0.top - r1.top, duration: 0.6, ease: "power2.inOut" });
+            if (oldVals.get(e.dataset.id) !== e.querySelector(".v")?.textContent) gsap.fromTo(e, { backgroundColor: "rgba(236,72,153,0.5)" }, { backgroundColor: "rgba(139,92,246,0.13)", duration: 0.9, clearProps: "backgroundColor" });
+          });
+          for (const [id, node] of oldNodes) {
+            if (box.querySelector(`[data-id="${id}"]`)) continue;
+            const r = oldRects.get(id);
+            node.classList.add("ghost");
+            node.classList.remove("hl");
+            Object.assign(node.style, { left: r.left - base.left + "px", top: r.top - base.top + "px", width: r.width + "px" });
+            box.appendChild(node);
+            gsap.to(node, { opacity: 0, y: 28, scale: 0.7, duration: 0.55, ease: "power1.in", onComplete: () => node.remove() });
+          }
+          const note = box.querySelector(".mv-note");
+          if (st.note) gsap.from(note, { opacity: 0, y: 6, duration: 0.3 });
+        }
+
+        const shown = () => {
+          let n = 0;
+          lines.forEach((l, i) => l.classList.contains("shown") && (n = i + 1));
+          return n;
+        };
+        const M = { render, refresh: (anim) => render(shown(), anim) };
+        Deck.scene(slide, {
+          enter: () => render(0, false),
+          step: (s, n, els, d) => queueMicrotask(() => M.refresh(d?.dir > 0 && Deck.step === n)),
+          unstep: () => queueMicrotask(() => M.refresh(false)),
+        });
+        return M;
+      }
+
+      const ALICE = [["'name'", "'Alice'"], ["'age'", "25"]];
+
+      memview("#update", {
+        2: (S) => S.dict("person", [["'name'", "'Alice'"]]),
+        4: (S) => {
+          S.items("person").push(S.item("25", "'age'"), S.item("'NYC'", "'city'"));
+          S.hl("person", "'age'", "'city'");
+          S.note("both pairs are added in one call");
+        },
+      });
+      memview("#pop", {
+        2: (S) => S.dict("person", ALICE),
+        4: (S) => (S.items("person").pop(), S.val("age", "25"), S.note("the value comes out; the key is gone")),
+        5: (S) => S.hl("person", "'name'"),
+      });
+      memview("#popitem", {
+        2: (S) => S.dict("person", ALICE),
+        4: (S) => (S.items("person").pop(), S.tuple("item", ["'age'", "25"]), S.note("the last pair comes out as a tuple")),
+      });
+      memview("#setdefault", {
+        2: (S) => S.dict("person", [["'name'", "'Alice'"]]),
+        4: (S) => (S.items("person").push(S.item("0", "'age'")), S.val("age", "0"), S.note("'age' was missing: stored 0 and returned it")),
+        5: (S) => S.hl("person", "'age'"),
+      });
+      memview("#clear", {
+        2: (S) => S.dict("person", ALICE),
+        4: (S) => (S.items("person").length = 0),
+      });
+      memview("#copy", {
+        2: (S) => S.dict("person", [["'name'", "'Alice'"]]),
+        4: (S) => (S.dict("person_copy", [["'name'", "'Alice'"]]), S.note("a second, separate dictionary")),
+      });
+      memview("#fromkeys", {
+        2: (S) => S.list("keys", ["'a'", "'b'", "'c'"]),
+        4: (S) => (S.dict("d", [["'a'", "0"], ["'b'", "0"], ["'c'", "0"]]), S.note("each key gets the value 0")),
+      });
+
+      // ------------------------------------------------------------ shallow copy diagram
+      {
+        const slide = document.querySelector("#ex7");
+        const svg = slide.querySelector(".refs");
+        const ans = slide.querySelector(".line.answer");
+        const parts = ["g-d", "g-list", "g-d2", "c3"].map((c) => svg.querySelector("." + c));
+        let tl;
+        const draw = (path) => {
+          const len = path.getTotalLength();
+          return [path, { strokeDasharray: len, strokeDashoffset: len }, { strokeDashoffset: 0, duration: 0.6, ease: "power1.inOut" }];
+        };
+        function show(on, animate) {
+          tl?.kill();
+          gsap.set(svg.querySelectorAll("*"), { clearProps: "all" });
+          gsap.set(svg, { opacity: on ? 1 : 0.0 });
+          if (!on || !animate) return;
+          tl = gsap.timeline();
+          tl.from(parts[0], { opacity: 0, x: -20, duration: 0.4 });
+          tl.fromTo(...draw(svg.querySelector(".a1")));
+          tl.from(parts[1].querySelectorAll("rect, text"), { opacity: 0, duration: 0.4 }, "<");
+          tl.from(parts[2], { opacity: 0, x: -20, duration: 0.4 }, "+=0.3");
+          tl.fromTo(...draw(svg.querySelector(".a2")));
+          tl.from(parts[3], { opacity: 0, scale: 0.3, transformOrigin: "center", duration: 0.45, ease: "back.out(2)" }, "+=0.4");
+          tl.to(svg.querySelectorAll(".shared"), { strokeWidth: 5, duration: 0.25, yoyo: true, repeat: 3 });
+        }
+        Deck.scene(slide, {
+          enter: () => show(false),
+          leave: () => tl?.kill(),
+          step: (s, n, els, d) => els.includes(ans) && show(true, d?.dir > 0),
+          unstep: (s, n, els) => els.includes(ans) && show(false),
+        });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

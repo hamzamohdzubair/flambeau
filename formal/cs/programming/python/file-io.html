@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>File I/O</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- File view: the file's characters, the read/write cursor and the variables ---------- */
+      pre code,
+      .fv {
+        font-variant-ligatures: none;
+      }
+
+      .fv {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        min-width: min(100%, 20rem);
+        padding: 1rem 1.1rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-family: var(--font-mono);
+      }
+
+      .fv-head {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+      }
+
+      .fv-head .fname {
+        color: var(--text);
+      }
+
+      .fv-badge {
+        padding: 0.05rem 0.55rem;
+        border-radius: 999px;
+        font: 500 0.75rem var(--font);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+
+      .fv-badge.open {
+        border-color: rgba(134, 239, 172, 0.6);
+        color: var(--green);
+        background: rgba(134, 239, 172, 0.1);
+      }
+
+      .fv-badge.closed {
+        border-color: rgba(248, 113, 113, 0.5);
+        color: var(--red);
+      }
+
+      .fv-badge.mode {
+        border-color: rgba(34, 211, 238, 0.5);
+        color: #a5f3fc;
+      }
+
+      .fv-badge.pos {
+        border-color: rgba(240, 171, 252, 0.5);
+        color: #f0abfc;
+      }
+
+      .fv-text {
+        position: relative;
+        min-height: 4.6em;
+        padding: 0.6rem 0.8rem;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.35);
+        font-size: 1rem;
+        line-height: 1.55;
+        white-space: pre;
+        overflow-x: auto;
+      }
+
+      .fv-text.missing {
+        color: var(--faint);
+        font-family: var(--font);
+        font-size: 0.9rem;
+        white-space: normal;
+      }
+
+      .fv-text .ch {
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      .fv-text .nl {
+        color: var(--faint);
+        font-size: 0.8em;
+      }
+
+      .fv-text .ch.hl {
+        background: rgba(34, 211, 238, 0.28);
+        color: #ecfeff;
+      }
+
+      .fv-text .ch.new {
+        background: rgba(236, 72, 153, 0.28);
+      }
+
+      .fv-cursor {
+        display: inline-block;
+        width: 0;
+        height: 1.25em;
+        margin: 0 -1px;
+        border-left: 2px solid #f0abfc;
+        vertical-align: -0.25em;
+        box-shadow: 0 0 8px #ec4899;
+        animation: fv-blink 1s steps(1) infinite;
+      }
+
+      @keyframes fv-blink {
+        50% {
+          opacity: 0.25;
+        }
+      }
+
+      .fv-vars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+      }
+
+      .fv-vars div {
+        display: flex;
+        gap: 0.6rem;
+        align-items: baseline;
+      }
+
+      .fv-vars b {
+        min-width: 3.5rem;
+        font-weight: 500;
+        text-align: right;
+        color: var(--violet-soft);
+      }
+
+      .fv-vars span {
+        padding: 0.05rem 0.5rem;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        background: rgba(139, 92, 246, 0.12);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .fv-out {
+        padding: 0.4rem 0.7rem;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.35);
+        color: var(--green);
+        font-size: 0.88rem;
+        white-space: pre-wrap;
+      }
+
+      .fv-out::before {
+        content: "output";
+        display: block;
+        font: 600 0.65rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .fv-note {
+        min-height: 1.3em;
+        margin: 0;
+        font-family: var(--font);
+        font-size: 0.92rem;
+        color: var(--cyan);
+      }
+
+      .fv-note.err {
+        color: var(--red);
+      }
+
+      .fduo {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: center;
+        width: min(100%, 70rem);
+      }
+
+      .fduo pre {
+        width: auto;
+      }
+
+      @media (max-width: 760px) {
+        .fduo {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.8rem;
+        }
+
+        .fv {
+          padding: 0.7rem;
+          gap: 0.5rem;
+        }
+
+        .fv-text {
+          font-size: 0.8rem;
+          min-height: 3.5em;
+        }
+
+        .fv-vars {
+          font-size: 0.78rem;
+        }
+      }
+
+      .slide pre {
+        min-width: min(100%, 24rem);
+        font-size: 0.92rem;
+      }
+
+      .slide > pre {
+        width: auto;
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- File modes table: the row for the newest line lights up ---------- */
+      .modes {
+        font-size: 0.9rem;
+      }
+
+      .modes td,
+      .modes th {
+        padding: 0.35rem 0.7rem;
+        text-align: center;
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      .modes td:first-child {
+        font-family: var(--font-mono);
+        color: #f0abfc;
+      }
+
+      .modes .yes {
+        color: var(--green);
+      }
+
+      .modes .no {
+        color: var(--faint);
+      }
+
+      .modes .bad {
+        color: var(--red);
+      }
+
+      .modes tr.on td {
+        background: rgba(34, 211, 238, 0.2);
+      }
+
+      @media (max-width: 760px) {
+        .modes {
+          font-size: 0.7rem;
+        }
+
+        .modes td,
+        .modes th {
+          padding: 0.2rem 0.3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · files</span>
+      <h1 class="grad-each"><span>File</span> <span>I/O</span></h1>
+      <p>Reading and writing files, file modes and positions, binary data, paths and folders, CSV, JSON and temporary files.</p>
+    </section>
+
+    <!-- ================================================================ reading -->
+    <section class="slide" id="read1">
+      <h2>Reading files: basics</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # read entire file
+          file = open("data.txt", "r")
+          content = file.read()
+          file.close()
+          # read with context manager (recommended)
+          with open("data.txt", "r") as file:
+              content = file.read()
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="read2">
+      <h2>Reading files: line by line</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # read line by line
+          with open("data.txt", "r") as file:
+              for line in file:
+                  print(line.strip())
+          # read all lines into list
+          with open("data.txt", "r") as file:
+              lines = file.readlines()
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="methods1">
+      <h2>Reading methods: read and readline</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # read() - read entire file or n characters
+          with open("data.txt", "r") as file:
+              content = file.read()        # all content
+              content = file.read(10)      # first 10 characters
+          # readline() - read one line
+          with open("data.txt", "r") as file:
+              line1 = file.readline()
+              line2 = file.readline()
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+      <p class="hint step">Watch the cursor: right after <code>read()</code> it is at the end, so the <code>read(10)</code> on the next line returns <code>''</code>. On a freshly opened file, <code>read(10)</code> gives the first 10 characters.</p>
+    </section>
+
+    <section class="slide" id="methods2">
+      <h2>Reading methods: readlines and iteration</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # readlines() - read all lines
+          with open("data.txt", "r") as file:
+              lines = file.readlines()     # list of lines
+          # iterate (memory efficient)
+          with open("data.txt", "r") as file:
+              for line in file:
+                  print(line.strip())
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ writing -->
+    <section class="slide" id="write1">
+      <h2>Writing files</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # write (overwrites file)
+          with open("output.txt", "w") as file:
+              file.write("Hello, World!\n")
+              file.write("Second line\n")
+          # write multiple lines
+          lines = ["Line 1\n", "Line 2\n", "Line 3\n"]
+          with open("output.txt", "w") as file:
+              file.writelines(lines)
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="write2">
+      <h2>Appending, and the missing newline</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # append (adds to existing file)
+          with open("output.txt", "a") as file:
+              file.write("Appended line\n")
+          # write doesn't add newline automatically
+          with open("output.txt", "w") as file:
+              file.write("No newline here")
+              file.write("This is on the same line")
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ modes -->
+    <section class="slide" id="modes">
+      <h2>File modes</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # read modes
+          open("file.txt", "r")      # read (default)
+          open("file.txt", "rb")     # read binary
+          # write modes
+          open("file.txt", "w")      # write (overwrites)
+          open("file.txt", "wb")     # write binary
+          # append modes
+          open("file.txt", "a")      # append
+          open("file.txt", "ab")     # append binary
+          # read and write
+          open("file.txt", "r+")     # read and write
+          open("file.txt", "w+")     # write and read (overwrites)
+          open("file.txt", "a+")     # append and read
+          # exclusive creation
+          open("file.txt", "x")      # create (fails if exists)
+        </code></pre>
+        <table class="modes">
+          <tr><th>mode</th><th>read</th><th>write</th><th>existing file</th><th>missing file</th></tr>
+          <tr data-m="r"><td>r</td><td class="yes">yes</td><td class="no">no</td><td>kept</td><td class="bad">error</td></tr>
+          <tr data-m="rb"><td>rb</td><td class="yes">bytes</td><td class="no">no</td><td>kept</td><td class="bad">error</td></tr>
+          <tr data-m="w"><td>w</td><td class="no">no</td><td class="yes">yes</td><td class="bad">emptied</td><td>created</td></tr>
+          <tr data-m="wb"><td>wb</td><td class="no">no</td><td class="yes">bytes</td><td class="bad">emptied</td><td>created</td></tr>
+          <tr data-m="a"><td>a</td><td class="no">no</td><td class="yes">at end</td><td>kept</td><td>created</td></tr>
+          <tr data-m="ab"><td>ab</td><td class="no">no</td><td class="yes">bytes, at end</td><td>kept</td><td>created</td></tr>
+          <tr data-m="r+"><td>r+</td><td class="yes">yes</td><td class="yes">yes</td><td>kept</td><td class="bad">error</td></tr>
+          <tr data-m="w+"><td>w+</td><td class="yes">yes</td><td class="yes">yes</td><td class="bad">emptied</td><td>created</td></tr>
+          <tr data-m="a+"><td>a+</td><td class="yes">yes</td><td class="yes">at end</td><td>kept</td><td>created</td></tr>
+          <tr data-m="x"><td>x</td><td class="no">no</td><td class="yes">yes</td><td class="bad">error</td><td>created</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================================================================ position -->
+    <section class="slide" id="pos">
+      <h2>File position</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          with open("data.txt", "r") as file:
+              # get current position
+              pos = file.tell()
+              # read some data
+              data = file.read(10)
+              # get new position
+              pos = file.tell()
+              # move to beginning
+              file.seek(0)
+              # move to specific position
+              file.seek(10)
+              # move relative to current position
+              file.seek(5, 1)
+              # move relative to end
+              file.seek(-10, 2)
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+      <p class="hint step">The last two calls need binary mode (<code>"rb"</code>): in text mode Python only allows <code>seek(0, 1)</code> and <code>seek(0, 2)</code> and raises <code>io.UnsupportedOperation</code> otherwise. The picture shows what they do in binary mode.</p>
+    </section>
+
+    <!-- ================================================================ binary -->
+    <section class="slide" id="bin">
+      <h2>Binary files</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # write binary
+          data = bytes([65, 66, 67, 68])  # ABCD
+          with open("data.bin", "wb") as file:
+              file.write(data)
+          # read binary
+          with open("data.bin", "rb") as file:
+              data = file.read()
+              print(data)                  # b'ABCD'
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Copying and chunking binary files</h2>
+      <pre class="steps"><code class="language-python">
+        # copy binary file
+        with open("image.png", "rb") as src:
+            with open("copy.png", "wb") as dst:
+                dst.write(src.read())
+        # read binary in chunks
+        with open("large.bin", "rb") as file:
+            while True:
+                chunk = file.read(1024)   # 1KB chunks
+                if not chunk:
+                    break
+                process(chunk)
+      </code></pre>
+      <p class="hint step">Chunks keep memory use small: only 1 KB is held at a time, and an empty chunk means the end of the file.</p>
+    </section>
+
+    <!-- ================================================================ os.path -->
+    <section class="slide">
+      <h2>Working with paths: checks and info</h2>
+      <pre class="steps"><code class="language-python">
+        import os
+        # check if file exists
+        os.path.exists("file.txt")
+        os.path.isfile("file.txt")
+        os.path.isdir("folder")
+        # get file info
+        os.path.getsize("file.txt")        # size in bytes
+        os.path.getmtime("file.txt")       # modification time
+        os.path.getctime("file.txt")       # creation time
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Working with paths: building and splitting</h2>
+      <pre class="steps"><code class="language-python">
+        # path operations
+        os.path.join("folder", "file.txt")
+        os.path.dirname("/path/to/file.txt")
+        os.path.basename("/path/to/file.txt")
+        os.path.splitext("file.txt")       # ('file', '.txt')
+        # absolute path
+        os.path.abspath("file.txt")
+        os.path.realpath("symlink.txt")
+      </code></pre>
+      <p class="hint step">More, with pictures, in the <a href="file-paths.html">File Paths</a> deck.</p>
+    </section>
+
+    <!-- ================================================================ pathlib -->
+    <section class="slide">
+      <h2>pathlib: creating and checking</h2>
+      <pre class="steps"><code class="language-python">
+        from pathlib import Path
+        # create path object
+        path = Path("data.txt")
+        path = Path("/home/user/data.txt")
+        # check existence
+        path.exists()
+        path.is_file()
+        path.is_dir()
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>pathlib: reading, writing and parts</h2>
+      <pre class="steps"><code class="language-python">
+        # read and write
+        text = path.read_text()
+        path.write_text("Hello, World!")
+        data = path.read_bytes()
+        path.write_bytes(b"binary data")
+        # path operations
+        path.name                          # "data.txt"
+        path.stem                          # "data"
+        path.suffix                        # ".txt"
+        path.parent                        # parent directory
+        path.absolute()                    # absolute path
+      </code></pre>
+      <p class="hint step"><code>read_text</code> and <code>write_text</code> open and close the file for you.</p>
+    </section>
+
+    <!-- ================================================================ directories -->
+    <section class="slide">
+      <h2>Directory operations: list, create, remove</h2>
+      <pre class="steps"><code class="language-python">
+        import os
+        # list directory
+        files = os.listdir(".")
+        files = os.listdir("/path/to/dir")
+        # create directory
+        os.mkdir("new_folder")
+        os.makedirs("path/to/folder")      # create intermediate dirs
+        # remove directory
+        os.rmdir("folder")                 # only if empty
+        import shutil
+        shutil.rmtree("folder")            # remove with contents
+      </code></pre>
+      <p class="hint step"><code>shutil.rmtree</code> deletes everything inside without asking. Double-check the path.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Directory operations: move and delete files</h2>
+      <pre class="steps"><code class="language-python">
+        # rename/move
+        os.rename("old.txt", "new.txt")
+        shutil.move("file.txt", "folder/")
+        # delete file
+        os.remove("file.txt")
+        os.unlink("file.txt")              # same as remove
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ csv -->
+    <section class="slide">
+      <h2>Working with CSV: reading</h2>
+      <pre class="steps"><code class="language-python">
+        import csv
+        # read CSV
+        with open("data.csv", "r") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                print(row)                 # row is a list
+        # read CSV with headers
+        with open("data.csv", "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                print(row["name"], row["age"])
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Working with CSV: writing</h2>
+      <pre class="steps"><code class="language-python">
+        # write CSV
+        data = [["Name", "Age"], ["Alice", 25], ["Bob", 30]]
+        with open("output.csv", "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(data)
+        # write CSV with DictWriter
+        with open("output.csv", "w", newline="") as file:
+            writer = csv.DictWriter(file, fieldnames=["name", "age"])
+            writer.writeheader()
+            writer.writerow({"name": "Alice", "age": 25})
+      </code></pre>
+      <p class="hint step"><code>newline=""</code> stops the csv module's own line endings from being doubled on Windows. More in <a href="csv-json.html">CSV and JSON</a>.</p>
+    </section>
+
+    <!-- ================================================================ json -->
+    <section class="slide">
+      <h2>Working with JSON</h2>
+      <pre class="steps"><code class="language-python">
+        import json
+        # write JSON
+        data = {"name": "Alice", "age": 25, "city": "NYC"}
+        with open("data.json", "w") as file:
+            json.dump(data, file)
+            # or with indentation
+            json.dump(data, file, indent=2)
+        # read JSON
+        with open("data.json", "r") as file:
+            data = json.load(file)
+        # convert to/from JSON string
+        json_string = json.dumps(data, indent=2)
+        data = json.loads(json_string)
+      </code></pre>
+      <p class="hint step"><code>dump</code>/<code>load</code> work with files; <code>dumps</code>/<code>loads</code> (s for string) work with strings. Use one <code>dump</code> per file: calling it twice, as above, writes two JSON documents back to back.</p>
+    </section>
+
+    <section class="slide">
+      <h2>JSON: custom encoding</h2>
+      <pre class="steps"><code class="language-python">
+        # custom encoding
+        import datetime
+        class DateEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, datetime.date):
+                    return obj.isoformat()
+                return super().default(obj)
+      </code></pre>
+      <p class="hint step">Use it with <code>json.dumps(data, cls=DateEncoder)</code>: dates become strings like <code>"2024-05-01"</code>.</p>
+    </section>
+
+    <!-- ================================================================ temp -->
+    <section class="slide">
+      <h2>Temporary files</h2>
+      <pre class="steps"><code class="language-python">
+        import tempfile
+        # temporary file
+        with tempfile.TemporaryFile(mode="w+") as temp:
+            temp.write("temporary data")
+            temp.seek(0)
+            data = temp.read()
+        # file is deleted after with block
+        # named temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            temp.write(b"data")
+            temp_path = temp.name
+      </code></pre>
+      <p class="hint step"><code>seek(0)</code> rewinds the cursor after writing, so <code>read()</code> sees the data.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Temporary directories</h2>
+      <pre class="steps"><code class="language-python">
+        # temporary directory
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = os.path.join(temp_dir, "file.txt")
+            # work with files in temp_dir
+        # directory is deleted after with block
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3>Always <code>with</code></h3><p>The file is closed for you, even after an error.</p></div>
+        <div class="card step"><h3>Choose the mode</h3><p><code>r</code> reads, <code>w</code> empties then writes, <code>a</code> adds at the end, <code>x</code> refuses to overwrite; add <code>b</code> for bytes.</p></div>
+        <div class="card step"><h3>One cursor</h3><p>Reads and writes move it; <code>tell()</code> reports it and <code>seek()</code> moves it.</p></div>
+        <div class="card step"><h3>Right tool</h3><p><code>os.path</code>/<code>pathlib</code> for paths, <code>shutil</code> for folders, <code>csv</code> and <code>json</code> for structured data, <code>tempfile</code> for scratch files.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ file view
+      // fileview(slide, ops, { name, text, box }) draws one file in the slide's .fv (or box):
+      // its characters (↵ marks a newline), the cursor where the next read or
+      // write happens, and the variables. ops[n](F) runs once code line n is
+      // visible (ops[0] at the start), so the picture follows the code.
+      // text: null means the file does not exist yet.
+      //   F.open(mode)  F.read(k?)  F.readline()  F.readlines()  F.write(s)
+      //   F.writelines(list)  F.close()  F.seek(offset, whence)  F.tell()
+      //   F.set(name, value)  F.print(text)  F.note(text, isError)  F.r(value) Python repr
+      // Keys after the last code line are the slide's .fv-step beats, in order.
+      const pyr = (v) =>
+        Array.isArray(v) ? "[" + v.map(pyr).join(", ") + "]" : typeof v === "string" ? "'" + v.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/'/g, "\\'") + "'" : String(v);
+
+      function fileview(sel, ops, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        const box = opts.box || slide.querySelector(".fv");
+        const pre = slide.querySelector("pre");
+        const lines = pre ? [...pre.querySelectorAll(".line")] : [];
+        const extra = [...slide.querySelectorAll(".fv-step")];
+        const escF = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        function compute() {
+          const F = {
+            text: opts.text === undefined ? "" : opts.text,
+            pos: 0,
+            isOpen: false,
+            mode: "",
+            vars: new Map(),
+            hl: null,
+            fresh: null,
+            msg: "",
+            err: false,
+            r: pyr,
+            open(mode = "r") {
+              F.mode = mode;
+              F.pos = 0;
+              if (mode[0] === "w") F.text = "";
+              else if (mode[0] === "a") {
+                if (F.text === null) F.text = "";
+                F.pos = F.text.length;
+              } else if (mode[0] === "x") {
+                if (F.text !== null) return F.note("FileExistsError: the file already exists", true);
+                F.text = "";
+              } else if (F.text === null) return F.note("FileNotFoundError: no such file", true);
+              F.isOpen = true;
+            },
+            read(k) {
+              const s = F.text.slice(F.pos, k === undefined ? undefined : F.pos + k);
+              F.hl = [F.pos, F.pos + s.length];
+              F.pos += s.length;
+              return s;
+            },
+            readline() {
+              let e = F.text.indexOf("\n", F.pos);
+              e = e < 0 ? F.text.length : e + 1;
+              const s = F.text.slice(F.pos, e);
+              F.hl = [F.pos, e];
+              F.pos = e;
+              return s;
+            },
+            readlines() {
+              const a = F.pos;
+              const out = [];
+              while (F.pos < F.text.length) out.push(F.readline());
+              F.hl = [a, F.pos];
+              return out;
+            },
+            write(s) {
+              F.text = F.text.slice(0, F.pos) + s + F.text.slice(F.pos + s.length);
+              F.fresh = [F.pos, F.pos + s.length];
+              F.pos += s.length;
+              return s.length;
+            },
+            writelines(list) {
+              const a = F.pos;
+              list.forEach((s) => F.write(s));
+              F.fresh = [a, F.pos];
+            },
+            close() {
+              F.isOpen = false;
+            },
+            seek(off, whence = 0) {
+              F.pos = Math.max(0, Math.min(F.text.length, whence === 0 ? off : whence === 1 ? F.pos + off : F.text.length + off));
+              return F.pos;
+            },
+            tell: () => F.pos,
+            out: [],
+            print: (t) => F.out.push(t),
+            set: (name, v) => F.vars.set(name, v),
+            del: (name) => F.vars.delete(name),
+            note(t, err = false) {
+              F.msg = t;
+              F.err = err;
+            },
+          };
+          // keys past the last code line belong to the slide's .fv-step beats, in order
+          const visible = (i) => {
+            if (i === 0) return true;
+            if (i > lines.length) return extra[i - lines.length - 1]?.classList.contains("shown");
+            return !lines[i - 1].classList.contains("step") || lines[i - 1].classList.contains("shown");
+          };
+          for (let i = 0; i <= lines.length + extra.length; i++) {
+            if (!ops[i] || !visible(i)) continue;
+            F.hl = F.fresh = null;
+            F.msg = "";
+            F.err = false;
+            ops[i](F);
+          }
+          return F;
+        }
+
+        function render(anim) {
+          const old = box.querySelector(".fv-cursor")?.getBoundingClientRect();
+          const F = compute();
+          const name = opts.name || "data.txt";
+          let body;
+          if (F.text === null) body = `<div class="fv-text missing">${escF(name)} does not exist</div>`;
+          else {
+            let html = "";
+            const cls = (i) => (F.hl && i >= F.hl[0] && i < F.hl[1] ? " hl" : "") + (F.fresh && i >= F.fresh[0] && i < F.fresh[1] ? " new" : "");
+            for (let i = 0; i <= F.text.length; i++) {
+              if (F.isOpen && i === F.pos) html += `<span class="fv-cursor"></span>`;
+              if (i === F.text.length) break;
+              const c = F.text[i];
+              html += c === "\n" ? `<span class="ch nl${cls(i)}">↵</span>\n` : `<span class="ch${cls(i)}">${escF(c)}</span>`;
+            }
+            body = `<div class="fv-text">${html || " "}</div>`;
+          }
+          const badges = F.isOpen
+            ? `<span class="fv-badge open">open</span><span class="fv-badge mode">mode "${escF(F.mode)}"</span><span class="fv-badge pos">cursor ${F.pos}</span>`
+            : `<span class="fv-badge closed">closed</span>`;
+          const vars = [...F.vars].map(([k, v]) => `<div><b>${escF(k)}</b><span>${escF(v)}</span></div>`).join("");
+          box.innerHTML = `<div class="fv-head"><span class="fname">${escF(name)}</span>${badges}</div>${body}<div class="fv-vars">${vars}</div>${F.out.length ? `<div class="fv-out">${F.out.map((t) => `<div>${escF(t)}</div>`).join("")}</div>` : ""}<p class="fv-note${F.err ? " err" : ""}">${escF(F.msg)}</p>`;
+          if (!anim) return;
+          const cur = box.querySelector(".fv-cursor");
+          if (cur && old) {
+            const now = cur.getBoundingClientRect();
+            gsap.from(cur, { x: old.left - now.left, y: old.top - now.top, duration: 0.5, ease: "power2.inOut" });
+          }
+          const fresh = box.querySelectorAll(".ch.new");
+          if (fresh.length) gsap.from(fresh, { opacity: 0, y: -8, duration: 0.25, stagger: Math.min(0.04, 0.6 / fresh.length) });
+          const hl = box.querySelectorAll(".ch.hl");
+          if (hl.length) gsap.from(hl, { backgroundColor: "rgba(34,211,238,0)", duration: 0.2, stagger: Math.min(0.03, 0.6 / hl.length) });
+          if (F.msg) gsap.from(box.querySelector(".fv-note"), { opacity: 0, duration: 0.3 });
+        }
+
+        Deck.scene(slide, {
+          enter: () => render(false),
+          step: (s, n, els, d) => queueMicrotask(() => render(d?.dir > 0 && Deck.step === n)),
+          unstep: () => queueMicrotask(() => render(false)),
+        });
+        return { render };
+      }
+
+      const DATA = { name: "data.txt", text: "First line\nSecond line\nThird line\n" };
+
+      fileview(
+        "#read1",
+        {
+          2: (F) => (F.open("r"), F.set("file", "<open file>")),
+          3: (F) => F.set("content", F.r(F.read())),
+          4: (F) => (F.close(), F.set("file", "<closed file>"), F.note("closed by hand")),
+          6: (F) => (F.open("r"), F.note("a fresh open: cursor back at the start")),
+          7: (F) => (F.set("content", F.r(F.read())), F.note("closes automatically after the block")),
+        },
+        DATA
+      );
+      fileview(
+        "#read2",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => (F.set("line", F.r(F.readline())), F.print("First line")),
+          4: (F) => {
+            F.set("line", F.r(F.readline()));
+            F.print("Second line");
+            F.set("line", F.r(F.readline()));
+            F.print("Third line");
+            F.close();
+            F.note("one line per pass until the file runs out");
+          },
+          6: (F) => F.open("r"),
+          7: (F) => (F.set("lines", F.r(F.readlines())), F.close()),
+        },
+        DATA
+      );
+      fileview(
+        "#methods1",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => F.set("content", F.r(F.read())),
+          4: (F) => (F.set("content", F.r(F.read(10))), F.note("the cursor is already at the end: nothing left to read"), F.close()),
+          6: (F) => (F.del("content"), F.open("r")),
+          7: (F) => F.set("line1", F.r(F.readline())),
+          8: (F) => (F.set("line2", F.r(F.readline())), F.close()),
+        },
+        DATA
+      );
+      fileview(
+        "#methods2",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => (F.set("lines", F.r(F.readlines())), F.close()),
+          5: (F) => (F.del("lines"), F.open("r")),
+          6: (F) => (F.set("line", F.r(F.readline())), F.print("First line")),
+          7: (F) => {
+            F.readline();
+            F.print("Second line");
+            F.set("line", F.r(F.readline()));
+            F.print("Third line");
+            F.close();
+          },
+        },
+        DATA
+      );
+      fileview(
+        "#write1",
+        {
+          2: (F) => (F.open("w"), F.note('"w" empties the file first')),
+          3: (F) => F.write("Hello, World!\n"),
+          4: (F) => (F.write("Second line\n"), F.close()),
+          6: (F) => F.set("lines", F.r(["Line 1\n", "Line 2\n", "Line 3\n"])),
+          7: (F) => (F.open("w"), F.note("opened with \"w\" again: emptied again")),
+          8: (F) => (F.writelines(["Line 1\n", "Line 2\n", "Line 3\n"]), F.close()),
+        },
+        { name: "output.txt", text: "Old content\n" }
+      );
+      fileview(
+        "#write2",
+        {
+          2: (F) => (F.open("a"), F.note('"a" keeps the contents; the cursor starts at the end')),
+          3: (F) => (F.write("Appended line\n"), F.close()),
+          5: (F) => F.open("w"),
+          6: (F) => F.write("No newline here"),
+          7: (F) => (F.write("This is on the same line"), F.close(), F.note("both strings ended up on one line")),
+        },
+        { name: "output.txt", text: "Line 1\nLine 2\nLine 3\n" }
+      );
+
+      // ------------------------------------------------------------ modes table follows the code
+      {
+        const slide = document.querySelector("#modes");
+        const lines = [...slide.querySelectorAll("pre .line")];
+        const rows = [...slide.querySelectorAll(".modes tr[data-m]")];
+        const show = (anim) => {
+          let m = null;
+          lines.forEach((l) => {
+            const hit = l.textContent.match(/"([rwax]b?\+?)"\)/);
+            if (hit && l.classList.contains("shown")) m = hit[1];
+          });
+          rows.forEach((r) => r.classList.toggle("on", r.dataset.m === m));
+          const on = rows.find((r) => r.dataset.m === m);
+          if (on && anim) gsap.from(on.children, { x: -10, opacity: 0.3, duration: 0.35, stagger: 0.04 });
+        };
+        Deck.scene(slide, {
+          enter: () => show(false),
+          step: (s, n, els, d) => queueMicrotask(() => show(d?.dir > 0 && Deck.step === n)),
+          unstep: () => queueMicrotask(() => show(false)),
+        });
+      }
+
+      fileview(
+        "#pos",
+        {
+          1: (F) => F.open("r"),
+          3: (F) => (F.set("pos", String(F.tell())), F.note("tell() reports the cursor: 0 at the start")),
+          5: (F) => F.set("data", F.r(F.read(10))),
+          7: (F) => (F.set("pos", String(F.tell())), F.note("10 characters later")),
+          9: (F) => (F.seek(0), F.note("seek(0): back to the start")),
+          11: (F) => (F.seek(10), F.note("seek(10): jump to position 10")),
+          13: (F) => (F.seek(5, 1), F.note("seek(5, 1): 5 forward from here (binary mode only)")),
+          15: (F) => (F.seek(-10, 2), F.note("seek(-10, 2): 10 back from the end (binary mode only)")),
+        },
+        DATA
+      );
+      fileview(
+        "#bin",
+        {
+          2: (F) => (F.set("data", "b'ABCD'"), F.note("bytes 65, 66, 67, 68 are the codes for A, B, C, D")),
+          3: (F) => F.open("wb"),
+          4: (F) => (F.write("ABCD"), F.close()),
+          6: (F) => F.open("rb"),
+          7: (F) => (F.read(), F.set("data", "b'ABCD'")),
+          8: (F) => (F.print("b'ABCD'"), F.close()),
+        },
+        { name: "data.bin", text: null }
+      );
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

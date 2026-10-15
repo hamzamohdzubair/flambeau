@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>File Paths</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      pre code,
+      .anat,
+      .joinviz {
+        font-variant-ligatures: none;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      .chip {
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        color: var(--text);
+        border-color: rgba(167, 139, 250, 0.7);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      /* ---------- Path anatomy: brackets under the parts of a path ---------- */
+      .anat {
+        position: relative;
+        width: min(100%, 52rem);
+        padding: 1.4rem 1rem 0.5rem;
+        font-family: var(--font-mono);
+      }
+
+      .anat .path {
+        display: flex;
+        justify-content: center;
+        font-size: clamp(1.4rem, 4vw, 2.6rem);
+        color: var(--text);
+      }
+
+      .anat .path span.sep {
+        color: var(--faint);
+      }
+
+      .anat .bars {
+        position: relative;
+        height: 9.5rem;
+      }
+
+      .anat .bar {
+        position: absolute;
+        height: 0;
+        border: 2px solid currentColor;
+        border-top: none;
+        height: 0.6rem;
+        border-radius: 0 0 6px 6px;
+        transform-origin: left center;
+      }
+
+      .anat .bar small {
+        position: absolute;
+        top: 0.75rem;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-size: 0.82rem;
+        text-align: center;
+        line-height: 1.35;
+      }
+
+      .anat .bar small i {
+        display: block;
+        font-style: normal;
+        color: var(--text);
+      }
+
+      .anat .bar.parent {
+        color: var(--cyan);
+      }
+
+      .anat .bar.name {
+        color: #f0abfc;
+      }
+
+      .anat .bar.stem {
+        color: var(--green);
+      }
+
+      .anat .bar.suffix {
+        color: var(--amber);
+      }
+
+      /* ---------- Joining paths ---------- */
+      .joinviz {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.2rem;
+        min-height: 3rem;
+        font-size: 1.4rem;
+      }
+
+      .joinviz span {
+        padding: 0.25rem 0.6rem;
+        border-radius: 10px;
+        border: 1px solid rgba(167, 139, 250, 0.45);
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      .joinviz span.sep {
+        border-color: rgba(240, 171, 252, 0.6);
+        background: rgba(236, 72, 153, 0.2);
+        color: #f0abfc;
+      }
+
+      @media (max-width: 760px) {
+        .anat .bars {
+          height: 8rem;
+        }
+
+        .anat .bar small {
+          font-size: 0.68rem;
+        }
+
+        .chip {
+          padding: 0.2rem 0.55rem;
+          font-size: 0.78rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · files</span>
+      <h1 class="grad-each"><span>File</span> <span>Paths</span></h1>
+      <p>Check whether files exist, build paths that work on every system, and take paths apart with os.path and pathlib.</p>
+    </section>
+
+    <!-- ================================================================ os basics -->
+    <section class="slide">
+      <h2>os module: basic checks</h2>
+      <pre class="steps"><code class="language-python">
+        import os
+        # check if exists
+        os.path.exists("file.txt")
+        # ans: True or False
+        # check if file
+        os.path.isfile("file.txt")
+        # ans: True or False
+        # check if directory
+        os.path.isdir("folder")
+        # ans: True or False
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>os module: path info</h2>
+      <pre class="steps"><code class="language-python">
+        import os
+        # file size
+        os.path.getsize("file.txt")
+        # ans: size in bytes
+        # absolute path
+        os.path.abspath("file.txt")
+        # ans: /full/path/to/file.txt
+      </code></pre>
+      <p class="hint step"><code>abspath</code> glues the current working directory onto a relative path.</p>
+    </section>
+
+    <section class="slide" id="join">
+      <h2>os module: joining paths</h2>
+      <pre class="steps"><code class="language-python">
+        import os
+        # join paths
+        os.path.join("folder", "file.txt")
+        # ans: folder/file.txt
+        # ans: works across platforms
+      </code></pre>
+      <div class="joinviz"></div>
+      <div class="try" data-interactive>
+        <button class="chip on" type="button" data-sep="/">Linux / macOS</button>
+        <button class="chip" type="button" data-sep="\">Windows</button>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>os module: splitting paths</h2>
+      <pre class="steps"><code class="language-python">
+        import os
+        # directory name
+        os.path.dirname("/path/to/file.txt")
+        # ans: "/path/to"
+        # base name
+        os.path.basename("/path/to/file.txt")
+        # ans: "file.txt"
+        # split extension
+        os.path.splitext("file.txt")
+        # ans: ("file", ".txt")
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ pathlib -->
+    <section class="slide">
+      <h2>The pathlib module</h2>
+      <pre class="steps"><code class="language-python">
+        from pathlib import Path
+        # create path object
+        path = Path("file.txt")
+        # check exists
+        path.exists()
+        # ans: True or False
+        # read file
+        content = path.read_text()
+      </code></pre>
+      <p class="hint step">A <code>Path</code> is an object with methods, instead of a plain string passed to <code>os.path</code> functions.</p>
+    </section>
+
+    <section class="slide">
+      <h2>pathlib: path parts</h2>
+      <pre class="steps"><code class="language-python">
+        from pathlib import Path
+        path = Path("/folder/file.txt")
+        # name
+        path.name
+        # ans: "file.txt"
+        # stem
+        path.stem
+        # ans: "file"
+        # suffix
+        path.suffix
+        # ans: ".txt"
+        # parent
+        path.parent
+        # ans: Path("/folder")
+      </code></pre>
+    </section>
+
+    <section class="slide" id="anatomy">
+      <h2>The anatomy of a path</h2>
+      <div class="anat">
+        <div class="path"></div>
+        <div class="bars"></div>
+      </div>
+      <div class="try" data-interactive></div>
+      <p class="hint">pathlib names on top, the matching <code>os.path</code> function underneath. <code>os.path.splitext</code> splits off the same <code>suffix</code>, which is only the last extension.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict, then reveal.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        import os
+        # exists vs isfile?
+        os.path.exists("folder")
+        # ans: True
+        os.path.isfile("folder")
+        # ans: False
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        import os
+        # join paths?
+        os.path.join("a", "b", "c")
+        # ans: "a/b/c" (or "a\\b\\c" on Windows)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        import os
+        # splitext?
+        os.path.splitext("file.tar.gz")
+        # ans: ("file.tar", ".gz")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        from pathlib import Path
+        # path / operator?
+        Path("folder") / "file.txt"
+        # ans: Path("folder/file.txt")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        from pathlib import Path
+        # suffix with no extension?
+        Path("file").suffix
+        # ans: ""
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        import os
+        # abspath on absolute?
+        os.path.abspath("/a/b/c")
+        # ans: "/a/b/c" (unchanged)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        from pathlib import Path
+        # multiple suffixes?
+        Path("file.tar.gz").suffixes
+        # ans: [".tar", ".gz"]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre><code class="language-python">
+        import os
+        # basename of directory?
+        os.path.basename("/path/to/")
+        # ans: ""
+        os.path.basename("/path/to")
+        # ans: "to"
+      </code></pre>
+      <p class="hint step"><code>basename</code> is just the text after the last slash, so a trailing slash leaves nothing.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        from pathlib import Path
+        # parent of parent?
+        Path("/a/b/c").parent.parent
+        # ans: Path("/a")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        import os
+        # current directory?
+        os.getcwd()
+        # ans: returns current working directory
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Check</h3><p><code>exists</code> is True for files and folders; <code>isfile</code> and <code>isdir</code> tell them apart.</p></div>
+        <div class="card step"><h3>Build</h3><p><code>os.path.join</code> or <code>Path(...) / "name"</code> pick the right separator for the system.</p></div>
+        <div class="card step"><h3>Take apart</h3><p><code>parent</code>/<code>dirname</code>, <code>name</code>/<code>basename</code>, <code>stem</code> and <code>suffix</code>/<code>splitext</code>.</p></div>
+        <div class="card step"><h3>Where am I?</h3><p>Relative paths start from <code>os.getcwd()</code>; <code>abspath</code> makes them absolute.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ------------------------------------------------------------ path anatomy
+      {
+        const slide = document.querySelector("#anatomy");
+        const pathEl = slide.querySelector(".path");
+        const bars = slide.querySelector(".bars");
+        const box = slide.querySelector(".try");
+        const PATHS = ["/folder/file.txt", "/path/to/file.txt", "file.tar.gz", "/home/user/data.csv", "notes"];
+        box.innerHTML = PATHS.map((p, i) => `<button class="chip" type="button" data-i="${i}">${esc(p)}</button>`).join("");
+        let tl;
+
+        function parts(p) {
+          const i = p.lastIndexOf("/");
+          const name = [i + 1, p.length];
+          const nm = p.slice(i + 1);
+          const dot = nm.lastIndexOf(".");
+          const out = [];
+          if (i >= 0) {
+            const parent = i === 0 ? "/" : p.slice(0, i);
+            out.push({ cls: "parent", range: [0, Math.max(i, 1)], top: "parent", bottom: "dirname", value: parent, row: 0 });
+          }
+          out.push({ cls: "name", range: name, top: "name", bottom: "basename", value: nm, row: 0 });
+          if (dot > 0) {
+            out.push({ cls: "stem", range: [i + 1, i + 1 + dot], top: "stem", bottom: "", value: nm.slice(0, dot), row: 1 });
+            out.push({ cls: "suffix", range: [i + 1 + dot, p.length], top: "suffix", bottom: "", value: nm.slice(dot), row: 1 });
+          } else {
+            out.push({ cls: "stem", range: name, top: "stem", bottom: "", value: nm, row: 1 });
+          }
+          return out;
+        }
+
+        function show(k, animate) {
+          tl?.kill();
+          const p = PATHS[k];
+          box.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.i === k));
+          pathEl.innerHTML = [...p].map((c) => `<span class="${c === "/" ? "sep" : ""}">${esc(c)}</span>`).join("");
+          const chars = [...pathEl.children];
+          const base = bars.getBoundingClientRect();
+          bars.innerHTML = "";
+          const made = parts(p).map((pt) => {
+            const a = chars[pt.range[0]].getBoundingClientRect();
+            const b = chars[pt.range[1] - 1].getBoundingClientRect();
+            const el = document.createElement("div");
+            el.className = "bar " + pt.cls;
+            Object.assign(el.style, { left: a.left - base.left + 2 + "px", width: b.right - a.left - 4 + "px", top: pt.row * 4.4 + "rem" });
+            el.innerHTML = `<small>${pt.top}<i>${esc(JSON.stringify(pt.value))}</i>${pt.bottom}</small>`;
+            bars.appendChild(el);
+            return el;
+          });
+          if (!animate) return;
+          tl = gsap.timeline();
+          tl.from(chars, { opacity: 0, y: -10, duration: 0.25, stagger: 0.02 });
+          made.forEach((el) => {
+            tl.from(el, { scaleX: 0, duration: 0.35, ease: "power2.out" }, "+=0.1");
+            tl.from(el.querySelector("small"), { opacity: 0, duration: 0.25 }, "<0.2");
+          });
+        }
+        box.addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (c) show(+c.dataset.i, true);
+        });
+        Deck.scene(slide, { enter: () => show(0, true), leave: () => tl?.kill() });
+      }
+
+      // ------------------------------------------------------------ joining
+      {
+        const slide = document.querySelector("#join");
+        const viz = slide.querySelector(".joinviz");
+        let sep = "/";
+        let tl;
+        function show(animate) {
+          tl?.kill();
+          viz.innerHTML = `<span>folder</span><span class="sep">${esc(sep)}</span><span>file.txt</span>`;
+          slide.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c.dataset.sep === sep));
+          if (!animate) return;
+          const [a, s, b] = viz.children;
+          tl = gsap.timeline();
+          tl.from(a, { x: -40, duration: 0.5, ease: "power2.out" }).from(b, { x: 40, duration: 0.5, ease: "power2.out" }, "<").from(s, { y: -30, opacity: 0, duration: 0.4, ease: "back.out(2.5)" }, "-=0.1");
+        }
+        slide.querySelector(".try").addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (!c) return;
+          sep = c.dataset.sep;
+          show(true);
+        });
+        Deck.scene(slide, { enter: () => show(true), leave: () => tl?.kill() });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

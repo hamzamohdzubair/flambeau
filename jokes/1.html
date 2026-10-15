@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Joke 1</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #setup figure img {
+        max-height: 78vh;
+      }
+
+      #eyes {
+        background: #000;
+        gap: 1rem;
+      }
+
+      #eyes .face {
+        width: min(100%, 34rem, 58vh);
+        height: auto;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      #eyes .lines {
+        display: grid;
+        gap: 0.4rem;
+        justify-items: center;
+        min-height: 14rem;
+      }
+
+      #eyes .line {
+        margin: 0;
+        font: 700 clamp(1.6rem, 4.5vw, 3rem) / 1.15 var(--font-display);
+        color: #fff;
+        text-align: center;
+        transition:
+          opacity 0.4s,
+          font-size 0.4s,
+          transform 0.4s;
+      }
+
+      #eyes .lines .line.step.shown:not(.current) {
+        opacity: 0.3;
+        font-size: clamp(0.9rem, 2.4vw, 1.3rem);
+      }
+
+      #eyes .line:not(.shown) {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide" id="setup">
+      <figure><img src="/assets/2025-10-24-22-29-48.png" alt="The Introduction to AI/ML index slide, with tiles: Why learn AI?, Terminology, Learning Patterns, Types of Learning, Types of Tasks, Examples" /></figure>
+    </section>
+
+    <section class="slide" id="eyes">
+      <img class="face" src="/assets/2025-10-24-14-21-00.png" alt="Two glowing blue eyes in the dark" />
+      <div class="lines">
+        <p class="line step" data-anim="none">Don't call me stupid!</p>
+        <p class="line step" data-anim="none">How dare you call me stupid!</p>
+        <p class="line step" data-anim="none">You're stupid!</p>
+        <p class="line step" data-anim="none">You shut up!!</p>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const slide = document.querySelector("#eyes");
+      const face = slide.querySelector(".face");
+      let blink = null;
+
+      Deck.scene("#eyes", {
+        enter() {
+          blink?.kill();
+          // The eyes blink every few seconds
+          blink = gsap.timeline({ repeat: -1, repeatDelay: 2.4 }).to(face, { scaleY: 0.08, duration: 0.09, ease: "power1.in" }).to(face, { scaleY: 1, duration: 0.14, ease: "power1.out" });
+        },
+        step(s, n, els, d) {
+          if (d.dir < 0) return;
+          // The eyes flinch at each line
+          gsap.fromTo(face, { x: -10 }, { x: 0, duration: 0.5, ease: "elastic.out(1.2, 0.3)" });
+          gsap.from(els, { scale: 1.3, opacity: 0, duration: 0.35, ease: "back.out(2)", clearProps: "opacity,transform" });
+        },
+        leave() {
+          blink?.kill();
+          blink = null;
+          gsap.set(face, { scaleY: 1, x: 0 });
+        },
+      });
+    </script>
+  </body>
+</html>

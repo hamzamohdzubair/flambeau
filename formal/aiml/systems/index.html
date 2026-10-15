@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ML Systems</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #triangle svg {
+        width: min(100%, 44rem, 80vh);
+        height: auto;
+        overflow: visible;
+      }
+
+      #triangle .edge {
+        stroke: rgba(167, 139, 250, 0.45);
+        stroke-width: 4;
+        fill: none;
+      }
+
+      #triangle .node circle {
+        fill: #0b0d1a;
+        stroke-width: 3;
+      }
+
+      #triangle .node text {
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 600;
+        fill: var(--text);
+        text-anchor: middle;
+      }
+
+      #triangle .node .sub {
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 400;
+        fill: var(--muted);
+      }
+
+      #triangle .dot {
+        fill: #f0abfc;
+      }
+
+      #triangle .node:not(.on) {
+        opacity: 0.15;
+      }
+
+      #source img {
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · Extra topics</span>
+      <h1>ML Systems</h1>
+      <p>A model is only one corner: it also needs data, and the infrastructure to train and serve it.</p>
+    </section>
+
+    <section class="slide" id="triangle">
+      <h2>AI triangle</h2>
+      <svg viewBox="0 0 600 470" aria-label="A triangle linking model, data and infrastructure">
+        <path class="edge" id="e1" d="M 300 95 L 500 380" />
+        <path class="edge" id="e2" d="M 500 380 L 100 380" />
+        <path class="edge" id="e3" d="M 100 380 L 300 95" />
+        <g class="dots"></g>
+        <g class="node on" data-k="0"><circle cx="300" cy="95" r="62" stroke="#a78bfa" /><text x="300" y="102">Model</text><text class="sub" x="300" y="22">the algorithm</text></g>
+        <g class="node" data-k="1"><circle cx="500" cy="380" r="62" stroke="#22d3ee" /><text x="500" y="387">Data</text><text class="sub" x="500" y="468">what it learns from</text></g>
+        <g class="node" data-k="2"><circle cx="100" cy="380" r="62" stroke="#ec4899" /><text x="100" y="387">Infra</text><text class="sub" x="100" y="468">machines to train and run it</text></g>
+      </svg>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <p class="center step">Each corner depends on the other two.</p>
+    </section>
+
+    <section class="slide" id="source">
+      <h2>AI triangle</h2>
+      <figure class="step">
+        <img src="/assets/2025-10-27-18-45-38.png" alt="Diagram: model, infra and data connected in a triangle" />
+        <figcaption>Reddi VJ. <em>Machine Learning Systems</em> (<a href="https://www.mlsysbook.ai/">mlsysbook.ai</a>), 2025.</figcaption>
+      </figure>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.load("gsapMotionPath");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // Corners light up one per step; once all three are on, signals flow round the triangle
+      const slide = document.querySelector("#triangle");
+      const nodes = [...slide.querySelectorAll(".node")];
+      const dotsG = slide.querySelector(".dots");
+      let flow = null;
+      function show(n) {
+        nodes.forEach((g) => g.classList.toggle("on", +g.dataset.k <= n));
+        flow?.kill();
+        dotsG.innerHTML = "";
+        if (n < 2) return;
+        flow = gsap.timeline({ repeat: -1 });
+        ["#e1", "#e2", "#e3"].forEach((id, i) => {
+          for (const dir of [0, 1]) {
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute("class", "dot");
+            c.setAttribute("r", 6);
+            dotsG.appendChild(c);
+            flow.fromTo(c, { motionPath: { path: id, align: id, alignOrigin: [0.5, 0.5], start: dir, end: dir } }, { motionPath: { path: id, align: id, alignOrigin: [0.5, 0.5], start: dir, end: 1 - dir }, duration: 2.4, ease: "none" }, i * 0.8 + dir * 1.2);
+          }
+        });
+      }
+      Deck.scene("#triangle", {
+        enter: () => show(Deck.step),
+        step: (s, n) => show(Math.min(n, 2)),
+        unstep: (s, n) => show(Math.min(n - 1, 2)),
+        leave: () => flow?.kill(),
+      });
+    </script>
+  </body>
+</html>

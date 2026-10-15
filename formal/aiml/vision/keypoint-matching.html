@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Keypoint Matching</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.85rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 1.4rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 8rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 60rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      pre.ex {
+        width: min(100%, 64rem);
+        font-size: 0.95rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 0.95rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+      @media (max-width: 760px) {
+        .play {
+          grid-template-columns: 1fr;
+          gap: 0.8rem;
+        }
+
+        .codek {
+          grid-template-columns: 1fr;
+          gap: 1.4rem;
+        }
+
+        input[type="range"] {
+          width: 6.5rem;
+        }
+
+        pre.ex,
+        .qa pre {
+          font-size: 0.78rem;
+        }
+      }
+
+      /* ---------- Pipeline ---------- */
+      .pipe {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .pipe .node {
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        color: var(--muted);
+      }
+
+      .pipe .node.lit {
+        border-color: var(--violet-soft);
+        background: rgba(139, 92, 246, 0.3);
+        color: var(--text);
+        box-shadow: 0 0 24px rgba(139, 92, 246, 0.45);
+      }
+
+      .pipe .arrow {
+        color: var(--faint);
+        font-size: 1.3rem;
+      }
+
+      #what .cards {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        width: min(100%, 66rem);
+      }
+
+      #what .card {
+        padding: 0.9rem 1rem;
+      }
+
+      #what .card h3 {
+        font-size: 1rem;
+      }
+
+      /* ---------- BF vs FLANN ---------- */
+      #search svg {
+        width: min(100%, 52rem);
+        height: auto;
+      }
+
+      #search .pt {
+        fill: #a78bfa;
+      }
+
+      #search .q {
+        fill: #ec4899;
+        filter: drop-shadow(0 0 6px #ec4899);
+      }
+
+      #search .ray {
+        stroke: #67e8f9;
+        stroke-width: 1;
+        opacity: 0;
+      }
+
+      #search .split {
+        stroke: rgba(251, 191, 36, 0.8);
+        stroke-width: 1.5;
+        stroke-dasharray: 5 4;
+        opacity: 0;
+      }
+
+      #search .cell {
+        fill: rgba(251, 191, 36, 0.12);
+        opacity: 0;
+      }
+
+      #search .best {
+        stroke: #86efac;
+        stroke-width: 3;
+        opacity: 0;
+      }
+
+      #search text {
+        fill: var(--muted);
+        font: 15px var(--font);
+      }
+
+      #search text.count {
+        fill: var(--text);
+        font: 600 17px var(--font-display);
+      }
+
+      /* ---------- Hamming ---------- */
+      .bits {
+        display: grid;
+        grid-template-columns: 6.5rem repeat(16, min(2rem, 4.6vw));
+        gap: 4px;
+        align-items: center;
+        font-family: var(--font-mono);
+      }
+
+      .bits .lbl {
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-align: right;
+        padding-right: 0.4rem;
+      }
+
+      .bits b {
+        display: grid;
+        place-items: center;
+        height: min(2rem, 4.6vw);
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.06);
+        font-weight: 400;
+        font-size: 0.9rem;
+      }
+
+      .bits .x b.diff {
+        background: rgba(236, 72, 153, 0.55);
+        color: #fff;
+      }
+
+      .bits .x {
+        display: contents;
+      }
+
+      .hd {
+        font-family: var(--font-mono);
+        font-size: 1.1rem;
+        text-align: center;
+      }
+
+      .hd .big {
+        font-size: 2.4rem;
+        vertical-align: middle;
+      }
+
+      #metrics .cols {
+        width: min(100%, 60rem);
+      }
+
+      /* ---------- Lab ---------- */
+      #lab canvas.img {
+        width: min(100%, 64rem);
+      }
+
+      #lab .ctl {
+        min-height: 2rem;
+      }
+
+      #lab .readout {
+        min-height: 1.4em;
+      }
+
+      /* ---------- Ratio test ---------- */
+      .ratio {
+        display: grid;
+        gap: 1.4rem;
+        width: min(100%, 50rem);
+      }
+
+      .ratio .case {
+        display: grid;
+        grid-template-columns: 9rem 1fr 7rem;
+        gap: 0.4rem 1rem;
+        align-items: center;
+      }
+
+      .ratio .case h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        color: var(--text);
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .ratio .track {
+        position: relative;
+        height: 1.3rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .ratio .bar {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 0;
+        border-radius: 6px;
+      }
+
+      .ratio .bar.d1 {
+        background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+      }
+
+      .ratio .bar.d2 {
+        background: linear-gradient(90deg, #0891b2, #22d3ee);
+      }
+
+      .ratio .mark {
+        position: absolute;
+        top: -0.35rem;
+        bottom: -0.35rem;
+        width: 2px;
+        background: var(--amber);
+        opacity: 0;
+      }
+
+      .ratio .tl {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .ratio .verdict {
+        grid-row: span 2;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        opacity: 0;
+      }
+
+      .ratio .verdict b {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+      }
+
+      .ok b {
+        color: var(--green);
+      }
+
+      .no b {
+        color: var(--red);
+      }
+
+      /* ---------- RANSAC ---------- */
+      #ransac svg {
+        width: min(100%, 46rem);
+        height: auto;
+      }
+
+      #ransac .p {
+        fill: rgba(255, 255, 255, 0.55);
+        transition: fill 0.3s;
+      }
+
+      #ransac .p.in {
+        fill: #86efac;
+      }
+
+      #ransac .p.pick {
+        fill: #ec4899;
+      }
+
+      #ransac .band {
+        fill: rgba(34, 211, 238, 0.12);
+      }
+
+      #ransac .fit {
+        stroke: #22d3ee;
+        stroke-width: 2.5;
+      }
+
+      #ransac text {
+        fill: var(--text);
+        font: 600 18px var(--font-display);
+      }
+
+      #ransac .cols {
+        width: min(100%, 66rem);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+      }
+
+      @media (max-width: 760px) {
+        #what .cards {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .bits {
+          grid-template-columns: 3.6rem repeat(16, minmax(0, 1fr));
+          gap: 2px;
+          width: 100%;
+        }
+
+        .bits .lbl {
+          font-size: 0.65rem;
+        }
+
+        .bits b {
+          font-size: 0.7rem;
+        }
+
+        .ratio .case {
+          grid-template-columns: 1fr;
+        }
+
+        .ratio .verdict {
+          grid-row: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <h1>Keypoint Matching</h1>
+      <p>Find the same points in two images, then throw away the matches that lie.</p>
+      <div class="pipe" style="margin-top: 1rem">
+        <span class="node">Detect</span><span class="arrow">→</span><span class="node">Describe</span><span class="arrow">→</span><span class="node">Match</span><span class="arrow">→</span><span class="node">Filter</span>
+      </div>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide" id="what">
+      <h2>What is keypoint matching?</h2>
+      <p class="lead"><strong>Matching</strong> finds corresponding features between images.</p>
+      <div class="cards">
+        <div class="card step"><h3>Image stitching</h3><p>Panoramas</p></div>
+        <div class="card step"><h3>Object recognition</h3><p>Find an object in a scene</p></div>
+        <div class="card step"><h3>3-D reconstruction</h3><p>Stereo vision</p></div>
+        <div class="card step"><h3>Visual tracking</h3><p>Follow objects</p></div>
+        <div class="card step"><h3>Registration</h3><p>Align images</p></div>
+      </div>
+      <div class="pipe step" data-anim="fade">
+        <span class="node">Detect</span><span class="arrow">→</span><span class="node">Describe</span><span class="arrow">→</span><span class="node">Match</span><span class="arrow">→</span><span class="node">Filter</span>
+      </div>
+    </section>
+
+    <!-- ================================================================ approaches -->
+    <section class="slide" id="search">
+      <h2>Matching approaches</h2>
+      <div class="cards" style="width: min(100%, 52rem)">
+        <div class="card">
+          <h3>Brute-force (BF)</h3>
+          <p>Compare each descriptor in set 1 with <em>all</em> in set 2 and keep the closest. Simple, exact, slow for large sets.</p>
+        </div>
+        <div class="card">
+          <h3>FLANN</h3>
+          <p>Fast Library for Approximate Nearest Neighbors. Tree-based search (KD-tree, LSH): much faster, slightly less accurate.</p>
+        </div>
+      </div>
+      <svg viewBox="0 0 640 300" aria-label="Brute force compares the query with every point; a KD-tree only searches the query's cell">
+        <g class="bf" transform="translate(0 0)"></g>
+        <g class="kd" transform="translate(340 0)"></g>
+      </svg>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <p class="muted center">Press → to search with each. The pink star is the query descriptor.</p>
+    </section>
+
+    <!-- ================================================================ metrics -->
+    <section class="slide" id="metrics">
+      <h2>Distance metrics</h2>
+      <div class="cols">
+        <div class="card">
+          <h3>Float descriptors (SIFT, SURF)</h3>
+          <p><strong>L1 (Manhattan):</strong> \(\sum_i |d_1[i] - d_2[i]|\)</p>
+          <p><strong>L2 (Euclidean):</strong> \(\sqrt{\sum_i (d_1[i] - d_2[i])^2}\)</p>
+        </div>
+        <div class="card">
+          <h3>Binary descriptors (ORB, BRIEF)</h3>
+          <p><strong>Hamming:</strong> the number of differing bits.</p>
+          <p><strong>Hamming2:</strong> for ORB with <code>WTA_K</code> = 3 or 4, where bits come in pairs.</p>
+        </div>
+      </div>
+      <div class="bits">
+        <span class="lbl">d₁</span><span class="x r1"></span>
+        <span class="lbl">d₂</span><span class="x r2"></span>
+        <span class="lbl">d₁ XOR d₂</span><span class="x r3"></span>
+      </div>
+      <p class="hd">count the 1s → distance = <span class="big grad">0</span></p>
+      <p class="center"><strong>Lower distance = better match.</strong> <span class="muted">XOR and a bit count is all a binary match costs.</span></p>
+    </section>
+
+    <!-- ================================================================ BF code -->
+    <section class="slide">
+      <h2>Brute-force matcher</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        # BF matcher for ORB (binary)
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)  # ans:
+        # BF matcher for SIFT (float)
+        bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)  # ans:
+        # crossCheck: mutual best match
+        # ans: ensures A's best match is B AND B's best match is A
+        # match descriptors
+        matches = bf.match(des1, des2)  # ans:
+        # returns DMatch objects
+        # ans: each has .distance, .queryIdx, .trainIdx
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>The DMatch object</h2>
+      <pre class="steps"><code class="language-python">
+        matches = bf.match(des1, des2)
+        m = matches[0]  # ans:
+        # properties
+        distance = m.distance  # ans:
+        # ans: lower is better
+        queryIdx = m.queryIdx  # ans:
+        # ans: index in des1
+        trainIdx = m.trainIdx  # ans:
+        # ans: index in des2
+        # sort by distance
+        matches = sorted(matches, key=lambda x: x.distance)  # ans:
+        # ans: best matches first (lowest distance)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Drawing matches</h2>
+      <pre class="steps"><code class="language-python">
+        # simple match drawing
+        orb = cv2.ORB_create()
+        kp1, des1 = orb.detectAndCompute(gray1, None)
+        kp2, des2 = orb.detectAndCompute(gray2, None)
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        matches = bf.match(des1, des2)
+        matches = sorted(matches, key=lambda x: x.distance)
+        # draw top 30 matches
+        img_matches = cv2.drawMatches(img1, kp1, img2, kp2, matches[:30], None, flags=2)  # ans:
+        # ans: flags=2 means cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ LAB -->
+    <section class="slide top" id="lab">
+      <h2>Matching, live</h2>
+      <canvas class="img" width="980" height="270"></canvas>
+      <div class="chips" data-interactive>
+        <button class="chip" data-mode="kp">1 · Keypoints</button>
+        <button class="chip on" data-mode="bf">2 · bf.match, crossCheck</button>
+        <button class="chip" data-mode="ratio">3 · knnMatch + ratio test</button>
+        <button class="chip" data-mode="ransac">4 · RANSAC inliers</button>
+        <button class="chip ghost" data-act="view">New view</button>
+      </div>
+      <div class="ctl" data-interactive>
+        <label class="for-bf">top N <input type="range" name="top" min="5" max="200" value="30" /><output>30</output></label>
+        <label class="for-ratio">ratio <input type="range" name="ratio" min="0.4" max="1" step="0.05" value="0.75" /><output>0.75</output></label>
+      </div>
+      <p class="readout">computing…</p>
+      <p class="muted center" style="font-size: 0.85rem">ORB written in JavaScript, running on the photo (left) and a rotated, scaled, re-lit copy (right).</p>
+    </section>
+
+    <!-- ================================================================ kNN -->
+    <section class="slide">
+      <h2>kNN matching</h2>
+      <p class="lead"><strong>k-nearest neighbours</strong> returns the <em>k</em> best matches for each descriptor. Its purpose: enabling Lowe's ratio test.</p>
+      <pre class="steps"><code class="language-python">
+        # kNN with k=2 (2 best matches)
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+        matches = bf.knnMatch(des1, des2, k=2)  # ans:
+        # ans: returns a list of lists: [[best, 2nd_best], ...]
+        # each descriptor gets 2 matches
+        for matches_for_one in matches:  # ans:
+            m, n = matches_for_one  # ans:
+            # ans: best and 2nd best
+      </code></pre>
+      <p class="muted center">No <code>crossCheck</code> here: it only works with <code>k=1</code>.</p>
+    </section>
+
+    <!-- ================================================================ ratio -->
+    <section class="slide" id="ratio">
+      <h2>Ratio test (Lowe's test)</h2>
+      <p class="lead"><strong>Purpose:</strong> filter ambiguous matches. Accept a match only if the best is much closer than the second best.</p>
+      <div class="ratio">
+        <div class="case" data-d1="18" data-d2="62">
+          <h4>Distinctive</h4>
+          <div><div class="track"><div class="bar d1"></div><div class="mark"></div></div><span class="tl">best = 18</span></div>
+          <div class="verdict ok"><b>keep</b>18 / 62 = 0.29</div>
+          <span></span>
+          <div><div class="track"><div class="bar d2"></div></div><span class="tl">2nd best = 62</span></div>
+        </div>
+        <div class="case" data-d1="40" data-d2="46">
+          <h4>Ambiguous</h4>
+          <div><div class="track"><div class="bar d1"></div><div class="mark"></div></div><span class="tl">best = 40</span></div>
+          <div class="verdict no"><b>reject</b>40 / 46 = 0.87</div>
+          <span></span>
+          <div><div class="track"><div class="bar d2"></div></div><span class="tl">2nd best = 46</span></div>
+        </div>
+      </div>
+      <p class="center step" data-step="3">The amber mark is <strong>0.75 × 2nd best</strong>: the best match must end before it. Typical thresholds: <strong>0.7 to 0.8</strong>.</p>
+      <span class="step" data-step="1" data-anim="none"></span>
+      <span class="step" data-step="2" data-anim="none"></span>
+    </section>
+
+    <section class="slide">
+      <h2>Ratio test in code</h2>
+      <pre class="steps"><code class="language-python">
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+        matches = bf.knnMatch(des1, des2, k=2)
+        # apply ratio test
+        good_matches = []
+        for m, n in matches:  # ans:
+            if m.distance &lt; 0.75 * n.distance:  # ans:
+                good_matches.append(m)  # ans:
+        # ans: keeps only distinctive matches
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ FLANN -->
+    <section class="slide">
+      <h2>FLANN matcher</h2>
+      <div class="cols top" style="width: min(100%, 56rem)">
+        <div class="card">
+          <h3>Advantages</h3>
+          <ul>
+            <li class="step">Much faster for large descriptor sets</li>
+            <li class="step">Approximate search: trades accuracy for speed</li>
+            <li class="step">Different algorithms for different descriptor types</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Algorithms</h3>
+          <ul>
+            <li class="step"><strong>KD-tree:</strong> for SIFT, SURF (float)</li>
+            <li class="step"><strong>LSH</strong> (locality-sensitive hashing): for ORB, BRIEF (binary)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>FLANN for SIFT</h2>
+      <pre class="steps"><code class="language-python">
+        # FLANN parameters for SIFT (KD-tree)
+        FLANN_INDEX_KDTREE = 1
+        index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+        search_params = dict(checks=50)
+        flann = cv2.FlannBasedMatcher(index_params, search_params)  # ans:
+        # trees: number of KD-trees
+        # ans: more trees = better accuracy, slower
+        # checks: number of leaf nodes to search
+        # ans: higher = better accuracy, slower
+        # match
+        matches = flann.knnMatch(des1, des2, k=2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>FLANN for ORB</h2>
+      <pre class="steps"><code class="language-python">
+        # FLANN parameters for ORB (LSH)
+        FLANN_INDEX_LSH = 6
+        index_params = dict(algorithm=FLANN_INDEX_LSH, table_number=6,
+                            key_size=12, multi_probe_level=1)
+        search_params = dict(checks=50)
+        flann = cv2.FlannBasedMatcher(index_params, search_params)  # ans:
+        # descriptor type?
+        # ans: LSH hashes the binary uint8 descriptors as they are
+        # ans: (only a KD-tree index needs np.float32(des))
+        # match
+        matches = flann.knnMatch(des1, des2, k=2)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ RANSAC -->
+    <section class="slide" id="ransac">
+      <h2>Homography filtering</h2>
+      <div class="cols">
+        <div style="display: grid; gap: 0.8rem">
+          <p><strong>Homography:</strong> a 3×3 perspective transformation matrix mapping points in one image to the other.</p>
+          <p><strong>RANSAC</strong> (random sample consensus) iteratively fits the transformation to random samples and keeps the one most points agree with. Those points are the <strong>inliers</strong>; the rest are outliers.</p>
+          <p class="muted"><strong>Use case:</strong> filter geometric outliers after matching. Here RANSAC fits a line (2 points per sample); a homography needs 4.</p>
+          <div class="chips" data-interactive style="justify-content: flex-start"><button class="chip ghost" data-act="replay">Replay</button></div>
+        </div>
+        <svg viewBox="0 0 460 320" aria-label="RANSAC fitting a line through noisy points with outliers"></svg>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Finding the homography</h2>
+      <pre class="steps"><code class="language-python">
+        # need at least 4 matches
+        # extract matched point coordinates
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+        # find homography with RANSAC
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)  # ans:
+        # M: 3x3 transformation matrix
+        # ans: mask: inliers (1) vs outliers (0)
+        # filter matches using mask
+        inliers = [m for m, msk in zip(good_matches, mask.ravel()) if msk == 1]  # ans:
+      </code></pre>
+      <p class="muted center"><code>5.0</code> is the reprojection threshold in pixels: a match further than that from where <code>M</code> sends it is an outlier.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is keypoint matching?</p><p class="answer">Finding corresponding features between images.</p></div>
+        <div class="q"><p>Which distance for binary descriptors?</p><p class="answer">Hamming distance.</p></div>
+        <div class="q"><p>What is <code>crossCheck</code> in <code>BFMatcher</code>?</p><p class="answer">It keeps only mutual best matches (bidirectional).</p></div>
+        <div class="q"><p>What is the ratio test?</p><p class="answer">Compare the best and second-best match; reject if they are similar.</p></div>
+        <div class="q"><p>A typical ratio test threshold?</p><p class="answer">0.75 (or the 0.7 to 0.8 range).</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>BF vs FLANN?</p><p class="answer">BF is exact but slow; FLANN is approximate but fast.</p></div>
+        <div class="q"><p>What is kNN matching?</p><p class="answer">Finding the k nearest neighbours for each descriptor.</p></div>
+        <div class="q"><p>Why <code>k=2</code> for the ratio test?</p><p class="answer">We need the second-best match to compare with the best.</p></div>
+        <div class="q"><p>What is RANSAC?</p><p class="answer">Random sampling to find inliers and filter outliers.</p></div>
+        <div class="q"><p>What is a homography?</p><p class="answer">A 3×3 perspective transformation matrix.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # BF matcher for ORB
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)  # ans:
+        matches = bf.match(des1, des2)  # ans:
+        matches = sorted(matches, key=lambda x: x.distance)  # ans:
+        # kNN matching
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+        matches = bf.knnMatch(des1, des2, k=2)  # ans:
+        # ratio test
+        good = []
+        for m, n in matches:  # ans:
+            if m.distance &lt; 0.75 * n.distance:  # ans:
+                good.append(m)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # FLANN for SIFT
+        FLANN_INDEX_KDTREE = 1
+        index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+        search_params = dict(checks=50)
+        flann = cv2.FlannBasedMatcher(index_params, search_params)  # ans:
+        matches = flann.knnMatch(des1, des2, k=2)  # ans:
+        # FLANN for ORB
+        FLANN_INDEX_LSH = 6
+        index_params = dict(algorithm=FLANN_INDEX_LSH, table_number=6,
+                            key_size=12, multi_probe_level=1)
+        flann = cv2.FlannBasedMatcher(index_params, search_params)  # ans:
+        matches = flann.knnMatch(des1, des2, k=2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # complete matching pipeline
+        orb = cv2.ORB_create()
+        kp1, des1 = orb.detectAndCompute(gray1, None)
+        kp2, des2 = orb.detectAndCompute(gray2, None)
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+        matches = bf.knnMatch(des1, des2, k=2)
+        good = [m for m, n in matches if m.distance &lt; 0.75 * n.distance]  # ans:
+        img_matches = cv2.drawMatches(img1, kp1, img2, kp2, good, None, flags=2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 6 · advanced</h2>
+      <pre class="ex"><code class="language-python">
+        # homography filtering
+        good_matches = []  # from ratio test
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)  # ans:
+        inliers = [m for m, msk in zip(good_matches, mask.ravel()) if msk == 1]  # ans:
+        print(f"Inliers: {len(inliers)}/{len(good_matches)}")  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      // ------------------------------------------------------------ ORB, small and in JavaScript
+      // FAST-9 corners on an image pyramid, ranked by the Harris measure,
+      // oriented by the intensity centroid, described by 256 rotated BRIEF tests.
+      const ORB = (() => {
+        const CIRCLE = [[0, -3], [1, -3], [2, -2], [3, -1], [3, 0], [3, 1], [2, 2], [1, 3], [0, 3], [-1, 3], [-2, 2], [-3, 1], [-3, 0], [-3, -1], [-2, -2], [-1, -3]];
+        // Fixed, seeded test pattern: 256 point pairs inside the 31x31 patch
+        let seed = 12345;
+        const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+        const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
+        const PAIRS = Array.from({ length: 256 }, () => [0, 0, 0, 0].map(() => Math.max(-13, Math.min(13, Math.round(gauss() * 6.2)))));
+        const POP = new Uint8Array(256).map((_, i) => i.toString(2).replace(/0/g, "").length);
+
+        function resize(g, w, h, nw, nh) {
+          const out = new Float32Array(nw * nh);
+          const sx = w / nw, sy = h / nh;
+          for (let y = 0; y < nh; y++)
+            for (let x = 0; x < nw; x++) {
+              const fx = (x + 0.5) * sx - 0.5, fy = (y + 0.5) * sy - 0.5;
+              const x0 = Math.max(0, Math.floor(fx)), y0 = Math.max(0, Math.floor(fy));
+              const x1 = Math.min(w - 1, x0 + 1), y1 = Math.min(h - 1, y0 + 1);
+              const ax = Math.min(1, Math.max(0, fx - x0)), ay = Math.min(1, Math.max(0, fy - y0));
+              out[y * nw + x] = (g[y0 * w + x0] * (1 - ax) + g[y0 * w + x1] * ax) * (1 - ay) + (g[y1 * w + x0] * (1 - ax) + g[y1 * w + x1] * ax) * ay;
+            }
+          return out;
+        }
+        function smooth(g, w, h) {
+          const k = [1, 4, 6, 4, 1];
+          const t = new Float32Array(w * h), o = new Float32Array(w * h);
+          for (let y = 0; y < h; y++)
+            for (let x = 0; x < w; x++) {
+              let s = 0;
+              for (let i = -2; i <= 2; i++) s += k[i + 2] * g[y * w + Math.min(w - 1, Math.max(0, x + i))];
+              t[y * w + x] = s / 16;
+            }
+          for (let y = 0; y < h; y++)
+            for (let x = 0; x < w; x++) {
+              let s = 0;
+              for (let i = -2; i <= 2; i++) s += k[i + 2] * t[Math.min(h - 1, Math.max(0, y + i)) * w + x];
+              o[y * w + x] = s / 16;
+            }
+          return o;
+        }
+        // FAST: N contiguous circle pixels all brighter than p + t or all darker than p - t
+        function fast(g, w, h, t, border, N = 9) {
+          const out = [];
+          const off = CIRCLE.map(([dx, dy]) => dy * w + dx);
+          const v = new Int8Array(32);
+          for (let y = border; y < h - border; y++)
+            for (let x = border; x < w - border; x++) {
+              const i = y * w + x, p = g[i];
+              for (let k = 0; k < 16; k++) {
+                const q = g[i + off[k]];
+                v[k] = v[k + 16] = q > p + t ? 1 : q < p - t ? -1 : 0;
+              }
+              let run = 0, best = 0, sign = 0;
+              for (let k = 0; k < 32; k++) {
+                if (v[k] !== 0 && v[k] === sign) run++;
+                else (sign = v[k]), (run = v[k] ? 1 : 0);
+                if (run > best) best = run;
+              }
+              if (best >= N) {
+                let score = 0;
+                for (let k = 0; k < 16; k++) score += Math.max(0, Math.abs(g[i + off[k]] - p) - t);
+                out.push({ x, y, score });
+              }
+            }
+          return out;
+        }
+        function harris(g, w, x, y, r = 3) {
+          let a = 0, b = 0, c = 0;
+          for (let j = -r; j <= r; j++)
+            for (let i = -r; i <= r; i++) {
+              const k = (y + j) * w + x + i;
+              const ix = g[k + 1] - g[k - 1], iy = g[k + w] - g[k - w];
+              a += ix * ix;
+              b += iy * iy;
+              c += ix * iy;
+            }
+          return a * b - c * c - 0.04 * (a + b) * (a + b);
+        }
+        // Orientation from the intensity centroid of a circular patch
+        function orientation(g, w, x, y, r = 15) {
+          let m01 = 0, m10 = 0;
+          for (let dy = -r; dy <= r; dy++) {
+            const span = Math.floor(Math.sqrt(r * r - dy * dy));
+            for (let dx = -span; dx <= span; dx++) {
+              const v = g[(y + dy) * w + x + dx];
+              m10 += dx * v;
+              m01 += dy * v;
+            }
+          }
+          return Math.atan2(m01, m10);
+        }
+        function describe(s, w, x, y, ang) {
+          const c = Math.cos(ang), si = Math.sin(ang);
+          const d = new Uint8Array(32);
+          PAIRS.forEach(([ax, ay, bx, by], k) => {
+            const pa = s[Math.round(y + ax * si + ay * c) * w + Math.round(x + ax * c - ay * si)];
+            const pb = s[Math.round(y + bx * si + by * c) * w + Math.round(x + bx * c - by * si)];
+            if (pa < pb) d[k >> 3] |= 1 << (k & 7);
+          });
+          return d;
+        }
+        // detectAndCompute(gray, w, h, opts) -> keypoints with .d descriptors
+        function detectAndCompute(gray, w, h, { nfeatures = 500, scaleFactor = 1.2, nlevels = 4, fastThreshold = 20 } = {}) {
+          const border = 20;
+          const weights = Array.from({ length: nlevels }, (_, l) => Math.pow(scaleFactor, -2 * l));
+          const wsum = weights.reduce((a, b) => a + b, 0);
+          const all = [];
+          for (let l = 0; l < nlevels; l++) {
+            const s = Math.pow(scaleFactor, l);
+            const lw = Math.round(w / s), lh = Math.round(h / s);
+            if (lw < 2 * border + 4 || lh < 2 * border + 4) break;
+            const g = l ? resize(gray, w, h, lw, lh) : gray;
+            let cs = fast(g, lw, lh, fastThreshold, border);
+            // 3x3 non-maximum suppression on the FAST score
+            const grid = new Map(cs.map((p) => [p.y * lw + p.x, p.score]));
+            cs = cs.filter((p) => {
+              for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) if ((i || j) && (grid.get((p.y + j) * lw + p.x + i) || 0) > p.score) return false;
+              return true;
+            });
+            cs.forEach((p) => (p.response = harris(g, lw, p.x, p.y)));
+            cs.sort((a, b) => b.response - a.response);
+            cs = cs.slice(0, Math.round((nfeatures * weights[l]) / wsum));
+            const sm = smooth(g, lw, lh);
+            for (const p of cs) {
+              const angle = orientation(g, lw, p.x, p.y);
+              all.push({ x: p.x * s, y: p.y * s, level: l, size: 31 * s, angle, response: p.response, d: describe(sm, lw, p.x, p.y, angle) });
+            }
+          }
+          return all;
+        }
+        function hamming(a, b) {
+          let n = 0;
+          for (let i = 0; i < 32; i++) n += POP[a[i] ^ b[i]];
+          return n;
+        }
+        // For each query descriptor: the best and second-best train descriptors
+        function knn2(A, B) {
+          return A.map((a, qi) => {
+            let b1 = 1e9, b2 = 1e9, i1 = -1, i2 = -1;
+            B.forEach((b, ti) => {
+              const dd = hamming(a.d, b.d);
+              if (dd < b1) (b2 = b1), (i2 = i1), (b1 = dd), (i1 = ti);
+              else if (dd < b2) (b2 = dd), (i2 = ti);
+            });
+            return [{ queryIdx: qi, trainIdx: i1, distance: b1 }, { queryIdx: qi, trainIdx: i2, distance: b2 }];
+          });
+        }
+        function solve(A, b) {
+          const n = b.length;
+          const M = A.map((r, i) => [...r, b[i]]);
+          for (let c = 0; c < n; c++) {
+            let p = c;
+            for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+            [M[c], M[p]] = [M[p], M[c]];
+            if (Math.abs(M[c][c]) < 1e-12) return null;
+            for (let r = 0; r < n; r++) {
+              if (r === c) continue;
+              const f = M[r][c] / M[c][c];
+              for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k];
+            }
+          }
+          return M.map((r, i) => r[n] / r[i]);
+        }
+        // Homography from 4 point pairs (the getPerspectiveTransform system)
+        function homography(src, dst) {
+          const A = [], b = [];
+          src.forEach(([x, y], i) => {
+            const [u, v] = dst[i];
+            A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]);
+            b.push(u);
+            A.push([0, 0, 0, x, y, 1, -v * x, -v * y]);
+            b.push(v);
+          });
+          const h = solve(A, b);
+          return h && [...h, 1];
+        }
+        const apply = (H, [x, y]) => {
+          const z = H[6] * x + H[7] * y + H[8];
+          return [(H[0] * x + H[1] * y + H[2]) / z, (H[3] * x + H[4] * y + H[5]) / z];
+        };
+        // RANSAC: fit to 4 random pairs, keep the model with the most inliers
+        function ransac(src, dst, thresh = 5, iters = 600) {
+          let best = null, bestMask = src.map(() => 0), bestN = 0;
+          if (src.length < 4) return { H: null, mask: bestMask };
+          for (let it = 0; it < iters; it++) {
+            const idx = new Set();
+            while (idx.size < 4) idx.add(Math.floor(Math.random() * src.length));
+            const ids = [...idx];
+            const H = homography(ids.map((i) => src[i]), ids.map((i) => dst[i]));
+            if (!H) continue;
+            const mask = src.map((p, i) => {
+              const [u, v] = apply(H, p);
+              return Math.hypot(u - dst[i][0], v - dst[i][1]) < thresh ? 1 : 0;
+            });
+            const n = mask.reduce((a, b) => a + b, 0);
+            if (n > bestN) (bestN = n), (best = H), (bestMask = mask);
+          }
+          return { H: best, mask: bestMask };
+        }
+        return { detectAndCompute, hamming, knn2, homography, apply, ransac, PAIRS, CIRCLE, fast, orientation };
+      })();
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        parent?.appendChild(e);
+        return e;
+      };
+      let seed = 7;
+      const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+      // ------------------------------------------------------------ cover + pipeline
+      function lightPipe(pipe, delay = 0) {
+        const nodes = pipe.querySelectorAll(".node");
+        nodes.forEach((n) => n.classList.remove("lit"));
+        const tl = gsap.timeline({ delay });
+        nodes.forEach((n, i) => tl.call(() => n.classList.add("lit"), null, i * 0.45));
+        return tl;
+      }
+      let coverTl = null;
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+          coverTl?.kill();
+          coverTl = lightPipe(slide.querySelector(".pipe"), 0.6);
+        },
+        leave: () => coverTl?.kill(),
+      });
+      Deck.scene("#what", {
+        step(slide, n, els) {
+          if (els[0].matches(".pipe")) lightPipe(els[0], 0.3);
+        },
+      });
+
+      // ------------------------------------------------------------ BF vs KD-tree search
+      {
+        const svg = document.querySelector("#search svg");
+        const bf = svg.querySelector(".bf"), kd = svg.querySelector(".kd");
+        seed = 11;
+        const P = Array.from({ length: 36 }, () => [20 + rand() * 260, 40 + rand() * 220]);
+        const Q = [196, 118];
+        const nearest = P.reduce((b, p, i) => (Math.hypot(p[0] - Q[0], p[1] - Q[1]) < Math.hypot(P[b][0] - Q[0], P[b][1] - Q[1]) ? i : b), 0);
+        function build(g, title) {
+          el("rect", { x: 10, y: 30, width: 280, height: 240, rx: 10, fill: "rgba(255,255,255,0.03)", stroke: "rgba(255,255,255,0.12)" }, g);
+          el("text", { x: 150, y: 20, "text-anchor": "middle" }, g).textContent = title;
+          const layer = el("g", {}, g);
+          P.forEach((p) => el("circle", { class: "pt", cx: p[0], cy: p[1], r: 4.5 }, g));
+          el("path", { class: "q", d: star(Q[0], Q[1]) }, g);
+          const count = el("text", { class: "count", x: 150, y: 296, "text-anchor": "middle" }, g);
+          return { layer, count };
+        }
+        function star(x, y, r = 10) {
+          let d = "";
+          for (let i = 0; i < 10; i++) {
+            const a = -Math.PI / 2 + (i * Math.PI) / 5, rr = i % 2 ? r * 0.45 : r;
+            d += (i ? "L" : "M") + (x + rr * Math.cos(a)).toFixed(1) + " " + (y + rr * Math.sin(a)).toFixed(1);
+          }
+          return d + "Z";
+        }
+        const A = build(bf, "Brute force");
+        const B = build(kd, "KD-tree (FLANN)");
+        // Brute force: a ray to every point
+        const raysA = P.map((p) => el("line", { class: "ray", x1: Q[0], y1: Q[1], x2: p[0], y2: p[1] }, A.layer));
+        const bestA = el("line", { class: "best", x1: Q[0], y1: Q[1], x2: P[nearest][0], y2: P[nearest][1] }, A.layer);
+        // KD-tree: split at the median x, then median y in each half, then median x again
+        const splits = [];
+        let cell = { x0: 10, x1: 290, y0: 30, y1: 270, pts: P.map((p, i) => i) };
+        const cellRects = [];
+        for (let depth = 0; depth < 3; depth++) {
+          const ax = depth % 2 === 0 ? 0 : 1;
+          const vals = cell.pts.map((i) => P[i][ax]).sort((a, b) => a - b);
+          const m = vals[Math.floor(vals.length / 2)];
+          splits.push(ax === 0 ? el("line", { class: "split", x1: m, y1: cell.y0, x2: m, y2: cell.y1 }, B.layer) : el("line", { class: "split", x1: cell.x0, y1: m, x2: cell.x1, y2: m }, B.layer));
+          const left = Q[ax] < m;
+          const pts = cell.pts.filter((i) => (P[i][ax] < m) === left);
+          cell = ax === 0 ? { ...cell, x0: left ? cell.x0 : m, x1: left ? m : cell.x1, pts } : { ...cell, y0: left ? cell.y0 : m, y1: left ? m : cell.y1, pts };
+          cellRects.push(el("rect", { class: "cell", x: cell.x0, y: cell.y0, width: cell.x1 - cell.x0, height: cell.y1 - cell.y0 }, B.layer));
+        }
+        const raysB = cell.pts.map((i) => el("line", { class: "ray", x1: Q[0], y1: Q[1], x2: P[i][0], y2: P[i][1] }, B.layer));
+        const nearB = cell.pts.reduce((b, i) => (Math.hypot(P[i][0] - Q[0], P[i][1] - Q[1]) < Math.hypot(P[b][0] - Q[0], P[b][1] - Q[1]) ? i : b), cell.pts[0]);
+        const bestB = el("line", { class: "best", x1: Q[0], y1: Q[1], x2: P[nearB][0], y2: P[nearB][1] }, B.layer);
+        const note = nearB === nearest ? "same answer" : "close, not exact";
+
+        let tls = [];
+        function reset() {
+          tls.forEach((t) => t.kill());
+          tls = [];
+          gsap.set([...raysA, ...raysB, bestA, bestB, ...splits, ...cellRects], { opacity: 0 });
+          A.count.textContent = B.count.textContent = "";
+        }
+        function runBF(instant) {
+          const c = { n: 0 };
+          if (instant) {
+            gsap.set(raysA, { opacity: 0.25 });
+            gsap.set(bestA, { opacity: 1 });
+            A.count.textContent = `${P.length} comparisons`;
+            return;
+          }
+          const tl = gsap.timeline();
+          tl.to(raysA, { opacity: 0.9, duration: 0.12, stagger: { each: 0.06, onComplete() { A.count.textContent = `${++c.n} comparisons`; } } });
+          tl.to(raysA, { opacity: 0.18, duration: 0.4 }, "-=0.2").to(bestA, { opacity: 1, duration: 0.4 });
+          tls.push(tl);
+        }
+        function runKD(instant) {
+          if (instant) {
+            gsap.set(splits, { opacity: 1 });
+            gsap.set(cellRects[2], { opacity: 1 });
+            gsap.set(raysB, { opacity: 0.4 });
+            gsap.set(bestB, { opacity: 1 });
+            B.count.textContent = `${raysB.length} comparisons, ${note}`;
+            return;
+          }
+          const tl = gsap.timeline();
+          splits.forEach((s, i) => {
+            tl.to(s, { opacity: 1, duration: 0.4 });
+            tl.to(cellRects, { opacity: (k) => (k === i ? 1 : 0), duration: 0.3 });
+          });
+          tl.to(raysB, { opacity: 0.9, duration: 0.15, stagger: 0.12, onStart: () => (B.count.textContent = `${raysB.length} comparisons, ${note}`) });
+          tl.to(raysB, { opacity: 0.35, duration: 0.3 }).to(bestB, { opacity: 1, duration: 0.4 });
+          tls.push(tl);
+        }
+        Deck.scene("#search", {
+          enter: reset,
+          leave: reset,
+          step(slide, n, els, d) {
+            const instant = d.dir < 0;
+            if (n === 1) runBF(instant || Deck.step > 1);
+            if (n === 2) runKD(instant);
+          },
+          unstep(slide, n) {
+            if (n === 2) {
+              gsap.set([...raysB, bestB, ...splits, ...cellRects], { opacity: 0 });
+              B.count.textContent = "";
+            }
+            if (n === 1) reset();
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ Hamming
+      {
+        const sl = document.querySelector("#metrics");
+        const a = "1011001110100101", b = "1001011110110001";
+        const rows = [sl.querySelector(".r1"), sl.querySelector(".r2"), sl.querySelector(".r3")];
+        rows[0].innerHTML = [...a].map((c) => `<b>${c}</b>`).join("");
+        rows[1].innerHTML = [...b].map((c) => `<b>${c}</b>`).join("");
+        rows[2].innerHTML = [...a].map((c, i) => `<b data-d="${c !== b[i] ? 1 : 0}"></b>`).join("");
+        const out = sl.querySelector(".hd .big");
+        const xs = [...rows[2].children];
+        let tl = null;
+        Deck.scene("#metrics", {
+          enter() {
+            tl?.kill();
+            xs.forEach((x) => {
+              x.textContent = "";
+              x.classList.remove("diff");
+            });
+            out.textContent = "0";
+            let n = 0;
+            tl = gsap.timeline({ delay: 0.8 });
+            xs.forEach((x, i) =>
+              tl.call(() => {
+                x.textContent = x.dataset.d;
+                if (x.dataset.d === "1") x.classList.add("diff"), (out.textContent = ++n);
+                gsap.from(x, { scale: 0.3, duration: 0.3 });
+              }, null, i * 0.18)
+            );
+          },
+          leave: () => tl?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ Ratio test bars
+      {
+        const sl = document.querySelector("#ratio");
+        const cases = [...sl.querySelectorAll(".case")];
+        const MAX = 70;
+        function setCase(c, on, instant) {
+          const d1 = +c.dataset.d1, d2 = +c.dataset.d2;
+          const t = { duration: instant ? 0 : 0.9, ease: "power2.out" };
+          gsap.to(c.querySelector(".bar.d2"), { width: on ? (d2 / MAX) * 100 + "%" : 0, ...t });
+          gsap.to(c.querySelector(".bar.d1"), { width: on ? (d1 / MAX) * 100 + "%" : 0, ...t, delay: instant ? 0 : 0.4 });
+          gsap.set(c.querySelector(".mark"), { left: ((0.75 * d2) / MAX) * 100 + "%" });
+          gsap.to([c.querySelector(".mark"), c.querySelector(".verdict")], { opacity: on ? 1 : 0, duration: instant ? 0 : 0.4, delay: instant ? 0 : 1.2 });
+        }
+        Deck.scene("#ratio", {
+          enter() {
+            cases.forEach((c) => setCase(c, false, true));
+          },
+          step(slide, n, els, d) {
+            if (n <= 2) setCase(cases[n - 1], true, d.dir < 0);
+          },
+          unstep(slide, n) {
+            if (n <= 2) setCase(cases[n - 1], false, true);
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ RANSAC on a line
+      {
+        const sl = document.querySelector("#ransac");
+        const svg = sl.querySelector("svg");
+        seed = 3;
+        const line = (x) => 250 - 0.42 * x;
+        const pts = [];
+        for (let i = 0; i < 26; i++) {
+          const x = 30 + rand() * 400;
+          pts.push([x, line(x) + (rand() - 0.5) * 22]);
+        }
+        for (let i = 0; i < 14; i++) pts.push([30 + rand() * 400, 30 + rand() * 260]);
+        el("rect", { x: 0, y: 0, width: 460, height: 320, rx: 12, fill: "rgba(255,255,255,0.03)" }, svg);
+        const band = el("polygon", { class: "band", points: "" }, svg);
+        const fit = el("line", { class: "fit" }, svg);
+        const dots = pts.map(([x, y]) => el("circle", { class: "p", cx: x, cy: y, r: 5 }, svg));
+        const label = el("text", { x: 16, y: 30 }, svg);
+        // A few hand-picked samples: two bad guesses, then a good one
+        const trials = [[27, 33], [3, 30], [5, 19], [8, 21]];
+        let best = { n: -1 };
+        function evaluate([i, j]) {
+          const [x1, y1] = pts[i], [x2, y2] = pts[j];
+          const len = Math.hypot(x2 - x1, y2 - y1);
+          const nx = -(y2 - y1) / len, ny = (x2 - x1) / len;
+          const inl = pts.map(([x, y]) => Math.abs((x - x1) * nx + (y - y1) * ny) < 14);
+          const t = (x) => [x, y1 + ((x - x1) * (y2 - y1)) / (x2 - x1)];
+          const [a, b] = [t(0), t(460)];
+          const off = 14 / Math.abs(nx === 0 ? 1 : ny);
+          return { inl, n: inl.filter(Boolean).length, a, b, off, i, j };
+        }
+        function draw(r, k) {
+          fit.setAttribute("x1", r.a[0]);
+          fit.setAttribute("y1", r.a[1]);
+          fit.setAttribute("x2", r.b[0]);
+          fit.setAttribute("y2", r.b[1]);
+          band.setAttribute("points", `${r.a[0]},${r.a[1] - r.off} ${r.b[0]},${r.b[1] - r.off} ${r.b[0]},${r.b[1] + r.off} ${r.a[0]},${r.a[1] + r.off}`);
+          dots.forEach((d, i) => {
+            d.classList.toggle("in", r.inl[i]);
+            d.classList.toggle("pick", i === r.i || i === r.j);
+          });
+          label.textContent = k === "best" ? `best model: ${r.n} inliers, ${pts.length - r.n} outliers` : `try ${k}: ${r.n} inliers (best so far ${Math.max(best.n, r.n)})`;
+        }
+        let tl = null;
+        function play() {
+          tl?.kill();
+          best = { n: -1 };
+          dots.forEach((d) => d.classList.remove("in", "pick"));
+          gsap.set([fit, band], { opacity: 0 });
+          label.textContent = "";
+          tl = gsap.timeline({ delay: 0.5 });
+          trials.forEach((tr, k) => {
+            const r = evaluate(tr);
+            tl.call(() => {
+              draw(r, k + 1);
+              if (r.n > best.n) best = r;
+            });
+            tl.fromTo([fit, band], { opacity: 0 }, { opacity: 1, duration: 0.4 });
+            tl.to({}, { duration: 1.3 });
+          });
+          tl.call(() => {
+            draw(best, "best");
+            dots.forEach((d) => d.classList.remove("pick"));
+          });
+        }
+        sl.querySelector("[data-act=replay]").addEventListener("click", play);
+        Deck.scene("#ransac", { enter: play, leave: () => tl?.kill() });
+      }
+
+      // ------------------------------------------------------------ Live matching lab
+      {
+        const sl = document.querySelector("#lab");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const read = sl.querySelector(".readout");
+        const W = 480, H = 270, GAP = 20;
+        const photo = await loadImage("/assets/2025-10-16-19-17-39.png");
+        const id1 = readPixels(photo, W, H);
+        const g1 = toGray(id1);
+        let kp1 = null, view = null, mode = "bf";
+        const inputs = Object.fromEntries([...sl.querySelectorAll("input")].map((i) => [i.name, i]));
+
+        function makeView(angle, scale, dx, dy, light) {
+          const c = document.createElement("canvas");
+          c.width = W;
+          c.height = H;
+          const x = c.getContext("2d", { willReadFrequently: true });
+          x.fillStyle = "#1a1d2b";
+          x.fillRect(0, 0, W, H);
+          x.filter = `brightness(${light})`;
+          x.translate(W / 2 + dx, H / 2 + dy);
+          x.rotate(angle);
+          x.scale(scale, scale);
+          x.drawImage(photo, -W / 2, -H / 2, W, H);
+          const id = x.getImageData(0, 0, W, H);
+          const kp = ORB.detectAndCompute(toGray(id), W, H, { nfeatures: 400 });
+          const knn = ORB.knn2(kp1, kp);
+          // crossCheck: keep i -> j only if j's best match is i
+          const back = ORB.knn2(kp, kp1);
+          const cross = knn.map((p) => p[0]).filter((m) => back[m.trainIdx][0].trainIdx === m.queryIdx).sort((a, b) => a.distance - b.distance);
+          return { id, kp, knn, cross };
+        }
+        function draw() {
+          if (!view) return;
+          ctx.fillStyle = "#05060f";
+          ctx.fillRect(0, 0, cv.width, cv.height);
+          ctx.putImageData(id1, 0, 0);
+          ctx.putImageData(view.id, W + GAP, 0);
+          const ratio = +inputs.ratio.value, top = +inputs.top.value;
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          sl.querySelector(".for-bf").style.display = mode === "bf" ? "" : "none";
+          sl.querySelector(".for-ratio").style.display = mode === "ratio" || mode === "ransac" ? "" : "none";
+          const dot = (k, off, color) => {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(k.x + off, k.y, 3 + k.level * 1.5, 0, 7);
+            ctx.stroke();
+          };
+          const link = (m, color, w = 1.2) => {
+            const a = kp1[m.queryIdx], b = view.kp[m.trainIdx];
+            ctx.strokeStyle = color;
+            ctx.lineWidth = w;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x + W + GAP, b.y);
+            ctx.stroke();
+            dot(a, 0, color);
+            dot(b, W + GAP, color);
+          };
+          if (mode === "kp") {
+            kp1.forEach((k) => dot(k, 0, "#86efac"));
+            view.kp.forEach((k) => dot(k, W + GAP, "#86efac"));
+            read.innerHTML = `kp1: <b>${kp1.length}</b> keypoints · kp2: <b>${view.kp.length}</b> keypoints · each with a 256-bit descriptor`;
+          } else if (mode === "bf") {
+            const ms = view.cross.slice(0, top);
+            ms.forEach((m) => link(m, "rgba(103,232,249,0.85)"));
+            read.innerHTML = `bf.match with crossCheck: <b>${view.cross.length}</b> mutual matches · drawing the best <b>${ms.length}</b>`;
+          } else {
+            const good = view.knn.filter(([m, n]) => m.distance < ratio * n.distance).map((p) => p[0]);
+            if (mode === "ratio") {
+              good.forEach((m) => link(m, "rgba(167,139,250,0.85)"));
+              read.innerHTML = `knnMatch k=2: <b>${view.knn.length}</b> pairs · ratio test keeps <b>${good.length}</b>`;
+            } else {
+              const src = good.map((m) => [kp1[m.queryIdx].x, kp1[m.queryIdx].y]);
+              const dst = good.map((m) => [view.kp[m.trainIdx].x, view.kp[m.trainIdx].y]);
+              const { mask } = ORB.ransac(src, dst, 5);
+              good.forEach((m, i) => !mask[i] && link(m, "rgba(248,113,113,0.9)", 1.5));
+              good.forEach((m, i) => mask[i] && link(m, "rgba(134,239,172,0.8)"));
+              const n = mask.reduce((a, b) => a + b, 0);
+              read.innerHTML = `findHomography, RANSAC: <b>${n}/${good.length}</b> inliers (green), ${good.length - n} outliers (red). Raise the ratio to let more doubtful matches in.`;
+            }
+          }
+        }
+        const views = [
+          [0.35, 0.8, 10, 0, 1.25],
+          [-0.6, 0.7, -20, 10, 0.8],
+          [0.15, 1.15, 30, -10, 1.1],
+          [1.2, 0.75, 0, 0, 0.95],
+        ];
+        let vi = 0;
+        function newView() {
+          read.textContent = "computing…";
+          setTimeout(() => {
+            view = makeView(...views[vi++ % views.length]);
+            draw();
+          }, 30);
+        }
+        sl.querySelector(".chips").addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (!b || !kp1) return;
+          if (b.dataset.act === "view") return newView();
+          mode = b.dataset.mode;
+          sl.querySelectorAll("[data-mode]").forEach((x) => x.classList.toggle("on", x === b));
+          draw();
+        });
+        sl.addEventListener("input", draw);
+        Deck.scene("#lab", {
+          enter() {
+            if (kp1) return;
+            setTimeout(() => {
+              kp1 = ORB.detectAndCompute(g1, W, H, { nfeatures: 400 });
+              newView();
+            }, 400);
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

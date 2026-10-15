@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Programming</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .hub {
+        gap: 1.6rem;
+      }
+
+      .hub .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .hub h1 {
+        text-align: center;
+      }
+
+      .hub > p.muted {
+        max-width: 40rem;
+        text-align: center;
+      }
+
+      .hub .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      .hub .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      .hub .group h3 span {
+        margin-right: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .hub .tile {
+        min-height: 5.6rem;
+      }
+
+      .hub .tiles.big .tile {
+        min-height: 9rem;
+        font-size: 1.3rem;
+      }
+
+      .hub .soon {
+        opacity: 0.45;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide top hub" id="hub">
+      <span class="kicker">Computer science</span>
+      <h1>Programming</h1>
+
+      <div class="group">
+        <h3>Concepts</h3>
+        <div class="tiles">
+          <a class="tile" href="why-programming.html"><span>Why We Need Programming</span></a>
+          <a class="tile" href="highvslow.html"><span>High Level vs Low Level</span></a>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Languages</h3>
+        <div class="tiles">
+          <a class="tile" href="cpp/index.html" style="--img:url('/assets/2025-10-02-11-55-50.png')"><span>C++</span></a>
+          <a class="tile" href="python/index.html" style="--img:url('/assets/2025-10-19-00-50-48.png')"><span>Python</span></a>
+          <a class="tile" href="rust/index.html" style="--img:url('/assets/2025-10-19-00-52-23.png')"><span>Rust</span></a>
+          <div class="tile soon" style="--img:url('/assets/2025-10-02-11-56-23.png')"><span>Haskell<small>coming soon</small></span></div>
+          <div class="tile soon" style="--img:url('/assets/2025-10-19-01-03-25.png')"><span>JavaScript<small>coming soon</small></span></div>
+          <a class="tile" href="sql/index.html" style="--img:url('/assets/2025-10-19-00-55-48.png')"><span>SQL</span></a>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dreams</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #automata .figs {
+        grid-template-columns: repeat(auto-fit, minmax(min(11rem, 40vw), 1fr));
+        width: min(100%, 60rem);
+      }
+
+      #automata .figs img {
+        aspect-ratio: 2 / 3;
+        max-height: 44vh;
+      }
+
+      #aristotle .cols {
+        grid-template-columns: auto minmax(0, 1fr);
+        width: min(100%, 52rem);
+      }
+
+      #aristotle img {
+        max-height: 56vh;
+      }
+
+      #aristotle ul {
+        font-size: 1.5rem;
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      #dated svg {
+        width: min(100%, 64rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      #dated .rail {
+        stroke: url(#railGrad);
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+
+      #dated .gap {
+        stroke: var(--faint);
+        stroke-width: 2;
+        stroke-dasharray: 3 7;
+      }
+
+      #dated circle {
+        fill: #0b0d1a;
+        stroke: var(--cyan);
+        stroke-width: 3;
+      }
+
+      #dated .yr {
+        font-family: var(--font-mono);
+        font-size: 15px;
+        fill: var(--cyan);
+        text-anchor: middle;
+      }
+
+      #dated .what {
+        font-family: var(--font-display);
+        font-size: 17px;
+        fill: var(--text);
+        text-anchor: middle;
+      }
+
+      #dated a .what {
+        fill: #f9a8d4;
+        text-decoration: underline;
+      }
+
+      @media (max-width: 700px) {
+        #aristotle .cols {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">History of AI · Chapter 1</span>
+      <h1>Dreams</h1>
+      <p>Long before computers, people imagined machines that move, serve and think.</p>
+    </section>
+
+    <section class="slide" id="automata">
+      <h2>Automata</h2>
+      <div class="figs">
+        <figure class="step"><img src="/assets/2025-10-16-10-17-59.png" alt="Book cover: Homer, The Iliad and The Odyssey" /><figcaption>Homer, <em>The Iliad</em> and <em>The Odyssey</em>: 800–600 BC</figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-16-10-39-15.png" alt="C-3PO and R2-D2 from Star Wars" /><figcaption>C-3PO</figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-16-10-24-09.png" alt="Poster for The Odyssey, a 2026 film by Christopher Nolan" /><figcaption><em>The Odyssey</em>: 2026</figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-16-10-25-10.png" alt="Poster for Troy, a 2004 film" /><figcaption><em>Troy</em>: 2004</figcaption></figure>
+      </div>
+      <p class="step center">The same stories, nearly 3,000 years apart: the <em>Iliad</em> already has Hephaestus' self-moving tripods and golden servants.</p>
+    </section>
+
+    <section class="slide" id="aristotle">
+      <h2>Aristotle</h2>
+      <div class="cols">
+        <figure class="step"><img src="/assets/2025-10-19-09-01-43.png" alt="Book cover: Politics by Aristotle" /><figcaption><em>Politics</em>, written ~320 BC</figcaption></figure>
+        <ul>
+          <li class="step">Automation: impossible</li>
+          <li class="step">So slavery: essential for leisure</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Early attempts at automation and AI</h2>
+      <div class="figs contain">
+        <figure class="step"><img src="/assets/2025-10-18-06-55-32.png" alt="A copy of Ars Magna with its paper rotating wheels" /><figcaption><em>Ars Magna</em> (~1300 AD) by Ramon Llull</figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-19-08-53-00.png" alt="A reconstruction of Leonardo da Vinci's automaton knight beside its mechanism" /><figcaption>Automaton Knight (1495) by Leonardo da Vinci</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide" id="dated">
+      <h2>The dream, dated</h2>
+      <svg viewBox="0 0 960 260" aria-label="Timeline: Homer 800 to 600 BC, Aristotle about 320 BC, Ars Magna about 1300, da Vinci's knight 1495, AI named 1955">
+        <defs>
+          <linearGradient id="railGrad" gradientUnits="userSpaceOnUse" x1="40" y1="0" x2="920" y2="0">
+            <stop offset="0" stop-color="#8b5cf6" />
+            <stop offset="1" stop-color="#22d3ee" />
+          </linearGradient>
+        </defs>
+        <line class="rail" x1="40" y1="130" x2="920" y2="130" />
+      </svg>
+      <p class="center muted">Positions are to scale in time: most of the story is waiting.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent, text) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        if (text) e.textContent = text;
+        parent?.appendChild(e);
+        return e;
+      };
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // Milestones placed to scale between 800 BC and 1960 AD
+      const svg = document.querySelector("#dated svg");
+      const X = (yr) => 40 + ((yr + 800) / 2760) * 880;
+      const marks = [
+        [-700, "800–600 BC", "Homer's automata", -1],
+        [-320, "~320 BC", "Aristotle", 1],
+        [1300, "~1300", "Ars Magna", -1],
+        [1495, "1495", "da Vinci's knight", 1],
+        [1955, "1955", "AI is named", -1, "index.html#3"],
+      ].map(([yr, label, what, side, href]) => {
+        const parent = href ? el("a", { href }, svg) : svg;
+        const g = el("g", {}, parent);
+        el("circle", { cx: X(yr), cy: 130, r: 9 }, g);
+        const y = side < 0 ? 72 : 180;
+        el("line", { class: "gap", x1: X(yr), x2: X(yr), y1: 130 + side * 12, y2: y + (side < 0 ? 12 : -22) }, g);
+        el("text", { class: "yr", x: X(yr), y: side < 0 ? y - 20 : y }, g, label);
+        el("text", { class: "what", x: X(yr), y: side < 0 ? y : y + 22 }, g, what);
+        return g;
+      });
+      const rail = svg.querySelector(".rail");
+      let tl = null;
+      Deck.scene("#dated", {
+        enter() {
+          tl?.kill();
+          tl = gsap.timeline();
+          tl.fromTo(rail, { attr: { x2: 40 } }, { attr: { x2: 920 }, duration: 2.4, ease: "none" });
+          marks.forEach((g, i) => tl.fromTo(g, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 }, [0.1, 0.5, 1.9, 2.05, 2.35][i]));
+        },
+        leave: () => tl?.progress(1),
+      });
+    </script>
+  </body>
+</html>

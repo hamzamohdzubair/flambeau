@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Edge Detection</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chip {
+        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      .chip.ghost { border-style: dashed; }
+      canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
+      figure figcaption { font-family: var(--font-mono); }
+      .sl { display: grid; grid-template-columns: 7rem minmax(0, 1fr) 3rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.9rem; margin: 0.3rem 0; }
+      .sl input { width: 100%; accent-color: var(--violet); }
+      .sl output { color: var(--cyan); text-align: right; }
+
+      .kgrid { --kc: 2.4rem; position: relative; display: inline-grid; gap: 4px; padding: 6px; border-radius: 12px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); font-family: var(--font-mono); }
+      .kgrid b { display: grid; place-items: center; width: var(--kc); height: var(--kc); border-radius: 6px; font-size: calc(var(--kc) * 0.36); font-weight: 500; color: var(--text); }
+      .kpair { display: flex; gap: 2.4rem; justify-content: center; flex-wrap: wrap; text-align: center; }
+      .kpair figure { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+
+      /* edge-type profiles */
+      .etype svg { width: 100%; height: auto; overflow: visible; }
+      .etype .strip { height: 1.6rem; border-radius: 6px; margin-bottom: 0.7rem; border: 1px solid var(--border); }
+      .etype path { fill: none; stroke: var(--cyan); stroke-width: 3; stroke-linecap: round; }
+
+      /* gradient formula */
+      .gradwrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 64rem); }
+      .gradwrap svg { width: 100%; max-width: 22rem; margin: 0 auto; display: block; }
+      .gradwrap svg text { font-family: var(--font-mono); font-size: 12px; fill: var(--muted); }
+
+      /* 1-D derivatives */
+      .deriv { width: min(100%, 34rem); margin: 1.6rem 0 0.6rem; }
+      .deriv svg { width: 100%; overflow: visible; }
+      .deriv text { font-family: var(--font-mono); font-size: 11px; }
+      .lapl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.4rem; align-items: center; width: min(100%, 64rem); }
+
+      /* labs */
+      .lab { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; width: min(100%, 62rem); }
+      .canny { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 70rem); }
+      .canny ol li { transition: color 0.3s; }
+      .canny ol li.now { color: var(--cyan); }
+      .ctl { width: min(100%, 30rem); }
+
+      .codeside { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2.4rem; align-items: center; width: min(100%, 66rem); }
+      .codeside pre { width: 100%; }
+      .codeside .side { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; text-align: center; }
+
+      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
+      .qa .q { display: grid; gap: 0.4rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
+      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
+      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
+
+      @media (max-width: 760px) {
+        .gradwrap, .lapl, .canny, .codeside { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+        .lab { gap: 0.6rem; }
+        .kgrid { --kc: 1.9rem; }
+        .kpair { gap: 1rem; }
+        .sl { grid-template-columns: 5rem minmax(0, 1fr) 2.6rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84vw)" aria-label="A photo dissolving into its Canny edge map"></canvas>
+      <h1>Edge Detection</h1>
+      <p>Find where intensity changes sharply: the outlines of everything in the picture.</p>
+    </section>
+
+    <!-- ================================================================ what are edges -->
+    <section class="slide" id="slide-types">
+      <h2>What are edges?</h2>
+      <p class="lead"><strong>Edge:</strong> a significant local change in pixel intensity, the boundary between regions.</p>
+      <div class="cards etype" style="width: min(100%, 60rem)">
+        <div class="card step">
+          <div class="strip" style="background: linear-gradient(90deg, #222 50%, #ddd 50%)"></div>
+          <svg viewBox="0 0 160 70"><path d="M5 60 H80 V10 H155" /></svg>
+          <h3>Step edge</h3><p>A sharp intensity change.</p>
+        </div>
+        <div class="card step">
+          <div class="strip" style="background: linear-gradient(90deg, #222 30%, #ddd 70%)"></div>
+          <svg viewBox="0 0 160 70"><path d="M5 60 H50 L110 10 H155" /></svg>
+          <h3>Ramp edge</h3><p>A gradual intensity change.</p>
+        </div>
+        <div class="card step">
+          <div class="strip" style="background: linear-gradient(90deg, #222 35%, #ddd 50%, #222 65%)"></div>
+          <svg viewBox="0 0 160 70"><path d="M5 60 H55 L80 10 L105 60 H155" /></svg>
+          <h3>Roof edge</h3><p>A peak or a valley.</p>
+        </div>
+      </div>
+      <p class="step center"><strong>Why detect edges?</strong> Object boundaries · feature extraction · image segmentation · shape analysis</p>
+    </section>
+
+    <!-- ================================================================ gradient -->
+    <section class="slide" id="slide-grad">
+      <h2>Gradient-based edge detection</h2>
+      <div class="gradwrap">
+        <div>
+          <p><strong>Image gradient:</strong> the rate of change of intensity.</p>
+          <ul>
+            <li class="step">\(G_x\): horizontal gradient, \(\partial I / \partial x\)</li>
+            <li class="step">\(G_y\): vertical gradient, \(\partial I / \partial y\)</li>
+            <li class="step">Magnitude: \(G = \sqrt{G_x^2 + G_y^2}\)</li>
+            <li class="step">Direction: \(\theta = \arctan(G_y / G_x)\)</li>
+          </ul>
+          <p class="step lead"><strong class="grad">Large gradient = edge!</strong></p>
+        </div>
+        <svg class="gvec" viewBox="0 0 220 220" aria-label="The gradient vector at an edge is the sum of its x and y parts and points across the edge">
+          <defs>
+            <linearGradient id="eg" x1="0" y1="1" x2="1" y2="0"><stop offset="0.48" stop-color="#1e2236" /><stop offset="0.52" stop-color="#cbd5e1" /></linearGradient>
+            <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke" /></marker>
+          </defs>
+          <rect width="220" height="220" rx="14" fill="url(#eg)" />
+          <line class="gx" x1="110" y1="110" x2="170" y2="110" stroke="#ec4899" stroke-width="4" marker-end="url(#ah)" />
+          <line class="gy" x1="170" y1="110" x2="170" y2="50" stroke="#22d3ee" stroke-width="4" marker-end="url(#ah)" />
+          <line class="gm" x1="110" y1="110" x2="170" y2="50" stroke="#a78bfa" stroke-width="5" marker-end="url(#ah)" />
+          <text x="132" y="128" fill="#f9a8d4">Gx</text>
+          <text x="176" y="84" fill="#67e8f9">Gy</text>
+          <text x="104" y="74" fill="#c4b5fd">G, θ</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ================================================================ sobel -->
+    <section class="slide">
+      <h2>Sobel edge detection</h2>
+      <p class="lead center">Sobel kernels approximate the gradient <em>with</em> smoothing.</p>
+      <div class="kpair">
+        <figure><div class="kgrid" data-k="-1 0 1|-2 0 2|-1 0 1"></div><figcaption>Sobel X</figcaption></figure>
+        <figure><div class="kgrid" data-k="-1 -2 -1|0 0 0|1 2 1"></div><figcaption>Sobel Y</figcaption></figure>
+      </div>
+      <div class="cards" style="width: min(100%, 52rem)">
+        <div class="card step"><h3>Gradient + smoothing</h3><p>The 1-2-1 weights average across the edge direction.</p></div>
+        <div class="card step"><h3>3×3 kernels</h3><p>Small and fast.</p></div>
+        <div class="card step"><h3>Noise-resistant</h3><p>Good noise resistance thanks to the smoothing.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ sobel code -->
+    <section class="slide">
+      <h2>Sobel in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # compute sobel x (vertical edges)
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+        # ans: dx=1, dy=0 means the x-derivative (vertical edges)
+        # compute sobel y (horizontal edges)
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+        # ans: dx=0, dy=1 means the y-derivative (horizontal edges)
+        # combine both gradients
+        magnitude = np.sqrt(sobelx**2 + sobely**2)  # ans:
+        # convert to uint8 for display
+        magnitude = np.uint8(np.clip(magnitude, 0, 255))  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ sobel params -->
+    <section class="slide">
+      <h2>Sobel parameters</h2>
+      <pre class="steps"><code class="language-python">
+        # cv2.Sobel(src, ddepth, dx, dy, ksize)
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=5)
+        # ddepth: output image depth
+        # ans: CV_64F, so negative values aren't clipped
+        # dx, dy: derivative order
+        # ans: (1, 0) = x-direction, (0, 1) = y-direction
+        # ksize: kernel size (1, 3, 5, 7)
+        # ans: larger kernel = more smoothing, less noise
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ gradient lab -->
+    <section class="slide" id="slide-lab">
+      <h2>Gradients of a real photo</h2>
+      <div class="lab">
+        <figure><canvas class="photo a" width="400" height="225"></canvas><figcaption class="na">gray</figcaption></figure>
+        <figure><canvas class="photo b" width="400" height="225"></canvas><figcaption class="nb"></figcaption></figure>
+      </div>
+      <div class="chips" data-interactive>
+        <button class="chip" data-v="gx">Sobel X</button>
+        <button class="chip" data-v="gy">Sobel Y</button>
+        <button class="chip on" data-v="mag">magnitude</button>
+        <button class="chip" data-v="dir">direction</button>
+        <button class="chip" data-v="scharr">Scharr magnitude</button>
+        <button class="chip" data-v="lap">Laplacian</button>
+        <button class="chip" data-v="log">blur + Laplacian</button>
+      </div>
+      <p class="muted center note" style="font-size: 0.9rem"></p>
+    </section>
+
+    <!-- ================================================================ scharr -->
+    <section class="slide">
+      <h2>Scharr edge detection</h2>
+      <p class="lead center"><strong>Scharr:</strong> a more accurate gradient than Sobel for small 3×3 kernels.</p>
+      <div class="kpair">
+        <figure><div class="kgrid" data-k="-3 0 3|-10 0 10|-3 0 3"></div><figcaption>Scharr X</figcaption></figure>
+        <figure><div class="kgrid" data-k="-3 -10 -3|0 0 0|3 10 3"></div><figcaption>Scharr Y</figcaption></figure>
+      </div>
+      <p class="step center"><strong>When to use:</strong> when you need more accuracy from a 3×3 kernel.</p>
+    </section>
+
+    <!-- ================================================================ scharr code -->
+    <section class="slide">
+      <h2>Scharr in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # scharr gradient (more accurate than sobel)
+        scharrx = cv2.Scharr(gray, cv2.CV_64F, 1, 0)
+        # ans: x-direction gradient
+        scharry = cv2.Scharr(gray, cv2.CV_64F, 0, 1)
+        # ans: y-direction gradient
+        # only works with a 3x3 kernel
+        # ans: more accurate than a 3x3 Sobel
+        # combine gradients
+        magnitude = np.sqrt(scharrx**2 + scharry**2)
+        # ans: the same as combining Sobel
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ laplacian -->
+    <section class="slide" id="slide-lap">
+      <h2>Laplacian edge detection</h2>
+      <div class="lapl">
+        <div style="display: grid; justify-items: center; gap: 0.8rem">
+          <div class="kgrid" data-k="0 1 0|1 -4 1|0 1 0"></div>
+          <p class="muted">\(\nabla^2 I = \dfrac{\partial^2 I}{\partial x^2} + \dfrac{\partial^2 I}{\partial y^2}\)</p>
+        </div>
+        <div>
+          <p><strong>Laplacian:</strong> a second-derivative operator. Where the first derivative peaks, the second crosses zero.</p>
+          <div class="deriv" data-interactive>
+            <svg class="d1d" viewBox="0 0 340 240" aria-label="An edge profile, its first derivative and its second derivative"></svg>
+            <div class="chips" style="justify-content: flex-start"><button class="chip ghost" data-noise>Add noise</button></div>
+          </div>
+          <p class="step"><strong>Property:</strong> very sensitive to noise, so smooth first!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ laplacian code -->
+    <section class="slide">
+      <h2>Laplacian in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # laplacian (2nd derivative)
+        laplacian = cv2.Laplacian(gray, cv2.CV_64F, ksize=3)
+        # ans: detects edges in all directions
+        # why the second derivative?
+        # ans: a zero-crossing marks the edge location
+        # the laplacian is very noise-sensitive
+        blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+        laplacian = cv2.Laplacian(blurred, cv2.CV_64F)
+        # ans: blur first to reduce noise
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ canny -->
+    <section class="slide" id="slide-canny">
+      <h2>Canny edge detection</h2>
+      <div class="canny">
+        <figure><canvas class="photo" width="400" height="225"></canvas><figcaption class="cname">input (grayscale)</figcaption></figure>
+        <div>
+          <p><strong>Canny</strong> is a multi-stage algorithm, and the classic best edge detector.</p>
+          <ol>
+            <li class="step">Gaussian smoothing (noise reduction)</li>
+            <li class="step">Gradient calculation (Sobel)</li>
+            <li class="step">Non-maximum suppression (thin edges)</li>
+            <li class="step">Double thresholding (strong / weak edges)</li>
+            <li class="step">Edge tracking by hysteresis</li>
+          </ol>
+          <p class="step"><strong>Output:</strong> a binary edge map (0 or 255).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ canny params -->
+    <section class="slide">
+      <h2>Canny parameters</h2>
+      <pre class="steps"><code class="language-python">
+        # canny edge detection
+        edges = cv2.Canny(gray, threshold1=50, threshold2=150)
+        # ans: threshold1 = low, threshold2 = high
+        # threshold1 (low threshold):
+        # ans: weak edges below this are discarded
+        # threshold2 (high threshold):
+        # ans: strong edges above this are kept
+        # ratio recommendation:
+        # ans: threshold2 = 2 × threshold1 or 3 × threshold1
+        # edges between the thresholds:
+        # ans: kept if connected to a strong edge (hysteresis)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ canny code -->
+    <section class="slide">
+      <h2>Canny in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # basic canny
+        edges = cv2.Canny(gray, 50, 150)
+        # ans: detects edges, outputs a binary image
+        # canny with an aperture size
+        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        # ans: apertureSize for the Sobel operator (3, 5, 7)
+        # canny with the L2 gradient
+        edges = cv2.Canny(gray, 50, 150, L2gradient=True)
+        # ans: L2gradient=True uses √(Gx²+Gy²): more accurate
+        # ans: L2gradient=False uses |Gx|+|Gy|: faster
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ thresholds -->
+    <section class="slide" id="slide-thr">
+      <h2>Choosing thresholds</h2>
+      <div class="canny">
+        <figure><canvas class="photo" width="400" height="225"></canvas><figcaption class="tname"></figcaption></figure>
+        <div>
+          <ul>
+            <li><strong>Low threshold</strong> too low → noise edges</li>
+            <li><strong>High threshold</strong> too high → missed edges</li>
+          </ul>
+          <p class="step"><strong>Strategy:</strong></p>
+          <ul>
+            <li class="step">Try a ratio of 2:1 or 3:1 (e.g. 50, 150)</li>
+            <li class="step">Adjust based on the results</li>
+            <li class="step">High-contrast images → higher thresholds; low-contrast → lower</li>
+          </ul>
+          <div class="ctl" data-interactive>
+            <label class="sl">threshold1 <input type="range" min="0" max="300" value="50" data-t="lo" /><output></output></label>
+            <label class="sl">threshold2 <input type="range" min="0" max="400" value="150" data-t="hi" /><output></output></label>
+            <div class="chips" style="justify-content: flex-start"><button class="chip ghost" data-l2>L2gradient=False</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What defines an edge?</p><p class="answer">A significant change in pixel intensity.</p></div>
+        <div class="q"><p>What is the gradient magnitude?</p><p class="answer">√(Gx² + Gy²): the strength of the intensity change.</p></div>
+        <div class="q"><p>Which edges does Sobel X detect?</p><p class="answer">Vertical edges (left-right transitions).</p></div>
+        <div class="q"><p>Why use <code>CV_64F</code> for Sobel?</p><p class="answer">It keeps negative values instead of clipping them.</p></div>
+        <div class="q"><p>What does Canny output?</p><p class="answer">A binary edge map (0 or 255).</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is the difference between Sobel and Scharr?</p><p class="answer">Scharr is more accurate for 3×3 kernels.</p></div>
+        <div class="q"><p>Why is the Laplacian noise-sensitive?</p><p class="answer">A second derivative amplifies noise.</p></div>
+        <div class="q"><p>What is non-maximum suppression?</p><p class="answer">It thins edges to single-pixel width.</p></div>
+        <div class="q"><p>What is hysteresis in Canny?</p><p class="answer">It keeps weak edges that connect to strong edges.</p></div>
+        <div class="q"><p>What Canny threshold ratio is recommended?</p><p class="answer">high = 2 × low or 3 × low.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # ans:
+        # compute sobel x
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)  # ans:
+        # compute sobel y
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)  # ans:
+        # combine sobel x and y
+        magnitude = np.sqrt(sobelx**2 + sobely**2)  # ans:
+        magnitude = np.uint8(np.clip(magnitude, 0, 255))  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # apply canny with thresholds 100, 200
+        edges = cv2.Canny(gray, 100, 200)  # ans:
+        # apply the laplacian
+        laplacian = cv2.Laplacian(gray, cv2.CV_64F, ksize=3)  # ans:
+        # apply scharr x
+        scharrx = cv2.Scharr(gray, cv2.CV_64F, 1, 0)  # ans:
+        # apply scharr y
+        scharry = cv2.Scharr(gray, cv2.CV_64F, 0, 1)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # canny with different thresholds
+        edges1 = cv2.Canny(gray, 30, 90)
+        edges2 = cv2.Canny(gray, 100, 300)
+        # ans: edges1 detects more (lower thresholds)
+        # ans: edges2 detects fewer (higher thresholds)
+        # blur before canny
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)  # ans:
+        edges = cv2.Canny(blurred, 50, 150)  # ans:
+        # ans: reduces noise in the edge map
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 6 · mixed</h2>
+      <pre class="steps"><code class="language-python">
+        # sobel with a larger kernel
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=7)
+        # ans: more smoothing, less sensitive to noise
+        # absolute value of sobel
+        abs_sobelx = np.absolute(sobelx)  # ans:
+        # ans: turns negative gradients positive
+        # canny with the L2 gradient
+        edges = cv2.Canny(gray, 50, 150, L2gradient=True)
+        # ans: a more accurate gradient calculation
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 7 · mixed</h2>
+      <pre class="steps"><code class="language-python">
+        # gradient direction from sobel
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0)
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1)
+        direction = np.arctan2(sobely, sobelx)  # ans:
+        # ans: direction in radians
+        # combine laplacian and gaussian
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)  # ans:
+        laplacian = cv2.Laplacian(blurred, cv2.CV_64F)  # ans:
+        # what is LoG?
+        # ans: Laplacian of Gaussian (blur + laplacian)
+        # ans: it reduces noise sensitivity
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 8 · advanced</h2>
+      <pre class="steps"><code class="language-python">
+        # automatic canny thresholds (median-based)
+        median = np.median(gray)
+        lower = int(max(0, 0.7 * median))  # ans:
+        upper = int(min(255, 1.3 * median))  # ans:
+        edges = cv2.Canny(gray, lower, upper)  # ans:
+        # combine canny with morphology
+        edges = cv2.Canny(gray, 50, 150)
+        kernel = np.ones((3, 3), dtype=np.uint8)
+        edges = cv2.dilate(edges, kernel, iterations=1)  # ans:
+        # ans: thickens edges for better visibility
+      </code></pre>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      // ------------------------------------------------------------ kernel matrices
+      document.querySelectorAll(".kgrid[data-k]").forEach((el) => {
+        const k = el.dataset.k.split("|").map((r) => r.trim().split(/\s+/).map(Number));
+        const max = Math.max(...k.flat().map(Math.abs)) || 1;
+        el.style.gridTemplateColumns = `repeat(${k[0].length}, var(--kc))`;
+        el.innerHTML = k.flat().map((w) => {
+          const a = 0.12 + 0.6 * (Math.abs(w) / max);
+          const bg = w > 0 ? `rgba(139,92,246,${a})` : w < 0 ? `rgba(34,211,238,${a})` : "rgba(255,255,255,0.04)";
+          return `<b style="background:${bg}">${w < 0 ? "−" + -w : w}</b>`;
+        }).join("");
+      });
+
+      // ------------------------------------------------------------ image maths (grayscale float arrays)
+      async function loadGray(src, w) {
+        const im = new Image();
+        im.src = src;
+        await im.decode();
+        const h = Math.round((im.naturalHeight / im.naturalWidth) * w);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const x = c.getContext("2d", { willReadFrequently: true });
+        x.drawImage(im, 0, 0, w, h);
+        const d = x.getImageData(0, 0, w, h).data, g = new Float32Array(w * h);
+        for (let i = 0; i < g.length; i++) g[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+        return { w, h, g };
+      }
+      const refl = (v, m) => (v < 0 ? -v : v >= m ? 2 * m - v - 2 : v);
+      function conv({ w, h, g }, K) {
+        const n = K.length, r = (n - 1) / 2, out = new Float32Array(w * h);
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+          let a = 0;
+          for (let j = 0; j < n; j++) { const row = refl(y + j - r, h) * w; for (let i = 0; i < n; i++) if (K[j][i]) a += K[j][i] * g[row + refl(x + i - r, w)]; }
+          out[y * w + x] = a;
+        }
+        return { w, h, g: out };
+      }
+      const G5 = [[1, 4, 6, 4, 1], [4, 16, 24, 16, 4], [6, 24, 36, 24, 6], [4, 16, 24, 16, 4], [1, 4, 6, 4, 1]].map((r) => r.map((v) => v / 256));
+      const G3 = [[1, 2, 1], [2, 4, 2], [1, 2, 1]].map((r) => r.map((v) => v / 16));
+      const SX = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], SY = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
+      const CX = [[-3, 0, 3], [-10, 0, 10], [-3, 0, 3]], CY = [[-3, -10, -3], [0, 0, 0], [3, 10, 3]];
+      const LAP = [[0, 1, 0], [1, -4, 1], [0, 1, 0]];
+      function show(canvas, { w, h, g }, map = (v) => [v, v, v]) {
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d"), im = ctx.createImageData(w, h);
+        for (let i = 0; i < g.length; i++) { const [r, gg, b] = map(g[i], i); im.data[i * 4] = r; im.data[i * 4 + 1] = gg; im.data[i * 4 + 2] = b; im.data[i * 4 + 3] = 255; }
+        ctx.putImageData(im, 0, 0);
+      }
+      const hue = (a) => { // angle (rad) to an RGB hue
+        const h = ((a / Math.PI) * 180 + 360) % 360, f = (n) => { const k = (n + h / 60) % 6; return 255 * (1 - Math.max(0, Math.min(k, 4 - k, 1))); };
+        return [f(5), f(3), f(1)];
+      };
+
+      // Canny, stage by stage
+      function canny(img, lo, hi, l2 = true) {
+        const { w, h } = img;
+        const blur = conv(img, G5);
+        const gx = conv(blur, SX).g, gy = conv(blur, SY).g;
+        const mag = new Float32Array(w * h);
+        for (let i = 0; i < mag.length; i++) mag[i] = l2 ? Math.hypot(gx[i], gy[i]) : Math.abs(gx[i]) + Math.abs(gy[i]);
+        const nms = new Float32Array(w * h);
+        for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+          const i = y * w + x, a = ((Math.atan2(gy[i], gx[i]) * 180) / Math.PI + 180) % 180;
+          let n1, n2;
+          if (a < 22.5 || a >= 157.5) (n1 = i - 1), (n2 = i + 1);
+          else if (a < 67.5) (n1 = i - w - 1), (n2 = i + w + 1);
+          else if (a < 112.5) (n1 = i - w), (n2 = i + w);
+          else (n1 = i - w + 1), (n2 = i + w - 1);
+          nms[i] = mag[i] >= mag[n1] && mag[i] > mag[n2] ? mag[i] : 0;
+        }
+        const cls = new Uint8Array(w * h); // 2 strong, 1 weak
+        for (let i = 0; i < cls.length; i++) cls[i] = nms[i] >= hi ? 2 : nms[i] >= lo ? 1 : 0;
+        const out = new Uint8Array(w * h), stack = [];
+        for (let i = 0; i < cls.length; i++) if (cls[i] === 2) { out[i] = 1; stack.push(i); }
+        while (stack.length) {
+          const i = stack.pop();
+          for (const d of [-w - 1, -w, -w + 1, -1, 1, w - 1, w, w + 1]) { const j = i + d; if (j >= 0 && j < cls.length && cls[j] === 1 && !out[j]) { out[j] = 1; stack.push(j); } }
+        }
+        return { blur, mag, nms, cls, out, gx, gy };
+      }
+
+      const PHOTO = loadGray("/assets/2025-10-09-22-21-33.png", 400);
+
+      // ------------------------------------------------------------ cover: photo ↔ edges
+      const cover = document.querySelector("#title canvas");
+      let coverTl = null, coverImgs = null;
+      PHOTO.then((img) => {
+        const c = canny(img, 50, 150);
+        coverImgs = [img, c.out];
+        paintCover(0);
+      });
+      function paintCover(f) {
+        if (!coverImgs) return;
+        const [img, e] = coverImgs;
+        show(cover, img, (v, i) => {
+          const g = v * (1 - f);
+          return e[i] ? [g + f * 103, g + f * 232, g + f * 249] : [g + f * 8, g + f * 9, g + f * 20];
+        });
+      }
+      Deck.scene("#title", {
+        enter() {
+          const st = { f: 0 };
+          coverTl?.kill();
+          coverTl = gsap.to(st, { f: 1, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: -1, repeatDelay: 1, delay: 0.6, onUpdate: () => paintCover(st.f) });
+        },
+        leave() { coverTl?.kill(); },
+      });
+
+      // ------------------------------------------------------------ edge-type profiles draw in
+      Deck.scene("#slide-types", {
+        step(slide, n, els) {
+          els.forEach((el) => {
+            const p = el.querySelector("path");
+            if (!p) return;
+            const L = p.getTotalLength();
+            gsap.fromTo(p, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.out" });
+          });
+        },
+      });
+
+      // ------------------------------------------------------------ gradient vector: rotate the edge
+      let gradTl = null;
+      Deck.scene("#slide-grad", {
+        enter(slide) {
+          const svg = slide.querySelector("svg.gvec");
+          const st = { a: -45 };
+          const set = () => {
+            const r = (st.a * Math.PI) / 180, L = 70;
+            const ex = 110 + L * Math.cos(r), ey = 110 + L * Math.sin(r);
+            svg.querySelector(".gm").setAttribute("x2", ex); svg.querySelector(".gm").setAttribute("y2", ey);
+            svg.querySelector(".gx").setAttribute("x2", ex);
+            const gy = svg.querySelector(".gy"); gy.setAttribute("x1", ex); gy.setAttribute("x2", ex); gy.setAttribute("y2", ey);
+            svg.querySelector("linearGradient").setAttribute("gradientTransform", `rotate(${st.a + 45} 0.5 0.5)`);
+          };
+          gradTl?.kill();
+          gradTl = gsap.to(st, { a: -15, duration: 2.5, ease: "sine.inOut", yoyo: true, repeat: -1, onUpdate: set });
+          set();
+        },
+        leave() { gradTl?.kill(); },
+      });
+
+      // ------------------------------------------------------------ gradient lab
+      const ls = document.querySelector("#slide-lab");
+      const NOTES = {
+        gx: "cv2.Sobel(gray, cv2.CV_64F, 1, 0): violet = positive (dark → bright), cyan = negative. Vertical edges light up.",
+        gy: "cv2.Sobel(gray, cv2.CV_64F, 0, 1): horizontal edges light up, like the horizon.",
+        mag: "np.sqrt(sobelx**2 + sobely**2): every edge, whatever its direction.",
+        dir: "np.arctan2(sobely, sobelx): hue = direction, brightness = magnitude.",
+        scharr: "cv2.Scharr in x and y, combined: like Sobel, with larger weights (and a more accurate angle).",
+        lap: "cv2.Laplacian(gray, cv2.CV_64F): noisy, because a second derivative amplifies noise.",
+        log: "cv2.GaussianBlur, then cv2.Laplacian: much cleaner (a Laplacian of Gaussian).",
+      };
+      let L = null;
+      PHOTO.then((img) => {
+        const gx = conv(img, SX), gy = conv(img, SY), cx = conv(img, CX), cy = conv(img, CY);
+        L = { img, gx, gy, cx, cy, lap: conv(img, LAP), log: conv(conv(img, G5), LAP) };
+        show(ls.querySelector(".a"), img);
+        paintLab("mag");
+      });
+      const signed = (s) => (v) => { const t = Math.min(1, Math.abs(v) / s); return v > 0 ? [5 + 134 * t, 6 + 86 * t, 15 + 231 * t] : [5 + 29 * t, 6 + 205 * t, 15 + 223 * t]; };
+      function paintLab(v) {
+        if (!L) return;
+        const b = ls.querySelector(".b"), { w, h } = L.img;
+        const mag = (X, Y, s) => ({ w, h, g: X.g.map((x, i) => Math.min(255, Math.hypot(x, Y.g[i]) / s)) });
+        if (v === "gx") show(b, L.gx, signed(250));
+        else if (v === "gy") show(b, L.gy, signed(250));
+        else if (v === "mag") show(b, mag(L.gx, L.gy, 1));
+        else if (v === "scharr") show(b, mag(L.cx, L.cy, 4));
+        else if (v === "lap") show(b, L.lap, signed(60));
+        else if (v === "log") show(b, L.log, signed(20));
+        else if (v === "dir") show(b, L.gx, (x, i) => { const m = Math.min(1, Math.hypot(x, L.gy.g[i]) / 200); return hue(Math.atan2(L.gy.g[i], x)).map((c) => c * m); });
+        ls.querySelector(".nb").textContent = ls.querySelector(`[data-v="${v}"]`).textContent;
+        ls.querySelector(".note").textContent = NOTES[v];
+        gsap.fromTo(b, { opacity: 0.4 }, { opacity: 1, duration: 0.35 });
+      }
+      ls.querySelector(".chips").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        labTour?.kill();
+        ls.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === b));
+        paintLab(b.dataset.v);
+      });
+      let labTour = null;
+      Deck.scene("#slide-lab", {
+        enter() {
+          const seq = ["gx", "gy", "mag", "dir"];
+          let k = 0;
+          const next = () => {
+            if (!L) return (labTour = gsap.delayedCall(0.4, next));
+            ls.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c.dataset.v === seq[k]));
+            paintLab(seq[k]);
+            if (++k < seq.length) labTour = gsap.delayedCall(2.2, next);
+          };
+          labTour = gsap.delayedCall(0.3, next);
+        },
+        leave() { labTour?.kill(); },
+      });
+
+      // ------------------------------------------------------------ 1-D derivatives
+      (function () {
+        const ds = document.querySelector("#slide-lap");
+        const svg = ds.querySelector("svg.d1d");
+        const N = 120, X = (i) => 20 + (i / (N - 1)) * 310;
+        const clean = Array.from({ length: N }, (_, i) => 1 / (1 + Math.exp(-(i - 60) / 4)));
+        let r = 3;
+        const rnd = () => ((r = (r * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff - 0.5);
+        const noiseV = Array.from({ length: N }, () => rnd() * 0.06);
+        const rows = [
+          { y: 50, s: 40, name: "I(x): intensity", col: "#e2e8f0" },
+          { y: 150, s: 400, name: "I′(x): 1st derivative: peak", col: "#a78bfa" },
+          { y: 205, s: 2000, name: "I″(x): 2nd derivative: zero-crossing", col: "#22d3ee" },
+        ];
+        svg.innerHTML = rows.map((R, k) => `<line x1="20" x2="330" y1="${R.y}" y2="${R.y}" stroke="rgba(255,255,255,0.12)"/><text x="20" y="${R.y - (k ? 38 : 44)}" fill="${R.col}">${R.name}</text><path class="p${k}" fill="none" stroke="${R.col}" stroke-width="2"/>`).join("") +
+          `<line x1="${X(60)}" x2="${X(60)}" y1="14" y2="232" stroke="#ec4899" stroke-dasharray="3 4"/><text x="${X(60) + 4}" y="236" fill="#f9a8d4">edge</text>`;
+        const path = (arr, R, base) => arr.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + (R.y - (v - base) * R.s).toFixed(1)).join("");
+        const st = { k: 0 };
+        function paint() {
+          const sig = clean.map((v, i) => v + st.k * noiseV[i]);
+          const d1 = sig.map((v, i) => (sig[Math.min(N - 1, i + 1)] - sig[Math.max(0, i - 1)]) / 2);
+          const d2 = sig.map((v, i) => sig[Math.min(N - 1, i + 1)] - 2 * v + sig[Math.max(0, i - 1)]);
+          svg.querySelector(".p0").setAttribute("d", path(sig, rows[0], 0.5));
+          svg.querySelector(".p1").setAttribute("d", path(d1, rows[1], 0));
+          svg.querySelector(".p2").setAttribute("d", path(d2.map((v) => Math.max(-0.016, Math.min(0.016, v))), rows[2], 0));
+        }
+        paint();
+        const btn = ds.querySelector("[data-noise]");
+        btn.addEventListener("click", () => {
+          const on = !btn.classList.contains("on");
+          btn.classList.toggle("on", on);
+          btn.textContent = on ? "Remove noise" : "Add noise";
+          gsap.to(st, { k: on ? 1 : 0, duration: 0.8, onUpdate: paint });
+        });
+        Deck.scene("#slide-lap", {
+          enter() {
+            ["p0", "p1", "p2"].forEach((c, i) => {
+              const p = svg.querySelector("." + c), L = p.getTotalLength();
+              gsap.fromTo(p, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 1, delay: 0.3 + i * 0.5, ease: "power2.inOut", onComplete: () => (p.style.strokeDasharray = "none") });
+            });
+          },
+        });
+      })();
+
+      // ------------------------------------------------------------ canny stages, synced to the list
+      const cs = document.querySelector("#slide-canny");
+      const ccv = cs.querySelector("canvas");
+      const items = [...cs.querySelectorAll("ol li")];
+      let C = null;
+      PHOTO.then((img) => { C = { img, ...canny(img, 50, 150) }; paintStage(); });
+      function paintStage() {
+        if (!C) return;
+        const n = items.filter((li) => li.classList.contains("shown")).length;
+        items.forEach((li, i) => li.classList.toggle("now", i === n - 1));
+        const names = ["input (grayscale)", "1 · Gaussian 5×5", "2 · gradient magnitude", "3 · non-maximum suppression", "4 · strong (white) and weak (violet)", "5 · hysteresis: the final edges"];
+        cs.querySelector(".cname").textContent = names[n];
+        if (n === 0) show(ccv, C.img);
+        else if (n === 1) show(ccv, C.blur);
+        else if (n === 2) show(ccv, { ...C.img, g: C.mag });
+        else if (n === 3) show(ccv, { ...C.img, g: C.nms.map((v) => Math.min(255, v * 2)) });
+        else if (n === 4) show(ccv, C.img, (v, i) => (C.cls[i] === 2 ? [255, 255, 255] : C.cls[i] === 1 ? [139, 92, 246] : [8, 9, 20]));
+        else show(ccv, C.img, (v, i) => (C.out[i] ? [255, 255, 255] : C.cls[i] === 1 ? [60, 30, 90] : [8, 9, 20]));
+      }
+      Deck.scene("#slide-canny", { enter: paintStage, step: paintStage, unstep: paintStage });
+
+      // ------------------------------------------------------------ live thresholds
+      const ts = document.querySelector("#slide-thr");
+      const tcv = ts.querySelector("canvas");
+      const tin = Object.fromEntries([...ts.querySelectorAll("input")].map((i) => [i.dataset.t, i]));
+      const l2b = ts.querySelector("[data-l2]");
+      let l2 = false, timg = null;
+      function runThr() {
+        tin.lo.nextElementSibling.textContent = tin.lo.value;
+        tin.hi.nextElementSibling.textContent = tin.hi.value;
+        if (!timg) return;
+        const c = canny(timg, +tin.lo.value, +tin.hi.value, l2);
+        show(tcv, timg, (v, i) => (c.out[i] ? [255, 255, 255] : [8, 9, 20]));
+        ts.querySelector(".tname").textContent = `cv2.Canny(gray, ${tin.lo.value}, ${tin.hi.value}${l2 ? ", L2gradient=True" : ""})`;
+      }
+      Object.values(tin).forEach((i) => i.addEventListener("input", runThr));
+      l2b.addEventListener("click", () => { l2 = !l2; l2b.classList.toggle("on", l2); l2b.textContent = `L2gradient=${l2 ? "True" : "False"}`; runThr(); });
+      PHOTO.then((img) => { timg = img; runThr(); });
+    </script>
+  </body>
+</html>

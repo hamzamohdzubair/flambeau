@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Basic Configuration</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #levels .cols {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        align-items: center;
+        width: min(100%, 64rem);
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.7rem;
+      }
+
+      .layer {
+        display: grid;
+        grid-template-columns: 6.5rem 1fr;
+        gap: 0.2rem 1rem;
+        align-items: center;
+        padding: 0.8rem 1.1rem;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        transition:
+          border-color 0.4s,
+          box-shadow 0.4s;
+      }
+
+      .layer b {
+        font-family: var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .layer small {
+        color: var(--faint);
+        font-family: var(--font-mono);
+      }
+
+      .layer code {
+        grid-column: 2;
+        font-size: 0.9rem;
+      }
+
+      .layer.wins {
+        border-color: var(--green);
+        box-shadow: 0 0 24px -6px rgba(134, 239, 172, 0.6);
+      }
+
+      .result {
+        padding: 1.2rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: rgba(5, 6, 15, 0.8);
+        font-family: var(--font-mono);
+      }
+
+      .result .cmd {
+        color: var(--green);
+      }
+
+      .result .cmd span {
+        color: var(--faint);
+      }
+
+      .result .out {
+        display: inline-block;
+        margin-top: 0.6rem;
+        font-size: 1.15rem;
+        color: var(--text);
+        min-height: 1.4em;
+      }
+
+      .result p {
+        margin-top: 0.8rem;
+        font-family: var(--font);
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 760px) {
+        #levels .cols {
+          grid-template-columns: 1fr;
+        }
+
+        .layer {
+          grid-template-columns: 5rem 1fr;
+          font-size: 0.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Git 100 · lesson 1</span>
+      <h1 class="grad-each"><span>Basic</span> <span>Configuration</span></h1>
+      <p>Tell Git who you are once, and set the defaults every later lesson relies on.</p>
+    </section>
+
+    <!-- ================================================================ identity -->
+    <section class="slide">
+      <h2>Who are you?</h2>
+      <p class="center">Every commit records an author. Set your name and email before your first commit:</p>
+      <pre class="steps"><code class="language-bash">
+        git config --global user.name "Your Name"
+        git config --global user.email "you@example.com"
+      </code></pre>
+      <p class="center muted step">Use the email of your GitHub account so your commits are linked to you.</p>
+    </section>
+
+    <!-- ================================================================ levels -->
+    <section class="slide" id="levels">
+      <h2>Three levels of settings</h2>
+      <div class="cols">
+        <div class="stack">
+          <div class="layer step" data-v="admin@company.com"><b>--system</b><span>every user on this computer</span><small></small><code>/etc/gitconfig</code></div>
+          <div class="layer step" data-v="you@example.com"><b>--global</b><span>you, in every repository</span><small></small><code>~/.gitconfig</code></div>
+          <div class="layer step" data-v="you@work.com"><b>--local</b><span>this repository only</span><small></small><code>.git/config</code></div>
+        </div>
+        <div class="result">
+          <div class="cmd"><span>$</span> git config user.email</div>
+          <span class="out"></span>
+          <p class="muted">The most specific level wins: local beats global, global beats system.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ defaults -->
+    <section class="slide">
+      <h2>Useful defaults</h2>
+      <pre class="steps"><code class="language-bash">
+        # name new repositories' first branch "main"
+        git config --global init.defaultBranch main
+        # the editor Git opens for commit messages
+        git config --global core.editor "code --wait"
+        # what git pull does when histories diverge
+        git config --global pull.rebase false
+      </code></pre>
+      <p class="center muted step">The last one is explained in <a href="divergence-conflict.html">Divergence and Conflicts</a>.</p>
+    </section>
+
+    <!-- ================================================================ check -->
+    <section class="slide">
+      <h2>Check what is set</h2>
+      <pre class="steps"><code class="language-bash">
+        # one setting
+        git config user.name
+        # everything, and which file each value came from
+        git config --list --show-origin
+      </code></pre>
+      <p class="center step">Next: <a href="workflow.html">the basic workflow</a>.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const slide = document.querySelector("#levels");
+      const layers = [...slide.querySelectorAll(".layer")];
+      const out = slide.querySelector(".out");
+      let last = null;
+      function sync(animate) {
+        const shown = layers.filter((l) => l.classList.contains("shown"));
+        const top = shown[shown.length - 1];
+        layers.forEach((l) => l.classList.toggle("wins", l === top));
+        const v = top ? top.dataset.v : "(not set)";
+        if (v === last) return;
+        last = v;
+        out.textContent = v;
+        if (animate) gsap.fromTo(out, { y: -14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" });
+      }
+      Deck.scene("#levels", {
+        enter: () => queueMicrotask(() => sync(false)),
+        step: (s, n, els, d) => queueMicrotask(() => sync(d.dir > 0)),
+        unstep: () => queueMicrotask(() => sync(false)),
+      });
+    </script>
+  </body>
+</html>

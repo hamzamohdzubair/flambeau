@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Geometric Transforms</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chip {
+        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      .chip.ghost { border-style: dashed; }
+      canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
+      figure figcaption { font-family: var(--font-mono); }
+      .sl { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr) 3rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.9rem; margin: 0.3rem 0; }
+      .sl input { width: 100%; accent-color: var(--violet); }
+      .sl output { color: var(--cyan); text-align: right; }
+      .katex-display { font-size: 1.45em; }
+
+      .twocol { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 70rem); }
+      .drag { position: relative; touch-action: none; }
+      .drag svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+      .drag .h { cursor: grab; }
+      .drag .h circle { fill: rgba(236, 72, 153, 0.25); stroke: var(--pink); stroke-width: 3; }
+      .drag .h text { font: 600 18px var(--font-mono); fill: #fff; paint-order: stroke; stroke: rgba(5, 6, 15, 0.8); stroke-width: 4px; }
+      .mat { font-family: var(--font-mono); font-size: 0.95rem; text-align: center; color: var(--text); }
+      .mat table { margin: 0 auto; border-left: 2px solid var(--muted); border-right: 2px solid var(--muted); border-radius: 6px; padding: 0.2rem 0.4rem; }
+      .mat td { padding: 0.1rem 0.6rem; text-align: right; }
+
+      .examples { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 68rem); }
+      .examples .lbl { font-family: var(--font-mono); text-align: center; color: var(--cyan); min-height: 1.4em; }
+      .ab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.6rem; width: min(100%, 64rem); }
+
+      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
+      .qa .q { display: grid; gap: 0.4rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
+      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
+      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
+
+      @media (max-width: 760px) {
+        .twocol, .examples, .ab { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+        .mat { font-size: 0.8rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas class="photo" width="620" height="349" style="width: min(30rem, 84vw); box-shadow: none; background: none" aria-label="A photo tilting in perspective"></canvas>
+      <h1>Geometric Transforms</h1>
+      <p>Move every pixel somewhere else with one small matrix: shift, rotate, scale, shear, or change the point of view.</p>
+    </section>
+
+    <!-- ================================================================ affine -->
+    <section class="slide" id="slide-affine">
+      <h2>Affine transformations</h2>
+      <p class="lead"><strong>Affine transform:</strong> a linear mapping (plus a shift) that keeps points, straight lines and planes.</p>
+      <div class="examples">
+        <div>
+          <p class="step"><strong>Preserved:</strong></p>
+          <ul>
+            <li class="step">Parallelism: parallel lines stay parallel</li>
+            <li class="step">Ratios of distances along a line</li>
+            <li class="step">Barycentres (centres) of weighted points</li>
+          </ul>
+          <p class="step"><strong>Not preserved:</strong> angles; distances (except along parallel lines).</p>
+        </div>
+        <div>
+          <canvas class="photo ex" width="620" height="349" style="box-shadow: none; background: rgba(255,255,255,0.03)"></canvas>
+          <p class="lbl"></p>
+        </div>
+      </div>
+      <p class="muted center">Examples: translation, rotation, scaling, shearing. Note the grid: its lines stay straight and parallel.</p>
+    </section>
+
+    <!-- ================================================================ affine matrix -->
+    <section class="slide">
+      <h2>The affine transform matrix</h2>
+      <div class="cols">
+        <div>
+          <p class="center"><strong>2×3 matrix</strong></p>
+          $$M = \begin{bmatrix} a & b & t_x \\ c & d & t_y \end{bmatrix}$$
+        </div>
+        <div class="step">
+          <p class="center"><strong>Transformation</strong></p>
+          $$\begin{bmatrix} x' \\ y' \end{bmatrix} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} + \begin{bmatrix} t_x \\ t_y \end{bmatrix}$$
+        </div>
+      </div>
+      <ul>
+        <li class="step">\(\begin{bmatrix} a & b \\ c & d \end{bmatrix}\): the linear part: rotation, scale, shear</li>
+        <li class="step">\(\begin{bmatrix} t_x \\ t_y \end{bmatrix}\): the translation</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ affine code -->
+    <section class="slide">
+      <h2>Affine transform in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        # define 3 points in the source
+        pts1 = np.float32([[50, 50], [200, 50], [50, 200]])  # ans:
+        # define 3 points in the destination
+        pts2 = np.float32([[10, 100], [200, 50], [100, 250]])  # ans:
+        # compute the affine matrix
+        M = cv2.getAffineTransform(pts1, pts2)  # ans:
+        # ans: M is a 2x3 matrix
+        # apply the transform
+        h, w = img.shape[:2]
+        result = cv2.warpAffine(img, M, (w, h))  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ affine live -->
+    <section class="slide" id="slide-aff">
+      <h2>Drag three points</h2>
+      <div class="twocol">
+        <figure><canvas class="photo src" width="620" height="349"></canvas><figcaption>img with pts1</figcaption></figure>
+        <figure>
+          <div class="drag" data-interactive><canvas class="photo dst" width="620" height="349"></canvas><svg viewBox="0 0 620 349"></svg></div>
+          <figcaption>cv2.warpAffine(img, M, (w, h)): drag pts2</figcaption>
+        </figure>
+      </div>
+      <div class="mat"></div>
+      <div class="chips" data-interactive><button class="chip ghost" data-reset>Reset to the code's points</button></div>
+    </section>
+
+    <!-- ================================================================ perspective -->
+    <section class="slide">
+      <h2>Perspective transform</h2>
+      <p class="lead center"><strong>Perspective</strong> simulates a 3-D viewing angle.</p>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3>Properties</h3><ul><li>Straight lines stay straight</li><li>Parallel lines may converge (a vanishing point)</li><li>Preserves collinearity</li></ul></div>
+        <div class="card step"><h3>Use cases</h3><p>Document scanning, bird's-eye view, rectification.</p></div>
+        <div class="card step"><h3>Matrix</h3><p>A 3×3 <strong>homography</strong> matrix.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ perspective matrix -->
+    <section class="slide">
+      <h2>The perspective transform matrix</h2>
+      <div class="cols">
+        <div>
+          <p class="center"><strong>3×3 homogeneous matrix</strong></p>
+          $$H = \begin{bmatrix} h_{11} & h_{12} & h_{13} \\ h_{21} & h_{22} & h_{23} \\ h_{31} & h_{32} & h_{33} \end{bmatrix}$$
+        </div>
+        <div class="step">
+          <p class="center"><strong>Transformation</strong></p>
+          $$\begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} = \frac{1}{w} \begin{bmatrix} h_{11} & h_{12} & h_{13} \\ h_{21} & h_{22} & h_{23} \\ h_{31} & h_{32} & h_{33} \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$
+        </div>
+      </div>
+      <p class="step center">\(w = h_{31}x + h_{32}y + h_{33}\): dividing by it is what makes far things smaller.</p>
+      <p class="step center lead"><strong>You need 4 point pairs</strong> to solve for it (8 unknowns, since \(h_{33} = 1\)).</p>
+    </section>
+
+    <!-- ================================================================ perspective code -->
+    <section class="slide">
+      <h2>Perspective transform in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # define 4 points in the source (corners of a document)
+        pts1 = np.float32([[56, 65], [368, 52], [28, 387], [389, 390]])  # ans:
+        # define 4 points in the destination (a rectangle)
+        pts2 = np.float32([[0, 0], [300, 0], [0, 300], [300, 300]])  # ans:
+        # compute the perspective matrix
+        M = cv2.getPerspectiveTransform(pts1, pts2)  # ans:
+        # ans: M is a 3x3 homography matrix
+        # apply the transform
+        result = cv2.warpPerspective(img, M, (300, 300))  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ perspective live -->
+    <section class="slide" id="slide-persp">
+      <h2>Scan it: drag four corners</h2>
+      <div class="twocol">
+        <figure>
+          <div class="drag" data-interactive><canvas class="photo src" width="620" height="349"></canvas><svg viewBox="0 0 620 349"></svg></div>
+          <figcaption>img: drag pts1 (in the order 1, 2, 3, 4)</figcaption>
+        </figure>
+        <figure><canvas class="photo dst" width="300" height="300" style="width: min(100%, 22rem); margin: 0 auto"></canvas><figcaption>cv2.warpPerspective(img, M, (300, 300))</figcaption></figure>
+      </div>
+      <div class="mat"></div>
+    </section>
+
+    <!-- ================================================================ affine vs perspective -->
+    <section class="slide">
+      <h2>Affine vs perspective</h2>
+      <div class="ab">
+        <div class="card step">
+          <h3>Affine</h3>
+          <ul><li>2×3 matrix (6 parameters)</li><li>Needs 3 point pairs</li><li>Preserves parallelism</li><li>Faster to compute</li></ul>
+        </div>
+        <div class="card step">
+          <h3>Perspective</h3>
+          <ul><li>3×3 matrix (8 parameters)</li><li>Needs 4 point pairs</li><li>Allows vanishing points</li><li>More general</li></ul>
+        </div>
+      </div>
+      <p class="step center lead"><strong>Rule:</strong> use affine if parallel lines stay parallel; perspective otherwise.</p>
+    </section>
+
+    <!-- ================================================================ shear -->
+    <section class="slide" id="slide-shear">
+      <h2>Shearing</h2>
+      <div class="twocol">
+        <div>
+          <p><strong>Shear</strong> slants the shape of the image.</p>
+          <div class="cols">
+            <div><p class="center muted">Horizontal</p>$$M = \begin{bmatrix} 1 & s_x & 0 \\ 0 & 1 & 0 \end{bmatrix}$$</div>
+            <div><p class="center muted">Vertical</p>$$M = \begin{bmatrix} 1 & 0 & 0 \\ s_y & 1 & 0 \end{bmatrix}$$</div>
+          </div>
+          <div data-interactive>
+            <label class="sl">sx <input type="range" min="-0.8" max="0.8" step="0.05" value="0.5" data-k="sx" /><output>0.5</output></label>
+            <label class="sl">sy <input type="range" min="-0.8" max="0.8" step="0.05" value="0" data-k="sy" /><output>0</output></label>
+          </div>
+        </div>
+        <figure><canvas class="photo" width="620" height="420" style="box-shadow: none; background: rgba(255,255,255,0.03)"></canvas><figcaption class="cap"></figcaption></figure>
+      </div>
+    </section>
+
+    <!-- ================================================================ shear code -->
+    <section class="slide">
+      <h2>Shearing in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # horizontal shear
+        M = np.float32([[1, 0.5, 0],
+                        [0, 1,   0]])  # ans:
+        sheared = cv2.warpAffine(img, M, (w + int(h*0.5), h))  # ans:
+        # vertical shear
+        M = np.float32([[1,   0, 0],
+                        [0.5, 1, 0]])
+        sheared = cv2.warpAffine(img, M, (w, h + int(w*0.5)))  # ans:
+        # combined shear
+        M = np.float32([[1,  0.3, 0],
+                        [0.2, 1,  0]])
+        sheared = cv2.warpAffine(img, M, (int(w*1.3), int(h*1.2)))  # ans:
+        # ans: the output size grows so the slanted image still fits
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is an affine transform?</p><p class="answer">A linear mapping that preserves parallelism and ratios.</p></div>
+        <div class="q"><p>What size is the affine matrix?</p><p class="answer">2×3 (6 parameters).</p></div>
+        <div class="q"><p>How many points define an affine transform?</p><p class="answer">3 point pairs.</p></div>
+        <div class="q"><p>What is a perspective transform?</p><p class="answer">A 3-D projection that allows vanishing points.</p></div>
+        <div class="q"><p>How many points for a perspective transform?</p><p class="answer">4 point pairs.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What does affine preserve?</p><p class="answer">Parallelism, ratios of distances, straight lines.</p></div>
+        <div class="q"><p>What does perspective NOT preserve?</p><p class="answer">Parallelism: parallel lines can converge.</p></div>
+        <div class="q"><p>When do you use affine vs perspective?</p><p class="answer">Affine if parallelism is kept; perspective for 3-D effects.</p></div>
+        <div class="q"><p>What is shearing?</p><p class="answer">A slanting transformation.</p></div>
+        <div class="q"><p>What size is the perspective matrix?</p><p class="answer">A 3×3 homography (8 free parameters).</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # affine transform from 3 points
+        pts1 = np.float32([[50, 50], [200, 50], [50, 200]])
+        pts2 = np.float32([[10, 100], [200, 50], [100, 250]])
+        M = cv2.getAffineTransform(pts1, pts2)  # ans:
+        h, w = img.shape[:2]
+        result = cv2.warpAffine(img, M, (w, h))  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # perspective transform (document scan)
+        pts1 = np.float32([[56, 65], [368, 52], [28, 387], [389, 390]])
+        pts2 = np.float32([[0, 0], [300, 0], [0, 300], [300, 300]])
+        M = cv2.getPerspectiveTransform(pts1, pts2)  # ans:
+        result = cv2.warpPerspective(img, M, (300, 300))  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="steps"><code class="language-python">
+        # horizontal shear by 0.3
+        M = np.float32([[1, 0.3, 0],
+                        [0, 1,   0]])  # ans:
+        h, w = img.shape[:2]
+        sheared = cv2.warpAffine(img, M, (int(w + h*0.3), h))  # ans:
+        # combine rotation and scaling in one affine
+        center = (w // 2, h // 2)
+        M = cv2.getRotationMatrix2D(center, 45, 1.5)  # ans:
+        result = cv2.warpAffine(img, M, (w, h))  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const photo = new Image();
+      photo.src = "/assets/2025-10-09-22-21-33.png";
+      const ready = photo.decode();
+      const W = 620, H = 349;
+
+      // ------------------------------------------------------------ maths
+      // Solve A x = b (Gaussian elimination with partial pivoting)
+      function solve(A, b) {
+        const n = b.length, M = A.map((r, i) => [...r, b[i]]);
+        for (let c = 0; c < n; c++) {
+          let p = c;
+          for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+          [M[c], M[p]] = [M[p], M[c]];
+          for (let r = 0; r < n; r++) if (r !== c) { const f = M[r][c] / M[c][c]; for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k]; }
+        }
+        return M.map((r, i) => r[n] / r[i]);
+      }
+      // getAffineTransform: 2x3 from 3 point pairs
+      function affineFrom(p, q) {
+        const A = [], b = [];
+        p.forEach(([x, y], i) => { A.push([x, y, 1, 0, 0, 0]); b.push(q[i][0]); A.push([0, 0, 0, x, y, 1]); b.push(q[i][1]); });
+        const m = solve(A, b);
+        return [[m[0], m[1], m[2]], [m[3], m[4], m[5]]];
+      }
+      // getPerspectiveTransform: 3x3 from 4 point pairs
+      function homographyFrom(p, q) {
+        const A = [], b = [];
+        p.forEach(([x, y], i) => {
+          const [u, v] = q[i];
+          A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); b.push(u);
+          A.push([0, 0, 0, x, y, 1, -v * x, -v * y]); b.push(v);
+        });
+        const h = solve(A, b);
+        return [[h[0], h[1], h[2]], [h[3], h[4], h[5]], [h[6], h[7], 1]];
+      }
+      const fmt = (v) => (Math.abs(v) < 0.0005 ? "0" : Math.abs(v) >= 100 ? v.toFixed(1) : Math.abs(v) >= 1 ? v.toFixed(2) : v.toFixed(4)).replace("-", "−");
+      const matHTML = (name, M) => `<div style="display:inline-flex;gap:0.8rem;align-items:center">${name} = <table>${M.map((r) => `<tr>${r.map((v) => `<td>${fmt(v)}</td>`).join("")}</tr>`).join("")}</table></div>`;
+
+      // draggable handles on an svg overlay (viewBox in image pixels)
+      function handles(svg, pts, onMove) {
+        svg.innerHTML = `<polygon class="poly" fill="rgba(34,211,238,0.12)" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 5"/>` + pts.map((p, i) => `<g class="h" data-i="${i}"><circle r="13"/><text x="16" y="-12">${i + 1}</text></g>`).join("");
+        const order = pts.length === 4 ? [0, 1, 3, 2] : [0, 1, 2];
+        const paint = () => {
+          svg.querySelectorAll(".h").forEach((g, i) => g.setAttribute("transform", `translate(${pts[i][0]},${pts[i][1]})`));
+          svg.querySelector(".poly").setAttribute("points", order.map((i) => pts[i].join(",")).join(" "));
+        };
+        let drag = -1;
+        const toSvg = (e) => { const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal; return [((e.clientX - r.left) / r.width) * vb.width, ((e.clientY - r.top) / r.height) * vb.height]; };
+        svg.addEventListener("pointerdown", (e) => {
+          const g = e.target.closest(".h");
+          const [x, y] = toSvg(e);
+          drag = g ? +g.dataset.i : pts.reduce((best, p, i) => (Math.hypot(p[0] - x, p[1] - y) < Math.hypot(pts[best][0] - x, pts[best][1] - y) ? i : best), 0);
+          svg.setPointerCapture(e.pointerId);
+          e.preventDefault();
+        });
+        svg.addEventListener("pointermove", (e) => {
+          if (drag < 0) return;
+          const vb = svg.viewBox.baseVal, [x, y] = toSvg(e);
+          pts[drag] = [Math.max(-40, Math.min(vb.width + 40, Math.round(x))), Math.max(-40, Math.min(vb.height + 40, Math.round(y)))];
+          paint(); onMove();
+        });
+        svg.addEventListener("pointerup", () => (drag = -1));
+        paint();
+        return paint;
+      }
+
+      // inverse-mapped perspective warp into an output canvas
+      let srcData = null;
+      ready.then(() => { const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(photo, 0, 0); srcData = x.getImageData(0, 0, W, H); });
+
+      // ------------------------------------------------------------ cover: the photo tilting in perspective
+      (function () {
+        const cv = document.querySelector("#title canvas"), ctx = cv.getContext("2d");
+        const st = { t: 0 };
+        let tl = null;
+        function paint() {
+          if (!srcData) return;
+          const a = Math.sin(st.t) * 0.5, b = Math.cos(st.t * 0.7) * 0.25;
+          // corners of a card rotating in 3-D, projected
+          const P = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([x, y]) => {
+            const X = x * 280 * Math.cos(a), Z = x * 280 * Math.sin(a) + y * 160 * Math.sin(b), Y = y * 160 * Math.cos(b);
+            const f = 900 / (900 + Z);
+            return [310 + X * f, 175 + Y * f * 0.98];
+          });
+          // output size equals the input: map dst -> src with the inverse
+          const inv = homographyFrom(P, [[0, 0], [W, 0], [0, H], [W, H]]);
+          const out = ctx.createImageData(W, H), s = srcData.data;
+          for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) {
+            const w = inv[2][0] * x + inv[2][1] * y + inv[2][2];
+            const sx = Math.round((inv[0][0] * x + inv[0][1] * y + inv[0][2]) / w), sy = Math.round((inv[1][0] * x + inv[1][1] * y + inv[1][2]) / w);
+            if (sx >= 0 && sy >= 0 && sx < W && sy < H) { const o = (y * W + x) * 4, q = (sy * W + sx) * 4; out.data[o] = s[q]; out.data[o + 1] = s[q + 1]; out.data[o + 2] = s[q + 2]; out.data[o + 3] = 255; }
+          }
+          ctx.putImageData(out, 0, 0);
+        }
+        Deck.scene("#title", {
+          async enter() { await ready; tl?.kill(); tl = gsap.to(st, { t: Math.PI * 2, duration: 9, ease: "none", repeat: -1, onUpdate: paint }); },
+          leave() { tl?.kill(); },
+        });
+      })();
+
+      // ------------------------------------------------------------ affine examples, morphing
+      (function () {
+        const as = document.querySelector("#slide-affine");
+        const cv = as.querySelector("canvas.ex"), ctx = cv.getContext("2d"), lbl = as.querySelector(".lbl");
+        const c = [310, 175];
+        const rot = (deg, s = 1) => { const r = (deg * Math.PI) / 180, co = Math.cos(r) * s, si = Math.sin(r) * s; return [co, -si, c[0] - co * c[0] + si * c[1], si, co, c[1] - si * c[0] - co * c[1]]; };
+        const SEQ = [
+          ["identity", [1, 0, 0, 0, 1, 0]],
+          ["translation", [1, 0, 70, 0, 1, -40]],
+          ["rotation 25°", rot(25)],
+          ["scaling × 0.6", [0.6, 0, 124, 0, 0.6, 70]],
+          ["shear sx = 0.5", [1, 0.5, -87, 0, 1, 0]],
+          ["all together", (() => { const r = rot(-15, 0.75); r[1] += 0.3; return r; })()],
+        ];
+        const cur = Object.assign({}, SEQ[0][1]);
+        function paint() {
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, W, H);
+          ctx.setTransform(cur[0], cur[3], cur[1], cur[4], cur[2], cur[5]);
+          ctx.globalAlpha = 0.9; ctx.drawImage(photo, 0, 0); ctx.globalAlpha = 1;
+          ctx.strokeStyle = "rgba(34,211,238,0.8)"; ctx.lineWidth = 2;
+          for (let x = 0; x <= W; x += 62) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+          for (let y = 0; y <= H; y += 58.2) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        let tl = null;
+        Deck.scene("#slide-affine", {
+          async enter() {
+            await ready;
+            tl?.kill();
+            tl = gsap.timeline({ repeat: -1 });
+            SEQ.forEach(([name, m], i) => {
+              tl.call(() => (lbl.textContent = name));
+              tl.to(cur, { ...Object.fromEntries(m.map((v, k) => [k, v])), duration: i ? 1.1 : 0.01, ease: "power2.inOut", onUpdate: paint });
+              tl.to({}, { duration: 1.3 });
+            });
+          },
+          leave() { tl?.kill(); },
+        });
+        ready.then(paint);
+      })();
+
+      // ------------------------------------------------------------ affine: drag pts2
+      (function () {
+        const s = document.querySelector("#slide-aff");
+        const src = s.querySelector(".src").getContext("2d"), dst = s.querySelector(".dst").getContext("2d");
+        const P1 = [[50, 50], [200, 50], [50, 200]];
+        const P2 = [[10, 100], [200, 50], [100, 250]];
+        const pts = P2.map((p) => [...p]);
+        function paint() {
+          src.drawImage(photo, 0, 0);
+          src.fillStyle = "rgba(251,191,36,0.2)"; src.strokeStyle = "#fbbf24"; src.lineWidth = 3;
+          src.beginPath(); P1.forEach(([x, y], i) => (i ? src.lineTo(x, y) : src.moveTo(x, y))); src.closePath(); src.fill(); src.stroke();
+          src.font = "600 18px JetBrains Mono, monospace"; src.fillStyle = "#fff";
+          P1.forEach(([x, y], i) => { src.beginPath(); src.arc(x, y, 7, 0, 7); src.fill(); src.fillText(i + 1, x + 10, y - 10); });
+          const M = affineFrom(P1, pts);
+          dst.setTransform(1, 0, 0, 1, 0, 0);
+          dst.fillStyle = "#000"; dst.fillRect(0, 0, W, H);
+          dst.setTransform(M[0][0], M[1][0], M[0][1], M[1][1], M[0][2], M[1][2]);
+          dst.drawImage(photo, 0, 0);
+          dst.setTransform(1, 0, 0, 1, 0, 0);
+          s.querySelector(".mat").innerHTML = matHTML("M", M);
+        }
+        const repaint = handles(s.querySelector("svg"), pts, paint);
+        s.querySelector("[data-reset]").addEventListener("click", () => { P2.forEach((p, i) => (pts[i] = [...p])); repaint(); paint(); });
+        ready.then(paint);
+      })();
+
+      // ------------------------------------------------------------ perspective: drag pts1, see the scan
+      (function () {
+        const s = document.querySelector("#slide-persp");
+        const src = s.querySelector(".src").getContext("2d"), dctx = s.querySelector(".dst").getContext("2d");
+        const pts = [[228, 92], [415, 92], [205, 290], [440, 300]];
+        let raf = 0;
+        function paint() {
+          src.drawImage(photo, 0, 0);
+          const M = homographyFrom(pts, [[0, 0], [300, 0], [0, 300], [300, 300]]);
+          s.querySelector(".mat").innerHTML = matHTML("M", M);
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(() => {
+            if (!srcData) return;
+            const inv = homographyFrom([[0, 0], [300, 0], [0, 300], [300, 300]], pts);
+            const out = dctx.createImageData(300, 300), d = srcData.data;
+            for (let y = 0; y < 300; y++) for (let x = 0; x < 300; x++) {
+              const w = inv[2][0] * x + inv[2][1] * y + inv[2][2];
+              const sx = Math.round((inv[0][0] * x + inv[0][1] * y + inv[0][2]) / w), sy = Math.round((inv[1][0] * x + inv[1][1] * y + inv[1][2]) / w);
+              const o = (y * 300 + x) * 4;
+              if (sx >= 0 && sy >= 0 && sx < W && sy < H) { const q = (sy * W + sx) * 4; out.data[o] = d[q]; out.data[o + 1] = d[q + 1]; out.data[o + 2] = d[q + 2]; }
+              out.data[o + 3] = 255;
+            }
+            dctx.putImageData(out, 0, 0);
+          });
+        }
+        handles(s.querySelector("svg"), pts, paint);
+        ready.then(() => setTimeout(paint, 0));
+        Deck.scene("#slide-persp", { enter: paint });
+      })();
+
+      // ------------------------------------------------------------ shear
+      (function () {
+        const s = document.querySelector("#slide-shear");
+        const cv = s.querySelector("canvas"), ctx = cv.getContext("2d");
+        const ins = Object.fromEntries([...s.querySelectorAll("input")].map((i) => [i.dataset.k, i]));
+        const sc = 0.62;
+        function paint() {
+          const sx = +ins.sx.value, sy = +ins.sy.value;
+          ins.sx.nextElementSibling.textContent = sx; ins.sy.nextElementSibling.textContent = sy;
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, cv.width, cv.height);
+          // centre the sheared image in the canvas
+          const w = W * sc, h = H * sc, ox = 310 - (w + sx * h) / 2, oy = 210 - (h + sy * w) / 2;
+          ctx.setTransform(sc, sy * sc, sx * sc, sc, ox, oy);
+          ctx.drawImage(photo, 0, 0);
+          ctx.strokeStyle = "rgba(34,211,238,0.9)"; ctx.lineWidth = 3 / sc; ctx.strokeRect(0, 0, W, H);
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          s.querySelector(".cap").textContent = `M = [[1, ${sx}, 0], [${sy}, 1, 0]]`;
+        }
+        Object.values(ins).forEach((i) => i.addEventListener("input", () => { tl?.kill(); paint(); }));
+        let tl = null;
+        Deck.scene("#slide-shear", {
+          async enter() {
+            await ready;
+            tl?.kill();
+            const st = { sx: 0, sy: 0 };
+            const set = () => { ins.sx.value = st.sx.toFixed(2); ins.sy.value = st.sy.toFixed(2); paint(); };
+            tl = gsap.timeline({ onUpdate: set })
+              .to(st, { sx: 0.5, duration: 1.2, ease: "power2.inOut" })
+              .to(st, { sx: 0, sy: 0.5, duration: 1.2, ease: "power2.inOut", delay: 0.6 })
+              .to(st, { sx: 0.3, sy: 0.2, duration: 1.2, ease: "power2.inOut", delay: 0.6 });
+          },
+          leave() { tl?.kill(); },
+        });
+        ready.then(paint);
+      })();
+    </script>
+  </body>
+</html>

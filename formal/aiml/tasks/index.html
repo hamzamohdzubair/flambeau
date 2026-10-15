@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tasks</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #index {
+        gap: 1.6rem;
+      }
+
+      #index .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      #index h1 {
+        text-align: center;
+      }
+
+      #index .intro {
+        max-width: 40rem;
+        text-align: center;
+      }
+
+      #index .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      #index .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      #index .tile {
+        min-height: 6.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide top" id="index">
+      <span class="kicker">AI/ML</span>
+      <h1>Tasks</h1>
+      <p class="intro">The jobs machine learning is asked to do, and the problems that come with them.</p>
+      <div class="group">
+        <div class="tiles">
+          <a class="tile" href="classification/index.html" style="--img: url('/assets/2025-10-04-08-15-36.png')"><span>Classification</span></a>
+          <a class="tile" href="imb.html" style="--img: url('/assets/2025-10-16-19-27-01.png')"><span>Class Imbalance</span></a>
+          <a class="tile" href="xai.html" style="--img: url('/assets/2025-10-18-09-32-58.png')"><span>Explainable AI</span></a>
+          <a class="tile" href="language/index.html" style="--img: url('/assets/2025-10-09-22-22-22.png')"><span>Language</span></a>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

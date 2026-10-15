@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>File Reading</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- File view: the file's characters, the read/write cursor and the variables ---------- */
+      pre code,
+      .fv {
+        font-variant-ligatures: none;
+      }
+
+      .fv {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        min-width: min(100%, 20rem);
+        padding: 1rem 1.1rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-family: var(--font-mono);
+      }
+
+      .fv-head {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+      }
+
+      .fv-head .fname {
+        color: var(--text);
+      }
+
+      .fv-badge {
+        padding: 0.05rem 0.55rem;
+        border-radius: 999px;
+        font: 500 0.75rem var(--font);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+
+      .fv-badge.open {
+        border-color: rgba(134, 239, 172, 0.6);
+        color: var(--green);
+        background: rgba(134, 239, 172, 0.1);
+      }
+
+      .fv-badge.closed {
+        border-color: rgba(248, 113, 113, 0.5);
+        color: var(--red);
+      }
+
+      .fv-badge.mode {
+        border-color: rgba(34, 211, 238, 0.5);
+        color: #a5f3fc;
+      }
+
+      .fv-badge.pos {
+        border-color: rgba(240, 171, 252, 0.5);
+        color: #f0abfc;
+      }
+
+      .fv-text {
+        position: relative;
+        min-height: 4.6em;
+        padding: 0.6rem 0.8rem;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.35);
+        font-size: 1rem;
+        line-height: 1.55;
+        white-space: pre;
+        overflow-x: auto;
+      }
+
+      .fv-text.missing {
+        color: var(--faint);
+        font-family: var(--font);
+        font-size: 0.9rem;
+        white-space: normal;
+      }
+
+      .fv-text .ch {
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      .fv-text .nl {
+        color: var(--faint);
+        font-size: 0.8em;
+      }
+
+      .fv-text .ch.hl {
+        background: rgba(34, 211, 238, 0.28);
+        color: #ecfeff;
+      }
+
+      .fv-text .ch.new {
+        background: rgba(236, 72, 153, 0.28);
+      }
+
+      .fv-cursor {
+        display: inline-block;
+        width: 0;
+        height: 1.25em;
+        margin: 0 -1px;
+        border-left: 2px solid #f0abfc;
+        vertical-align: -0.25em;
+        box-shadow: 0 0 8px #ec4899;
+        animation: fv-blink 1s steps(1) infinite;
+      }
+
+      @keyframes fv-blink {
+        50% {
+          opacity: 0.25;
+        }
+      }
+
+      .fv-vars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+      }
+
+      .fv-vars div {
+        display: flex;
+        gap: 0.6rem;
+        align-items: baseline;
+      }
+
+      .fv-vars b {
+        min-width: 3.5rem;
+        font-weight: 500;
+        text-align: right;
+        color: var(--violet-soft);
+      }
+
+      .fv-vars span {
+        padding: 0.05rem 0.5rem;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        background: rgba(139, 92, 246, 0.12);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .fv-out {
+        padding: 0.4rem 0.7rem;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.35);
+        color: var(--green);
+        font-size: 0.88rem;
+        white-space: pre-wrap;
+      }
+
+      .fv-out::before {
+        content: "output";
+        display: block;
+        font: 600 0.65rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .fv-note {
+        min-height: 1.3em;
+        margin: 0;
+        font-family: var(--font);
+        font-size: 0.92rem;
+        color: var(--cyan);
+      }
+
+      .fv-note.err {
+        color: var(--red);
+      }
+
+      .fduo {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: center;
+        width: min(100%, 70rem);
+      }
+
+      .fduo pre {
+        width: auto;
+      }
+
+      @media (max-width: 760px) {
+        .fduo {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.8rem;
+        }
+
+        .fv {
+          padding: 0.7rem;
+          gap: 0.5rem;
+        }
+
+        .fv-text {
+          font-size: 0.8rem;
+          min-height: 3.5em;
+        }
+
+        .fv-vars {
+          font-size: 0.78rem;
+        }
+      }
+
+      .slide pre {
+        min-width: min(100%, 22rem);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · files</span>
+      <h1 class="grad-each"><span>File</span> <span>Reading</span></h1>
+      <p>Open a text file, read it all at once, line by line or a few characters at a time, and close it again.</p>
+    </section>
+
+    <section class="slide">
+      <h2>The file we will read</h2>
+      <div class="fduo">
+        <pre><code class="language-text">
+          First line
+          Second line
+          Third line
+        </code></pre>
+        <div class="cards" style="width: min(100%, 30rem)">
+          <div class="card step"><h3>data.txt</h3><p>Three lines. Each ends with a newline character <code>\n</code>, drawn as ↵ in the pictures.</p></div>
+          <div class="card step"><h3>The cursor</h3><p>An open file remembers where it is. Every read starts at the cursor and moves it forward.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ open/read -->
+    <section class="slide" id="open">
+      <h2>Open and read</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # open and read file
+          file = open("data.txt", "r")
+          content = file.read()
+          file.close()
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ with -->
+    <section class="slide" id="with">
+      <h2>Context manager (best practice)</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # with statement
+          with open("data.txt", "r") as file:
+              content = file.read()
+          # ans: file automatically closed
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+      <p class="hint step">The file closes when the indented block ends, even if an error happens inside it.</p>
+    </section>
+
+    <!-- ================================================================ readlines -->
+    <section class="slide" id="readlines">
+      <h2>Read lines</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # read all lines
+          with open("data.txt", "r") as file:
+              lines = file.readlines()
+          # ans: returns list of lines
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ for line -->
+    <section class="slide" id="loop">
+      <h2>Read line by line</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # iterate over lines
+          with open("data.txt", "r") as file:
+              for line in file:
+                  print(line.strip())
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+      <span class="step fv-step" data-anim="none"></span>
+      <span class="step fv-step" data-anim="none"></span>
+      <span class="step fv-step" data-anim="none"></span>
+      <span class="step fv-step" data-anim="none"></span>
+      <p class="hint">Only one line is in memory at a time, so this works for files of any size.</p>
+    </section>
+
+    <!-- ================================================================ readline -->
+    <section class="slide" id="readline">
+      <h2>The readline method</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # read one line at a time
+          with open("data.txt", "r") as file:
+              line1 = file.readline()
+              line2 = file.readline()
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ read(n) -->
+    <section class="slide" id="limit">
+      <h2>Read with a limit</h2>
+      <div class="fduo">
+        <pre class="steps"><code class="language-python">
+          # read n characters
+          with open("data.txt", "r") as file:
+              content = file.read(10)
+          # ans: first 10 characters
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict, then reveal. Watch the cursor.</p>
+    </section>
+
+    <section class="slide" id="ex1">
+      <h2>Exercise 1</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # what happens without close?
+          file = open("data.txt", "r")
+          content = file.read()
+          # ans: file remains open (bad practice)
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex2">
+      <h2>Exercise 2</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # read() returns what type?
+          with open("data.txt", "r") as f:
+              content = f.read()
+          # ans: str (string)
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex3">
+      <h2>Exercise 3</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # readlines() returns?
+          with open("data.txt", "r") as f:
+              lines = f.readlines()
+          # ans: list of strings
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex4">
+      <h2>Exercise 4</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # strip() in loop?
+          for line in file:
+              print(line.strip())
+          # ans: removes \n at end
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex5">
+      <h2>Exercise 5</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # read empty file?
+          with open("empty.txt", "r") as f:
+              content = f.read()
+          # ans: "" (empty string)
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex6">
+      <h2>Exercise 6</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # file not found?
+          with open("missing.txt", "r") as f:
+              pass
+          # ans: FileNotFoundError
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex7">
+      <h2>Exercise 7</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # read twice?
+          with open("data.txt", "r") as f:
+              c1 = f.read()
+              c2 = f.read()
+          # ans: c2 is "" (already at end)
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex8">
+      <h2>Exercise 8</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # readline at end?
+          with open("data.txt", "r") as f:
+              f.read()
+              line = f.readline()
+          # ans: "" (empty string)
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex9">
+      <h2>Exercise 9</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # iterate multiple times?
+          with open("data.txt", "r") as f:
+              for line in f:
+                  pass
+              for line in f:
+                  pass
+          # ans: second loop doesn't run
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+      <p class="hint step">Call <code>f.seek(0)</code> to move the cursor back to the start before reading again.</p>
+    </section>
+
+    <section class="slide" id="ex10">
+      <h2>Exercise 10</h2>
+      <div class="fduo">
+        <pre><code class="language-python">
+          # read with encoding?
+          with open("data.txt", "r", encoding="utf-8") as f:
+              content = f.read()
+          # ans: specify encoding explicitly
+        </code></pre>
+        <div class="fv"></div>
+      </div>
+      <p class="hint step">Without it, Python uses the system's default encoding, which differs between computers.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3><code>with open(...)</code></h3><p>Closes the file for you. Without it, call <code>close()</code> yourself.</p></div>
+        <div class="card step"><h3>Pick a read</h3><p><code>read()</code> one string, <code>read(n)</code> n characters, <code>readline()</code> one line, <code>readlines()</code> a list.</p></div>
+        <div class="card step"><h3>Loop for big files</h3><p><code>for line in file</code> reads one line at a time; <code>strip()</code> removes the <code>\n</code>.</p></div>
+        <div class="card step"><h3>The cursor moves</h3><p>At the end, reads return <code>""</code> and loops do nothing, until you <code>seek(0)</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ file view
+      // fileview(slide, ops, { name, text, box }) draws one file in the slide's .fv (or box):
+      // its characters (↵ marks a newline), the cursor where the next read or
+      // write happens, and the variables. ops[n](F) runs once code line n is
+      // visible (ops[0] at the start), so the picture follows the code.
+      // text: null means the file does not exist yet.
+      //   F.open(mode)  F.read(k?)  F.readline()  F.readlines()  F.write(s)
+      //   F.writelines(list)  F.close()  F.seek(offset, whence)  F.tell()
+      //   F.set(name, value)  F.print(text)  F.note(text, isError)  F.r(value) Python repr
+      // Keys after the last code line are the slide's .fv-step beats, in order.
+      const pyr = (v) =>
+        Array.isArray(v) ? "[" + v.map(pyr).join(", ") + "]" : typeof v === "string" ? "'" + v.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/'/g, "\\'") + "'" : String(v);
+
+      function fileview(sel, ops, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        const box = opts.box || slide.querySelector(".fv");
+        const pre = slide.querySelector("pre");
+        const lines = pre ? [...pre.querySelectorAll(".line")] : [];
+        const extra = [...slide.querySelectorAll(".fv-step")];
+        const escF = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        function compute() {
+          const F = {
+            text: opts.text === undefined ? "" : opts.text,
+            pos: 0,
+            isOpen: false,
+            mode: "",
+            vars: new Map(),
+            hl: null,
+            fresh: null,
+            msg: "",
+            err: false,
+            r: pyr,
+            open(mode = "r") {
+              F.mode = mode;
+              F.pos = 0;
+              if (mode[0] === "w") F.text = "";
+              else if (mode[0] === "a") {
+                if (F.text === null) F.text = "";
+                F.pos = F.text.length;
+              } else if (mode[0] === "x") {
+                if (F.text !== null) return F.note("FileExistsError: the file already exists", true);
+                F.text = "";
+              } else if (F.text === null) return F.note("FileNotFoundError: no such file", true);
+              F.isOpen = true;
+            },
+            read(k) {
+              const s = F.text.slice(F.pos, k === undefined ? undefined : F.pos + k);
+              F.hl = [F.pos, F.pos + s.length];
+              F.pos += s.length;
+              return s;
+            },
+            readline() {
+              let e = F.text.indexOf("\n", F.pos);
+              e = e < 0 ? F.text.length : e + 1;
+              const s = F.text.slice(F.pos, e);
+              F.hl = [F.pos, e];
+              F.pos = e;
+              return s;
+            },
+            readlines() {
+              const a = F.pos;
+              const out = [];
+              while (F.pos < F.text.length) out.push(F.readline());
+              F.hl = [a, F.pos];
+              return out;
+            },
+            write(s) {
+              F.text = F.text.slice(0, F.pos) + s + F.text.slice(F.pos + s.length);
+              F.fresh = [F.pos, F.pos + s.length];
+              F.pos += s.length;
+              return s.length;
+            },
+            writelines(list) {
+              const a = F.pos;
+              list.forEach((s) => F.write(s));
+              F.fresh = [a, F.pos];
+            },
+            close() {
+              F.isOpen = false;
+            },
+            seek(off, whence = 0) {
+              F.pos = Math.max(0, Math.min(F.text.length, whence === 0 ? off : whence === 1 ? F.pos + off : F.text.length + off));
+              return F.pos;
+            },
+            tell: () => F.pos,
+            out: [],
+            print: (t) => F.out.push(t),
+            set: (name, v) => F.vars.set(name, v),
+            del: (name) => F.vars.delete(name),
+            note(t, err = false) {
+              F.msg = t;
+              F.err = err;
+            },
+          };
+          // keys past the last code line belong to the slide's .fv-step beats, in order
+          const visible = (i) => {
+            if (i === 0) return true;
+            if (i > lines.length) return extra[i - lines.length - 1]?.classList.contains("shown");
+            return !lines[i - 1].classList.contains("step") || lines[i - 1].classList.contains("shown");
+          };
+          for (let i = 0; i <= lines.length + extra.length; i++) {
+            if (!ops[i] || !visible(i)) continue;
+            F.hl = F.fresh = null;
+            F.msg = "";
+            F.err = false;
+            ops[i](F);
+          }
+          return F;
+        }
+
+        function render(anim) {
+          const old = box.querySelector(".fv-cursor")?.getBoundingClientRect();
+          const F = compute();
+          const name = opts.name || "data.txt";
+          let body;
+          if (F.text === null) body = `<div class="fv-text missing">${escF(name)} does not exist</div>`;
+          else {
+            let html = "";
+            const cls = (i) => (F.hl && i >= F.hl[0] && i < F.hl[1] ? " hl" : "") + (F.fresh && i >= F.fresh[0] && i < F.fresh[1] ? " new" : "");
+            for (let i = 0; i <= F.text.length; i++) {
+              if (F.isOpen && i === F.pos) html += `<span class="fv-cursor"></span>`;
+              if (i === F.text.length) break;
+              const c = F.text[i];
+              html += c === "\n" ? `<span class="ch nl${cls(i)}">↵</span>\n` : `<span class="ch${cls(i)}">${escF(c)}</span>`;
+            }
+            body = `<div class="fv-text">${html || " "}</div>`;
+          }
+          const badges = F.isOpen
+            ? `<span class="fv-badge open">open</span><span class="fv-badge mode">mode "${escF(F.mode)}"</span><span class="fv-badge pos">cursor ${F.pos}</span>`
+            : `<span class="fv-badge closed">closed</span>`;
+          const vars = [...F.vars].map(([k, v]) => `<div><b>${escF(k)}</b><span>${escF(v)}</span></div>`).join("");
+          box.innerHTML = `<div class="fv-head"><span class="fname">${escF(name)}</span>${badges}</div>${body}<div class="fv-vars">${vars}</div>${F.out.length ? `<div class="fv-out">${F.out.map((t) => `<div>${escF(t)}</div>`).join("")}</div>` : ""}<p class="fv-note${F.err ? " err" : ""}">${escF(F.msg)}</p>`;
+          if (!anim) return;
+          const cur = box.querySelector(".fv-cursor");
+          if (cur && old) {
+            const now = cur.getBoundingClientRect();
+            gsap.from(cur, { x: old.left - now.left, y: old.top - now.top, duration: 0.5, ease: "power2.inOut" });
+          }
+          const fresh = box.querySelectorAll(".ch.new");
+          if (fresh.length) gsap.from(fresh, { opacity: 0, y: -8, duration: 0.25, stagger: Math.min(0.04, 0.6 / fresh.length) });
+          const hl = box.querySelectorAll(".ch.hl");
+          if (hl.length) gsap.from(hl, { backgroundColor: "rgba(34,211,238,0)", duration: 0.2, stagger: Math.min(0.03, 0.6 / hl.length) });
+          if (F.msg) gsap.from(box.querySelector(".fv-note"), { opacity: 0, duration: 0.3 });
+        }
+
+        Deck.scene(slide, {
+          enter: () => render(false),
+          step: (s, n, els, d) => queueMicrotask(() => render(d?.dir > 0 && Deck.step === n)),
+          unstep: () => queueMicrotask(() => render(false)),
+        });
+        return { render };
+      }
+
+      const DATA = { name: "data.txt", text: "First line\nSecond line\nThird line\n" };
+
+      fileview(
+        "#open",
+        {
+          2: (F) => (F.open("r"), F.set("file", "<open file 'data.txt'>"), F.note('open(..., "r") puts the cursor at the start')),
+          3: (F) => (F.set("content", F.r(F.read())), F.note("read() takes everything from the cursor to the end")),
+          4: (F) => (F.close(), F.set("file", "<closed file>")),
+        },
+        DATA
+      );
+      fileview(
+        "#with",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => F.set("content", F.r(F.read())),
+          4: (F) => (F.close(), F.note("leaving the with block closed the file")),
+        },
+        DATA
+      );
+      fileview(
+        "#readlines",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => F.set("lines", F.r(F.readlines())),
+          4: (F) => (F.close(), F.note("one string per line, each still ending in \\n")),
+        },
+        DATA
+      );
+      // beats: three passes of the loop, then the end of the file
+      const LOOP = { 2: (F) => F.open("r") };
+      for (let k = 0; k < 3; k++)
+        LOOP[5 + k] = (F) => {
+          const line = F.readline();
+          F.set("line", F.r(line));
+          F.print(line.trim());
+          F.note(`pass ${k + 1}: the next line, up to and including ↵`);
+        };
+      LOOP[8] = (F) => (F.read(), F.close(), F.note("no more lines: the loop ends and the with block closes the file"));
+      fileview("#loop", LOOP, DATA);
+      fileview(
+        "#readline",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => F.set("line1", F.r(F.readline())),
+          4: (F) => (F.set("line2", F.r(F.readline())), F.note("each call continues where the last one stopped")),
+        },
+        DATA
+      );
+      fileview(
+        "#limit",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => F.set("content", F.r(F.read(10))),
+          4: (F) => F.note("the cursor stops after 10 characters"),
+        },
+        DATA
+      );
+
+      // ------------------------------------------------------------ exercises
+      fileview(
+        "#ex1",
+        {
+          2: (F) => (F.open("r"), F.set("file", "<open file 'data.txt'>")),
+          3: (F) => F.set("content", F.r(F.read())),
+          4: (F) => F.note("nothing closed it: the file stays open until Python cleans up"),
+        },
+        DATA
+      );
+      fileview("#ex2", { 2: (F) => F.open("r"), 3: (F) => F.set("content", F.r(F.read())), 4: (F) => (F.close(), F.note("one str with all the text")) }, DATA);
+      fileview("#ex3", { 2: (F) => F.open("r"), 3: (F) => F.set("lines", F.r(F.readlines())), 4: (F) => F.close() }, DATA);
+      fileview(
+        "#ex4",
+        {
+          0: (F) => F.open("r"),
+          2: (F) => F.set("line", F.r(F.readline())),
+          4: (F) => (F.set("line.strip()", F.r("First line")), F.print("First line"), F.note("strip() drops the trailing \\n (and spaces)")),
+        },
+        DATA
+      );
+      fileview("#ex5", { 2: (F) => F.open("r"), 3: (F) => F.set("content", F.r(F.read())), 4: (F) => (F.close(), F.note("nothing to read")) }, { name: "empty.txt", text: "" });
+      fileview("#ex6", { 4: (F) => F.open("r") }, { name: "missing.txt", text: null });
+      fileview(
+        "#ex7",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => F.set("c1", F.r(F.read())),
+          5: (F) => (F.set("c2", F.r(F.read())), F.note("the cursor was already at the end")),
+        },
+        DATA
+      );
+      fileview(
+        "#ex8",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => F.read(),
+          5: (F) => (F.set("line", F.r(F.readline())), F.note("readline() at the end returns an empty string")),
+        },
+        DATA
+      );
+      fileview(
+        "#ex9",
+        {
+          2: (F) => F.open("r"),
+          3: (F) => (F.readlines(), F.note("the first loop reads every line")),
+          7: (F) => F.note("cursor at the end: the second loop gets no lines"),
+        },
+        DATA
+      );
+      fileview("#ex10", { 2: (F) => F.open("r"), 3: (F) => F.set("content", F.r(F.read())), 4: (F) => F.close() }, DATA);
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

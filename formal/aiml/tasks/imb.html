@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Class Imbalance</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #what .lead {
+        font-size: clamp(1.8rem, 5vw, 2.8rem);
+      }
+
+      .figs.white img {
+        background: #fff;
+        object-fit: contain;
+      }
+
+      /* ---------- Accuracy trap ---------- */
+      #trap .stage {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: center;
+        width: min(100%, 60rem);
+      }
+
+      #trap .bars {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 2.4rem;
+        height: min(18rem, 40vh);
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--faint);
+      }
+
+      #trap .bar {
+        position: relative;
+        width: 5.5rem;
+        border-radius: 10px 10px 0 0;
+        transition: height 0.35s var(--ease);
+      }
+
+      #trap .bar.min {
+        background: var(--pink);
+      }
+
+      #trap .bar.maj {
+        background: var(--cyan);
+      }
+
+      #trap .bar span {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding-bottom: 0.3rem;
+        font-family: var(--font-mono);
+        white-space: nowrap;
+      }
+
+      #trap .bar small {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      #trap .verdict {
+        display: grid;
+        gap: 1rem;
+      }
+
+      #trap .verdict .card p {
+        font-size: 0.95rem;
+      }
+
+      #trap .score {
+        font-family: var(--font-display);
+        font-size: 2.6rem;
+        line-height: 1;
+      }
+
+      #trap .score.bad {
+        color: var(--red);
+      }
+
+      #trap .ctrl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.4rem 1rem;
+      }
+
+      #trap .ctrl input {
+        width: min(18rem, 70vw);
+        accent-color: var(--pink);
+      }
+
+      @media (max-width: 700px) {
+        #trap .stage {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · Minor tasks</span>
+      <h1>Class Imbalance</h1>
+      <p>When one class is rare, a model can look accurate while being useless.</p>
+    </section>
+
+    <section class="slide" id="what">
+      <h2>What is class imbalance?</h2>
+      <p class="lead answer">One class has far more examples than the other.</p>
+    </section>
+
+    <section class="slide">
+      <h2>What is class imbalance?</h2>
+      <div class="figs contain white">
+        <figure class="step"><img src="/assets/2025-09-29-18-53-08.png" alt="Scatter plot: thousands of class-0 points, a small cluster of class-1 points" /></figure>
+        <figure class="step"><img src="/assets/2025-09-29-18-54-12.png" alt="Bar chart: fraud is 0.2% of the data, not fraud is 99.8%" /></figure>
+        <figure class="step"><img src="/assets/2025-09-29-18-57-23.png" alt="Scatter plot: a few positive stars among many negative points" /></figure>
+      </div>
+    </section>
+
+    <section class="slide" id="trap">
+      <h2>The accuracy trap</h2>
+      <div class="stage">
+        <div class="bars">
+          <div class="bar min"><span class="v">0.2%</span><small>fraud</small></div>
+          <div class="bar maj"><span class="v">99.8%</span><small>not fraud</small></div>
+        </div>
+        <div class="verdict">
+          <div class="card">
+            <p>A "model" that always answers <strong>not fraud</strong>:</p>
+            <p>accuracy <span class="score acc">99.8%</span></p>
+          </div>
+          <div class="card step">
+            <p>Frauds it catches:</p>
+            <p><span class="score bad">0%</span></p>
+          </div>
+        </div>
+      </div>
+      <div class="ctrl" data-interactive>
+        <label for="frac">Share of fraud</label>
+        <input id="frac" type="range" min="0" max="50" step="0.1" value="0.2" />
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // Drag the slider: the always-majority model's accuracy is just the majority share
+      const slide = document.querySelector("#trap");
+      const range = slide.querySelector("#frac");
+      const [minBar, majBar] = slide.querySelectorAll(".bar");
+      const acc = slide.querySelector(".acc");
+      const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1) + "%";
+      function render(p) {
+        const maxH = 100;
+        // sqrt scale so a tiny class is still visible
+        minBar.style.height = Math.max(3, Math.sqrt(p / 100) * maxH) + "%";
+        majBar.style.height = Math.max(3, Math.sqrt((100 - p) / 100) * maxH) + "%";
+        minBar.querySelector(".v").textContent = fmt(p);
+        majBar.querySelector(".v").textContent = fmt(100 - p);
+        acc.textContent = fmt(100 - p);
+      }
+      let tw = null;
+      range.addEventListener("input", () => {
+        tw?.kill();
+        render(+range.value);
+      });
+      Deck.scene("#trap", {
+        enter() {
+          range.value = 0.2;
+          render(0.2);
+          // A short demo sweep: balanced data first, then back to the fraud case
+          const o = { p: 50 };
+          tw = gsap.fromTo(o, { p: 50 }, { p: 0.2, duration: 2.2, ease: "power2.inOut", onUpdate: () => { range.value = o.p; render(o.p); } });
+        },
+        leave: () => tw?.kill(),
+      });
+    </script>
+  </body>
+</html>

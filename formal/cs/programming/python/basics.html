@@ -1,0 +1,1821 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Python Basics</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* tracer:start (shared by the Python decks: traced code beside variables, objects and output) */
+      pre code,
+      .viz,
+      .reduce {
+        font-variant-ligatures: none;
+      }
+
+      .viz {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(15rem, 23rem);
+        justify-content: center;
+        align-items: start;
+        gap: 1.6rem;
+        width: min(100%, 66rem);
+      }
+
+      .viz > pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+        max-width: 100%;
+        font-size: 1.08rem;
+      }
+
+      .viz.wide {
+        grid-template-columns: minmax(0, auto) minmax(15rem, 28rem);
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.42;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.3;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre .line.answer.shown {
+        transition-delay: var(--d, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 0.9em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+        white-space: nowrap;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f,
+      .tb.e {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb.s {
+        color: var(--amber);
+        border-color: rgba(251, 191, 36, 0.5);
+        background: rgba(251, 191, 36, 0.1);
+      }
+
+      .panel {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-width: 0;
+      }
+
+      /* With objects: variables on the left, objects on the right, arrows between */
+      .panel.mem2 {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 2.4rem;
+        row-gap: 0.75rem;
+        align-items: start;
+      }
+
+      .panel.mem2 > .box:not(.vars):not(.heap),
+      .panel.mem2 > .heap:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .panel.mem2 .vgrid,
+      .panel.mem2 .hgrid {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+      }
+
+      .panel .box {
+        position: relative;
+        padding: 0.55rem 0.8rem 0.75rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      .panel .bh {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 0.45rem;
+        font: 600 0.68rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .panel .replay {
+        padding: 0.1rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.7rem var(--font);
+        letter-spacing: 0.04em;
+        text-transform: none;
+        cursor: pointer;
+      }
+
+      .panel .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      .vgrid,
+      .hgrid {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.55rem 0.7rem;
+        min-height: 3.9rem;
+      }
+
+      .hgrid {
+        min-height: 2.5rem;
+      }
+
+      .var {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.12rem;
+        max-width: 100%;
+      }
+
+      .var .n {
+        font: 500 0.8rem var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .var .v,
+      .obj .fv {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-width: 3rem;
+        min-height: 2.1rem;
+        max-width: 100%;
+        padding: 0.25rem 0.6rem;
+        overflow: hidden;
+        border: 2px solid rgba(167, 139, 250, 0.55);
+        border-radius: 8px;
+        background: rgba(10, 12, 26, 0.9);
+        font: 500 0.92rem var(--font-mono);
+        color: var(--text);
+        white-space: pre;
+        transition:
+          border-color 0.4s,
+          box-shadow 0.4s;
+      }
+
+      .var .v b,
+      .obj .fv b {
+        font-weight: 500;
+      }
+
+      .var .v b.gone,
+      .obj .fv b.gone {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .var .t {
+        font: 0.62rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .var.hot .v,
+      .obj .fv.hot {
+        border-color: var(--cyan);
+        box-shadow: 0 0 14px rgba(34, 211, 238, 0.35);
+      }
+
+      .var.gone {
+        opacity: 0.3;
+      }
+
+      .dot {
+        display: inline-block;
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: var(--pink);
+        box-shadow: 0 0 8px var(--pink);
+      }
+
+      .obj {
+        min-width: 7rem;
+        border-radius: 10px;
+        border: 1px solid rgba(236, 72, 153, 0.5);
+        background: rgba(236, 72, 153, 0.07);
+        padding: 0.3rem 0.5rem 0.45rem;
+        font: 0.8rem var(--font-mono);
+      }
+
+      .obj .oh {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 0.25rem;
+        color: #f9a8d4;
+        font-weight: 600;
+      }
+
+      .obj .oh i {
+        font-style: normal;
+        font-weight: 400;
+        color: var(--faint);
+      }
+
+      .obj .fr {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+      }
+
+      .obj .fr > span {
+        color: var(--violet-soft);
+      }
+
+      .obj .fv {
+        min-height: 1.7rem;
+        min-width: 2.4rem;
+        font-size: 0.82rem;
+        padding: 0.1rem 0.45rem;
+      }
+
+      .panel svg.arrows {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: visible;
+      }
+
+      .panel svg.arrows path {
+        fill: none;
+        stroke: #f472b6;
+        stroke-width: 2;
+        opacity: 0.85;
+      }
+
+      .con {
+        min-height: 2.2rem;
+        max-height: 13rem;
+        overflow: auto;
+        font: 0.92rem/1.5 var(--font-mono);
+        color: #e2e8f0;
+        white-space: pre-wrap;
+        tab-size: 8;
+      }
+
+      .con .e {
+        color: var(--red);
+      }
+
+      .con .nl {
+        color: var(--faint);
+        font-style: normal;
+      }
+
+      .cells {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+      }
+
+      .cell {
+        position: relative;
+        min-width: 2rem;
+        padding: 0.2rem 0.4rem;
+        text-align: center;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        font: 0.85rem var(--font-mono);
+        color: var(--muted);
+        transition: all 0.3s;
+      }
+
+      .cell.now {
+        border-color: var(--cyan);
+        color: var(--text);
+        box-shadow: 0 0 12px rgba(34, 211, 238, 0.45);
+        transform: translateY(-3px);
+      }
+
+      .cell.ok {
+        background: rgba(134, 239, 172, 0.16);
+        border-color: rgba(134, 239, 172, 0.55);
+        color: var(--green);
+      }
+
+      .cell.skip {
+        background: rgba(251, 191, 36, 0.12);
+        border-color: rgba(251, 191, 36, 0.5);
+        color: var(--amber);
+        text-decoration: line-through;
+      }
+
+      .cell.stop {
+        background: rgba(248, 113, 113, 0.15);
+        border-color: rgba(248, 113, 113, 0.6);
+        color: var(--red);
+      }
+
+      .cell.done {
+        background: rgba(139, 92, 246, 0.18);
+        border-color: rgba(167, 139, 250, 0.5);
+        color: var(--text);
+      }
+
+      .cell.never {
+        opacity: 0.35;
+      }
+
+      .fl {
+        font: 0.85rem/1.55 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .fl div {
+        padding: 0 0.4rem;
+        border-radius: 4px;
+        white-space: pre;
+        transition: all 0.3s;
+      }
+
+      .fl div.now {
+        color: var(--text);
+        background: rgba(34, 211, 238, 0.18);
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      .fl div.done {
+        color: var(--text);
+      }
+
+      /* Step-by-step evaluation of one expression */
+      .reduce {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 0.7em;
+        list-style: none;
+        margin: 0;
+        padding: 0.8rem 1.2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        font: 1.15rem/1.9 var(--font-mono);
+      }
+
+      .reduce.v {
+        flex-direction: column;
+      }
+
+      .reduce li {
+        padding: 0;
+        margin: 0;
+        white-space: pre;
+      }
+
+      .reduce li::marker {
+        content: "";
+      }
+
+      .reduce li + li::before {
+        content: "→ ";
+        color: var(--faint);
+      }
+
+      .reduce mark {
+        padding: 0 0.2em;
+        border-radius: 4px;
+        color: var(--text);
+        background: rgba(34, 211, 238, 0.22);
+        box-shadow: inset 0 -2px 0 var(--cyan);
+      }
+
+      .reduce s {
+        color: var(--faint);
+        text-decoration-color: var(--red);
+      }
+
+      .reduce li:last-child {
+        color: var(--green);
+      }
+
+      .reduce .why {
+        margin-left: 0.6em;
+        font: 0.75em var(--font);
+        color: var(--muted);
+        white-space: normal;
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .viz,
+        .viz.wide {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.9rem;
+        }
+
+        .viz > pre {
+          min-width: 0;
+          font-size: 0.82rem;
+        }
+
+        .reduce {
+          font-size: 0.9rem;
+          padding: 0.6rem 0.8rem;
+        }
+
+        .con {
+          max-height: 8rem;
+        }
+      }
+      /* tracer:end */
+
+      .code {
+        width: min(100%, 44rem);
+      }
+
+      .pair {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, auto);
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        width: min(100%, 66rem);
+      }
+
+      .pair > pre {
+        width: auto;
+        min-width: min(100%, 18rem);
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+
+      #map .tiles .tile {
+        min-height: 7rem;
+      }
+
+      @media (max-width: 760px) {
+        .pair {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 1rem;
+        }
+
+        .pair > pre {
+          min-width: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · fundamentals</span>
+      <h1 class="grad-each"><span>Python</span> <span>Basics</span></h1>
+      <p>Variables, types, operators, conversions, printing and comments, with exercises for each.</p>
+    </section>
+
+    <section class="slide" id="map">
+      <h2>In this deck</h2>
+      <div class="tiles">
+        <a class="tile" href="#3"><span>Variables<small>assignment, swapping</small></span></a>
+        <a class="tile" href="#10"><span>Data types<small>int, float, str, bool</small></span></a>
+        <a class="tile" href="#15"><span>Operations<small>arithmetic, comparison</small></span></a>
+        <a class="tile" href="#22"><span>Logic<small>and, or, not</small></span></a>
+        <a class="tile" href="#28"><span>Type conversion<small>int(), str(), bool()</small></span></a>
+        <a class="tile" href="#34"><span>Input &amp; output<small>print, input</small></span></a>
+        <a class="tile" href="#41"><span>Comments<small>#, triple quotes</small></span></a>
+      </div>
+      <p class="hint">Each topic also has its own deck: see the <a href="index.html">Python index</a>.</p>
+    </section>
+
+    <!-- ============================================================ variables -->
+    <section class="slide section">
+      <h2>Variables and assignment</h2>
+    </section>
+
+    <section class="slide" id="vars">
+      <h2>Variables and assignment</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # variable assignment
+          x = 5
+          name = "Alice"
+          pi = 3.14
+          # multiple assignment
+          a, b, c = 1, 2, 3
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <section class="slide" id="swap">
+      <h2>Swapping values</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # swap values
+          x, y = 10, 20
+          x, y = y, x
+          # ans: x is now 20, y is now 10
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+      <p class="hint">The right side, <code>(20, 10)</code>, is built first; then both names are reassigned.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Variables · exercises 1</h2>
+      <pre class="code"><code class="language-python">
+        # what is the value of x?
+        x = 10
+        # ans: 10
+        # what happens after this swap?
+        a, b = 5, 15
+        a, b = b, a
+        # ans: a=15, b=5
+        # what is z after this?
+        x, y, z = 1, 2, 3
+        z = x + y
+        # ans: 3
+        # can you assign like this?
+        x = y = z = 0
+        # ans: yes, all are 0
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Variables · exercises 2</h2>
+      <pre class="code"><code class="language-python">
+        # what is the value of b?
+        a = 5
+        b = a
+        a = 10
+        # ans: 5
+        # what does this produce?
+        x, y = 1, 2, 3
+        # ans: Error: too many values to unpack
+        # what is y?
+        x = y = 5
+        x = x + 1
+        # ans: 5
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Variables · exercises 3</h2>
+      <pre class="code"><code class="language-python">
+        # multiple assignment with calculation?
+        a, b = 10, 20
+        a, b = a+b, a-b
+        # ans: a=30, b=-10
+        # what happens here?
+        x = 1
+        x = x
+        # ans: x is still 1
+        # tricky swap
+        x, y = 5, 10
+        x, y = y, x+y
+        # ans: x=10, y=15
+      </code></pre>
+    </section>
+
+    <section class="slide" id="walrus">
+      <h2>Variables · exercises 4</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # assignment from right to left?
+          a = b = 3
+          b = 5
+          # ans: a=3, b=5
+          # chained assignment with operation?
+          x = 5
+          y = (x := x + 1)
+          # ans: x=6, y=6 (walrus operator)
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ data types -->
+    <section class="slide section">
+      <h2>Data types</h2>
+    </section>
+
+    <section class="slide" id="types">
+      <h2>Data types</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # integer
+          age = 25
+          type(age)
+          # ans: &lt;class 'int'&gt;
+          # float
+          price = 19.99
+          type(price)
+          # ans: &lt;class 'float'&gt;
+          # string
+          message = "Hello, World!"
+          type(message)
+          # ans: &lt;class 'str'&gt;
+          # boolean
+          is_valid = True
+          type(is_valid)
+          # ans: &lt;class 'bool'&gt;
+          is_empty = False
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Data types · exercises 1</h2>
+      <pre class="code"><code class="language-python">
+        # what type is this?
+        x = 5.0
+        # ans: &lt;class 'float'&gt;
+        # what type is this?
+        y = "123"
+        # ans: &lt;class 'str'&gt;
+        # what type results?
+        result = 10 / 2
+        # ans: &lt;class 'float'&gt;
+        # what type is this?
+        z = True + False
+        # ans: &lt;class 'int'&gt; (True=1, False=0)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Data types · exercises 2</h2>
+      <pre class="code"><code class="language-python">
+        # what type?
+        a = 5
+        b = 2
+        c = a / b
+        # ans: &lt;class 'float'&gt;
+        # what type?
+        x = 10
+        y = 3
+        z = x // y
+        # ans: &lt;class 'int'&gt;
+        # tricky: what type?
+        value = "5" + "3"
+        # ans: &lt;class 'str'&gt; (result is "53")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Data types · exercises 3</h2>
+      <pre class="code"><code class="language-python">
+        # what is the type?
+        x = None
+        # ans: &lt;class 'NoneType'&gt;
+        # what type is this expression?
+        result = 5 &gt; 3
+        # ans: &lt;class 'bool'&gt;
+        # what happens?
+        x = int(True)
+        # ans: 1, type is &lt;class 'int'&gt;
+        # mixing types?
+        x = 5 + 2.5
+        # ans: 7.5, type is &lt;class 'float'&gt;
+        # edge case?
+        x = bool([])
+        # ans: False, type is &lt;class 'bool'&gt;
+      </code></pre>
+    </section>
+
+    <!-- ============================================================ operations -->
+    <section class="slide section">
+      <h2>Basic operations</h2>
+    </section>
+
+    <section class="slide">
+      <h2>Arithmetic operations</h2>
+      <div class="cols" style="width: min(100%, 50rem)">
+        <pre><code class="language-python">
+          # arithmetic operations
+          10 + 5
+          # ans: 15
+          10 - 5
+          # ans: 5
+          10 * 5
+          # ans: 50
+          10 / 5
+          # ans: 2.0
+        </code></pre>
+        <pre><code class="language-python">
+          10 // 3
+          # ans: 3
+          10 % 3
+          # ans: 1
+          10 ** 2
+          # ans: 100
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Comparison operations</h2>
+      <div class="cols" style="width: min(100%, 50rem)">
+        <pre><code class="language-python">
+          # comparison operations
+          5 == 5
+          # ans: True
+          5 != 3
+          # ans: True
+          5 &gt; 3
+          # ans: True
+        </code></pre>
+        <pre><code class="language-python">
+          5 &lt; 3
+          # ans: False
+          5 &gt;= 5
+          # ans: True
+          5 &lt;= 3
+          # ans: False
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Operations · exercises 1</h2>
+      <pre class="code"><code class="language-python">
+        # what is the result?
+        7 % 3
+        # ans: 1
+        # division types
+        10 / 3
+        # ans: 3.3333...
+        10 // 3
+        # ans: 3
+        # negative modulus?
+        -10 % 3
+        # ans: 2
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Operations · exercises 2</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # what is this?
+          2 ** 3 ** 2
+          # ans: 512 (right associative: 2^(3^2) = 2^9)
+          # operator precedence?
+          10 + 5 * 2
+          # ans: 20
+          # comparison chain?
+          3 &lt; 5 &lt; 7
+          # ans: True
+        </code></pre>
+        <div class="stack">
+          <ol class="reduce step" data-step="1"><li>2 ** <mark>3 ** 2</mark></li><li><mark>2 ** 9</mark></li><li>512</li></ol>
+          <ol class="reduce step" data-step="2"><li>10 + <mark>5 * 2</mark></li><li><mark>10 + 10</mark></li><li>20</li></ol>
+          <ol class="reduce step" data-step="3"><li><mark>3 &lt; 5</mark> and <mark>5 &lt; 7</mark></li><li>True and True</li><li>True</li></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Operations · exercises 3</h2>
+      <pre class="code"><code class="language-python">
+        # what happens?
+        5 / 0
+        # ans: ZeroDivisionError
+        # floor division with negative?
+        -10 // 3
+        # ans: -4
+        # modulus with float?
+        10.5 % 3
+        # ans: 1.5
+      </code></pre>
+    </section>
+
+    <section class="slide" id="isvs">
+      <h2>Operations · exercises 4</h2>
+      <div class="viz wide">
+        <pre><code class="language-python">
+          # comparison with different types?
+          5 == 5.0
+          # ans: True
+          # is vs ==?
+          a = [1, 2]
+          b = [1, 2]
+          a == b
+          # ans: True
+          a is b
+          # ans: False
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ logic -->
+    <section class="slide section">
+      <h2>Logical operations</h2>
+    </section>
+
+    <section class="slide" id="logic">
+      <h2>Logical operations</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # logical operators
+          True and False
+          # ans: False
+          True or False
+          # ans: True
+          not True
+          # ans: False
+          # combining conditions
+          x = 10
+          x &gt; 5 and x &lt; 15
+          # ans: True
+          x &lt; 5 or x &gt; 8
+          # ans: True
+          not (x == 10)
+          # ans: False
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Logic · exercises 1</h2>
+      <pre class="code"><code class="language-python">
+        # what is the result?
+        True and True
+        # ans: True
+        # short circuit evaluation?
+        False and (1/0)
+        # ans: False (no error, doesn't evaluate second part)
+        # short circuit with or?
+        True or (1/0)
+        # ans: True (no error)
+        # what about this?
+        not False
+        # ans: True
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Logic · exercises 2</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # chaining and/or?
+          True or False and False
+          # ans: True (and has higher precedence)
+          # boolean with comparison?
+          5 &gt; 3 and 10 &lt; 20
+          # ans: True
+          # tricky: what is this?
+          bool([]) and bool([1])
+          # ans: False
+        </code></pre>
+        <div class="stack">
+          <ol class="reduce step" data-step="1"><li>True or <mark>(False and False)</mark></li><li>True or False</li><li>True</li></ol>
+          <ol class="reduce step" data-step="3"><li><mark>bool([])</mark> and <s>bool([1])</s></li><li>False</li></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Logic · exercises 3</h2>
+      <pre class="code"><code class="language-python">
+        # what evaluates?
+        0 or 5
+        # ans: 5 (returns last truthy value)
+        # and returns?
+        5 and 10
+        # ans: 10 (returns last value if all truthy)
+        # mixed types?
+        "hello" and ""
+        # ans: "" (returns last value or first falsy)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Logic · exercises 4</h2>
+      <pre class="code"><code class="language-python">
+        # what about this?
+        not not True
+        # ans: True
+        # De Morgan's law?
+        not (True and False)
+        # ans: True
+        not True or not False
+        # ans: True
+      </code></pre>
+    </section>
+
+    <!-- ============================================================ conversion -->
+    <section class="slide section">
+      <h2>Type conversion</h2>
+    </section>
+
+    <section class="slide">
+      <h2>Type conversion</h2>
+      <div class="cols" style="width: min(100%, 50rem)">
+        <pre><code class="language-python">
+          # to integer
+          int("42")
+          # ans: 42
+          int(3.14)
+          # ans: 3
+          int(True)
+          # ans: 1
+          # to float
+          float("3.14")
+          # ans: 3.14
+          float(42)
+          # ans: 42.0
+        </code></pre>
+        <pre><code class="language-python">
+          # to string
+          str(42)
+          # ans: "42"
+          str(3.14)
+          # ans: "3.14"
+          # to boolean
+          bool(1)
+          # ans: True
+          bool(0)
+          # ans: False
+          bool("")
+          # ans: False
+          bool("text")
+          # ans: True
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Conversion · exercises 1</h2>
+      <pre class="code"><code class="language-python">
+        # what is the result?
+        int("100")
+        # ans: 100
+        # what happens?
+        int("3.14")
+        # ans: ValueError
+        # float from string?
+        float("3.14")
+        # ans: 3.14
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Conversion · exercises 2</h2>
+      <pre class="code"><code class="language-python">
+        # bool from number?
+        bool(0)
+        # ans: False
+        bool(1)
+        # ans: True
+        bool(-1)
+        # ans: True
+        # bool from string?
+        bool("")
+        # ans: False
+        bool("False")
+        # ans: True (any non-empty string is True)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Conversion · exercises 3</h2>
+      <pre class="code"><code class="language-python">
+        # string from bool?
+        str(True)
+        # ans: "True"
+        # int from bool?
+        int(False)
+        # ans: 0
+        # what about this?
+        int("  42  ")
+        # ans: 42 (whitespace is stripped)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Conversion · exercises 4</h2>
+      <pre class="code"><code class="language-python">
+        # edge case?
+        int("0b101", 2)
+        # ans: 5 (binary to int)
+        # what happens?
+        float("inf")
+        # ans: inf (infinity)
+        # string to int base?
+        int("FF", 16)
+        # ans: 255 (hex to int)
+      </code></pre>
+    </section>
+
+    <!-- ============================================================ i/o -->
+    <section class="slide section">
+      <h2>User input and output</h2>
+    </section>
+
+    <section class="slide" id="io">
+      <h2>Output with <code>print</code></h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # output
+          print("Hello, World!")
+          # ans: Hello, World!
+          print("Age:", 25)
+          # ans: Age: 25
+          print("Name:", "Alice", "Score:", 95)
+          # ans: Name: Alice Score: 95
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Input with <code>input</code></h2>
+      <pre class="code"><code class="language-python">
+        # input (commented as it requires user interaction)
+        # ans: name = input("Enter your name: ")
+        # ans: age = input("Enter your age: ")
+        # ans: age = int(input("Enter your age: "))
+      </code></pre>
+      <p class="hint step"><code>input()</code> waits for the user to type and always returns a string, so wrap it in <code>int()</code> to get a number.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Input &amp; output · exercises 1</h2>
+      <pre class="code"><code class="language-python">
+        # what is printed?
+        print(1, 2, 3)
+        # ans: 1 2 3
+        # what separator is used?
+        print("a", "b", "c", sep="-")
+        # ans: a-b-c
+        # what is printed?
+        print("Hello", end="")
+        print("World")
+        # ans: HelloWorld
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Input &amp; output · exercises 2</h2>
+      <pre class="code"><code class="language-python">
+        # multiple arguments?
+        print(5 + 3)
+        # ans: 8
+        # what does this print?
+        print("Result:", 10, 20, sep=", ")
+        # ans: Result:, 10, 20
+        # what about this?
+        print()
+        # ans: (empty line)
+        # print with expression?
+        x = 5
+        print("x =", x)
+        # ans: x = 5
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Input &amp; output · exercises 3</h2>
+      <pre class="code"><code class="language-python">
+        # what is the output?
+        print("Line1\nLine2")
+        # ans: Line1
+        # ans: Line2 (on separate lines)
+        # tab character?
+        print("Name:\tAlice")
+        # ans: Name:    Alice (with tab)
+        # escape quotes?
+        print("He said \"Hi\"")
+        # ans: He said "Hi"
+      </code></pre>
+    </section>
+
+    <section class="slide" id="ret">
+      <h2>Input &amp; output · exercises 4</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # raw string?
+          print(r"C:\new\path")
+          # ans: C:\new\path (backslashes not escaped)
+          # print return value?
+          x = print("Hello")
+          # ans: Hello (printed)
+          # ans: x is None
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ comments -->
+    <section class="slide section">
+      <h2>Comments</h2>
+    </section>
+
+    <section class="slide" id="comments">
+      <h2>Comments</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # this is a single line comment
+          """
+          This is a
+          multi-line comment
+          or docstring
+          """
+          x = 5  # inline comment
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <section class="slide">
+      <h2>Comments · exercises 1</h2>
+      <pre class="code"><code class="language-python">
+        # what is x?
+        # ans: x = 10
+        x = 5
+        # ans: 5
+        # what gets executed?
+        x = 5  # x = 10
+        # ans: x is 5
+        # multiline comment?
+        """
+        x = 10
+        """
+        x = 5
+        # ans: x is 5
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Comments · exercises 2</h2>
+      <pre class="code"><code class="language-python">
+        # can you do this?
+        x = 5 """comment"""
+        # ans: SyntaxError
+        # what about this?
+        x = 5  # comment
+        y = x
+        # ans: y is 5
+        # nested comments?
+        # ans: # this is a comment
+        # ans: valid, just a comment
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Comments · exercises 3</h2>
+      <pre class="code"><code class="language-python">
+        # multiline string as comment?
+        '''
+        This is also
+        a comment
+        '''
+        # ans: valid if not assigned to anything
+        # what is x?
+        x = 5
+        # ans: x = 10
+        # ans: x is 5
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Comments · exercises 4</h2>
+      <pre class="code"><code class="language-python">
+        # inline multiline?
+        x = 5 """ this won't work """
+        # ans: SyntaxError
+        # comment with backslash?
+        x = 5  # this is \
+        # ans: a comment
+        # ans: two separate single-line comments
+        # doc string vs comment?
+        def func():
+            """This is docstring"""
+            # This is comment
+            pass
+        # ans: both valid, different purposes
+      </code></pre>
+    </section>
+
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>Assignment</h3><p>The right side is evaluated first; unpacking needs one name per value.</p></div>
+        <div class="card step"><h3>Types</h3><p><code>/</code> always gives a float; <code>True</code> and <code>False</code> act as 1 and 0.</p></div>
+        <div class="card step"><h3>Logic</h3><p><code>and</code> / <code>or</code> short-circuit and return one of their operands.</p></div>
+        <div class="card step"><h3>Conversion</h3><p><code>int()</code> truncates; empty values and zero are falsy.</p></div>
+        <div class="card step"><h3>print</h3><p><code>sep</code> goes between values, <code>end</code> after them; it returns <code>None</code>.</p></div>
+        <div class="card step"><h3>Comments</h3><p><code>#</code> to the end of the line; triple-quoted strings for longer notes.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      /* tracer:start (shared by the Python decks) */
+      // A tracer plays a snippet line by line beside panels for its variables,
+      // objects, the items a loop walks over, a file, and printed output.
+      // A program is a list of events, grouped into beats keyed by the slide's
+      // step number: beat k plays when step k is revealed (beat 0 on enter).
+      //   { l: 3 | "x = 5", set: { x: 5, s: "'hi'" }, out: "text", end: "",
+      //     cond: true, note: "5 > 3", val: "15", err: "ZeroDivisionError",
+      //     say: "text", del: ["x"], heap: { id: { cls, f: {...}, v } },
+      //     clear: true (fresh run), tape: [index, "ok" | "skip" | "stop" | "done", which], file: { line } | { add } }
+      // Strings in `set` are Python reprs written as they print ("'Alice'", "2.0");
+      // "@id" is a reference to a heap object. `l` as a string means the next line
+      // (searching down from the current one, wrapping) that starts with that text.
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      const repr = (v) =>
+        v === true ? "True" : v === false ? "False" : v == null ? "None" : Array.isArray(v) ? "[" + v.map(repr).join(", ") + "]" : String(v);
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const typeName = (r, heap) => {
+        if (r.startsWith("@")) return heap.get(r.slice(1))?.cls ?? "object";
+        if (/^-?\d+$/.test(r)) return "int";
+        if (/^-?(\d+\.\d*(e-?\d+)?|inf|nan)$/.test(r)) return "float";
+        if (/^[rbf]?['"]/.test(r)) return "str";
+        if (r === "True" || r === "False") return "bool";
+        if (r === "None") return "NoneType";
+        if (r[0] === "[") return "list";
+        if (r[0] === "(") return "tuple";
+        if (r[0] === "{") return r === "{}" || r.includes(":") ? "dict" : "set";
+        return "";
+      };
+      // Record a program with ordinary JS control flow: t(line, set, more)
+      const rec = (fn) => {
+        const ev = [];
+        fn((l, set, more) => ev.push({ l, set, ...more }), ev);
+        return ev;
+      };
+      const SVGNS = "http://www.w3.org/2000/svg";
+      let arrowIds = 0;
+
+      class Tracer {
+        constructor(viz, cfg) {
+          this.viz = viz;
+          this.cfg = cfg;
+          this.dt = cfg.dt ?? 0.5;
+          this.pre = viz.querySelector("pre");
+          this.pre.classList.add("trace");
+          this.lines = [...this.pre.querySelectorAll(".line")];
+          this.lines.forEach((l) => l.classList.toggle("cmt", /^\s*(#|$)/.test(l.textContent) && !l.classList.contains("answer")));
+          this.slide = viz.closest(".slide");
+          this.beats = cfg.beats || { 0: cfg.run || [] };
+          this.shown = 0;
+          this.build();
+        }
+
+        build() {
+          const c = this.cfg;
+          const want = c.panels || ["vars", "out"];
+          const p = (this.panel = this.viz.querySelector(".panel") || this.viz.appendChild(document.createElement("div")));
+          p.classList.add("panel");
+          p.setAttribute("data-interactive", "");
+          p.innerHTML = "";
+          const box = (cls, title) => {
+            const b = document.createElement("div");
+            b.className = "box " + cls;
+            b.innerHTML = `<div class="bh"><span>${title}</span></div>`;
+            p.appendChild(b);
+            return b;
+          };
+          const tapes = c.tape ? [].concat(c.tape) : [];
+          this.tapes = [];
+          for (const name of want) {
+            if (name === "tape") {
+              for (const tp of tapes) {
+                const b = box("tape", tp.label);
+                const row = b.appendChild(document.createElement("div"));
+                row.className = "cells";
+                row.innerHTML = tp.items.map((x) => `<span class="cell">${esc(repr(x))}</span>`).join("");
+                this.tapes.push([...row.children]);
+              }
+            } else if (name === "file") {
+              const b = box("file", c.file.name);
+              this.fileEl = b.appendChild(document.createElement("div"));
+              this.fileEl.className = "fl";
+            } else if (name === "vars") {
+              this.vgrid = box("vars", c.varsTitle || "Variables").appendChild(document.createElement("div"));
+              this.vgrid.className = "vgrid";
+            } else if (name === "heap") {
+              this.hgrid = box("heap", "Objects in memory").appendChild(document.createElement("div"));
+              this.hgrid.className = "hgrid";
+            } else if (name === "out") {
+              this.con = box("out", c.outTitle || "Output").appendChild(document.createElement("div"));
+              this.con.className = "con";
+            }
+          }
+          const btn = document.createElement("button");
+          btn.className = "replay";
+          btn.textContent = "replay";
+          btn.addEventListener("click", () => this.renderTo(this.shown, "all"));
+          p.querySelector(".bh").appendChild(btn);
+          if (want.includes("heap")) {
+            p.classList.add("mem2");
+            this.svg = document.createElementNS(SVGNS, "svg");
+            this.svg.classList.add("arrows");
+            const id = "tr-arrow-" + ++arrowIds;
+            this.svg.innerHTML = `<defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f472b6"/></marker></defs><g></g>`;
+            this.marker = id;
+            p.appendChild(this.svg);
+          }
+        }
+
+        reset() {
+          this.tl?.kill();
+          this.tl = null;
+          this.cur = -1;
+          this.vars = new Map();
+          this.heap = new Map();
+          this.objEls = new Map();
+          this.pre.classList.remove("tracing", "traced");
+          this.lines.forEach((l) => {
+            l.classList.remove("run", "now");
+            l.querySelector(".tb")?.remove();
+          });
+          if (this.vgrid) this.vgrid.innerHTML = "";
+          if (this.hgrid) this.hgrid.innerHTML = "";
+          if (this.con) this.con.innerHTML = "";
+          this.tapes.forEach((cells) => cells.forEach((x) => (x.className = "cell")));
+          if (this.fileEl) this.fileEl.innerHTML = (this.cfg.file.text ?? "").split("\n").filter((s, i, a) => s || i < a.length - 1).map((s) => `<div>${esc(s) || " "}</div>`).join("");
+          this.drawArrows();
+        }
+
+        find(l) {
+          const L = this.lines;
+          if (typeof l === "number") return l - 1;
+          for (let k = 1; k <= L.length; k++) {
+            const i = (this.cur + k + L.length) % L.length;
+            if (!L[i].classList.contains("answer") && L[i].textContent.trim().startsWith(l)) return i;
+          }
+          console.warn("tracer: no line starts with", l);
+          return -1;
+        }
+
+        badge(el, e, anim) {
+          el.querySelector(".tb")?.remove();
+          const b = document.createElement("span");
+          let cls = "", txt;
+          if (e.err) (cls = "e"), (txt = e.err);
+          else if (e.cond !== undefined) (cls = e.cond ? "t" : "f"), (txt = (e.note ? e.note + " → " : "") + (e.cond ? "True" : "False"));
+          else if (e.val !== undefined) txt = "→ " + e.val;
+          else (cls = e.skip ? "s" : ""), (txt = e.say);
+          b.className = "tb " + cls;
+          b.textContent = txt;
+          el.appendChild(b);
+          if (anim) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+        }
+
+        valueHTML(r) {
+          return r.startsWith("@") ? `<i class="dot"></i>` : esc(r);
+        }
+
+        swapValue(holder, r, anim) {
+          const old = holder.querySelector("b:not(.gone)");
+          if (old && old.dataset.r === r) return false;
+          const nb = document.createElement("b");
+          nb.dataset.r = r;
+          nb.innerHTML = this.valueHTML(r);
+          if (r.startsWith("@")) holder.dataset.ref = r.slice(1);
+          else delete holder.dataset.ref;
+          holder.appendChild(nb);
+          if (old) {
+            if (anim) {
+              old.classList.add("gone");
+              gsap.to(old, { y: -22, opacity: 0, duration: 0.3, onComplete: () => old.remove() });
+              gsap.from(nb, { y: 22, opacity: 0, duration: 0.35, ease: "power2.out" });
+            } else old.remove();
+          }
+          return true;
+        }
+
+        flash(el, anim) {
+          if (!anim) return;
+          el.classList.add("hot");
+          setTimeout(() => el.classList.remove("hot"), 650);
+        }
+
+        setVar(n, v, anim) {
+          const r = repr(v);
+          let box = this.vars.get(n);
+          if (!box) {
+            box = document.createElement("div");
+            box.className = "var";
+            box.innerHTML = `<span class="n">${esc(n)}</span><span class="v"></span><span class="t"></span>`;
+            this.vgrid.appendChild(box);
+            this.vars.set(n, box);
+            this.swapValue(box.querySelector(".v"), r, false);
+            if (anim) gsap.from(box, { scale: 0.3, opacity: 0, duration: 0.4, ease: "back.out(2)" });
+          } else if (this.swapValue(box.querySelector(".v"), r, anim)) this.flash(box, anim);
+          box.classList.remove("gone");
+          box.querySelector(".t").textContent = typeName(r, this.heap);
+        }
+
+        setObj(id, o, anim) {
+          const prev = this.heap.get(id) || { f: {} };
+          const obj = { cls: o.cls ?? prev.cls, f: { ...prev.f, ...(o.f || {}) }, v: o.v ?? prev.v };
+          this.heap.set(id, obj);
+          let el = this.objEls.get(id);
+          if (!el) {
+            el = document.createElement("div");
+            el.className = "obj";
+            el.innerHTML = `<div class="oh"><span>${esc(obj.cls)}</span><i>${esc(o.label ?? "")}</i></div>`;
+            this.hgrid.appendChild(el);
+            this.objEls.set(id, el);
+            if (anim) gsap.from(el, { scale: 0.4, opacity: 0, duration: 0.4, ease: "back.out(2)" });
+          }
+          const rows = o.v !== undefined ? { "": o.v } : o.f || {};
+          for (const [k, v] of Object.entries(rows)) {
+            let row = [...el.querySelectorAll(".fr")].find((x) => x.dataset.k === k);
+            if (!row) {
+              row = document.createElement("div");
+              row.className = "fr";
+              row.dataset.k = k;
+              row.innerHTML = `${k ? `<span>${esc(k)}</span>` : ""}<span class="fv"></span>`;
+              el.appendChild(row);
+              this.swapValue(row.querySelector(".fv"), repr(v), false);
+              if (anim) gsap.from(row, { opacity: 0, x: -10, duration: 0.3 });
+            } else if (this.swapValue(row.querySelector(".fv"), repr(v), anim)) this.flash(row.querySelector(".fv"), anim);
+          }
+        }
+
+        print(text, anim, err) {
+          const s = document.createElement("span");
+          if (err) s.className = "e";
+          s.innerHTML = this.cfg.showEnd ? esc(text).replace(/\n/g, '<i class="nl">↵</i>\n') : esc(text);
+          this.con.appendChild(s);
+          this.con.scrollTop = this.con.scrollHeight;
+          if (anim) gsap.from(s, { opacity: 0, duration: 0.35 });
+        }
+
+        apply(e, anim) {
+          if (e.clear) {
+            // a fresh run: forget variables, objects and output
+            this.vars.forEach((b) => b.remove());
+            this.vars.clear();
+            this.objEls.forEach((b) => b.remove());
+            this.objEls.clear();
+            this.heap.clear();
+            if (this.con) this.con.innerHTML = "";
+          }
+          if (e.l != null) {
+            const i = this.find(e.l);
+            if (i >= 0) {
+              this.lines.forEach((x) => x.classList.remove("now"));
+              const el = this.lines[i];
+              el.classList.add("run", "now");
+              this.cur = i;
+              this.pre.classList.add("tracing");
+              this.pre.classList.remove("traced");
+              if (e.err || e.cond !== undefined || e.val !== undefined || e.say) this.badge(el, e, anim);
+            }
+          }
+          if (e.heap) for (const [id, o] of Object.entries(e.heap)) this.setObj(id, o, anim);
+          if (e.set) for (const [n, v] of Object.entries(e.set)) this.setVar(n, v, anim);
+          if (e.del)
+            e.del.forEach((n) => {
+              this.vars.get(n)?.remove();
+              this.vars.delete(n);
+            });
+          if (e.out !== undefined) this.print(e.out + (e.end ?? "\n"), anim, false);
+          if (e.err && this.con) this.print(e.err + "\n", anim, true);
+          if (e.tape) {
+            const [i, cls, w = 0] = e.tape;
+            const cells = this.tapes[w];
+            cells.forEach((x) => x.classList.remove("now"));
+            if (cells[i]) {
+              cells[i].classList.add("now");
+              if (cls) cells[i].classList.add(cls);
+            }
+          }
+          if (e.tapeEnd) {
+            const [cls, w = 0] = e.tapeEnd;
+            this.tapes[w].forEach((x) => {
+              x.classList.remove("now");
+              if (cls && !/ok|skip|stop|done/.test(x.className)) x.classList.add(cls);
+            });
+          }
+          if (e.tapeClear !== undefined) this.tapes[e.tapeClear].forEach((x) => (x.className = "cell"));
+          if (e.file && this.fileEl) {
+            const rows = [...this.fileEl.children];
+            rows.forEach((x) => x.classList.remove("now"));
+            if (e.file.line !== undefined && rows[e.file.line]) rows[e.file.line].classList.add("now", "done");
+            if (e.file.add !== undefined) {
+              const d = document.createElement("div");
+              d.textContent = e.file.add || " ";
+              d.className = "now done";
+              this.fileEl.appendChild(d);
+              if (anim) gsap.from(d, { opacity: 0, x: -12, duration: 0.35 });
+            }
+          }
+          if (e.heap || e.set || e.del) this.arrowsSoon();
+        }
+
+        settle() {
+          this.lines.forEach((l) => l.classList.remove("now"));
+          if (this.pre.classList.contains("tracing")) this.pre.classList.replace("tracing", "traced");
+          this.tapes.forEach((cells) => cells.forEach((x) => x.classList.remove("now")));
+          this.arrowsSoon();
+        }
+
+        keys() {
+          return Object.keys(this.beats).map(Number).sort((a, b) => a - b);
+        }
+
+        duration(k) {
+          return (this.beats[k]?.length || 0) * this.dt;
+        }
+
+        // mode: false = instant, "last" = animate beat k only, "all" = animate beats 0..k
+        renderTo(k, mode) {
+          this.reset();
+          this.shown = k;
+          const play = [];
+          for (const b of this.keys()) {
+            if (b > k) continue;
+            if (mode === "all" || (mode === "last" && b === k)) play.push(...this.beats[b]);
+            else this.beats[b].forEach((e) => this.apply(e, false));
+          }
+          if (!play.length) return this.settle();
+          const tl = gsap.timeline();
+          play.forEach((e, j) => tl.call(() => this.apply(e, true), null, j * this.dt));
+          tl.call(() => this.settle(), null, play.length * this.dt);
+          this.tl = tl;
+        }
+
+        arrowsSoon(ms = 700) {
+          if (!this.svg) return;
+          const until = performance.now() + ms;
+          const tick = () => {
+            this.drawArrows();
+            if (performance.now() < until) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+
+        drawArrows() {
+          if (!this.svg) return;
+          const g = this.svg.querySelector("g");
+          g.innerHTML = "";
+          const pr = this.panel.getBoundingClientRect();
+          if (!pr.width) return;
+          const sx = this.panel.offsetWidth / pr.width || 1;
+          const rel = (r) => ({ l: (r.left - pr.left) * sx, r: (r.right - pr.left) * sx, t: (r.top - pr.top) * sx, b: (r.bottom - pr.top) * sx });
+          for (const src of this.panel.querySelectorAll("[data-ref]")) {
+            const tgt = this.objEls.get(src.dataset.ref);
+            if (!tgt || !src.isConnected) continue;
+            const a = rel(src.querySelector(".dot")?.getBoundingClientRect() ?? src.getBoundingClientRect());
+            const b = rel(tgt.getBoundingClientRect());
+            const ax = (a.l + a.r) / 2, ay = (a.t + a.b) / 2;
+            let d;
+            if (b.t > ay + 12) {
+              const bx = Math.min(Math.max(ax, b.l + 14), b.r - 14);
+              d = `M${ax} ${ay} C${ax} ${(ay + b.t) / 2} ${bx} ${(ay + b.t) / 2} ${bx} ${b.t - 2}`;
+            } else if (b.l > ax + 12) {
+              const by = (b.t + b.b) / 2;
+              d = `M${ax} ${ay} C${(ax + b.l) / 2} ${ay} ${(ax + b.l) / 2} ${by} ${b.l - 2} ${by}`;
+            } else {
+              const by = b.t + 14, x = Math.max(a.r, b.r) + 26;
+              d = `M${a.r} ${ay} C${x} ${ay} ${x} ${by} ${b.r + 2} ${by}`;
+            }
+            const path = document.createElementNS(SVGNS, "path");
+            path.setAttribute("d", d);
+            path.setAttribute("marker-end", `url(#${this.marker})`);
+            g.appendChild(path);
+          }
+        }
+      }
+
+      // Which elements each step of a slide reveals (mirrors deck.js)
+      const stepGroups = (slide) => {
+        let auto = 0;
+        const by = new Map();
+        for (const e of slide.querySelectorAll(".step, .answer")) {
+          const k = e.dataset.step !== undefined ? parseFloat(e.dataset.step) : ++auto;
+          if (!by.has(k)) by.set(k, []);
+          by.get(k).push(e);
+        }
+        return [...by.entries()].sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+      };
+
+      const tracers = new Map();
+      const trace = (sel, cfg) => {
+        const viz = typeof sel === "string" ? document.querySelector(sel) : sel;
+        if (!viz) return console.warn("tracer: missing", sel);
+        const t = new Tracer(viz, cfg);
+        const groups = stepGroups(t.slide);
+        const max = Math.max(...t.keys());
+        if (max > groups.length) console.warn(`tracer: ${t.slide.id || "slide"} has beat ${max} but ${groups.length} steps`);
+        if (!tracers.has(t.slide)) tracers.set(t.slide, []);
+        tracers.get(t.slide).push(t);
+        return t;
+      };
+
+      const delays = (slide, on) => {
+        stepGroups(slide).forEach((g, i) => {
+          const d = on ? Math.max(0, ...(tracers.get(slide) || []).map((t) => t.duration(i + 1))) : 0;
+          g.forEach((e) => e.classList.contains("answer") && e.style.setProperty("--d", d + "s"));
+        });
+      };
+
+      const pending = new Map();
+      const queue = (slide, k, dir) => {
+        const ts = tracers.get(slide);
+        if (!ts) return;
+        if (dir < 0) delays(slide, false);
+        let p = pending.get(slide);
+        if (!p) {
+          p = { n: 0 };
+          pending.set(slide, p);
+          queueMicrotask(() => {
+            pending.delete(slide);
+            const instant = p.dir < 0 || p.n > 1;
+            if (instant) delays(slide, false);
+            ts.forEach((t) => t.renderTo(p.k, instant ? false : "last"));
+          });
+        }
+        p.n++;
+        p.k = k;
+        p.dir = dir;
+      };
+
+      // Call once, after every trace(): hooks the tracers to the deck's events
+      const startTracers = () => {
+        Deck.on("enter", (slide) => {
+          const ts = tracers.get(slide);
+          if (!ts) return;
+          delays(slide, true);
+          ts.forEach((t) => {
+            t.renderTo(0, t.cfg.auto ? "all" : false);
+            t.arrowsSoon(1200);
+          });
+        });
+        Deck.on("step", (slide, i, d) => queue(slide, d.step, d.dir));
+        Deck.on("unstep", (slide, i, d) => queue(slide, d.step - 1, -1));
+        Deck.on("leave", (slide) => (tracers.get(slide) || []).forEach((t) => t.tl?.kill()));
+        addEventListener("resize", () => tracers.forEach((ts) => ts.forEach((t) => t.drawArrows())));
+
+        // Reductions: an expression rewritten one evaluation at a time
+        const playReduce = (r, instant) => {
+          const rows = r.querySelectorAll("li");
+          gsap.killTweensOf(rows);
+          if (instant) gsap.set(rows, { opacity: 1, x: 0 });
+          else gsap.fromTo(rows, { opacity: 0, x: -14 }, { opacity: 1, x: 0, stagger: 0.75, duration: 0.4, delay: 0.15 });
+        };
+        document.querySelectorAll(".reduce").forEach((r) => {
+          if (r.classList.contains("step")) r.addEventListener("step:show", (e) => e.target === r && playReduce(r, e.detail.dir < 0));
+        });
+        Deck.on("enter", (slide, i, d) => slide.querySelectorAll(".reduce:not(.step)").forEach((r) => playReduce(r, d?.dir < 0)));
+      };
+
+      const cover = (sel) =>
+        Deck.scene(sel, {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+            gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+          },
+        });
+      /* tracer:end */
+
+      cover("#title");
+      const V = { panels: ["vars"] };
+      trace("#vars .viz", {
+        ...V,
+        beats: {
+          1: [{ l: "x = 5", set: { x: 5 } }, { l: "name =", set: { name: "'Alice'" } }, { l: "pi =", set: { pi: 3.14 } }],
+          2: [{ l: "a, b, c", set: { a: 1, b: 2, c: 3 } }],
+        },
+      });
+      trace("#swap .viz", {
+        ...V,
+        dt: 0.7,
+        beats: { 1: [{ l: "x, y = 10", set: { x: 10, y: 20 } }, { l: "x, y = y", say: "right side first: (20, 10)" }, { set: { x: 20, y: 10 } }] },
+      });
+      trace("#walrus .viz", {
+        ...V,
+        beats: {
+          1: [{ l: "a = b", set: { a: 3, b: 3 } }, { l: "b = 5", set: { b: 5 } }],
+          2: [{ clear: 1, l: "x = 5", set: { x: 5 } }, { l: "y = (x", say: "x := 6 first", set: { x: 6 } }, { set: { y: 6 } }],
+        },
+      });
+      const T = (t) => ({ val: `<class '${t}'>` });
+      trace("#types .viz", {
+        ...V,
+        beats: {
+          1: [{ l: "age =", set: { age: 25 } }, { l: "type(age)", ...T("int") }],
+          2: [{ l: "price =", set: { price: 19.99 } }, { l: "type(price)", ...T("float") }],
+          3: [{ l: "message =", set: { message: "'Hello, World!'" } }, { l: "type(message)", ...T("str") }],
+          4: [{ l: "is_valid =", set: { is_valid: true } }, { l: "type(is_valid)", ...T("bool") }, { l: "is_empty =", set: { is_empty: false } }],
+        },
+      });
+      trace("#isvs .viz", {
+        panels: ["vars", "heap"],
+        beats: {
+          1: [{ l: "5 == 5.0", val: "True" }],
+          2: [
+            { l: "a = [", heap: { L1: { cls: "list", v: "[1, 2]" } }, set: { a: "@L1" } },
+            { l: "b = [", heap: { L2: { cls: "list", v: "[1, 2]" } }, set: { b: "@L2" } },
+            { l: "a == b", cond: true, note: "same contents" },
+          ],
+          3: [{ l: "a is b", cond: false, note: "same object" }],
+        },
+      });
+      trace("#logic .viz", {
+        ...V,
+        beats: {
+          1: [{ l: "True and False", val: "False" }],
+          2: [{ l: "True or False", val: "True" }],
+          3: [{ l: "not True", val: "False" }],
+          4: [{ l: "x = 10", set: { x: 10 } }, { l: "x > 5", cond: true, note: "True and True" }],
+          5: [{ l: "x < 5", cond: true, note: "False or True" }],
+          6: [{ l: "not (x", cond: false, note: "not True" }],
+        },
+      });
+      const O = { panels: ["out"], showEnd: true };
+      trace("#io .viz", {
+        ...O,
+        beats: { 1: [{ l: 'print("Hello', out: "Hello, World!" }], 2: [{ l: 'print("Age', out: "Age: 25" }], 3: [{ l: 'print("Name', out: "Name: Alice Score: 95" }] },
+      });
+      trace("#ret .viz", {
+        panels: ["vars", "out"],
+        showEnd: true,
+        beats: { 1: [{ l: "print(r", out: "C:\\new\\path" }], 2: [{ l: "x = print", out: "Hello" }], 3: [{ set: { x: null } }] },
+      });
+      trace("#comments .viz", {
+        ...V,
+        dt: 0.7,
+        beats: { 1: [{ l: "# this", say: "ignored", skip: 1 }, { l: 2, say: "a string, never stored", skip: 1 }, { l: "x = 5", set: { x: 5 } }] },
+      });
+      startTracers();
+    </script>
+  </body>
+</html>

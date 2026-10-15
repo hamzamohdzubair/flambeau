@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Function Parameters</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Binder: arguments flowing into parameter slots ---------- */
+      .bind-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.3rem;
+        width: min(100%, 60rem);
+      }
+
+      .bind-wrap pre {
+        width: min(100%, 44rem);
+      }
+
+      .binder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.9rem;
+        width: 100%;
+      }
+
+      .bcall {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        font: 500 1.15rem var(--font-mono);
+        color: var(--text);
+      }
+
+      .bcall .fnm {
+        color: var(--cyan);
+      }
+
+      .arg {
+        display: inline-block;
+        padding: 0.1em 0.6em;
+        border-radius: 999px;
+        border: 1px solid rgba(34, 211, 238, 0.55);
+        background: rgba(34, 211, 238, 0.12);
+        font: 500 1rem/1.6 var(--font-mono);
+        color: #cffafe;
+        transition: opacity 0.3s;
+      }
+
+      .arg.kw {
+        border-color: rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.16);
+        color: #ede9fe;
+      }
+
+      .arg .kn {
+        color: var(--violet-soft);
+      }
+
+      .arg.used {
+        opacity: 0.35;
+      }
+
+      .bslots {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.8rem;
+      }
+
+      .slot {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .slot .pn {
+        font: 600 0.9rem var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .slot .pn i {
+        font-style: normal;
+        font-weight: 400;
+        color: var(--faint);
+      }
+
+      .slot .box {
+        display: grid;
+        place-items: center;
+        min-width: 6.5rem;
+        min-height: 2.6rem;
+        padding: 0.2rem 0.8rem;
+        border-radius: 12px;
+        border: 1.5px dashed rgba(167, 139, 250, 0.45);
+        background: rgba(15, 18, 35, 0.7);
+        font: 500 1rem var(--font-mono);
+        color: var(--text);
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .slot.filled .box {
+        border-style: solid;
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .slot.def .box {
+        border-style: solid;
+        border-color: var(--amber);
+        background: rgba(251, 191, 36, 0.08);
+        color: #fde68a;
+      }
+
+      .slot.miss .box {
+        border-color: var(--red);
+        color: var(--red);
+      }
+
+      .slot .tag {
+        font: 0.7rem var(--font);
+        color: var(--faint);
+        min-height: 1em;
+      }
+
+      .bout {
+        min-height: 1.8rem;
+        font: 500 1.05rem var(--font-mono);
+        color: var(--green);
+      }
+
+      .bout .lbl {
+        color: var(--faint);
+        font-family: var(--font);
+        font-size: 0.85rem;
+        margin-right: 0.5rem;
+      }
+
+      .bpick {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        font-size: 0.85rem;
+        color: var(--faint);
+      }
+
+      .bpick button {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.85rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .bpick button:hover {
+        color: var(--text);
+        border-color: rgba(167, 139, 250, 0.7);
+      }
+
+      .bpick button.on {
+        color: var(--text);
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+      }
+
+      .bind-wrap .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .flyarg {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        padding: 0 0.55em;
+        border-radius: 999px;
+        font: 600 1rem/1.6 var(--font-mono);
+        color: #fff;
+        background: rgba(34, 211, 238, 0.35);
+        border: 1px solid var(--cyan);
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
+      }
+
+      @media (max-width: 760px) {
+        .bcall {
+          font-size: 0.9rem;
+        }
+
+        .arg,
+        .slot .box {
+          font-size: 0.85rem;
+        }
+
+        .slot .box {
+          min-width: 4.5rem;
+        }
+      }
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- Exercise 10: one default list shared by every call ---------- */
+      .shared {
+        width: min(100%, 40rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      .shared .call rect,
+      .shared .obj rect {
+        fill: rgba(15, 18, 35, 0.85);
+        stroke: rgba(167, 139, 250, 0.5);
+        stroke-width: 2;
+        transition:
+          stroke 0.3s,
+          fill 0.3s;
+      }
+
+      .shared .call.on rect {
+        stroke: var(--cyan);
+        fill: rgba(34, 211, 238, 0.12);
+      }
+
+      .shared .obj rect {
+        stroke: var(--pink);
+      }
+
+      .shared text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 17px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .shared text.lbl {
+        fill: var(--muted);
+        font-family: var(--font);
+        font-size: 13px;
+      }
+
+      #e10 .line.answer.shown {
+        transition-delay: 2.9s;
+      }
+
+      .shared .wire {
+        fill: none;
+        stroke: var(--cyan);
+        stroke-width: 2.5;
+        marker-end: url(#sharedArrow);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · functions</span>
+      <h1 class="grad-each"><span>Function</span> <span>Parameters</span></h1>
+      <p>Defaults, keyword arguments, <code>*args</code> and <code>**kwargs</code>: how the values in a call find their way into the function.</p>
+    </section>
+
+    <section class="slide" id="howto">
+      <h2>Arguments meet parameters</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Parameters</h3><p>The names in the <code>def</code> line: empty slots waiting for values.</p></div>
+        <div class="card step"><h3>Arguments</h3><p>The values in a call. Positional ones fill slots left to right; <code>name=value</code> goes to the slot with that name.</p></div>
+        <div class="card step"><h3>Leftovers</h3><p>Unfilled slots take their default. Extra values go to <code>*args</code> or <code>**kwargs</code>, if the function has them.</p></div>
+      </div>
+      <p class="hint step">On the next slides, press → to watch each call's arguments fly into place, and use the <strong>Try</strong> buttons for other calls.</p>
+    </section>
+
+    <!-- ================================================================ defaults -->
+    <section class="slide" id="defaults">
+      <h2>Default parameters</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # parameter with default value
+          def greet(name="Guest"):
+              print(f"Hello, {name}!")
+
+          greet()
+          # ans: Hello, Guest!
+          greet("Alice")
+          # ans: Hello, Alice!
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="multi">
+      <h2>Multiple defaults</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # multiple default parameters
+          def create_user(name, age=0, city="Unknown"):
+              return f"{name}, {age}, {city}"
+
+          result = create_user("Alice")
+          # ans: "Alice, 0, Unknown"
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ keywords -->
+    <section class="slide" id="kw">
+      <h2>Keyword arguments</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # call with keyword arguments
+          def describe(animal, name):
+              print(f"{animal} named {name}")
+
+          describe(name="Rex", animal="dog")
+          # ans: dog named Rex
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+      <p class="hint">Keywords are matched by name, so their order in the call doesn't matter.</p>
+    </section>
+
+    <!-- ================================================================ args -->
+    <section class="slide" id="args">
+      <h2>Variable arguments: <code>*args</code></h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # accept any number of arguments
+          def sum_all(*numbers):
+              return sum(numbers)
+
+          result = sum_all(1, 2, 3, 4)
+          # ans: 10
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+      <p class="hint">The star packs every positional argument into one tuple.</p>
+    </section>
+
+    <section class="slide" id="kwargs">
+      <h2>Keyword variable arguments: <code>**kwargs</code></h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # accept any keyword arguments
+          def print_info(**info):
+              for key, value in info.items():
+                  print(f"{key}: {value}")
+
+          print_info(name="Alice", age=25)
+          # ans: name: Alice
+          # ans: age: 25
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+      <p class="hint">Two stars pack every keyword argument into one dict.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then press → to see the arguments bind.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # what is printed?
+          def func(x=5):
+              print(x)
+
+          func()
+          # ans: 5
+          func(10)
+          # ans: 10
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # default parameter order?
+          def func(a, b=10):
+              return a + b
+
+          func(5)
+          # ans: 15
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre style="width: min(100%, 40rem)"><code class="language-python">
+        # can you do this?
+        def func(a=5, b):
+            return a + b
+        # ans: SyntaxError (non-default after default)
+      </code></pre>
+      <p class="hint step">A call like <code>func(1)</code> couldn't tell whether 1 is for <code>a</code> or <code>b</code>, so Python forbids it: parameters with defaults come last.</p>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # keyword arguments?
+          def func(a, b):
+              return a - b
+
+          func(b=10, a=5)
+          # ans: -5 (5 - 10)
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # mixing positional and keyword?
+          def func(a, b, c):
+              return a + b + c
+
+          func(1, c=3, b=2)
+          # ans: 6
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e6">
+      <h2>Exercise 6</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # *args type?
+          def func(*args):
+              return type(args)
+
+          func(1, 2, 3)
+          # ans: &lt;class 'tuple'&gt;
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # **kwargs type?
+          def func(**kwargs):
+              return type(kwargs)
+
+          func(a=1, b=2)
+          # ans: &lt;class 'dict'&gt;
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e8">
+      <h2>Exercise 8</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # combining parameters?
+          def func(a, b=5, *args):
+              return a + b + sum(args)
+
+          func(1, 2, 3, 4)
+          # ans: 10 (1+2+3+4)
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+      <p class="hint">2 fills <code>b</code>, so its default is never used.</p>
+    </section>
+
+    <section class="slide" id="e9">
+      <h2>Exercise 9</h2>
+      <div class="bind-wrap">
+        <pre><code class="language-python">
+          # empty *args?
+          def func(*args):
+              return len(args)
+
+          func()
+          # ans: 0
+        </code></pre>
+        <div class="binder"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e10">
+      <h2>Exercise 10</h2>
+      <div class="cols" style="width: min(100%, 64rem)">
+        <pre><code class="language-python">
+          # mutable default parameter?
+          def func(x=[]):
+              x.append(1)
+              return x
+
+          func()
+          func()
+          # ans: [1, 1] (same list object!)
+        </code></pre>
+        <svg class="shared" viewBox="0 0 420 260" aria-label="Both calls to func point x at the same default list, which grows to [1, 1]">
+          <defs>
+            <marker id="sharedArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#22d3ee" />
+            </marker>
+          </defs>
+          <text class="lbl" x="300" y="40">default, made once when def runs</text>
+          <g class="obj"><rect x="215" y="105" width="170" height="54" rx="12" /><text class="val" x="300" y="132">[]</text></g>
+          <g class="call" data-c="1"><rect x="20" y="40" width="130" height="50" rx="12" /><text x="85" y="65">1st func()</text></g>
+          <g class="call" data-c="2"><rect x="20" y="170" width="130" height="50" rx="12" /><text x="85" y="195">2nd func()</text></g>
+          <path class="wire" data-c="1" d="M150 65 C 185 65, 185 120, 213 124" />
+          <path class="wire" data-c="2" d="M150 195 C 185 195, 185 145, 213 141" />
+          <text class="lbl" x="178" y="96">x</text>
+          <text class="lbl" x="178" y="168">x</text>
+        </svg>
+      </div>
+      <p class="hint">Fix: use <code>x=None</code> and create the list inside, with <code>if x is None: x = []</code>.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>Order of binding</h3><p>Positional left to right, then keywords by name, then defaults for any gaps.</p></div>
+        <div class="card step"><h3>Defaults go last</h3><p><code>def f(a=5, b)</code> is a SyntaxError.</p></div>
+        <div class="card step"><h3><code>*args</code> is a tuple</h3><p>Extra positional values, possibly empty.</p></div>
+        <div class="card step"><h3><code>**kwargs</code> is a dict</h3><p>Extra keyword values, by name.</p></div>
+        <div class="card step"><h3>Defaults are made once</h3><p>A mutable default like <code>[]</code> is shared by every call.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ Binder
+      // Shows how a call's arguments land in the function's parameters:
+      // positional in order, keywords by name, leftovers into *args / **kwargs,
+      // and defaults for whatever is still empty.
+      const FLY = 0.38; // seconds between flying arguments
+      const uq = (s) => String(s).replace(/^["']|["']$/g, "");
+      const escB = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const parseArgs = (s) =>
+        s.trim()
+          ? s.split(/,\s*/).map((t) => {
+              const m = t.match(/^(\w+)=(.+)$/);
+              return m ? { k: m[1], v: m[2] } : { v: t };
+            })
+          : [];
+
+      function bindArgs(params, args) {
+        const slots = params.map((p) => ({ p, vals: [], keys: [] }));
+        const si = slots.findIndex((s) => s.p.s === 1);
+        const pos = slots.filter((s, j) => !s.p.s && (si < 0 || j < si));
+        const moves = [];
+        let n = 0;
+        args.forEach((a, i) => {
+          const slot = a.k === undefined ? (n < pos.length ? pos[n++] : slots[si]) : slots.find((s) => !s.p.s && s.p.n === a.k) || slots.find((s) => s.p.s === 2);
+          if (!slot) return;
+          slot.vals.push(a.v);
+          if (a.k) slot.keys.push(a.k);
+          moves.push({ i, slot, upto: slot.vals.length });
+        });
+        for (const s of slots) if (!s.p.s && !s.vals.length) s.p.d !== undefined ? (s.def = true) : (s.miss = true);
+        return { slots, moves };
+      }
+
+      const showSlot = (s, upto = Infinity) => {
+        const v = s.vals.slice(0, upto), k = s.keys.slice(0, upto);
+        if (s.p.s === 1) return `(${v.join(", ")}${v.length === 1 ? "," : ""})`;
+        if (s.p.s === 2) return `{${v.map((x, i) => `'${k[i]}': ${x}`).join(", ")}}`;
+        return s.def ? s.p.d : v[0] ?? "";
+      };
+
+      function Binder(slide, cfg) {
+        const root = slide.querySelector(".binder");
+        const calls = cfg.calls.map(parseArgs);
+        const auto = cfg.auto ?? 1;
+        root.innerHTML = `<div class="bcall"></div><div class="bslots"></div><div class="bout"></div>` + (calls.length > auto ? `<div class="bpick" data-interactive>Try: ${cfg.calls.map((c, i) => `<button data-i="${i}">${escB(cfg.fn)}(${escB(c)})</button>`).join("")}</div>` : "");
+        const callEl = root.querySelector(".bcall"), slotsEl = root.querySelector(".bslots"), outEl = root.querySelector(".bout");
+        slotsEl.innerHTML = cfg.params
+          .map((p) => `<div class="slot"><span class="pn">${p.s === 1 ? "*" : p.s === 2 ? "**" : ""}${escB(p.n)}${p.d !== undefined ? `<i>=${escB(p.d)}</i>` : ""}</span><span class="box"></span><span class="tag"></span></div>`)
+          .join("");
+        const slotEls = [...slotsEl.children];
+        let tl = null, fliers = [], seen = 0, pending = null, cur = 0;
+
+        function clear() {
+          tl?.kill();
+          fliers.forEach((f) => { gsap.killTweensOf(f); f.remove(); });
+          fliers = [];
+        }
+
+        function drawCall(ci) {
+          callEl.innerHTML = `<span class="fnm">${escB(cfg.fn)}</span>(` + calls[ci].map((a) => `<span class="arg${a.k ? " kw" : ""}">${a.k ? `<span class="kn">${escB(a.k)}=</span>` : ""}${escB(a.v)}</span>`).join(", ") + ")";
+          root.querySelectorAll(".bpick button").forEach((b) => b.classList.toggle("on", +b.dataset.i === ci));
+        }
+
+        function setSlot(j, s, upto) {
+          const el = slotEls[j];
+          el.querySelector(".box").textContent = upto === 0 ? "" : showSlot(s, upto);
+          el.classList.toggle("filled", upto > 0 && !s.def);
+          el.classList.toggle("def", !!s.def && upto !== 0);
+          el.classList.toggle("miss", !!s.miss && upto !== 0);
+          el.querySelector(".tag").textContent = upto === 0 ? "" : s.def ? "default" : s.miss ? "missing" : s.p.s === 1 ? "tuple" : s.p.s === 2 ? "dict" : "";
+          if (s.miss && upto !== 0) el.querySelector(".box").textContent = "?";
+        }
+
+        function finish(ci, slots) {
+          const vals = Object.fromEntries(slots.map((s) => [s.p.n, showSlot(s)]));
+          const res = slots.some((s) => s.miss) ? { lbl: "error", out: `TypeError: missing argument '${slots.find((s) => s.miss).p.n}'` } : { lbl: cfg.kind || "returns", out: cfg.out(vals, slots) };
+          outEl.innerHTML = `<span class="lbl">${res.lbl}</span>${escB(res.out)}`;
+        }
+
+        function unbound(ci) {
+          clear();
+          cur = ci;
+          drawCall(ci);
+          const { slots } = bindArgs(cfg.params, calls[ci]);
+          slots.forEach((s, j) => setSlot(j, s, 0));
+          outEl.innerHTML = "";
+        }
+
+        function bind(ci, anim) {
+          unbound(ci);
+          const { slots, moves } = bindArgs(cfg.params, calls[ci]);
+          if (!anim) {
+            slots.forEach((s, j) => setSlot(j, s, Infinity));
+            root.querySelectorAll(".arg").forEach((a) => a.classList.add("used"));
+            finish(ci, slots);
+            return;
+          }
+          const argEls = [...callEl.querySelectorAll(".arg")];
+          tl = gsap.timeline();
+          moves.forEach((m, k) => {
+            tl.call(() => {
+              const from = argEls[m.i].getBoundingClientRect();
+              const j = slots.indexOf(m.slot);
+              const box = slotEls[j].querySelector(".box");
+              const to = box.getBoundingClientRect();
+              const f = document.createElement("span");
+              f.className = "flyarg";
+              f.textContent = calls[ci][m.i].v;
+              document.body.appendChild(f);
+              fliers.push(f);
+              argEls[m.i].classList.add("used");
+              gsap.set(f, { left: from.left, top: from.top });
+              gsap.to(f, {
+                left: to.left + to.width / 2 - f.offsetWidth / 2,
+                top: to.top + to.height / 2 - f.offsetHeight / 2,
+                duration: 0.55,
+                ease: "power2.inOut",
+                onComplete: () => {
+                  f.remove();
+                  setSlot(j, m.slot, m.upto);
+                  gsap.fromTo(box, { scale: 1.12 }, { scale: 1, duration: 0.35, ease: "back.out(3)" });
+                },
+              });
+            }, null, k * FLY);
+          });
+          const tEnd = moves.length * FLY + 0.5;
+          tl.call(() => {
+            slots.forEach((s, j) => {
+              if (s.def || s.miss || (s.p.s && !s.vals.length)) {
+                setSlot(j, s, Infinity);
+                gsap.fromTo(slotEls[j].querySelector(".box"), { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.35 });
+              }
+            });
+          }, null, tEnd);
+          tl.call(() => {
+            finish(ci, slots);
+            gsap.fromTo(outEl, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.35 });
+          }, null, tEnd + 0.4);
+        }
+        const duration = (ci) => bindArgs(cfg.params, calls[ci]).moves.length * FLY + 0.9;
+
+        function sync(dir) {
+          const n = Deck.step;
+          const jump = n - seen;
+          seen = n;
+          const steps = Math.min(n, auto);
+          if (!steps) return unbound(0);
+          bind(steps - 1, dir > 0 && jump === 1 && n <= auto);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        root.querySelector(".bpick")?.addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (b) bind(+b.dataset.i, true);
+        });
+
+        const steps = [...slide.querySelectorAll(".step")];
+        steps.slice(0, auto).forEach((el, i) => el.style.setProperty("--ans-delay", duration(i) + "s"));
+
+        Deck.scene(slide, {
+          enter() { seen = 0; unbound(0); },
+          leave() { unbound(0); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        unbound(0);
+      }
+      const binder = (id, cfg) => Binder(document.getElementById(id), cfg);
+      // ================================================================ the calls
+      binder("defaults", { fn: "greet", params: [{ n: "name", d: '"Guest"' }], calls: ["", '"Alice"', '"Bob"'], auto: 2, kind: "prints", out: (b) => `Hello, ${uq(b.name)}!` });
+
+      binder("multi", {
+        fn: "create_user",
+        params: [{ n: "name" }, { n: "age", d: "0" }, { n: "city", d: '"Unknown"' }],
+        calls: ['"Alice"', '"Bob", 25', '"Cy", 30, "Paris"', '"Dee", city="Oslo"', "age=40"],
+        out: (b) => `"${uq(b.name)}, ${b.age}, ${uq(b.city)}"`,
+      });
+
+      binder("kw", {
+        fn: "describe",
+        params: [{ n: "animal" }, { n: "name" }],
+        calls: ['name="Rex", animal="dog"', '"cat", "Tom"', '"cat", name="Tom"'],
+        kind: "prints",
+        out: (b) => `${uq(b.animal)} named ${uq(b.name)}`,
+      });
+
+      const sum = (s) => s.vals.reduce((a, v) => a + +v, 0);
+      binder("args", { fn: "sum_all", params: [{ n: "numbers", s: 1 }], calls: ["1, 2, 3, 4", "5", "", "10, 20"], out: (b, s) => String(sum(s[0])) });
+
+      binder("kwargs", {
+        fn: "print_info",
+        params: [{ n: "info", s: 2 }],
+        calls: ['name="Alice", age=25', 'city="NYC"', ""],
+        kind: "prints",
+        out: (b, s) => s[0].vals.map((v, i) => `${s[0].keys[i]}: ${uq(v)}`).join(" / ") || "(nothing)",
+      });
+
+      binder("e1", { fn: "func", params: [{ n: "x", d: "5" }], calls: ["", "10"], auto: 2, kind: "prints", out: (b) => b.x });
+      binder("e2", { fn: "func", params: [{ n: "a" }, { n: "b", d: "10" }], calls: ["5", "5, 1"], out: (b) => String(+b.a + +b.b) });
+      binder("e4", { fn: "func", params: [{ n: "a" }, { n: "b" }], calls: ["b=10, a=5", "10, 5"], out: (b) => String(b.a - b.b) });
+      binder("e5", { fn: "func", params: [{ n: "a" }, { n: "b" }, { n: "c" }], calls: ["1, c=3, b=2", "1, 2"], out: (b) => String(+b.a + +b.b + +b.c) });
+      binder("e6", { fn: "func", params: [{ n: "args", s: 1 }], calls: ["1, 2, 3"], out: () => "<class 'tuple'>" });
+      binder("e7", { fn: "func", params: [{ n: "kwargs", s: 2 }], calls: ["a=1, b=2"], out: () => "<class 'dict'>" });
+      binder("e8", { fn: "func", params: [{ n: "a" }, { n: "b", d: "5" }, { n: "args", s: 1 }], calls: ["1, 2, 3, 4", "1"], out: (b, s) => String(+b.a + +b.b + sum(s[2])) });
+      binder("e9", { fn: "func", params: [{ n: "args", s: 1 }], calls: ["", "7, 8"], out: (b, s) => String(s[0].vals.length) });
+
+      // ================================================================ exercise 10
+      {
+        const slide = document.getElementById("e10");
+        const svg = slide.querySelector(".shared");
+        const val = svg.querySelector(".val");
+        const wires = [...svg.querySelectorAll(".wire")];
+        const callsG = [...svg.querySelectorAll(".call")];
+        wires.forEach((w) => {
+          const len = w.getTotalLength();
+          w.style.strokeDasharray = len;
+          w.dataset.len = len;
+        });
+        let tl;
+        const reset = () => {
+          tl?.kill();
+          wires.forEach((w) => (w.style.strokeDashoffset = w.dataset.len));
+          callsG.forEach((g) => g.classList.remove("on"));
+          val.textContent = "[]";
+        };
+        const final = () => {
+          reset();
+          wires.forEach((w) => (w.style.strokeDashoffset = 0));
+          val.textContent = "[1, 1]";
+        };
+        const play = () => {
+          reset();
+          tl = gsap.timeline();
+          [1, 2].forEach((c, i) => {
+            const t = i * 1.4;
+            tl.call(() => { callsG.forEach((g) => g.classList.toggle("on", +g.dataset.c === c)); }, null, t);
+            tl.to(wires[i], { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, t + 0.1);
+            tl.call(() => {
+              val.textContent = c === 1 ? "[1]" : "[1, 1]";
+              gsap.fromTo(svg.querySelector(".obj rect"), { scale: 1.08, transformOrigin: "300px 132px" }, { scale: 1, duration: 0.4, ease: "back.out(3)" });
+            }, null, t + 0.8);
+          });
+          tl.call(() => callsG.forEach((g) => g.classList.remove("on")), null, 3);
+        };
+        Deck.scene(slide, {
+          enter: reset,
+          leave: reset,
+          step: (s, n, els, d) => (d.dir < 0 ? final() : play()),
+          unstep: reset,
+        });
+        reset();
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

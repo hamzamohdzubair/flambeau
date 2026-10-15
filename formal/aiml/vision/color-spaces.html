@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Color Spaces</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chip {
+        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
+      figure figcaption { font-family: var(--font-mono); }
+      .codeside { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2.4rem; align-items: center; width: min(100%, 66rem); }
+      .codeside pre { width: 100%; }
+      .codeside .side { display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; max-width: 18rem; }
+      .codeside .side p { font-size: 0.9rem; }
+
+      /* ---------- cover ---------- */
+      #title .wheel { position: relative; width: min(12rem, 40vw, 24vh); aspect-ratio: 1; border-radius: 50%; background: conic-gradient(from 90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); box-shadow: 0 0 60px rgba(139, 92, 246, 0.5); }
+      #title .wheel::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 62%); z-index: 1; }
+
+      /* ---------- BGR vs RGB ---------- */
+      .order { display: flex; gap: 0.5rem; justify-content: center; font-family: var(--font-mono); }
+      .order b { display: grid; place-items: center; width: 3.6rem; height: 3.6rem; border-radius: 12px; font-size: 1.3rem; color: #fff; }
+      .order .B { background: #2563eb; } .order .G { background: #16a34a; } .order .R { background: #dc2626; }
+      .orderrow { display: grid; grid-template-columns: 6rem auto; align-items: center; gap: 1rem; margin: 0.4rem 0; }
+      .orderrow span { font-family: var(--font-display); font-size: 1.1rem; color: var(--muted); text-align: right; }
+      .bgrfig { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; width: min(100%, 44rem); }
+
+      /* ---------- HSV picker ---------- */
+      .hsv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.2rem; align-items: center; width: min(100%, 58rem); }
+      .hsv .swatch { width: 9rem; aspect-ratio: 1; border-radius: 50%; border: 1px solid var(--border); box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.8); }
+      .sl { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 4.6rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.9rem; margin: 0.45rem 0; }
+      .sl input { width: 100%; accent-color: var(--violet); }
+      .sl output { color: var(--cyan); text-align: right; }
+      .track { height: 0.5rem; border-radius: 4px; margin: -0.2rem 0 0.4rem 6.4rem; width: calc(100% - 11.8rem); }
+      .hsv ul { font-size: 0.95rem; }
+
+      /* ---------- grayscale weights ---------- */
+      .weights { display: grid; gap: 0.6rem; width: 15rem; }
+      .weights .w { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr) 3.4rem; gap: 0.6rem; align-items: center; font-family: var(--font-mono); font-size: 0.85rem; }
+      .weights .bar { height: 1.1rem; border-radius: 5px; transform-origin: left; }
+
+      /* ---------- live demos ---------- */
+      .duo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; width: min(100%, 70rem); }
+      .ctl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.2rem 2rem; width: min(100%, 56rem); }
+      .ctl .sl { grid-template-columns: 4.4rem minmax(0, 1fr) 2.6rem; margin: 0.15rem 0; }
+      .hue-strip { position: relative; height: 0.7rem; border-radius: 4px; background: linear-gradient(90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); width: min(100%, 56rem); }
+      .hue-strip i { position: absolute; top: -3px; bottom: -3px; border: 2px solid #fff; border-radius: 4px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
+      .chans { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.9rem; width: min(100%, 76rem); }
+
+      /* ---------- exercises ---------- */
+      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
+      .qa .q { display: grid; gap: 0.5rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
+      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
+      .qa pre { width: 100%; font-size: 0.92rem; }
+      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
+
+      @media (max-width: 760px) {
+        .codeside, .hsv { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; justify-items: center; }
+        .hsv > div { width: 100%; }
+        .hsv .swatch { width: 5.5rem; }
+        .hsv ul { display: none; }
+        .sl { grid-template-columns: 4.2rem minmax(0, 1fr) 3.6rem; }
+        .track { margin-left: 5rem; width: calc(100% - 9.4rem); }
+        .duo, .chans { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+        .ctl { grid-template-columns: minmax(0, 1fr); }
+        .order b { width: 2.8rem; height: 2.8rem; font-size: 1rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <div class="wheel"></div>
+      <h1>Color Spaces</h1>
+      <p>The same colour can be written as different sets of numbers. Picking the right set makes a task easy.</p>
+    </section>
+
+    <!-- ================================================================ what are they -->
+    <section class="slide">
+      <h2>What are colour spaces?</h2>
+      <p class="lead">A <strong>colour space</strong> is a mathematical model for representing colours as numbers.</p>
+      <p class="step center"><strong>Why several?</strong> Different tasks need different representations.</p>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step">
+          <h3>RGB / BGR</h3>
+          <p>Red, Green, Blue. Device-dependent.</p>
+          <p class="muted">Best for storage and transmission.</p>
+        </div>
+        <div class="card step">
+          <h3>HSV</h3>
+          <p>Hue, Saturation, Value. Perceptually intuitive.</p>
+          <p class="muted">Best for colour segmentation.</p>
+        </div>
+        <div class="card step">
+          <h3>LAB</h3>
+          <p>Lightness, A (green–red), B (blue–yellow).</p>
+          <p class="muted">Perceptually uniform.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ RGB vs BGR -->
+    <section class="slide" id="slide-bgr">
+      <h2>RGB vs BGR</h2>
+      <div>
+        <div class="orderrow"><span>RGB</span><div class="order o-rgb"><b class="R">R</b><b class="G">G</b><b class="B">B</b></div></div>
+        <div class="orderrow"><span>BGR</span><div class="order o-bgr"><b class="B">B</b><b class="G">G</b><b class="R">R</b></div></div>
+      </div>
+      <p class="center"><strong>RGB</strong> is standard in most libraries. <strong>BGR</strong> is OpenCV's default.</p>
+      <ul>
+        <li class="step">Why BGR? Historical reasons: early camera manufacturers and older image-processing libraries used it.</li>
+        <li class="step"><strong>Important:</strong> always convert BGR to RGB before displaying with matplotlib.</li>
+      </ul>
+      <div class="bgrfig step">
+        <figure><canvas class="photo good" width="480" height="270"></canvas><figcaption>Converted to RGB</figcaption></figure>
+        <figure><canvas class="photo bad" width="480" height="270"></canvas><figcaption>BGR shown as if RGB</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- ================================================================ HSV -->
+    <section class="slide" id="slide-hsv">
+      <h2>The HSV colour space</h2>
+      <div class="hsv" data-interactive>
+        <div class="swatch"></div>
+        <div>
+          <label class="sl">H 0–179 <input type="range" min="0" max="179" value="0" data-k="h" /><output>0 (0°)</output></label>
+          <div class="track t-h" style="background: linear-gradient(90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)"></div>
+          <label class="sl">S 0–255 <input type="range" min="0" max="255" value="255" data-k="s" /><output>255</output></label>
+          <div class="track t-s"></div>
+          <label class="sl">V 0–255 <input type="range" min="0" max="255" value="255" data-k="v" /><output>255</output></label>
+          <div class="track t-v"></div>
+          <div class="chips" style="justify-content: flex-start; margin-top: 0.6rem">
+            <button class="chip" data-h="0">Red 0°</button>
+            <button class="chip" data-h="60">Green 120°</button>
+            <button class="chip" data-h="120">Blue 240°</button>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li class="step"><strong>Hue</strong>: the colour type. 0 to 179 in OpenCV, standing for 0 to 360° (halved to fit in a byte).</li>
+        <li class="step"><strong>Saturation</strong>: colour intensity. 0 = gray, 255 = pure colour.</li>
+        <li class="step"><strong>Value</strong>: brightness. 0 = black, 255 = brightest.</li>
+        <li class="step"><strong>When to use:</strong> colour-based object detection, skin detection, colour segmentation.</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ BGR -> RGB code -->
+    <section class="slide">
+      <h2>BGR to RGB conversion</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+
+        # opencv uses BGR by default
+        img_bgr = cv2.imread('image.jpg')
+        # ans: blue, green, red order
+
+        # convert to RGB
+        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        # ans: red, green, blue order
+
+        # channels are swapped
+        print(img_bgr[0, 0])  # [B, G, R]
+        print(img_rgb[0, 0])  # [R, G, B]
+        # ans: the same values, in a different order
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ grayscale -->
+    <section class="slide" id="slide-gray">
+      <h2>RGB to grayscale</h2>
+      <div class="codeside">
+        <pre class="steps"><code class="language-python">
+          # convert to grayscale
+          img = cv2.imread('image.jpg')
+          gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+          # ans: single-channel intensity
+
+          print(gray.shape)
+          # ans: (height, width): no channel dimension
+
+          # grayscale formula (weighted average)
+          # Gray = 0.299*R + 0.587*G + 0.114*B
+          # ans: green weighs most: the eye is most sensitive to it
+        </code></pre>
+        <div class="side">
+          <div class="weights">
+            <div class="w"><span>R</span><i class="bar" style="background: #ef4444; width: 29.9%"></i><span>0.299</span></div>
+            <div class="w"><span>G</span><i class="bar" style="background: #22c55e; width: 58.7%"></i><span>0.587</span></div>
+            <div class="w"><span>B</span><i class="bar" style="background: #3b82f6; width: 11.4%"></i><span>0.114</span></div>
+          </div>
+          <canvas class="photo gray" width="480" height="270" style="width: 15rem"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ HSV code -->
+    <section class="slide">
+      <h2>Converting to HSV</h2>
+      <pre class="steps"><code class="language-python">
+        # convert to HSV
+        img = cv2.imread('image.jpg')
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        # ans: hue, saturation, value
+
+        # split HSV channels
+        h, s, v = cv2.split(hsv)
+        # ans: three separate channels
+        print(h.shape)
+        # ans: (height, width)
+
+        # HSV ranges in OpenCV
+        # ans: H: 0-179, S: 0-255, V: 0-255
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ thresholding code -->
+    <section class="slide">
+      <h2>Colour thresholding in HSV</h2>
+      <pre class="steps"><code class="language-python">
+        # detect red objects using HSV
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+        # define the red range (hue wraps around)
+        lower_red = np.array([0, 100, 100])
+        upper_red = np.array([10, 255, 255])
+        # ans: hue 0-10 is red, with high saturation and value
+
+        mask = cv2.inRange(hsv, lower_red, upper_red)
+        # ans: binary mask: red regions are 255
+
+        # apply the mask to extract red objects
+        result = cv2.bitwise_and(img, img, mask=mask)
+        # ans: keeps only the red regions
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ live inRange -->
+    <section class="slide" id="slide-range">
+      <h2>Try <code>cv2.inRange</code></h2>
+      <div class="duo">
+        <figure><canvas class="photo src" width="480" height="320"></canvas><figcaption>img</figcaption></figure>
+        <figure><canvas class="photo mask" width="480" height="320"></canvas><figcaption>mask</figcaption></figure>
+        <figure><canvas class="photo res" width="480" height="320"></canvas><figcaption>bitwise_and(img, img, mask)</figcaption></figure>
+      </div>
+      <div class="hue-strip"><i class="hi1"></i><i class="hi2"></i></div>
+      <div class="ctl" data-interactive>
+        <label class="sl">H low <input type="range" min="0" max="179" value="0" data-k="h0" /><output></output></label>
+        <label class="sl">H high <input type="range" min="0" max="179" value="10" data-k="h1" /><output></output></label>
+        <label class="sl">S low <input type="range" min="0" max="255" value="100" data-k="s0" /><output></output></label>
+        <label class="sl">V low <input type="range" min="0" max="255" value="100" data-k="v0" /><output></output></label>
+      </div>
+      <div class="chips" data-interactive>
+        <button class="chip on" data-img="dice">Dice</button>
+        <button class="chip" data-img="dolls">Dolls</button>
+        <span style="width: 1rem"></span>
+        <button class="chip on" data-p="0,10,100,100">Red 0–10</button>
+        <button class="chip" data-p="170,10,100,100">Red, both ends</button>
+        <button class="chip" data-p="100,130,50,50">Blue 100–130</button>
+        <button class="chip" data-p="5,25,40,120">Skin 5–25</button>
+      </div>
+      <p class="muted center" style="font-size: 0.85rem">When H low &gt; H high the range wraps through 179 → 0: two <code>inRange</code> masks joined with <code>cv2.bitwise_or</code>.</p>
+    </section>
+
+    <!-- ================================================================ split / merge -->
+    <section class="slide">
+      <h2>Split &amp; merge channels</h2>
+      <pre class="steps"><code class="language-python">
+        # split BGR channels
+        b, g, r = cv2.split(img)
+        # ans: separate B, G, R channels (each is grayscale)
+
+        # merge channels back
+        merged = cv2.merge([b, g, r])
+        # ans: reconstructs the original image
+
+        # swap red and blue channels
+        swapped = cv2.merge([r, g, b])
+        # ans: BGR becomes RGB order: reds and blues trade places
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ LAB -->
+    <section class="slide">
+      <h2>The LAB colour space</h2>
+      <pre class="steps"><code class="language-python">
+        # convert to LAB
+        img = cv2.imread('image.jpg')
+        lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+        # ans: L (lightness), a, b (colour opponents)
+
+        l, a, b = cv2.split(lab)
+        # ans: L is a grayscale-like luminance
+
+        # LAB advantages
+        # ans: perceptually uniform (distance = perceived difference)
+        # ans: useful for colour correction and white balance
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ channel explorer -->
+    <section class="slide" id="slide-chan">
+      <h2>One photo, three spaces</h2>
+      <div class="chans">
+        <figure><canvas class="photo c0" width="480" height="270"></canvas><figcaption>original</figcaption></figure>
+        <figure><canvas class="photo c1" width="480" height="270"></canvas><figcaption class="n1">B</figcaption></figure>
+        <figure><canvas class="photo c2" width="480" height="270"></canvas><figcaption class="n2">G</figcaption></figure>
+        <figure><canvas class="photo c3" width="480" height="270"></canvas><figcaption class="n3">R</figcaption></figure>
+      </div>
+      <div class="chips" data-interactive>
+        <button class="chip on" data-s="bgr">cv2.split(img)</button>
+        <button class="chip" data-s="hsv">cv2.split(hsv)</button>
+        <button class="chip" data-s="lab">cv2.split(lab)</button>
+      </div>
+      <p class="center note" style="max-width: 52rem">Each channel is shown as a grayscale image: white = 255.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q">
+          <p>What does <code>cvtColor</code> do?</p>
+          <pre><code class="language-python">
+            rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+          </code></pre>
+          <p class="answer">It converts between colour spaces.</p>
+        </div>
+        <div class="q"><p>Why use HSV for colour detection?</p><p class="answer">It separates colour (H) from lighting (V), so thresholds are easier.</p></div>
+        <div class="q">
+          <p>What does this print?</p>
+          <pre><code class="language-python">
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            print(gray.ndim)  # ans: 2: a 2-D array, no channel dimension
+          </code></pre>
+        </div>
+        <div class="q"><p>Which colour order does <code>cv2.imread</code> give you by default?</p><p class="answer">BGR (blue, green, red).</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>Which channel matters most for grayscale? <span class="muted">Gray = 0.299·R + 0.587·G + 0.114·B</span></p><p class="answer">Green (0.587 is the highest weight).</p></div>
+        <div class="q"><p>What is the hue range in OpenCV?</p><p class="answer">0 to 179: it stands for 0 to 360°, divided by 2.</p></div>
+        <div class="q"><p>When do you use the LAB colour space?</p><p class="answer">Colour correction, white balance, whenever you need perceptual uniformity.</p></div>
+        <div class="q">
+          <p>What does <code>inRange</code> return?</p>
+          <pre><code class="language-python">
+            mask = cv2.inRange(hsv, lower, upper)
+          </code></pre>
+          <p class="answer">A binary mask: 255 where the value is in range, 0 elsewhere.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Convert BGR to RGB.</p>
+          <pre><code class="language-python">
+            img_bgr = cv2.imread('img.jpg')
+            img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)  # ans:
+            # ans: swaps the red and blue channels
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Extract the red channel from an RGB image.</p>
+          <pre><code class="language-python">
+            r = img_rgb[:, :, 0]  # ans:
+            # ans: red is the first channel in RGB
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Make a red-only image.</p>
+          <pre><code class="language-python">
+            red_only = img_rgb.copy()
+            red_only[:, :, 1:] = 0  # ans:
+            # ans: green and blue set to 0, red kept
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Detect blue in HSV.</p>
+          <pre><code class="language-python">
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            lower_blue = np.array([100, 50, 50])
+            upper_blue = np.array([130, 255, 255])
+            mask = cv2.inRange(hsv, lower_blue, upper_blue)  # ans:
+            # ans: a binary mask of the blue regions
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Apply the mask to the image.</p>
+          <pre><code class="language-python">
+            result = cv2.bitwise_and(img, img, mask=mask)  # ans:
+            # ans: extracts only the blue regions
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Invert the mask.</p>
+          <pre><code class="language-python">
+            inv_mask = cv2.bitwise_not(mask)  # ans:
+            # ans: 0 becomes 255 and 255 becomes 0
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <div class="qa">
+        <div class="q">
+          <p>What does this produce?</p>
+          <pre><code class="language-python">
+            b, g, r = cv2.split(img)
+            swapped = cv2.merge([r, g, b])
+            # ans: an RGB image made from a BGR one
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Extract the hue channel.</p>
+          <pre><code class="language-python">
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            hue = hsv[:, :, 0]  # ans:
+            # ans: hue values, 0-179 in OpenCV
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>What happens here? Are <code>img</code> and <code>back</code> the same?</p>
+          <pre><code class="language-python">
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            back = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+            # ans: a grayscale image with 3 identical channels
+            # ans: not the same: the colour information is lost
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      // ------------------------------------------------------------ images (drawn small for speed)
+      async function loadPixels(src, w) {
+        const im = new Image();
+        im.src = src;
+        await im.decode();
+        const h = Math.round((im.naturalHeight / im.naturalWidth) * w);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const x = c.getContext("2d", { willReadFrequently: true });
+        x.drawImage(im, 0, 0, w, h);
+        return x.getImageData(0, 0, w, h);
+      }
+      const IMGS = {
+        dolls: loadPixels("/assets/2025-10-16-19-17-39.png", 480),
+        dice: loadPixels("/assets/2025-09-30-23-10-12.png", 480),
+      };
+      function put(canvas, img, fn) {
+        canvas.width = img.width; canvas.height = img.height;
+        const out = new ImageData(img.width, img.height);
+        const s = img.data, d = out.data;
+        for (let p = 0; p < s.length; p += 4) {
+          const [r, g, b] = fn(s[p], s[p + 1], s[p + 2], p);
+          d[p] = r; d[p + 1] = g; d[p + 2] = b; d[p + 3] = 255;
+        }
+        canvas.getContext("2d").putImageData(out, 0, 0);
+      }
+
+      // OpenCV's 8-bit conversions
+      function hsv8(r, g, b) {
+        const v = Math.max(r, g, b), mn = Math.min(r, g, b), d = v - mn;
+        const s = v ? (d * 255) / v : 0;
+        let h = 0;
+        if (d) h = v === r ? (60 * (g - b)) / d : v === g ? 120 + (60 * (b - r)) / d : 240 + (60 * (r - g)) / d;
+        if (h < 0) h += 360;
+        return [Math.round(h / 2) % 180, Math.round(s), v];
+      }
+      const lin = (c) => ((c /= 255) <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+      function lab8(r, g, b) {
+        const R = lin(r), G = lin(g), B = lin(b);
+        const X = (0.412453 * R + 0.35758 * G + 0.180423 * B) / 0.950456;
+        const Y = 0.212671 * R + 0.71516 * G + 0.072169 * B;
+        const Z = (0.019334 * R + 0.119193 * G + 0.950227 * B) / 1.088754;
+        const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+        const L = Y > 0.008856 ? 116 * Math.cbrt(Y) - 16 : 903.3 * Y;
+        return [Math.round((L * 255) / 100), Math.round(500 * (f(X) - f(Y)) + 128), Math.round(200 * (f(Y) - f(Z)) + 128)];
+      }
+      function hsvToRgb(h, s, v) {
+        h *= 2; s /= 255; v /= 255;
+        const f = (n) => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); };
+        return [f(5), f(3), f(1)].map((x) => Math.round(x * 255));
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.fromTo(slide.querySelector(".wheel"), { rotate: -180, scale: 0.4, opacity: 0 }, { rotate: 0, scale: 1, opacity: 1, duration: 1.4, ease: "power3.out" });
+          gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, delay: 0.3, duration: 0.8 });
+        },
+      });
+
+      // ------------------------------------------------------------ BGR vs RGB
+      IMGS.dolls.then((img) => {
+        put(document.querySelector("#slide-bgr .good"), img, (r, g, b) => [r, g, b]);
+        put(document.querySelector("#slide-bgr .bad"), img, (r, g, b) => [b, g, r]);
+        put(document.querySelector("#slide-gray .gray"), img, (r, g, b) => { const y = 0.299 * r + 0.587 * g + 0.114 * b; return [y, y, y]; });
+      });
+      Deck.scene("#slide-bgr", {
+        enter(slide) {
+          const a = slide.querySelectorAll(".o-bgr b");
+          gsap.fromTo(a[0], { x: 0 }, { x: () => a[2].offsetLeft - a[0].offsetLeft, duration: 0.9, delay: 0.6, yoyo: true, repeat: 1, repeatDelay: 1.2, ease: "power2.inOut" });
+          gsap.fromTo(a[2], { x: 0 }, { x: () => a[0].offsetLeft - a[2].offsetLeft, duration: 0.9, delay: 0.6, yoyo: true, repeat: 1, repeatDelay: 1.2, ease: "power2.inOut" });
+        },
+      });
+
+      // ------------------------------------------------------------ HSV picker
+      const hs = document.querySelector("#slide-hsv");
+      const hin = Object.fromEntries([...hs.querySelectorAll("input")].map((i) => [i.dataset.k, i]));
+      function paintHsv() {
+        const h = +hin.h.value, s = +hin.s.value, v = +hin.v.value;
+        const [r, g, b] = hsvToRgb(h, s, v);
+        hs.querySelector(".swatch").style.background = `rgb(${r},${g},${b})`;
+        hin.h.nextElementSibling.textContent = `${h} (${h * 2}°)`;
+        hin.s.nextElementSibling.textContent = s;
+        hin.v.nextElementSibling.textContent = v;
+        const [r0, g0, b0] = hsvToRgb(h, 0, v), [r1, g1, b1] = hsvToRgb(h, 255, v);
+        hs.querySelector(".t-s").style.background = `linear-gradient(90deg, rgb(${r0},${g0},${b0}), rgb(${r1},${g1},${b1}))`;
+        const [r2, g2, b2] = hsvToRgb(h, s, 255);
+        hs.querySelector(".t-v").style.background = `linear-gradient(90deg, #000, rgb(${r2},${g2},${b2}))`;
+      }
+      Object.values(hin).forEach((i) => i.addEventListener("input", () => { hueTour?.kill(); paintHsv(); }));
+      hs.querySelector(".chips").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        hueTour?.kill();
+        const st = { h: +hin.h.value };
+        gsap.to(st, { h: +b.dataset.h, duration: 0.6, onUpdate: () => { hin.h.value = Math.round(st.h); paintHsv(); } });
+      });
+      paintHsv();
+      let hueTour = null;
+      Deck.scene("#slide-hsv", {
+        enter() {
+          const st = { h: 0 };
+          hueTour = gsap.to(st, { h: 179, duration: 6, ease: "none", repeat: -1, yoyo: true, onUpdate: () => { hin.h.value = Math.round(st.h); paintHsv(); } });
+        },
+        leave() { hueTour?.kill(); },
+      });
+
+      // ------------------------------------------------------------ live inRange
+      const rs = document.querySelector("#slide-range");
+      const rin = Object.fromEntries([...rs.querySelectorAll("input")].map((i) => [i.dataset.k, i]));
+      let rimg = null, rhsv = null, rname = "dice";
+      async function setRangeImage(name) {
+        rname = name;
+        const img = await IMGS[name];
+        if (rname !== name) return;
+        rimg = img;
+        rhsv = new Uint8Array((img.data.length / 4) * 3);
+        for (let p = 0, q = 0; p < img.data.length; p += 4, q += 3) {
+          const [h, s, v] = hsv8(img.data[p], img.data[p + 1], img.data[p + 2]);
+          rhsv[q] = h; rhsv[q + 1] = s; rhsv[q + 2] = v;
+        }
+        put(rs.querySelector(".src"), img, (r, g, b) => [r, g, b]);
+        paintRange();
+      }
+      function paintRange() {
+        const h0 = +rin.h0.value, h1 = +rin.h1.value, s0 = +rin.s0.value, v0 = +rin.v0.value;
+        Object.values(rin).forEach((i) => (i.nextElementSibling.textContent = i.value));
+        const pct = (h) => (h / 180) * 100;
+        const [i1, i2] = rs.querySelectorAll(".hue-strip i");
+        if (h0 <= h1) {
+          Object.assign(i1.style, { left: pct(h0) + "%", width: pct(h1 - h0 + 1) + "%" });
+          i2.style.display = "none";
+        } else {
+          Object.assign(i1.style, { left: pct(h0) + "%", width: 100 - pct(h0) + "%" });
+          Object.assign(i2.style, { left: "0%", width: pct(h1 + 1) + "%", display: "block" });
+        }
+        if (!rimg) return;
+        const inRange = (q) => {
+          const h = rhsv[q], ok = h0 <= h1 ? h >= h0 && h <= h1 : h >= h0 || h <= h1;
+          return ok && rhsv[q + 1] >= s0 && rhsv[q + 2] >= v0;
+        };
+        put(rs.querySelector(".mask"), rimg, (r, g, b, p) => (inRange((p / 4) * 3) ? [255, 255, 255] : [0, 0, 0]));
+        put(rs.querySelector(".res"), rimg, (r, g, b, p) => (inRange((p / 4) * 3) ? [r, g, b] : [0, 0, 0]));
+      }
+      Object.values(rin).forEach((i) => i.addEventListener("input", () => { rs.querySelectorAll("[data-p]").forEach((c) => c.classList.remove("on")); paintRange(); }));
+      rs.querySelector(".chips").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        if (b.dataset.img) {
+          rs.querySelectorAll("[data-img]").forEach((c) => c.classList.toggle("on", c === b));
+          setRangeImage(b.dataset.img);
+        } else if (b.dataset.p) {
+          rs.querySelectorAll("[data-p]").forEach((c) => c.classList.toggle("on", c === b));
+          const [a, c, d, f] = b.dataset.p.split(",");
+          rin.h0.value = a; rin.h1.value = c; rin.s0.value = d; rin.v0.value = f;
+          paintRange();
+        }
+      });
+      setRangeImage("dice");
+      // On entry: show the code's 0-10 range, then the wrap-around fix
+      let rangeTour = null;
+      Deck.scene("#slide-range", {
+        enter() {
+          rangeTour?.kill();
+          rangeTour = gsap.delayedCall(3.5, () => rname === "dice" && rs.querySelector('[data-p="170,10,100,100"]').click());
+          rs.querySelector(".chips").addEventListener("pointerdown", () => rangeTour?.kill(), { once: true });
+          rs.querySelector(".ctl").addEventListener("pointerdown", () => rangeTour?.kill(), { once: true });
+        },
+        leave() { rangeTour?.kill(); },
+      });
+
+      // ------------------------------------------------------------ channel explorer
+      const cs = document.querySelector("#slide-chan");
+      const NAMES = { bgr: ["B", "G", "R"], hsv: ["H (0–179, shown ×1.42)", "S", "V"], lab: ["L", "a (green ↔ red)", "b (blue ↔ yellow)"] };
+      const NOTES = {
+        bgr: "Each channel is a grayscale image: white = 255. The blue dolls are bright in B and dark in R.",
+        hsv: "Hue is one number for 'which colour': every blue doll has the same H however bright it is.",
+        lab: "L carries the lightness; a and b carry the colour, centred on 128 for neutral gray.",
+      };
+      let space = "bgr";
+      async function paintChannels() {
+        const img = await IMGS.dolls;
+        put(cs.querySelector(".c0"), img, (r, g, b) => [r, g, b]);
+        const conv = space === "bgr" ? (r, g, b) => [b, g, r] : space === "hsv" ? (r, g, b) => { const t = hsv8(r, g, b); t[0] = (t[0] * 255) / 179; return t; } : lab8;
+        const cache = new Uint8ClampedArray((img.data.length / 4) * 3);
+        for (let p = 0, q = 0; p < img.data.length; p += 4, q += 3) {
+          const t = conv(img.data[p], img.data[p + 1], img.data[p + 2]);
+          cache[q] = t[0]; cache[q + 1] = t[1]; cache[q + 2] = t[2];
+        }
+        [1, 2, 3].forEach((k) => {
+          put(cs.querySelector(".c" + k), img, (r, g, b, p) => { const v = cache[(p / 4) * 3 + k - 1]; return [v, v, v]; });
+          cs.querySelector(".n" + k).textContent = NAMES[space][k - 1];
+        });
+        cs.querySelector(".note").textContent = NOTES[space];
+        gsap.fromTo(cs.querySelectorAll(".c1, .c2, .c3"), { opacity: 0.3, y: 10 }, { opacity: 1, y: 0, stagger: 0.1, duration: 0.4 });
+      }
+      cs.querySelector(".chips").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        space = b.dataset.s;
+        cs.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === b));
+        paintChannels();
+      });
+      Deck.scene("#slide-chan", { enter() { paintChannels(); } });
+    </script>
+  </body>
+</html>

@@ -222,7 +222,12 @@
   }
 
   async function prepareMath() {
-    const text = document.body.textContent;
+    // Only visible text counts: scripts and code often contain \( or \[
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement.closest("script, style, pre, code, textarea") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+    });
+    let text = "";
+    while (walker.nextNode()) text += walker.currentNode.nodeValue;
     if (!/\$\$|\\\(|\\\[/.test(text)) return;
     try {
       const render = await load("katexAuto");

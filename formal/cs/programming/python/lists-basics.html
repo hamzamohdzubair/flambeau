@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lists Basics</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- List view: a list as indexed boxes ---------- */
+      .lv {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.9rem;
+        min-width: 0;
+      }
+
+      .lv .lname {
+        font: 500 0.85rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .lv .lcells {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem;
+        min-height: 5.6rem;
+        align-items: center;
+      }
+
+      .lv .lc {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+      }
+
+      .lv .lc b {
+        display: grid;
+        place-items: center;
+        min-width: 3.2rem;
+        height: 3rem;
+        padding: 0 0.7rem;
+        border-radius: 10px;
+        border: 1.5px solid rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.14);
+        font: 600 1.05rem var(--font-mono);
+        color: var(--text);
+        white-space: nowrap;
+        transition:
+          border-color 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .lv .lc i {
+        font: normal 500 0.75rem var(--font-mono);
+        color: var(--violet-soft);
+        min-height: 1em;
+      }
+
+      .lv .lc i.in {
+        color: var(--pink);
+      }
+
+      .lv:not(.neg) .lc i.in,
+      .lv.noidx .lc i {
+        visibility: hidden;
+      }
+
+      .lv .lc.hit b {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.2);
+        box-shadow: 0 0 18px -4px var(--cyan);
+      }
+
+      .lv .lc.dim b {
+        opacity: 0.35;
+      }
+
+      .lv .lc.ghost b {
+        border-style: dashed;
+        border-color: var(--red);
+        background: transparent;
+        color: var(--red);
+      }
+
+      .lv .lempty {
+        font: 1rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .lv .louts {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: min(100%, 18rem);
+        min-height: 2.4rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 0.95rem/1.5 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .lv .louts b {
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      .lv .louts .err b {
+        color: var(--red);
+      }
+
+      .lv .louts:empty {
+        visibility: hidden;
+      }
+
+      .flylv {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        padding: 0 0.5em;
+        border-radius: 8px;
+        font: 600 1rem/1.7 var(--font-mono);
+        color: #fff;
+        background: rgba(34, 211, 238, 0.35);
+        border: 1px solid var(--cyan);
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
+        white-space: nowrap;
+      }
+
+      .lv-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: center;
+        width: min(100%, 64rem);
+      }
+
+      .lv-cols pre {
+        width: 100%;
+      }
+
+      .lv-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      @media (max-width: 760px) {
+        .lv-cols {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .lv .lc b {
+          min-width: 2.2rem;
+          height: 2.4rem;
+          padding: 0 0.4rem;
+          font-size: 0.85rem;
+        }
+
+        .lv .louts {
+          font-size: 0.8rem;
+        }
+      }
+      .slide > pre {
+        width: min(100%, 44rem);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- slice playground ---------- */
+      .play {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.9rem;
+      }
+
+      .play .expr {
+        font: 600 1.6rem var(--font-mono);
+        font-variant-ligatures: none;
+        color: var(--text);
+      }
+
+      .play .expr span {
+        color: var(--cyan);
+      }
+
+      .play .ctrls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem 1.6rem;
+      }
+
+      .play label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font: 500 0.9rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .play input[type="range"] {
+        width: 8rem;
+        accent-color: var(--violet);
+      }
+
+      .play input[type="checkbox"] {
+        accent-color: var(--violet);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · data structures</span>
+      <h1 class="grad-each"><span>Lists</span> <span>Basics</span></h1>
+      <p>An ordered, changeable sequence of values: create it, index it, slice it, change it.</p>
+    </section>
+
+    <!-- ================================================================ creating -->
+    <section class="slide" id="create">
+      <h2>Creating lists</h2>
+      <div class="lv-cols">
+        <pre class="steps"><code class="language-python">
+          # create list
+          fruits = ["apple", "banana", "cherry"]
+          numbers = [1, 2, 3, 4, 5]
+          mixed = [1, "two", 3.0, True]
+          empty = []
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint">Square brackets, items separated by commas. A list can hold values of any type, even mixed.</p>
+    </section>
+
+    <!-- ================================================================ indexing -->
+    <section class="slide" id="access">
+      <h2>Accessing elements</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # indexing
+          fruits = ["apple", "banana", "cherry"]
+          fruits[0]
+          # ans: "apple"
+          fruits[-1]
+          # ans: "cherry"
+          fruits[1]
+          # ans: "banana"
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint">Indexes start at 0. Negative indexes (pink) count back from the end: -1 is the last item.</p>
+    </section>
+
+    <!-- ================================================================ slicing -->
+    <section class="slide" id="slicing">
+      <h2>Slicing</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # slice lists
+          numbers = [0, 1, 2, 3, 4, 5]
+          numbers[1:4]
+          # ans: [1, 2, 3]
+          numbers[:3]
+          # ans: [0, 1, 2]
+          numbers[3:]
+          # ans: [3, 4, 5]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint"><code>[start:stop]</code> includes <code>start</code> but stops <em>before</em> <code>stop</code>. A missing end means "from the start" or "to the end".</p>
+    </section>
+
+    <section class="slide" id="play">
+      <h2>Try a slice</h2>
+      <div class="play" data-interactive>
+        <div class="expr">numbers<span>[1:4:1]</span></div>
+        <div class="lv"></div>
+        <div class="ctrls">
+          <label>start <input type="range" min="-6" max="6" value="1" data-k="a" /> <output>1</output></label>
+          <label>stop <input type="range" min="-6" max="6" value="4" data-k="b" /> <output>4</output></label>
+          <label>step <input type="range" min="-3" max="3" value="1" data-k="s" /> <output>1</output></label>
+          <label><input type="checkbox" data-k="na" /> no start</label>
+          <label><input type="checkbox" data-k="nb" /> no stop</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ length -->
+    <section class="slide" id="len">
+      <h2>List length</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # len() function
+          fruits = ["apple", "banana", "cherry"]
+          len(fruits)
+          # ans: 3
+          len([])
+          # ans: 0
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ modifying -->
+    <section class="slide" id="modify">
+      <h2>Modifying elements</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # change element
+          fruits = ["apple", "banana", "cherry"]
+          fruits[1] = "blueberry"
+          # ans: fruits is ["apple", "blueberry", "cherry"]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint">Lists are <strong>mutable</strong>: you can replace an item in place.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the result, then press → to check.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # what is the first element?
+          lst = [10, 20, 30]
+          lst[0]
+          # ans: 10
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # negative index?
+          lst = [10, 20, 30]
+          lst[-1]
+          # ans: 30
+          lst[-2]
+          # ans: 20
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # slicing result?
+          lst = [1, 2, 3, 4, 5]
+          lst[1:4]
+          # ans: [2, 3, 4]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # what happens?
+          lst = [1, 2, 3]
+          lst[5]
+          # ans: IndexError
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # empty slice?
+          lst = [1, 2, 3]
+          lst[5:10]
+          # ans: []
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint">Unlike indexing, slicing past the end is not an error: you just get fewer (or no) items.</p>
+    </section>
+
+    <section class="slide" id="e6">
+      <h2>Exercise 6</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # step in slice?
+          lst = [0, 1, 2, 3, 4, 5]
+          lst[::2]
+          # ans: [0, 2, 4]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # reverse list?
+          lst = [1, 2, 3]
+          lst[::-1]
+          # ans: [3, 2, 1]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e8">
+      <h2>Exercise 8</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # modify with slice?
+          lst = [1, 2, 3, 4, 5]
+          lst[1:3] = [20, 30]
+          # ans: [1, 20, 30, 4, 5]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # nested list access?
+        matrix = [[1, 2], [3, 4]]
+        matrix[0][1]
+        # ans: 2
+      </code></pre>
+      <p class="hint step"><code>matrix[0]</code> is the inner list <code>[1, 2]</code>; then <code>[1]</code> picks its second item.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # list concatenation?
+        lst1 = [1, 2]
+        lst2 = [3, 4]
+        lst1 + lst2
+        # ans: [1, 2, 3, 4]
+      </code></pre>
+      <p class="hint step"><code>+</code> builds a new list; <code>lst1</code> and <code>lst2</code> are unchanged.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>Index from 0</h3><p><code>lst[0]</code> is first, <code>lst[-1]</code> is last; past the end is an <code>IndexError</code>.</p></div>
+        <div class="card step"><h3>Slices stop early</h3><p><code>lst[a:b]</code> includes <code>a</code>, excludes <code>b</code>; <code>[::-1]</code> reverses.</p></div>
+        <div class="card step"><h3>Mutable</h3><p>Assign to an index or a slice to change the list in place.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ List view
+      // A list drawn as boxes with their indexes. Each deck step runs a few
+      // operations (indexing, slicing, append, pop, sort, ...) and animates them.
+      const escL = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function Lv(slide, cfg) {
+        const root = cfg.root || slide.querySelector(".lv");
+        root.classList.toggle("neg", !!cfg.neg);
+        root.classList.toggle("noidx", cfg.idx === false);
+        root.innerHTML = `${cfg.name ? `<div class="lname">${escL(cfg.name)}</div>` : ""}<div class="lcells"></div><div class="louts"></div>`;
+        const box = root.querySelector(".lcells"), outs = root.querySelector(".louts");
+        let cells = [], extras = [], fliers = [], tl = null, seen = 0, pending = null;
+
+        const mk = (v) => {
+          const c = document.createElement("span");
+          c.className = "lc";
+          c.innerHTML = `<i class="ip"></i><b>${escL(v)}</b><i class="in"></i>`;
+          return c;
+        };
+        const val = (c) => c.querySelector("b").textContent;
+        function relabel() {
+          cells.forEach((c, i) => {
+            c.querySelector(".ip").textContent = i;
+            c.querySelector(".in").textContent = i - cells.length;
+          });
+          box.querySelector(".lempty")?.remove();
+          if (!cells.length && !extras.length) box.insertAdjacentHTML("beforeend", `<span class="lempty">[ ]  empty list</span>`);
+        }
+        const hits = (idx = []) => cells.forEach((c, i) => c.classList.toggle("hit", idx.includes(i)));
+
+        function reset() {
+          tl?.kill();
+          fliers.forEach((f) => f.remove());
+          fliers = [];
+          box.innerHTML = "";
+          cells = cfg.items.map(mk);
+          cells.forEach((c) => box.appendChild(c));
+          extras = [];
+          outs.innerHTML = "";
+          relabel();
+        }
+
+        function line(html, err) {
+          const d = document.createElement("div");
+          if (err) d.className = "err";
+          d.innerHTML = html;
+          outs.appendChild(d);
+          return d;
+        }
+
+        function fly(fromEl, toEl, text) {
+          const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+          const f = document.createElement("span");
+          f.className = "flylv";
+          f.textContent = text;
+          document.body.appendChild(f);
+          fliers.push(f);
+          gsap.set(toEl, { opacity: 0 });
+          gsap.set(f, { left: a.left, top: a.top });
+          gsap.to(f, { left: b.left, top: b.top - 3, duration: 0.5, ease: "power2.inOut", onComplete: () => { f.remove(); gsap.to(toEl, { opacity: 1, duration: 0.15 }); } });
+        }
+
+        // change the cells, then slide every surviving cell from where it was
+        function flip(mutate, anim) {
+          const before = new Map(cells.map((c) => [c, c.getBoundingClientRect()]));
+          const gone = mutate() || [];
+          for (const c of gone) {
+            if (anim) {
+              const r = c.getBoundingClientRect();
+              const g = c.cloneNode(true);
+              Object.assign(g.style, { position: "fixed", left: r.left + "px", top: r.top + "px", margin: 0, zIndex: 40 });
+              document.body.appendChild(g);
+              fliers.push(g);
+              gsap.to(g, { opacity: 0, y: -26, duration: 0.45, onComplete: () => g.remove() });
+            }
+            c.remove();
+          }
+          box.innerHTML = "";
+          cells.forEach((c) => box.appendChild(c));
+          extras.forEach((c) => box.appendChild(c));
+          relabel();
+          if (!anim) return;
+          cells.forEach((c) => {
+            const r0 = before.get(c);
+            gsap.killTweensOf(c);
+            if (!r0) return gsap.fromTo(c, { opacity: 0, y: -22, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(2)" });
+            const r1 = c.getBoundingClientRect();
+            gsap.fromTo(c, { x: r0.left - r1.left, y: r0.top - r1.top }, { x: 0, y: 0, duration: 0.55, ease: "power2.inOut" });
+          });
+        }
+
+        const norm = (i) => (i < 0 ? cells.length + i : i);
+        const range = (a, b, s = 1) => {
+          const n = cells.length, out = [];
+          const cl = (x, d) => (x === undefined ? d : x < 0 ? Math.max(0, n + x) : Math.min(n, x));
+          if (s > 0) for (let i = cl(a, 0); i < cl(b, n); i += s) out.push(i);
+          else {
+            const st = a === undefined ? n - 1 : Math.min(n - 1, a < 0 ? n + a : a);
+            const en = b === undefined ? -1 : b < 0 ? n + b : b;
+            for (let i = st; i > en; i += s) out.push(i);
+          }
+          return out;
+        };
+        const numSort = (arr, rev) => {
+          const num = arr.every((c) => !isNaN(+val(c)));
+          const k = (c) => (num ? +val(c) : val(c));
+          arr.sort((x, y) => (k(x) < k(y) ? -1 : k(x) > k(y) ? 1 : 0));
+          if (rev) arr.reverse();
+          return arr;
+        };
+
+        // run one operation starting at time t; returns how long it takes when animated
+        function run(o, t, anim) {
+          const at = (dt, fn) => (anim ? tl.call(fn, null, t + dt) : fn());
+          const call = o.call || "";
+          switch (o.op) {
+            case "get": {
+              const i = norm(o.i);
+              at(0, () => hits([i]));
+              at(0.35, () => {
+                const l = line(`${escL(call)} → <b>${escL(val(cells[i]))}</b>`);
+                if (anim) fly(cells[i], l.querySelector("b"), val(cells[i]));
+              });
+              return 1;
+            }
+            case "slice": {
+              const idx = range(o.a, o.b, o.s);
+              // light the picked items in the order the slice takes them
+              idx.forEach((i, k) => at(k * 0.18, () => hits(idx.slice(0, k + 1))));
+              if (!idx.length) at(0, () => hits([]));
+              at(idx.length * 0.18 + 0.25, () => {
+                const text = "[" + idx.map((i) => val(cells[i])).join(", ") + "]";
+                const l = line(`${escL(call)} → <b>${escL(text)}</b>`);
+                if (anim) gsap.fromTo(l, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.3 });
+              });
+              return idx.length * 0.18 + 0.7;
+            }
+            case "len": {
+              at(0, () => hits(cells.map((c, i) => i)));
+              at(0.35, () => line(`${escL(call)} → <b>${cells.length}</b>`));
+              return 0.8;
+            }
+            case "set": {
+              const i = norm(o.i);
+              at(0, () => hits([i]));
+              at(0.35, () => {
+                const b = cells[i].querySelector("b");
+                b.textContent = o.v;
+                if (anim) gsap.fromTo(b, { rotateX: 90 }, { rotateX: 0, duration: 0.45, ease: "back.out(2)" });
+                if (o.say) line(o.say);
+              });
+              return 1;
+            }
+            case "setslice": {
+              const idx = range(o.a, o.b);
+              at(0, () => hits(idx));
+              at(0.45, () =>
+                flip(() => {
+                  const gone = cells.splice(idx[0], idx.length, ...o.vals.map(mk));
+                  return gone;
+                }, anim)
+              );
+              at(1.1, () => hits([]));
+              if (o.say) at(1.1, () => line(o.say));
+              return 1.3;
+            }
+            case "err": {
+              at(0, () => {
+                const g = mk("?");
+                g.classList.add("ghost");
+                g.querySelector(".ip").textContent = o.i;
+                extras.push(g);
+                box.appendChild(g);
+                if (anim) gsap.fromTo(g, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35 });
+              });
+              at(0.4, () => line(`${escL(call)} → <b>${escL(o.msg || "IndexError")}</b>`, true));
+              return 0.9;
+            }
+            case "append":
+            case "insert": {
+              at(0, () => {
+                hits([]);
+                flip(() => { cells.splice(o.op === "append" ? cells.length : o.i, 0, mk(o.v)); }, anim);
+              });
+              if (o.say) at(0.5, () => line(o.say));
+              return 0.8;
+            }
+            case "extend": {
+              o.vals.forEach((v, k) => at(k * 0.35, () => flip(() => { cells.push(mk(v)); }, anim)));
+              return o.vals.length * 0.35 + 0.5;
+            }
+            case "remove": {
+              const i = cells.findIndex((c) => val(c) === o.v);
+              at(0, () => hits([i]));
+              at(0.45, () => flip(() => cells.splice(i, 1), anim));
+              return 1.1;
+            }
+            case "pop": {
+              const i = o.i === undefined ? cells.length - 1 : norm(o.i);
+              at(0, () => hits([i]));
+              at(0.4, () => {
+                const c = cells[i];
+                const l = line(`${escL(call)} → <b>${escL(val(c))}</b>`);
+                if (anim) fly(c, l.querySelector("b"), val(c));
+                flip(() => cells.splice(i, 1), anim);
+              });
+              return 1.2;
+            }
+            case "sort":
+            case "reverse": {
+              at(0, () => {
+                hits([]);
+                flip(() => { o.op === "sort" ? numSort(cells, o.rev) : cells.reverse(); }, anim);
+              });
+              if (o.say) at(0.6, () => line(o.say));
+              return 1;
+            }
+            case "count": {
+              const idx = cells.map((c, i) => (val(c) === o.v ? i : -1)).filter((i) => i >= 0);
+              idx.forEach((i, k) => at(k * 0.3, () => hits(idx.slice(0, k + 1))));
+              at(idx.length * 0.3 + 0.2, () => line(`${escL(call)} → <b>${idx.length}</b>`));
+              return idx.length * 0.3 + 0.7;
+            }
+            case "index": {
+              const found = cells.findIndex((c) => val(c) === o.v);
+              const upto = found < 0 ? cells.length : found + 1;
+              for (let k = 0; k < upto; k++) at(k * 0.3, () => hits([k]));
+              at(upto * 0.3 + 0.1, () => {
+                if (found < 0) hits([]);
+                line(found < 0 ? `${escL(call)} → <b>ValueError</b>` : `${escL(call)} → <b>${found}</b>`, found < 0);
+              });
+              return upto * 0.3 + 0.6;
+            }
+            case "clear": {
+              at(0, () => flip(() => cells.splice(0, cells.length), anim));
+              if (o.say) at(0.5, () => line(o.say));
+              return 0.8;
+            }
+            case "load": {
+              at(0, () => {
+                hits([]);
+                flip(() => cells.splice(0, cells.length, ...o.items.map(mk)), anim);
+              });
+              return 0.7;
+            }
+            case "say": {
+              at(0, () => {
+                hits(o.hit || []);
+                const l = line(o.line, o.err);
+                if (anim) gsap.fromTo(l, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+              });
+              return 0.4;
+            }
+          }
+          return 0;
+        }
+
+        function render(k, anim) {
+          reset();
+          for (let s = 0; s < k && s < cfg.steps.length; s++) {
+            const last = s === k - 1 && anim;
+            if (last) tl = gsap.timeline();
+            let t = 0;
+            for (const o of [].concat(cfg.steps[s])) t += run(o, t, last);
+          }
+        }
+
+        function sync(dir) {
+          const n = Deck.step - (cfg.offset || 0);
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          render(Math.max(0, n), dir > 0 && jump === 1 && n > 0 && n <= cfg.steps.length);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each step's answer waits for its animation (measured by a dry run)
+        {
+          reset();
+          const steps = [...slide.querySelectorAll(".step")];
+          cfg.steps.forEach((ops, i) => {
+            let t = 0;
+            for (const o of [].concat(ops)) t += run(o, t, false);
+            const el = steps[i + (cfg.offset || 0)];
+            if (el) el.style.setProperty("--ans-delay", Math.max(0, t - 0.4) + "s");
+          });
+        }
+
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        render(0, false);
+        return {
+          // run some operations at once, outside the deck's steps (for playgrounds)
+          show(ops) {
+            reset();
+            for (const o of ops) run(o, 0, false);
+          },
+        };
+      }
+      const lv = (id, cfg) => Lv(document.getElementById(id), cfg);
+      // ================================================================ lists in motion
+      const fruits = ['"apple"', '"banana"', '"cherry"'];
+      lv("create", { items: [], name: "", offset: 1, steps: [
+        { op: "load", items: fruits },
+        { op: "load", items: ["1", "2", "3", "4", "5"] },
+        { op: "load", items: ["1", '"two"', "3.0", "True"] },
+        { op: "load", items: [] },
+      ] });
+      lv("access", { items: fruits, name: "fruits", neg: true, steps: [{ op: "get", i: 0, call: "fruits[0]" }, { op: "get", i: -1, call: "fruits[-1]" }, { op: "get", i: 1, call: "fruits[1]" }] });
+      const six = ["0", "1", "2", "3", "4", "5"];
+      lv("slicing", { items: six, name: "numbers", steps: [{ op: "slice", a: 1, b: 4, call: "numbers[1:4]" }, { op: "slice", b: 3, call: "numbers[:3]" }, { op: "slice", a: 3, call: "numbers[3:]" }] });
+      lv("len", { items: fruits, name: "fruits", steps: [{ op: "len", call: "len(fruits)" }, [{ op: "load", items: [] }, { op: "len", call: "len([])" }]] });
+      lv("modify", { items: fruits, name: "fruits", steps: [{ op: "set", i: 1, v: '"blueberry"' }] });
+
+      lv("e1", { items: ["10", "20", "30"], name: "lst", steps: [{ op: "get", i: 0, call: "lst[0]" }] });
+      lv("e2", { items: ["10", "20", "30"], name: "lst", neg: true, steps: [{ op: "get", i: -1, call: "lst[-1]" }, { op: "get", i: -2, call: "lst[-2]" }] });
+      lv("e3", { items: ["1", "2", "3", "4", "5"], name: "lst", steps: [{ op: "slice", a: 1, b: 4, call: "lst[1:4]" }] });
+      lv("e4", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "err", i: 5, call: "lst[5]", msg: "IndexError" }] });
+      lv("e5", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "slice", a: 5, b: 10, call: "lst[5:10]" }] });
+      lv("e6", { items: six, name: "lst", steps: [{ op: "slice", s: 2, call: "lst[::2]" }] });
+      lv("e7", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "slice", s: -1, call: "lst[::-1]" }] });
+      lv("e8", { items: ["1", "2", "3", "4", "5"], name: "lst", steps: [{ op: "setslice", a: 1, b: 3, vals: ["20", "30"] }] });
+
+      // ================================================================ slice playground
+      {
+        const slide = document.getElementById("play");
+        const expr = slide.querySelector(".expr span");
+        const inputs = [...slide.querySelectorAll("input")];
+        const view = Lv(slide, { items: six, name: "numbers", neg: true, steps: [] });
+        const get = (k) => slide.querySelector(`[data-k="${k}"]`);
+        const update = () => {
+          inputs.forEach((i) => i.type === "range" && (i.nextElementSibling.textContent = i.value));
+          let s = +get("s").value;
+          if (s === 0) { s = 1; get("s").value = 1; get("s").nextElementSibling.textContent = 1; }
+          const a = get("na").checked ? undefined : +get("a").value;
+          const b = get("nb").checked ? undefined : +get("b").value;
+          const txt = `[${a ?? ""}:${b ?? ""}${s !== 1 ? ":" + s : ""}]`;
+          expr.textContent = txt;
+          view.show([{ op: "slice", a, b, s, call: "numbers" + txt }]);
+        };
+        inputs.forEach((i) => i.addEventListener("input", update));
+        Deck.scene(slide, { enter: update });
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sets</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ================= shared lesson widgets (tracer, strip, rewrite) ================= */
+      pre code,
+      .strip,
+      .rw {
+        font-variant-ligatures: none;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 30rem);
+        max-width: 100%;
+        font-size: 1.3rem;
+      }
+
+      .slide pre.small {
+        font-size: 1.15rem;
+      }
+
+      .slide pre.tiny {
+        font-size: 1rem;
+      }
+
+      /* ---------- Tracer: lines light up in the order Python runs them ---------- */
+      .tracer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 1.2rem;
+        width: min(100%, 64rem);
+      }
+
+      .tracer > pre {
+        flex: 0 1 auto;
+      }
+
+      .state {
+        flex: 0 0 15rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.8rem;
+        font-size: 1rem;
+      }
+
+      .state .box {
+        min-width: 0;
+        padding: 0.7rem 0.9rem;
+        border-radius: 12px;
+        background: var(--glass);
+        border: 1px solid var(--border);
+      }
+
+      .state h4 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 0 0.4rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .state .vars {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.2rem 0.8rem;
+        font-family: var(--font-mono);
+        min-height: 1.6em;
+      }
+
+      .state .vars .k {
+        color: var(--muted);
+      }
+
+      .state .vars .v {
+        color: var(--text);
+        border-radius: 4px;
+        padding: 0 0.3em;
+        transition: background 0.4s;
+      }
+
+      .state .vars .v.flash {
+        background: rgba(34, 211, 238, 0.35);
+        transition: none;
+      }
+
+      .state .out {
+        font-family: var(--font-mono);
+        color: var(--green);
+        min-height: 1.6em;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .state .out .err {
+        color: var(--red);
+      }
+
+      .state .empty {
+        color: var(--faint);
+        font-family: var(--font);
+        font-size: 0.85rem;
+      }
+
+      .replay {
+        border: 1px solid var(--border);
+        background: var(--glass-light);
+        color: var(--muted);
+        border-radius: 999px;
+        font: 500 0.7rem var(--font);
+        padding: 0.1rem 0.6rem;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        text-transform: none;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.4;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.28;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb + .tb {
+        margin-left: 0.4em;
+      }
+
+      /* chips to try other values */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .try:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- Strip: the characters / items of a sequence with their indices ---------- */
+      .strip {
+        display: grid;
+        justify-items: center;
+        gap: 0.6rem;
+        width: min(100%, 60rem);
+      }
+
+      .strip .cells {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 0.25rem;
+        max-width: 100%;
+      }
+
+      .strip .cell {
+        display: grid;
+        justify-items: center;
+        gap: 0.15rem;
+        font-family: var(--font-mono);
+      }
+
+      .strip .ix {
+        font-size: 0.7rem;
+        color: var(--faint);
+        transition: color 0.3s;
+      }
+
+      .strip .ch {
+        display: grid;
+        place-items: center;
+        width: var(--cw, 2.3rem);
+        height: 2.6rem;
+        border-radius: 8px;
+        background: rgba(15, 18, 35, 0.85);
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        font-size: 1.2rem;
+        white-space: pre;
+        transition:
+          background 0.35s,
+          border-color 0.35s,
+          opacity 0.35s;
+      }
+
+      .strip .ch.sp {
+        color: var(--faint);
+      }
+
+      .strip.picking .cell:not(.pick) .ch {
+        opacity: 0.35;
+      }
+
+      .strip .cell.pick .ch {
+        background: rgba(236, 72, 153, 0.28);
+        border-color: var(--pink);
+      }
+
+      .strip .cell.pick .ix {
+        color: #f0abfc;
+      }
+
+      .strip .ord {
+        font-size: 0.65rem;
+        color: var(--cyan);
+        height: 0.9rem;
+      }
+
+      .strip .res {
+        min-height: 2.2rem;
+        font: 500 1.25rem var(--font-mono);
+        color: var(--green);
+      }
+
+      .strip .res .lbl {
+        color: var(--faint);
+        font-size: 0.85rem;
+        margin-right: 0.6rem;
+      }
+
+      /* ---------- Rewrite: an expression turning into what Python actually runs ---------- */
+      .rw {
+        display: grid;
+        justify-items: center;
+        width: min(100%, 56rem);
+      }
+
+      .rw > .rs {
+        grid-area: 1 / 1;
+        display: grid;
+        justify-items: center;
+        gap: 0.4rem;
+        opacity: 0;
+        transform: translateY(0.8rem);
+        transition:
+          opacity 0.45s var(--ease),
+          transform 0.45s var(--ease);
+        pointer-events: none;
+      }
+
+      .slide .rw > .rs:not(.cur) {
+        opacity: 0;
+        filter: none;
+        transform: translateY(0.8rem);
+      }
+
+      .slide .rw > .rs.past:not(.cur) {
+        transform: translateY(-0.8rem);
+      }
+
+      .slide .rw > .rs.cur {
+        opacity: 1;
+        filter: none;
+        transform: none;
+      }
+
+      .rw .ex {
+        font: 500 1.35rem var(--font-mono);
+        padding: 0.55rem 1.1rem;
+        border-radius: 12px;
+        background: rgba(10, 12, 26, 0.78);
+        border: 1px solid var(--border);
+        white-space: pre;
+        color: var(--text);
+      }
+
+      .rw .ex mark {
+        color: #f0abfc;
+        background: rgba(236, 72, 153, 0.18);
+        border-radius: 4px;
+        padding: 0 0.1em;
+      }
+
+      .rw small {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .rw-dots {
+        display: flex;
+        gap: 0.35rem;
+        justify-content: center;
+        margin-top: 0.4rem;
+      }
+
+      .rw-dots i {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: var(--border);
+        transition: background 0.3s;
+      }
+
+      .rw-dots i.on {
+        background: var(--cyan);
+      }
+
+      @media (max-width: 760px) {
+        .slide pre,
+        .slide pre.small {
+          font-size: 0.85rem;
+          min-width: 0;
+        }
+
+        .slide pre.tiny {
+          font-size: 0.72rem;
+        }
+
+        .state {
+          flex: 1 1 100%;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          font-size: 0.85rem;
+        }
+
+        .strip .ch {
+          width: var(--cwm, min(1.9rem, 6.6vw));
+          height: 2.1rem;
+          font-size: 0.95rem;
+        }
+
+        .strip .cells {
+          gap: 0.12rem;
+        }
+
+        .rw .ex {
+          font-size: 0.9rem;
+          white-space: pre-wrap;
+        }
+      }
+      .pair {
+        display: grid;
+        gap: 1.2rem;
+        justify-items: center;
+        width: 100%;
+      }
+
+      .pair.side {
+        grid-template-columns: auto minmax(0, 26rem);
+        justify-content: center;
+        align-items: center;
+        gap: 2.4rem;
+        width: min(100%, 64rem);
+      }
+
+      /* ---------- Venn diagram ---------- */
+      .venn {
+        display: grid;
+        justify-items: center;
+        gap: 0.4rem;
+        width: min(100%, 26rem);
+      }
+
+      .venn svg {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+      }
+
+      .venn .rg {
+        fill: rgba(236, 72, 153, 0.32);
+        opacity: 0;
+        transition: opacity 0.45s;
+      }
+
+      .venn .rg.on {
+        opacity: 1;
+      }
+
+      .venn .ring {
+        fill: none;
+        stroke-width: 2.5;
+      }
+
+      .venn .ring.a {
+        stroke: var(--violet-soft);
+      }
+
+      .venn .ring.b {
+        stroke: var(--cyan);
+      }
+
+      .venn text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 20px;
+        text-anchor: middle;
+        dominant-baseline: central;
+        transition: fill 0.3s, opacity 0.3s;
+      }
+
+      .venn text.lbl {
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .venn.picking text.el:not(.in) {
+        opacity: 0.3;
+      }
+
+      .venn text.el.in {
+        fill: #fff;
+      }
+
+      .venn .res,
+      .setbox .note {
+        min-height: 1.8rem;
+        font: 500 1.2rem var(--font-mono);
+        color: var(--green);
+      }
+
+      .venn .res .lbl2,
+      .setbox .note .lbl2 {
+        color: var(--faint);
+        font-size: 0.85rem;
+        margin-right: 0.6rem;
+      }
+
+      /* ---------- set box ---------- */
+      .setbox .note {
+        max-width: 24rem;
+        text-align: center;
+        font: 500 1.05rem var(--font);
+      }
+
+      .setbox {
+        display: grid;
+        justify-items: center;
+        gap: 0.6rem;
+      }
+
+      .setbox .items {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 3.6rem;
+        min-width: 12rem;
+        padding: 0.7rem 1.6rem;
+        border-radius: 999px;
+        border: 2px solid rgba(34, 211, 238, 0.5);
+        background: rgba(34, 211, 238, 0.06);
+        position: relative;
+      }
+
+      .setbox .items::before,
+      .setbox .items::after {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font: 600 1.6rem var(--font-mono);
+        color: var(--cyan);
+      }
+
+      .setbox .items::before {
+        content: "{";
+        left: 0.5rem;
+      }
+
+      .setbox .items::after {
+        content: "}";
+        right: 0.5rem;
+      }
+
+      .setbox.list .items {
+        border-color: rgba(167, 139, 250, 0.5);
+        background: rgba(139, 92, 246, 0.06);
+        border-radius: 14px;
+      }
+
+      .setbox.list .items::before {
+        content: "[";
+        color: var(--violet-soft);
+      }
+
+      .setbox.list .items::after {
+        content: "]";
+        color: var(--violet-soft);
+      }
+
+      .setbox .it {
+        padding: 0.3rem 0.8rem;
+        border-radius: 10px;
+        background: rgba(15, 18, 35, 0.9);
+        border: 1px solid rgba(167, 139, 250, 0.5);
+        font: 500 1.1rem var(--font-mono);
+      }
+
+      .setbox .it.dup {
+        border-color: var(--red);
+      }
+
+      @media (max-width: 760px) {
+        .pair.side {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .venn {
+          width: min(100%, 18rem);
+        }
+
+        .setbox .it {
+          font-size: 0.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · data structures</span>
+      <h1 class="grad-each"><span>Sets</span></h1>
+      <p>Unordered collections of unique items, with fast membership tests and set algebra.</p>
+    </section>
+
+    <!-- ================================================================ basics -->
+    <section class="slide">
+      <h2>Creating sets</h2>
+      <pre><code class="language-python">
+        # create a set
+        fruits = {"apple", "banana", "cherry"}
+        numbers = {1, 2, 3, 4, 5}
+        empty = set()
+        # ans: not {}, which is an empty dict!
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Duplicates disappear</h2>
+      <div class="pair">
+        <div class="setbox list" data-items="1,2,2,3"></div>
+        <span class="step" data-anim="none" data-dedupe></span>
+        <p class="hint">A set keeps one copy of each value: <code>set([1, 2, 2, 3])</code> is <code>{1, 2, 3}</code>.</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Adding elements</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # add a single item
+          fruits = {"apple", "banana"}
+          fruits.add("cherry")
+          # ans: {"apple", "banana", "cherry"}
+        </code></pre>
+        <div class="setbox" data-states="apple,banana|apple,banana,cherry"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Removing elements</h2>
+      <div class="pair side">
+        <pre class="small"><code class="language-python">
+          # remove (raises an error if not found)
+          fruits = {"apple", "banana"}
+          fruits.remove("apple")
+          # ans: {"banana"}
+          # discard (no error if not found)
+          fruits.discard("cherry")
+          # ans: {"banana"}
+        </code></pre>
+        <div class="setbox" data-states="apple,banana|banana|banana" data-notes="|apple removed|cherry isn't there: nothing happens"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ operations -->
+    <section class="slide">
+      <h2>Union</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # union (combines all)
+          a = {1, 2, 3}
+          b = {3, 4, 5}
+          a | b
+          # ans: {1, 2, 3, 4, 5}
+          a.union(b)
+          # ans: {1, 2, 3, 4, 5}
+        </code></pre>
+        <div class="venn" data-a="1,2,3" data-b="3,4,5" data-ops="union;union"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Intersection</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # intersection (common elements)
+          a = {1, 2, 3}
+          b = {2, 3, 4}
+          a &amp; b
+          # ans: {2, 3}
+          a.intersection(b)
+          # ans: {2, 3}
+        </code></pre>
+        <div class="venn" data-a="1,2,3" data-b="2,3,4" data-ops="inter;inter"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Difference</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # difference (in a but not b)
+          a = {1, 2, 3}
+          b = {2, 3, 4}
+          a - b
+          # ans: {1}
+          a.difference(b)
+          # ans: {1}
+        </code></pre>
+        <div class="venn" data-a="1,2,3" data-b="2,3,4" data-ops="diff;diff"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Symmetric difference</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # symmetric diff (in either but not both)
+          a = {1, 2, 3}
+          b = {2, 3, 4}
+          a ^ b
+          # ans: {1, 4}
+          a.symmetric_difference(b)
+          # ans: {1, 4}
+        </code></pre>
+        <div class="venn" data-a="1,2,3" data-b="2,3,4" data-ops="sym;sym"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict each result, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # duplicates in a set?
+          s = {1, 2, 2, 3}
+          # ans: {1, 2, 3}
+        </code></pre>
+        <div class="setbox" data-items="1,2,2,3"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # empty set?
+        s = {}
+        type(s)
+        # ans: &lt;class 'dict'&gt;
+        s = set()
+        type(s)
+        # ans: &lt;class 'set'&gt;
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # add an existing element?
+          s = {1, 2}
+          s.add(2)
+          # ans: {1, 2} (no change)
+        </code></pre>
+        <div class="setbox" data-states="1,2|1,2" data-notes="|2 is already in: no change"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # remove something that isn't there?
+          s = {1, 2}
+          s.remove(3)
+          # ans: KeyError
+          s.discard(3)
+          # ans: no error
+        </code></pre>
+        <div class="setbox" data-states="1,2|1,2|1,2" data-notes="|KeyError: 3|discard ignores missing items"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # union result?
+          a = {1, 2}
+          b = {2, 3}
+          a | b
+          # ans: {1, 2, 3}
+        </code></pre>
+        <div class="venn" data-a="1,2" data-b="2,3" data-ops="union"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # empty intersection?
+          a = {1, 2}
+          b = {3, 4}
+          a &amp; b
+          # ans: set()
+        </code></pre>
+        <div class="venn" data-a="1,2" data-b="3,4" data-ops="inter"></div>
+      </div>
+      <p class="hint">An empty set prints as <code>set()</code>, because <code>{}</code> means an empty dict.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # subset check?
+          a = {1, 2}
+          b = {1, 2, 3}
+          a.issubset(b)
+          # ans: True
+        </code></pre>
+        <div class="venn" data-a="1,2" data-b="1,2,3" data-ops="sub"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <div class="pair side">
+        <pre><code class="language-python">
+          # set from a list?
+          lst = [1, 2, 2, 3]
+          s = set(lst)
+          # ans: {1, 2, 3}
+        </code></pre>
+        <div class="setbox list" data-items="1,2,2,3"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # set membership?
+        s = {1, 2, 3}
+        2 in s
+        # ans: True
+      </code></pre>
+      <p class="hint step">Membership tests are what sets are fastest at, even for millions of items.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # pop from a set?
+        s = {1, 2, 3}
+        s.pop()
+        # ans: an arbitrary element (don't rely on which)
+      </code></pre>
+      <p class="hint">Sets have no order, so there is no "last" item to pop.</p>
+    </section>
+
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Unique, unordered</h3><p>Duplicates collapse; there are no indexes.</p></div>
+        <div class="card step"><h3><code>set()</code>, not <code>{}</code></h3><p>Empty braces make a dict.</p></div>
+        <div class="card step"><h3>remove vs discard</h3><p><code>remove</code> raises <code>KeyError</code> if missing; <code>discard</code> doesn't.</p></div>
+        <div class="card step"><h3><code>|  &amp;  -  ^</code></h3><p>Union, intersection, difference, symmetric difference.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      // ================= shared lesson widgets (tracer, strip, rewrite) =================
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ------------------------------------------------------------ tracer
+      // data-trace on a <pre class="trace">: beats separated by ";". Each beat is
+      //   N            light code line N (1-based)
+      //   T[note] F[note] E[note] ~[note]   a badge: True / False / error / neutral
+      //   {a=1|b=2}    set variables (an empty value deletes one)
+      //   > text       print a line of output
+      const BEAT = /^\s*(\d+)\s*(?:([TFE~])(?:\x5B([^\x5D]*)\x5D)?)?\s*(?:\{([^}]*)\})?\s*(?:>\s?(.*))?$/; // \x5B \x5D are [ ], spelled so KaTeX isn't triggered
+      const parseTrace = (s) =>
+        (s || "").split(";").filter((t) => t.trim()).map((t) => {
+          const m = t.match(BEAT);
+          if (!m) throw new Error("bad trace beat: " + t);
+          const vars = m[4] ? m[4].split("|").map((kv) => { const i = kv.indexOf("="); return [kv.slice(0, i).trim(), kv.slice(i + 1).trim()]; }) : null;
+          return { line: +m[1], kind: m[2], note: m[3], vars, out: m[5] };
+        });
+      const speed = (n) => Math.max(0.28, Math.min(0.5, 8 / Math.max(n, 1)));
+
+      function buildPanel(pre) {
+        const seq = parseTrace(pre.dataset.trace);
+        const needs = pre.hasAttribute("data-panel") || seq.some((s) => s.vars || s.out !== undefined);
+        if (!needs || pre._panel) return;
+        const wrap = document.createElement("div");
+        wrap.className = "tracer";
+        pre.replaceWith(wrap);
+        wrap.appendChild(pre);
+        const st = document.createElement("div");
+        st.className = "state";
+        st.innerHTML = `<div class="box"><h4>Variables <button class="replay" title="Run the trace again">replay</button></h4><div class="vars"></div></div><div class="box"><h4>Output</h4><div class="out"></div></div>`;
+        st.setAttribute("data-interactive", "");
+        wrap.appendChild(st);
+        pre._panel = st;
+        st.querySelector(".replay").addEventListener("click", () => trace(pre, false));
+        clearPanel(pre);
+      }
+
+      function clearPanel(pre) {
+        const st = pre._panel;
+        if (!st) return;
+        pre._vars = new Map();
+        st.querySelector(".vars").innerHTML = `<span class="empty">none yet</span>`;
+        st.querySelector(".out").innerHTML = `<span class="empty">nothing printed</span>`;
+        pre._outN = 0;
+      }
+
+      function setVars(pre, vars, instant) {
+        const box = pre._panel.querySelector(".vars");
+        for (const [k, v] of vars) v === "" ? pre._vars.delete(k) : pre._vars.set(k, v);
+        box.innerHTML = pre._vars.size ? [...pre._vars].map(([k, v]) => `<span class="k">${esc(k)}</span><span class="v" data-k="${esc(k)}">${esc(v)}</span>`).join("") : `<span class="empty">none</span>`;
+        if (instant) return;
+        for (const [k, v] of vars) {
+          const el = [...box.querySelectorAll(".v")].find((e) => e.dataset.k === k);
+          if (!el) continue;
+          el.classList.add("flash");
+          requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove("flash")));
+        }
+      }
+
+      function print(pre, text, err, instant) {
+        const out = pre._panel.querySelector(".out");
+        if (!pre._outN) out.innerHTML = "";
+        pre._outN++;
+        const d = document.createElement("div");
+        if (err) d.className = "err";
+        d.textContent = text;
+        out.appendChild(d);
+        if (!instant) gsap.from(d, { x: -12, opacity: 0, duration: 0.3 });
+      }
+
+      function reset(pre) {
+        pre._tl?.kill();
+        pre.classList.remove("tracing", "traced");
+        pre.querySelectorAll(".line").forEach((l) => {
+          l.classList.remove("run", "now");
+          l.querySelectorAll(".tb").forEach((b) => b.remove());
+        });
+        clearPanel(pre);
+        pre._onReset?.();
+      }
+
+      function trace(pre, instant, from = 0, to) {
+        reset(pre);
+        const seq = parseTrace(pre.dataset.trace);
+        to = to ?? seq.length;
+        const STEP = speed(seq.length);
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        pre.classList.add("tracing");
+        const tl = gsap.timeline();
+        seq.slice(0, to).forEach((s, k) => {
+          const fast = instant || k < from;
+          tl.call(() => {
+            lines.forEach((l) => l.classList.remove("now"));
+            const el = lines[s.line - 1];
+            if (el) el.classList.add("run", "now");
+            if (s.kind && el) {
+              el.querySelectorAll(".tb").forEach((o) => o.remove());
+              const b = document.createElement("span");
+              b.className = "tb " + ({ T: "t", F: "f", E: "f", "~": "" })[s.kind];
+              b.textContent = s.note ?? (s.kind === "T" ? "True" : s.kind === "F" ? "False" : "");
+              el.appendChild(b);
+              if (!fast) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+            }
+            if (s.vars && pre._panel) setVars(pre, s.vars, fast);
+            if (s.out !== undefined && pre._panel) print(pre, s.out, s.kind === "E", fast);
+            pre._onBeat?.(s, k, fast);
+          }, null, Math.max(0, k - from) * STEP);
+        });
+        tl.call(() => {
+          lines.forEach((l) => l.classList.remove("now"));
+          pre.classList.replace("tracing", "traced");
+        }, null, Math.max(0, to - from) * STEP);
+        if (instant) tl.progress(1);
+        pre._tl = tl;
+      }
+
+      const traces = [...document.querySelectorAll("pre.trace[data-trace]")];
+      traces.forEach(buildPanel);
+      const setDelay = (pre) => pre.style.setProperty("--ans-delay", parseTrace(pre.dataset.trace).length * speed(parseTrace(pre.dataset.trace).length) + "s");
+      traces.filter((p) => !p.hasAttribute("data-upto")).forEach(setDelay);
+      const firstAnswer = (pre) => pre.querySelector(".line.answer");
+
+      // A trace runs when its first answer line is revealed, or on a [data-go] step
+      Deck.on("step", (slide, i, d) => {
+        for (const el of d.elements) {
+          let pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el !== firstAnswer(pre)) pre = null;
+          if (!pre && el.hasAttribute("data-go")) pre = slide.querySelector("pre.trace[data-trace]");
+          if (pre) trace(pre, d.dir < 0);
+        }
+      });
+      Deck.on("unstep", (slide, i, d) => {
+        for (const el of d.elements) {
+          const pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el === firstAnswer(pre)) reset(pre);
+          if (el.hasAttribute("data-go")) slide.querySelectorAll("pre.trace[data-trace]").forEach(reset);
+        }
+      });
+      Deck.on("enter", (slide, i, d) => {
+        slide.querySelectorAll("pre.trace[data-trace]").forEach((pre) => {
+          reset(pre);
+          if (pre.hasAttribute("data-auto")) trace(pre, d.dir < 0);
+        });
+      });
+      Deck.on("leave", (slide) => slide.querySelectorAll("pre.trace").forEach(reset));
+
+      // data-upto: straight-line code with several answers. Each revealed answer
+      // runs the code up to its own line.
+      function upto(slide, instant) {
+        for (const pre of slide.querySelectorAll("pre.trace[data-upto]")) {
+          const answers = [...pre.querySelectorAll(".line.answer")];
+          const n = answers.filter((a) => a.classList.contains("shown")).length;
+          const prev = pre._upto || 0;
+          if (!n) {
+            reset(pre);
+            pre._upto = 0;
+            continue;
+          }
+          const lines = [...pre.querySelectorAll(".line")];
+          const L = lines.indexOf(answers[n - 1]) + 1;
+          const seq = parseTrace(pre.dataset.trace);
+          let to = seq.findIndex((b) => b.line > L);
+          if (to < 0) to = seq.length;
+          if (to > prev && !instant) trace(pre, false, prev, to);
+          else trace(pre, true, 0, to);
+          pre._upto = to;
+        }
+      }
+      Deck.on("step", (slide, i, d) => upto(slide, d.dir < 0 || d.elements.length > 1));
+      Deck.on("unstep", (slide) => upto(slide, true));
+      Deck.on("enter", (slide) => slide.querySelectorAll("pre.trace[data-upto]").forEach((p) => (p._upto = 0)));
+
+      // Chips: try the same code with another value. Each chip carries the new
+      // literal (data-lit, written into line data-lit-line), its trace and output.
+      for (const box of document.querySelectorAll(".try")) {
+        const slide = box.closest(".slide");
+        const pre = slide.querySelector("pre.trace");
+        const chips = [...box.querySelectorAll(".chip[data-trace]")];
+        if (!pre || !chips.length) continue;
+        const apply = (chip, run) => {
+          chips.forEach((c) => c.classList.toggle("on", c === chip));
+          const line = pre.querySelectorAll(".line")[+pre.dataset.litLine - 1];
+          const lit = line?.querySelector(".hljs-string, .hljs-number, .hljs-literal, .hljs-keyword:last-child");
+          if (lit) lit.textContent = chip.dataset.lit;
+          const ans = firstAnswer(pre);
+          if (ans) (ans.querySelector(".hljs-comment") || ans).textContent = "# " + chip.dataset.out;
+          pre.dataset.trace = chip.dataset.trace;
+          setDelay(pre);
+          if (run) trace(pre, false);
+        };
+        box.addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (c) apply(c, true);
+        });
+        Deck.scene(slide, { enter: () => apply(chips[0], false) });
+      }
+
+      // ------------------------------------------------------------ strip
+      // <div class="strip" data-s="Hello"> (characters) or data-items='[1,2]' with
+      // data-kind="list|tuple|array". data-sel: one selection per answer line of the
+      // slide, separated by ";": an index, a slice a:b:c, a list [i,j], #sub (count),
+      // @sub (find), "-" (nothing). Add "=>text" to override the result shown.
+      function pyIndices(n, sel) {
+        sel = sel.trim();
+        if (sel === "-" || sel === "") return [];
+        if (sel.startsWith("[")) return JSON.parse(sel).map((i) => (i < 0 ? n + i : i));
+        if (!sel.includes(":")) {
+          const i = +sel;
+          return [i < 0 ? n + i : i];
+        }
+        let [a, b, c] = sel.split(":").map((x) => (x.trim() === "" ? null : +x));
+        c = c ?? 1;
+        const norm = (x, d) => (x === null ? d : x < 0 ? Math.max(n + x, c < 0 ? -1 : 0) : Math.min(x, c < 0 ? n - 1 : n));
+        a = norm(a, c > 0 ? 0 : n - 1);
+        b = norm(b, c > 0 ? n : -1);
+        const out = [];
+        for (let i = a; c > 0 ? i < b : i > b; i += c) out.push(i);
+        return out;
+      }
+
+      for (const strip of document.querySelectorAll(".strip")) {
+        const items = strip.dataset.items ? JSON.parse(strip.dataset.items) : [...strip.dataset.s];
+        const isStr = !strip.dataset.items || strip.hasAttribute("data-chars");
+        const kind = strip.dataset.kind || (isStr ? "str" : "list");
+        const n = items.length;
+        const show = (v) => (isStr ? (v === " " ? "␣" : v) : typeof v === "string" ? `'${v}'` : String(v));
+        const rep = (v) => (isStr ? `'${v}'` : typeof v === "string" ? `'${v}'` : String(v));
+        strip.innerHTML =
+          `<div class="cells">` +
+          items.map((v, i) => `<div class="cell"><span class="ord"></span><span class="ix">${i}</span><span class="ch${v === " " ? " sp" : ""}">${esc(show(v))}</span><span class="ix">${i - n}</span></div>`).join("") +
+          `</div><div class="res"></div>`;
+        if (strip.dataset.neg === "off") strip.querySelectorAll(".cell .ix:last-child").forEach((e) => (e.style.visibility = "hidden"));
+        const cells = [...strip.querySelectorAll(".cell")];
+        const res = strip.querySelector(".res");
+        const sels = (strip.dataset.sel || "").split(";");
+        const slide = strip.closest(".slide");
+        let cur = -2;
+
+        function pick(k, instant) {
+          if (k === cur) return;
+          cur = k;
+          gsap.killTweensOf(strip.querySelectorAll(".ch, .res"));
+          cells.forEach((c) => {
+            c.classList.remove("pick");
+            c.querySelector(".ord").textContent = "";
+          });
+          gsap.set(strip.querySelectorAll(".ch"), { y: 0 });
+          gsap.set(res, { clearProps: "opacity,transform" });
+          if (k < 0 || !sels[k] || sels[k].trim() === "-") {
+            strip.classList.remove("picking");
+            res.innerHTML = "";
+            return;
+          }
+          let [sel, override] = sels[k].split("=>");
+          sel = sel.trim();
+          let idx, text;
+          if (sel.startsWith("#") || sel.startsWith("@")) {
+            const sub = sel.slice(1);
+            const s = items.join("");
+            idx = [];
+            let first = -1;
+            for (let p = s.indexOf(sub); p >= 0; p = s.indexOf(sub, p + sub.length)) {
+              if (first < 0) first = p;
+              for (let j = 0; j < sub.length; j++) idx.push(p + j);
+              if (sel[0] === "@") break;
+            }
+            text = sel[0] === "#" ? String(idx.length / Math.max(sub.length, 1)) : String(first);
+          } else {
+            idx = pyIndices(n, sel);
+            const vals = idx.map((i) => items[i]);
+            const single = !sel.includes(":") && !sel.startsWith("[");
+            if (single) text = rep(vals[0]);
+            else if (isStr) text = `'${vals.join("")}'`;
+            else if (kind === "tuple") text = vals.length === 1 ? `(${rep(vals[0])},)` : `(${vals.map(rep).join(", ")})`;
+            else if (kind === "array") text = `array([${vals.map(rep).join(", ")}])`;
+            else text = `[${vals.map(rep).join(", ")}]`;
+          }
+          if (override !== undefined) text = override.trim();
+          strip.classList.add("picking");
+          res.innerHTML = `<span class="lbl">result</span>${esc(text)}`;
+          idx.forEach((i, o) => {
+            const c = cells[i];
+            if (!c) return;
+            c.classList.add("pick");
+            if (idx.length > 1 && !sel.startsWith("#") && !sel.startsWith("@")) {
+              const od = c.querySelector(".ord");
+              od.textContent = od.textContent ? od.textContent + "," + (o + 1) : o + 1;
+            }
+            if (!instant) gsap.fromTo(c.querySelector(".ch"), { y: 0 }, { y: -8, duration: 0.25, delay: o * 0.12, yoyo: true, repeat: 1, ease: "power2.out" });
+          });
+          if (!instant) gsap.from(res, { opacity: 0, y: 8, duration: 0.4, delay: idx.length * 0.12 });
+        }
+        const sync = (instant) => {
+          const scope = strip.dataset.scope ? slide.querySelector(strip.dataset.scope) : slide;
+          let k = scope.querySelectorAll(".line.answer.shown, .sel.shown").length - 1;
+          if (strip.hasAttribute("data-lines")) {
+            // one selection per code line; blank entries keep the previous one
+            const n = scope.querySelectorAll("pre .line.step.shown").length;
+            k = -1;
+            for (let i = n - 1; i >= 0; i--) if (sels[i] && sels[i].trim()) { k = i; break; }
+          }
+          pick(k, instant);
+        };
+        Deck.scene(slide, {
+          enter: () => {
+            cur = -2;
+            pick(-1, true);
+          },
+          step: (s, n, els, d) => sync(d.dir < 0 || els.length > 1),
+          unstep: () => sync(true),
+        });
+      }
+
+      // ------------------------------------------------------------ rewrite
+      // <div class="rw"><div class="rs">first</div><div class="rs step" data-anim="none">next</div>…</div>
+      for (const rw of document.querySelectorAll(".rw")) {
+        const states = [...rw.querySelectorAll(":scope > .rs")];
+        const dots = document.createElement("div");
+        dots.className = "rw-dots";
+        dots.innerHTML = states.map(() => "<i></i>").join("");
+        rw.after(dots);
+        const sync = () => {
+          let k = 0;
+          states.forEach((s, i) => {
+            if (i === 0 || s.classList.contains("shown")) k = i;
+          });
+          states.forEach((s, i) => {
+            s.classList.toggle("cur", i === k);
+            s.classList.toggle("past", i < k);
+          });
+          [...dots.children].forEach((d, i) => d.classList.toggle("on", i <= k));
+        };
+        sync();
+        const slide = rw.closest(".slide");
+        Deck.scene(slide, { enter: sync, step: sync, unstep: sync });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+      // ================= end shared widgets =================
+
+      const answersShown = (slide) => slide.querySelectorAll(".line.answer.shown").length;
+      const fmt = (xs) => (xs.length ? `{${xs.join(", ")}}` : "set()");
+
+      // ------------------------------------------------------------ Venn diagrams
+      let vid = 0;
+      for (const v of document.querySelectorAll(".venn")) {
+        const A = v.dataset.a.split(",");
+        const B = v.dataset.b.split(",");
+        const both = A.filter((x) => B.includes(x));
+        const onlyA = A.filter((x) => !B.includes(x));
+        const onlyB = B.filter((x) => !A.includes(x));
+        const id = "v" + vid++;
+        const col = (xs, cx) => xs.map((x, i) => `<text class="el" data-v="${x}" x="${cx}" y="${130 + (i - (xs.length - 1) / 2) * 34}">${x}</text>`).join("");
+        v.innerHTML = `<svg viewBox="0 0 400 260" aria-label="Venn diagram of a and b">
+          <defs>
+            <clipPath id="${id}ca"><circle cx="150" cy="130" r="100"/></clipPath>
+            <clipPath id="${id}cb"><circle cx="250" cy="130" r="100"/></clipPath>
+            <mask id="${id}na"><rect width="400" height="260" fill="#fff"/><circle cx="150" cy="130" r="100" fill="#000"/></mask>
+            <mask id="${id}nb"><rect width="400" height="260" fill="#fff"/><circle cx="250" cy="130" r="100" fill="#000"/></mask>
+          </defs>
+          <circle class="rg" data-r="a" cx="150" cy="130" r="100" mask="url(#${id}nb)"/>
+          <circle class="rg" data-r="ab" cx="250" cy="130" r="100" clip-path="url(#${id}ca)"/>
+          <circle class="rg" data-r="b" cx="250" cy="130" r="100" mask="url(#${id}na)"/>
+          <circle class="ring a" cx="150" cy="130" r="100"/>
+          <circle class="ring b" cx="250" cy="130" r="100"/>
+          <text class="lbl" x="70" y="22" style="fill:var(--violet-soft)">a</text>
+          <text class="lbl" x="330" y="22" style="fill:var(--cyan)">b</text>
+          ${col(onlyA, 100)}${col(both, 200)}${col(onlyB, 300)}
+        </svg><div class="res"></div>`;
+        const ops = v.dataset.ops.split(";");
+        const RULES = {
+          union: { r: ["a", "ab", "b"], xs: [...onlyA, ...both, ...onlyB] },
+          inter: { r: ["ab"], xs: both },
+          diff: { r: ["a"], xs: onlyA },
+          sym: { r: ["a", "b"], xs: [...onlyA, ...onlyB] },
+          sub: { r: ["ab"], xs: both, text: onlyA.length ? "False" : "True: every element of a is also in b" },
+        };
+        const slide = v.closest(".slide");
+        let cur = -2;
+        const render = (instant) => {
+          const k = answersShown(slide) - 1;
+          if (k === cur) return;
+          cur = k;
+          const rule = k >= 0 ? RULES[ops[Math.min(k, ops.length - 1)]] : null;
+          v.querySelectorAll(".rg").forEach((r) => r.classList.toggle("on", !!rule && rule.r.includes(r.dataset.r)));
+          v.classList.toggle("picking", !!rule);
+          const els = [...v.querySelectorAll("text.el")];
+          els.forEach((e) => e.classList.toggle("in", !!rule && rule.xs.includes(e.dataset.v)));
+          const res = v.querySelector(".res");
+          res.innerHTML = rule ? `<span class="lbl2">result</span>${rule.text ?? fmt(rule.xs)}` : "";
+          if (rule && !instant) {
+            const ins = els.filter((e) => e.classList.contains("in"));
+            if (ins.length) gsap.fromTo(ins, { scale: 1.6, transformOrigin: "center" }, { scale: 1, duration: 0.5, stagger: 0.08, ease: "back.out(2)" });
+            gsap.from(res, { opacity: 0, y: 8, duration: 0.4, delay: 0.2 });
+          }
+        };
+        Deck.scene(slide, {
+          enter: () => { cur = -2; render(true); },
+          step: (s, n, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+        });
+      }
+
+      // ------------------------------------------------------------ set boxes
+      for (const box of document.querySelectorAll(".setbox")) {
+        const slide = box.closest(".slide");
+        box.innerHTML = `<div class="items"></div><div class="note"></div>`;
+        const items = box.querySelector(".items");
+        const note = box.querySelector(".note");
+        // data-items: a list whose duplicates collapse on the first answer (or a [data-dedupe] step)
+        if (box.dataset.items) {
+          const xs = box.dataset.items.split(",");
+          let tl;
+          const render = (instant) => {
+            const go = answersShown(slide) > 0 || slide.querySelector("[data-dedupe].shown");
+            tl?.kill();
+            items.innerHTML = xs.map((x, i) => `<span class="it${xs.indexOf(x) < i ? " dup" : ""}">${x}</span>`).join("");
+            box.classList.toggle("list", box.dataset.wasList === "1" && !go);
+            note.innerHTML = "";
+            if (!go) return;
+            const dups = [...items.querySelectorAll(".dup")];
+            const done = () => {
+              dups.forEach((d) => d.remove());
+              box.classList.remove("list");
+              const uniq = [...new Set(xs)];
+              note.innerHTML = `<span class="lbl2">result</span>${fmt(uniq)}`;
+            };
+            if (instant) return done();
+            tl = gsap.timeline({ onComplete: done });
+            dups.forEach((d) => {
+              const first = [...items.children].find((c) => c.textContent === d.textContent && !c.classList.contains("dup"));
+              tl.to(d, { x: first.offsetLeft - d.offsetLeft, y: -10, opacity: 0, scale: 0.6, duration: 0.7, ease: "power2.in" }, 0.2);
+            });
+          };
+          box.dataset.wasList = box.classList.contains("list") ? "1" : "0";
+          Deck.scene(slide, {
+            enter: () => render(true),
+            step: (s, n, els, d) => render(d.dir < 0 || els.length > 1),
+            unstep: () => render(true),
+          });
+          continue;
+        }
+        // data-states: the set's contents before and after each answer
+        const states = box.dataset.states.split("|").map((s) => (s ? s.split(",") : []));
+        const notes = (box.dataset.notes || "").split("|");
+        let cur = -1;
+        const render = (instant) => {
+          const k = Math.min(answersShown(slide), states.length - 1);
+          if (k === cur) return;
+          const prev = cur >= 0 ? states[cur] : [];
+          cur = k;
+          const xs = states[k];
+          items.innerHTML = xs.map((x) => `<span class="it">${x}</span>`).join("");
+          note.innerHTML = notes[k] ? `<span class="lbl2">note</span>${notes[k]}` : "";
+          if (instant) return;
+          const added = [...items.children].filter((c) => !prev.includes(c.textContent));
+          if (k > 0 && added.length) gsap.from(added, { scale: 0.3, opacity: 0, duration: 0.5, ease: "back.out(2)" });
+          const gone = prev.filter((x) => !xs.includes(x));
+          for (const g of gone) {
+            const ghost = document.createElement("span");
+            ghost.className = "it dup";
+            ghost.textContent = g;
+            items.prepend(ghost);
+            gsap.to(ghost, { y: -40, opacity: 0, duration: 0.7, ease: "power2.in", onComplete: () => ghost.remove() });
+          }
+          if (!added.length && !gone.length && k > 0) gsap.fromTo(items, { x: -6 }, { x: 0, duration: 0.4, ease: "elastic.out(1, 0.3)" });
+        };
+        Deck.scene(slide, {
+          enter: () => { cur = -1; render(true); },
+          step: (s, n, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+        });
+      }
+    </script>
+  </body>
+</html>

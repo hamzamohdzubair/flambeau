@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Distribution Theory</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .hub {
+        gap: 1.6rem;
+      }
+
+      .hub .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .hub h1 {
+        text-align: center;
+      }
+
+      .hub > p.muted {
+        max-width: 40rem;
+        text-align: center;
+      }
+
+      .hub .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      .hub .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      .hub .group h3 span {
+        margin-right: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .hub .tile {
+        min-height: 5.6rem;
+      }
+
+      .hub .tiles.big .tile {
+        min-height: 9rem;
+        font-size: 1.3rem;
+      }
+
+      .hub .soon {
+        opacity: 0.45;
+      }
+
+      #chart figure img {
+        max-height: 68vh;
+      }
+
+      #demo figure.frame {
+        width: min(100%, 64rem);
+      }
+
+      #demo figure.frame iframe {
+        height: 64vh;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide top hub" id="hub">
+      <span class="kicker">Probability &amp; statistics</span>
+      <h1>Distribution Theory</h1>
+
+      <div class="group">
+        <h3>Chapters</h3>
+        <div class="tiles big">
+          <a class="tile" href="beta/index.html" style="--img:url('/assets/2025-10-02-22-40-24.png')"><span>Beta Distribution</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="chart">
+      <h2>Distributions</h2>
+      <figure><img src="/assets/2025-09-30-23-20-50.png" alt="A chart of common probability distributions and the relationships between them" /></figure>
+    </section>
+
+    <section class="slide" id="demo">
+      <h2>Demo</h2>
+      <figure class="frame">
+        <iframe data-src="https://www.acsu.buffalo.edu/~adamcunn/probability/probability.html" title="Interactive probability distributions"></iframe>
+        <figcaption><a href="https://www.acsu.buffalo.edu/~adamcunn/probability/probability.html" target="_blank" rel="noopener">acsu.buffalo.edu/~adamcunn/probability</a></figcaption>
+      </figure>
+    </section>
+
+    <script type="module">
+      // The external demo only loads when its slide is first shown
+      Deck.scene("#demo", {
+        enter(slide) {
+          const f = slide.querySelector("iframe");
+          if (!f.src) f.src = f.dataset.src;
+        },
+      });
+    </script>
+  </body>
+</html>

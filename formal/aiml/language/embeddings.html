@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Embeddings</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #space {
+        justify-content: flex-start;
+      }
+
+      #space canvas {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        cursor: grab;
+      }
+
+      #space .note {
+        margin-top: auto;
+        padding: 0.7rem 1.1rem;
+        border-radius: 12px;
+        background: var(--glass);
+        border: 1px solid var(--border);
+        text-align: center;
+        min-height: 3.2em;
+        max-width: 46rem;
+      }
+
+      #space .note b {
+        font-family: var(--font-mono);
+        font-weight: 500;
+      }
+
+      #space .legend {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+      }
+
+      #space .step {
+        display: none;
+      }
+
+      #paper figure.frame iframe {
+        height: 64vh;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · Language</span>
+      <h1>Embeddings</h1>
+      <p>Each word becomes a list of numbers: a point in space, where directions carry meaning.</p>
+    </section>
+
+    <section class="slide" id="space">
+      <canvas></canvas>
+      <h2>Words as points in space</h2>
+      <p class="note">Similar words sit close together. Drag to turn the space.</p>
+      <p class="legend muted">Positions are illustrative: real GloVe vectors have 50 to 300 dimensions, not 3.</p>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <section class="slide" id="paper">
+      <h2>GloVe embeddings</h2>
+      <figure class="frame">
+        <iframe src="https://nlp.stanford.edu/pubs/glove.pdf" title="GloVe: Global Vectors for Word Representation (PDF)" loading="lazy"></iframe>
+        <figcaption><a href="https://nlp.stanford.edu/pubs/glove.pdf">https://nlp.stanford.edu/pubs/glove.pdf</a></figcaption>
+      </figure>
+    </section>
+
+    <section class="slide">
+      <h2>Reading embeddings</h2>
+      <pre class="steps"><code class="language-python">
+        import numpy as np
+        import gensim.downloader as api
+        # load pre-trained 'glove-wiki-gigaword-50'
+        model = api.load('glove-wiki-gigaword-50')
+        # size of the model (no. of words / tokens)
+        len(model)
+        # ans: 400000
+        # the embedding for any word
+        model['india']
+        # ans: an array of 50 numbers
+        model['king']
+        # meaningful relationships
+        vector1 = model['man'] + model['queen'] - model['king']
+        model.most_similar(vector1, topn=1)
+        # ans: a word close to 'woman'
+        vector2 = model['paris'] - model['france'] + model['india']
+        model.most_similar(vector2, topn=1)
+        # ans: India's capital, by the same logic
+      </code></pre>
+      <p class="step center muted">Passing a raw vector does not exclude the input words, so they can also rank near the top.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const THREE = await Deck.load("three");
+      const { OrbitControls } = await Deck.load("threeOrbit");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      const slide = document.querySelector("#space");
+      const canvas = slide.querySelector("canvas");
+      const note = slide.querySelector(".note");
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+      camera.position.set(6.6, 3.4, 10.8);
+      const controls = new OrbitControls(camera, canvas);
+      controls.enableZoom = false;
+      controls.enableDamping = true;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.6;
+      controls.target.set(0, 0.8, 0);
+
+      // Illustrative 3-D positions: "royal" and "capital" offsets are shared directions
+      const V = (x, y, z) => new THREE.Vector3(x, y, z);
+      const gender = V(0.3, 0, 1.8);
+      const royal = V(0.2, 2.0, -0.4);
+      const capital = V(0.2, 1.6, 0.6);
+      const W = {};
+      W.man = V(-3, -1, 0);
+      W.woman = W.man.clone().add(gender);
+      W.king = W.man.clone().add(royal);
+      W.queen = W.king.clone().add(gender);
+      W.france = V(1.5, -1.2, -1.5);
+      W.paris = W.france.clone().add(capital);
+      W.india = V(2.8, -1.2, 1.2);
+      W.delhi = W.india.clone().add(capital);
+      const fillers = { apple: V(-0.4, 2.8, -2.4), mango: V(0.4, 3.1, -2.0), banana: V(-1.0, 3.4, -1.7), river: V(3.6, 2.4, -2.8), ocean: V(4.2, 2.9, -2.2) };
+
+      function label(text, colour) {
+        const c = document.createElement("canvas");
+        c.width = 256;
+        c.height = 64;
+        const g = c.getContext("2d");
+        g.font = "600 34px Space Grotesk, Inter, sans-serif";
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.shadowColor = "rgba(0,0,0,.9)";
+        g.shadowBlur = 8;
+        g.fillStyle = colour;
+        g.fillText(text, 128, 32);
+        const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+        s.scale.set(2, 0.5, 1);
+        return s;
+      }
+      const group = new THREE.Group();
+      scene.add(group);
+      const dotGeo = new THREE.SphereGeometry(0.13, 20, 14);
+      const addWord = (name, p, colour) => {
+        const m = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: colour }));
+        m.position.copy(p);
+        group.add(m);
+        const l = label(name, colour);
+        l.position.copy(p).add(V(0, 0.42, 0));
+        group.add(l);
+        return m;
+      };
+      for (const [w, p] of Object.entries(W)) addWord(w, p, ["man", "woman", "king", "queen"].includes(w) ? "#c4b5fd" : "#67e8f9");
+      for (const [w, p] of Object.entries(fillers)) addWord(w, p, "#94a3b8");
+
+      // Faint grid floor for depth
+      const grid = new THREE.GridHelper(12, 12, 0x3b2f6b, 0x1c1f3a);
+      grid.position.y = -2.4;
+      scene.add(grid);
+
+      // Arrows for each step
+      // A thick arrow: cylinder shaft + cone head, pointing from one word to another
+      const arrow = (from, to, colour) => {
+        const d = to.clone().sub(from);
+        const len = d.length() - 0.18;
+        const mat = new THREE.MeshBasicMaterial({ color: colour });
+        const a = new THREE.Group();
+        const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, len - 0.3, 12), mat);
+        shaft.position.y = (len - 0.3) / 2;
+        const head = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.3, 16), mat);
+        head.position.y = len - 0.15;
+        a.add(shaft, head);
+        a.position.copy(from);
+        a.quaternion.setFromUnitVectors(V(0, 1, 0), d.clone().normalize());
+        a.visible = false;
+        group.add(a);
+        return a;
+      };
+      const sets = [
+        [arrow(W.man, W.woman, 0xec4899), arrow(W.king, W.queen, 0xec4899)],
+        [arrow(W.france, W.paris, 0x22d3ee), arrow(W.india, W.delhi, 0x22d3ee)],
+        [arrow(W.king, W.queen, 0xfbbf24), arrow(W.man, W.man.clone().add(W.queen).sub(W.king), 0xfbbf24)],
+      ];
+      const notes = [
+        "Similar words sit close together. Drag to turn the space.",
+        "<b>man → woman</b> and <b>king → queen</b> point the same way: a 'gender' direction.",
+        "<b>france → paris</b> and <b>india → delhi</b> share a 'capital of' direction.",
+        "<b>man + (queen − king)</b> lands on <b>woman</b>: vector arithmetic on meaning.",
+      ];
+
+      let shown = -1;
+      function show(n) {
+        if (n === shown) return;
+        shown = n;
+        sets.forEach((s, k) => s.forEach((a) => (a.visible = k === n - 1)));
+        note.innerHTML = notes[n];
+      }
+
+      let running = false;
+      function resize() {
+        const w = slide.clientWidth, h = slide.clientHeight;
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.fov = w < 700 ? 80 : 45;
+        camera.updateProjectionMatrix();
+      }
+      function loop() {
+        if (!running) return;
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+      }
+      window.addEventListener("resize", () => running && resize());
+      Deck.scene("#space", {
+        enter() {
+          resize();
+          show(Deck.step);
+          running = true;
+          requestAnimationFrame(loop);
+          gsap.fromTo(group.scale, { x: 0.3, y: 0.3, z: 0.3 }, { x: 1, y: 1, z: 1, duration: 1.2, ease: "back.out(1.4)" });
+        },
+        leave() {
+          running = false;
+        },
+        step: (s, n) => show(n),
+        unstep: (s, n) => show(n - 1),
+      });
+    </script>
+  </body>
+</html>

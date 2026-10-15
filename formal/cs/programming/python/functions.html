@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Functions</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tutor: code beside a live call stack and output ---------- */
+      .tutor {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 1fr);
+        gap: 1.4rem;
+        width: min(100%, 66rem);
+        align-items: start;
+      }
+
+      .tutor pre {
+        width: 100%;
+        font-size: 1.1rem;
+      }
+
+      .tutor .line {
+        border-radius: 4px;
+        transition:
+          background 0.3s,
+          box-shadow 0.3s,
+          opacity 0.3s;
+      }
+
+      .tutor pre.live .line:not(.ran):not(.answer):not(.cmt) {
+        opacity: 0.45;
+      }
+
+      .tutor pre.live .line.ran {
+        background: rgba(139, 92, 246, 0.13);
+      }
+
+      .tutor pre .line.now {
+        opacity: 1;
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.32), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      .tutor .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.7em;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: var(--amber);
+        border: 1px solid rgba(251, 191, 36, 0.45);
+        background: rgba(251, 191, 36, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        min-width: 0;
+      }
+
+      .mh {
+        font: 500 0.68rem var(--font-mono);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .stack,
+      .shelf {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.45rem;
+      }
+
+      .shelf-wrap {
+        display: none;
+      }
+
+      .tutor.has-shelf .shelf-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+
+      .shelf:empty::after {
+        content: "none";
+        font: 0.8rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .frame {
+        padding: 0.45rem 0.75rem 0.55rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0d0f20;
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s,
+          opacity 0.3s;
+      }
+
+      .frame.top {
+        border-color: rgba(34, 211, 238, 0.75);
+        box-shadow: 0 0 22px -6px rgba(34, 211, 238, 0.55);
+      }
+
+      .frame.paused {
+        border-style: dashed;
+        border-color: rgba(167, 139, 250, 0.55);
+        opacity: 0.8;
+      }
+
+      .frame .fn {
+        font: 600 0.82rem var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .frame[data-id="global"] .fn {
+        color: var(--faint);
+      }
+
+      .frame .vars {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 0.8rem;
+        font: 0.95rem/1.55 var(--font-mono);
+      }
+
+      .frame .row {
+        display: contents;
+      }
+
+      .frame .k {
+        color: var(--muted);
+      }
+
+      .frame .v {
+        color: var(--text);
+        overflow-wrap: anywhere;
+        border-radius: 4px;
+      }
+
+      .frame .ret {
+        margin-top: 0.3rem;
+        font: 0.85rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .frame .ret b,
+      .flychip {
+        display: inline-block;
+        padding: 0 0.55em;
+        border-radius: 999px;
+        font: 600 0.9rem/1.6 var(--font-mono);
+        color: #fff;
+        background: rgba(236, 72, 153, 0.35);
+        border: 1px solid var(--pink);
+      }
+
+      .flychip {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        box-shadow: 0 0 18px rgba(236, 72, 153, 0.7);
+      }
+
+      .console {
+        min-height: 2.4rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.45);
+        font: 0.95rem/1.5 var(--font-mono);
+        color: var(--green);
+        white-space: pre-wrap;
+      }
+
+      .tutor.no-out .out-h,
+      .tutor.no-out .console {
+        display: none;
+      }
+
+      .console .echo {
+        color: var(--cyan);
+      }
+
+      .console .err {
+        color: var(--red);
+      }
+
+      .ctl {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.2rem;
+      }
+
+      .ctl button {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 600 0.9rem var(--font);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .ctl button:hover {
+        color: var(--text);
+        border-color: rgba(167, 139, 250, 0.7);
+      }
+
+      .ctl span {
+        margin-left: 0.3rem;
+        font: 0.75rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .tutor {
+          grid-template-columns: 1fr;
+          gap: 0.8rem;
+        }
+
+        .tutor pre {
+          font-size: 0.82rem;
+        }
+
+        .frame .vars,
+        .console {
+          font-size: 0.82rem;
+        }
+      }
+      .slide pre.steps {
+        width: min(100%, 50rem);
+      }
+
+      #fib .cols pre {
+        width: 100%;
+      }
+
+      #recap .card h3 code {
+        font-size: 0.85em;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · functions</span>
+      <h1 class="grad-each"><span>Functions</span></h1>
+      <p>Name a piece of code, give it inputs, get a result back: parameters, return values, lambdas, scope, recursion and type hints.</p>
+    </section>
+
+    <!-- ================================================================ basics -->
+    <section class="slide" id="basic">
+      <h2>Basic functions</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # simple function
+          def greet():
+              print("Hello!")
+          greet()
+
+          # function with parameters
+          def greet_person(name):
+              print(f"Hello, {name}!")
+          greet_person("Alice")
+
+          # function with return value
+          def add(a, b):
+              return a + b
+          result = add(5, 3)  # 8
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <p class="hint">Press → to run it. <code>def</code> only stores the function; its body runs when it is called, in a fresh frame.</p>
+    </section>
+
+    <!-- ================================================================ defaults -->
+    <section class="slide">
+      <h2>Default parameters</h2>
+      <pre class="steps"><code class="language-python">
+        # default parameter values
+        def greet(name="Guest"):
+            print(f"Hello, {name}!")
+
+        greet()           # Hello, Guest!
+        greet("Alice")    # Hello, Alice!
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Multiple defaults</h2>
+      <pre class="steps"><code class="language-python">
+        # multiple defaults
+        def create_profile(name, age=0, country="Unknown"):
+            return f"{name}, {age}, {country}"
+
+        create_profile("Alice")               # Alice, 0, Unknown
+        create_profile("Bob", 25)             # Bob, 25, Unknown
+        create_profile("Charlie", 30, "USA")  # Charlie, 30, USA
+      </code></pre>
+      <p class="hint">Arguments fill parameters left to right; any parameter left over takes its default.</p>
+    </section>
+
+    <!-- ================================================================ keywords -->
+    <section class="slide">
+      <h2>Keyword arguments</h2>
+      <pre class="steps"><code class="language-python">
+        # keyword arguments
+        def describe_pet(animal, name):
+            print(f"I have a {animal} named {name}")
+
+        describe_pet(animal="dog", name="Rex")
+        describe_pet(name="Whiskers", animal="cat")
+
+        # mixing positional and keyword
+        describe_pet("hamster", name="Fluffy")
+      </code></pre>
+      <p class="hint">With keywords, order no longer matters. Positional arguments must come first.</p>
+    </section>
+
+    <!-- ================================================================ args kwargs -->
+    <section class="slide">
+      <h2>Variable arguments</h2>
+      <pre class="steps"><code class="language-python">
+        # *args - arbitrary positional arguments
+        def sum_all(*numbers):
+            return sum(numbers)
+
+        sum_all(1, 2, 3)        # 6
+        sum_all(1, 2, 3, 4, 5)  # 15
+
+        # **kwargs - arbitrary keyword arguments
+        def print_info(**info):
+            for key, value in info.items():
+                print(f"{key}: {value}")
+
+        print_info(name="Alice", age=25, city="NYC")
+        # ans: name: Alice / age: 25 / city: NYC
+      </code></pre>
+    </section>
+
+    <section class="slide" id="combo">
+      <h2>Combining them all</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # combining all
+          def func(a, b, *args, key1="default", **kwargs):
+              print(a, b)
+              print(args)
+              print(key1)
+              print(kwargs)
+
+          func(1, 2, 3, 4, key1="value", x=10, y=20)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <p class="hint">Watch the call's frame: extra positional arguments are packed into the tuple <code>args</code>, extra keywords into the dict <code>kwargs</code>.</p>
+    </section>
+
+    <!-- ================================================================ return -->
+    <section class="slide">
+      <h2>Return values</h2>
+      <pre class="steps"><code class="language-python">
+        # single return
+        def square(x):
+            return x ** 2
+
+        # multiple return values
+        def divide(a, b):
+            quotient = a // b
+            remainder = a % b
+            return quotient, remainder
+
+        q, r = divide(17, 5)  # q=3, r=2
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Early return, and no return</h2>
+      <pre class="steps"><code class="language-python">
+        # early return
+        def is_even(n):
+            if n % 2 == 0:
+                return True
+            return False
+
+        # no return (returns None)
+        def print_message(msg):
+            print(msg)
+
+        result = print_message("Hi")  # result is None
+      </code></pre>
+      <p class="hint">More in <a href="function-return.html">Return Values</a>.</p>
+    </section>
+
+    <!-- ================================================================ lambda -->
+    <section class="slide">
+      <h2>Lambda functions</h2>
+      <pre class="steps"><code class="language-python">
+        # basic lambda
+        square = lambda x: x ** 2
+        square(5)  # 25
+
+        # lambda with multiple parameters
+        add = lambda x, y: x + y
+        add(3, 4)  # 7
+      </code></pre>
+      <p class="hint">A lambda is a one-expression function without a name: <code>lambda params: expression</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Lambdas as arguments</h2>
+      <pre class="steps"><code class="language-python">
+        # lambda in sorted
+        pairs = [(1, 'one'), (3, 'three'), (2, 'two')]
+        sorted(pairs, key=lambda pair: pair[1])
+        # ans: [(1, 'one'), (3, 'three'), (2, 'two')]
+
+        # lambda in map
+        numbers = [1, 2, 3, 4, 5]
+        squared = list(map(lambda x: x ** 2, numbers))
+        # ans: [1, 4, 9, 16, 25]
+
+        # lambda in filter
+        evens = list(filter(lambda x: x % 2 == 0, numbers))
+        # ans: [2, 4]
+      </code></pre>
+      <p class="hint">More in <a href="lambda-functions.html">Lambda Functions</a>.</p>
+    </section>
+
+    <!-- ================================================================ scope -->
+    <section class="slide" id="scope">
+      <h2>Scope: global and local</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # global scope
+          x = 10
+          def func():
+              # local scope
+              y = 20
+              print(x)  # can access global
+              print(y)  # local variable
+
+          func()
+          # print(y)  # Error: y not defined
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <p class="hint"><code>y</code> lives in <code>func</code>'s frame, so it disappears when the call ends.</p>
+    </section>
+
+    <section class="slide" id="global">
+      <h2>The global keyword</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # global keyword
+          count = 0
+          def increment():
+              global count
+              count += 1
+
+          increment()
+          print(count)  # 1
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <p class="hint">Without <code>global</code>, <code>count += 1</code> would try to change a local <code>count</code> that doesn't exist yet.</p>
+    </section>
+
+    <section class="slide" id="nonlocal">
+      <h2>The nonlocal keyword</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # nonlocal keyword
+          def outer():
+              x = 10
+              def inner():
+                  nonlocal x
+                  x = 20
+              inner()
+              print(x)  # 20
+
+          outer()
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <p class="hint"><code>nonlocal</code> points <code>x</code> at the enclosing function's frame. More in <a href="function-scope.html">Scope</a>.</p>
+    </section>
+
+    <!-- ================================================================ docstrings -->
+    <section class="slide">
+      <h2>Docstrings</h2>
+      <pre class="steps"><code class="language-python">
+        # function documentation
+        def calculate_area(radius):
+            """
+            Calculate the area of a circle.
+
+            Parameters:
+                radius (float): The radius of the circle
+
+            Returns:
+                float: The area of the circle
+            """
+            return 3.14 * radius ** 2
+
+        # accessing docstring
+        print(calculate_area.__doc__)
+        help(calculate_area)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recursion -->
+    <section class="slide" id="fact">
+      <h2>Recursion</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # factorial
+          def factorial(n):
+              if n &lt;= 1:
+                  return 1
+              return n * factorial(n - 1)
+
+          factorial(5)  # 120
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <p class="hint">Each call waits on the stack for the one above it. The base case <code>n &lt;= 1</code> stops the growth, then the answers flow back down.</p>
+    </section>
+
+    <section class="slide" id="fib">
+      <h2>More recursion</h2>
+      <div class="cols top" style="width: min(100%, 64rem)">
+        <pre class="steps"><code class="language-python">
+          # fibonacci
+          def fibonacci(n):
+              if n &lt;= 1:
+                  return n
+              return fibonacci(n - 1) + fibonacci(n - 2)
+
+          fibonacci(6)  # 8
+        </code></pre>
+        <pre class="steps"><code class="language-python">
+          # sum of list
+          def sum_list(lst):
+              if not lst:
+                  return 0
+              return lst[0] + sum_list(lst[1:])
+
+          sum_list([1, 2, 3, 4])  # 10
+        </code></pre>
+      </div>
+      <p class="hint">Every recursive function needs a base case that returns without calling itself.</p>
+    </section>
+
+    <!-- ================================================================ type hints -->
+    <section class="slide">
+      <h2>Type hints</h2>
+      <pre class="steps"><code class="language-python">
+        # basic type hints
+        def greet(name: str) -&gt; str:
+            return f"Hello, {name}!"
+
+        def add(a: int, b: int) -&gt; int:
+            return a + b
+
+        # multiple types
+        from typing import Union
+        def process(value: Union[int, str]) -&gt; str:
+            return str(value)
+      </code></pre>
+      <p class="hint">Hints document what a function expects and returns. Python does not enforce them; tools like mypy and your editor check them.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Container and optional types</h2>
+      <pre class="steps"><code class="language-python">
+        # list and dict types
+        from typing import List, Dict
+        def sum_list(numbers: List[int]) -&gt; int:
+            return sum(numbers)
+
+        def get_config() -&gt; Dict[str, str]:
+            return {"key": "value"}
+
+        # optional
+        from typing import Optional
+        def find_user(user_id: int) -&gt; Optional[str]:
+            return "Alice" if user_id == 1 else None
+      </code></pre>
+      <p class="hint">Since Python 3.9 and 3.10 you can also write <code>list[int]</code>, <code>dict[str, str]</code> and <code>str | None</code> without importing from <code>typing</code>.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>A call gets a frame</h3><p>Parameters and local variables live in it, and vanish when the call returns.</p></div>
+        <div class="card step"><h3>Flexible inputs</h3><p>Defaults, keywords, <code>*args</code> (a tuple) and <code>**kwargs</code> (a dict).</p></div>
+        <div class="card step"><h3><code>return</code></h3><p>Hands one value back (several become a tuple); none means <code>None</code>.</p></div>
+        <div class="card step"><h3>Scope</h3><p>Read outer names freely; change them with <code>global</code> or <code>nonlocal</code>.</p></div>
+        <div class="card step"><h3>Recursion</h3><p>A function calling itself, with a base case to stop.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ Tutor
+      // A trace is built by "running" the code by hand: set variables, call and
+      // return, then L(line) snapshots the state after that line ran.
+      const STEP = 0.85; // seconds per beat when playing
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function trace() {
+        const st = [{ id: "global", v: {} }];
+        const beats = [];
+        let at;
+        const top = () => [...st].reverse().find((f) => !f.p);
+        const find = (id) => st.find((f) => f.id === id);
+        const t = {
+          beats,
+          at(n) { at = n; return t; },
+          set(k, v, id) { (id ? find(id) : top()).v[k] = String(v); return t; },
+          call(id, vars = {}) { st.push({ id, v: Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, String(v)])) }); return t; },
+          ret() { st.splice(st.indexOf(top()), 1); return t; },
+          pause(id) { (id ? find(id) : top()).p = true; return t; },
+          resume(id) { const f = find(id); f.p = false; st.splice(st.indexOf(f), 1); st.push(f); return t; },
+          drop(id) { st.splice(st.indexOf(find(id)), 1); return t; },
+          L(l, o = {}) {
+            beats.push({ l, at, ...o, rid: o.r !== undefined ? top().id : null, s: st.map((f) => ({ id: f.id, v: { ...f.v }, p: !!f.p })) });
+            at = undefined;
+            return t;
+          },
+        };
+        return t;
+      }
+
+      function fly(text, from, to) {
+        const chip = document.createElement("span");
+        chip.className = "flychip";
+        chip.textContent = text;
+        document.body.appendChild(chip);
+        gsap.set(chip, { left: from.left, top: from.top });
+        gsap.to(chip, {
+          left: to.left,
+          top: to.top,
+          duration: 0.6,
+          ease: "power2.inOut",
+          onComplete: () => gsap.to(chip, { opacity: 0, duration: 0.25, onComplete: () => chip.remove() }),
+        });
+      }
+
+      function Tutor(slide, beats) {
+        const root = slide.querySelector(".tutor");
+        const pre = root.querySelector("pre");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const mem = root.querySelector(".mem");
+        mem.innerHTML = `<div class="mh">Frames</div><div class="stack"></div>
+          <div class="shelf-wrap"><div class="mh">Paused generators</div><div class="shelf"></div></div>
+          <div class="mh out-h">Output</div><div class="console"></div>
+          <div class="ctl" data-interactive><button data-do="back" title="Step back">‹</button><button data-do="play" title="Play from the start">▶</button><button data-do="fwd" title="Step forward">›</button><span></span></div>`;
+        const stack = mem.querySelector(".stack"), shelf = mem.querySelector(".shelf"), con = mem.querySelector(".console"), cnt = mem.querySelector(".ctl span");
+        root.classList.toggle("no-out", !beats.some((b) => b.o !== undefined || b.e !== undefined || b.err));
+        root.classList.toggle("has-shelf", beats.some((b) => b.s.some((f) => f.p)));
+        let a = 1;
+        for (const b of beats) a = b.at = b.at ?? a;
+        const frames = new Map();
+        let k = 0, tl = null, seen = 0, pending = null;
+
+        function makeFrame(id) {
+          const el = document.createElement("div");
+          el.className = "frame";
+          el.dataset.id = id;
+          el.innerHTML = `<div class="fn">${esc(id.split("#")[0])}</div><div class="vars"></div><div class="ret" hidden><span class="rl">return</span> <b></b></div>`;
+          return el;
+        }
+
+        function render(n, anim) {
+          const prev = k ? beats[k - 1] : null;
+          k = n;
+          cnt.textContent = `${n} / ${beats.length}`;
+          const b = n ? beats[n - 1] : null;
+          const state = b ? b.s : [{ id: "global", v: {}, p: false }];
+
+          // code lines
+          const ran = new Set(beats.slice(0, n).map((x) => x.l));
+          pre.classList.toggle("live", n > 0);
+          lines.forEach((el, i) => {
+            el.classList.toggle("now", !!b && b.l === i + 1);
+            el.classList.toggle("ran", ran.has(i + 1));
+            el.querySelector(".tb")?.remove();
+          });
+          if (b && (b.c !== undefined || b.n)) {
+            const tb = document.createElement("span");
+            tb.className = "tb" + (b.c === undefined ? "" : b.c ? " t" : " f");
+            tb.textContent = b.c === undefined ? b.n : (b.n ? b.n + " → " : "") + (b.c ? "True" : "False");
+            lines[b.l - 1].appendChild(tb);
+            if (anim) gsap.from(tb, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+
+          // remember where things were, for FLIP and the flying return value
+          const before = new Map([...frames].map(([id, el]) => [id, el.getBoundingClientRect()]));
+          const retEl = [...root.querySelectorAll(".ret")].find((r) => !r.hidden);
+          const retRect = anim && retEl ? retEl.querySelector("b").getBoundingClientRect() : null;
+          const retText = retEl?.querySelector("b").textContent;
+
+          // frames that are gone
+          const ids = new Set(state.map((f) => f.id));
+          for (const [id, el] of frames) {
+            if (ids.has(id)) continue;
+            frames.delete(id);
+            if (anim) {
+              const r = el.getBoundingClientRect();
+              const ghost = el.cloneNode(true);
+              Object.assign(ghost.style, { position: "fixed", left: r.left + "px", top: r.top + "px", width: r.width + "px", margin: 0, zIndex: 40 });
+              document.body.appendChild(ghost);
+              gsap.to(ghost, { opacity: 0, y: -24, scale: 0.92, duration: 0.35, ease: "power1.out", onComplete: () => ghost.remove() });
+            }
+            el.remove();
+          }
+
+          // frames that stay or arrive, in order
+          const changed = [];
+          const topId = [...state].reverse().find((f) => !f.p)?.id;
+          for (const f of state) {
+            let el = frames.get(f.id);
+            const isNew = !el;
+            if (isNew) frames.set(f.id, (el = makeFrame(f.id)));
+            (f.p ? shelf : stack).appendChild(el);
+            el.classList.toggle("paused", f.p);
+            el.classList.toggle("top", f.id === topId && state.length > 1);
+            const vars = el.querySelector(".vars");
+            const keys = Object.keys(f.v);
+            vars.querySelectorAll(".row").forEach((r) => keys.includes(r.dataset.k) || r.remove());
+            for (const key of keys) {
+              let row = vars.querySelector(`.row[data-k="${CSS.escape(key)}"]`);
+              const val = f.v[key];
+              if (!row) {
+                row = document.createElement("div");
+                row.className = "row";
+                row.dataset.k = key;
+                row.innerHTML = `<span class="k">${esc(key)}</span><span class="v"></span>`;
+                vars.appendChild(row);
+              }
+              const v = row.querySelector(".v");
+              if (v.textContent !== val) {
+                if (!isNew) changed.push(v);
+                v.textContent = val;
+              }
+            }
+            const ret = el.querySelector(".ret");
+            ret.hidden = !(b && b.rid === f.id);
+            if (!ret.hidden) {
+              ret.querySelector(".rl").textContent = b.rl || "return";
+              ret.querySelector("b").textContent = b.r;
+              if (anim) gsap.fromTo(ret, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 });
+            }
+          }
+
+          // output
+          const out = [];
+          for (const x of beats.slice(0, n)) {
+            for (const t of [].concat(x.o ?? [])) out.push(`<div>${esc(t)}</div>`);
+            if (x.e !== undefined) out.push(`<div class="echo">→ ${esc(x.e)}</div>`);
+            if (x.err) out.push(`<div class="err">${esc(x.err)}</div>`);
+          }
+          const grew = out.length > con.children.length;
+          const old = con.children.length;
+          con.innerHTML = out.join("");
+
+          for (const el of frames.values()) {
+            gsap.killTweensOf(el);
+            gsap.set(el, { x: 0, y: 0, opacity: 1, scale: 1 });
+          }
+          if (!anim) return;
+          // where a returned or yielded value lands (measured before anything moves)
+          const newLines = [...con.children].slice(old);
+          // delivered: the frame that showed the value has returned or paused
+          const was = prev && state.find((f) => f.id === prev.rid);
+          const delivered = retRect && prev && prev.rid && (!was || was.p);
+          const target = changed[0] || (grew ? newLines[0] : null) || (b && (lines[b.l - 1].querySelector(".tb") || lines[b.l - 1]));
+          const toRect = delivered && target ? target.getBoundingClientRect() : null;
+          for (const [id, el] of frames) {
+            const r0 = before.get(id);
+            if (!r0) {
+              gsap.fromTo(el, { opacity: 0, y: -16, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power2.out" });
+              continue;
+            }
+            const r1 = el.getBoundingClientRect();
+            const dx = r0.left - r1.left, dy = r0.top - r1.top;
+            if (Math.abs(dx) + Math.abs(dy) > 1) gsap.fromTo(el, { x: dx, y: dy }, { x: 0, y: 0, duration: 0.5, ease: "power2.inOut" });
+          }
+          let delay = 0;
+          if (toRect) {
+            fly(retText, retRect, toRect);
+            delay = 0.55;
+          }
+          changed.forEach((v) => gsap.fromTo(v, { backgroundColor: "rgba(236,72,153,0.4)" }, { backgroundColor: "rgba(236,72,153,0)", duration: 1.1, delay, immediateRender: false }));
+          if (newLines.length) gsap.fromTo(newLines, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.3, delay, stagger: 0.1 });
+        }
+
+        const stop = () => { tl?.kill(); tl = null; };
+        function playTo(t) {
+          stop();
+          const from = k;
+          tl = gsap.timeline();
+          for (let i = from + 1; i <= t; i++) tl.call(() => render(i, true), null, (i - from - 1) * STEP);
+        }
+        const target = () => beats.filter((x) => x.at <= Deck.step).length;
+        function sync(dir) {
+          const t = target();
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          if (dir < 0 || jump > 1 || t < k) { stop(); render(t, false); }
+          else if (t > k) playTo(t);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each answer waits for its part of the trace to play
+        const steps = [...slide.querySelectorAll(".step")];
+        steps.forEach((el, i) => el.style.setProperty("--ans-delay", beats.filter((x) => x.at === i + 1).length * STEP + "s"));
+
+        mem.querySelector(".ctl").addEventListener("click", (e) => {
+          const d = e.target.closest("button")?.dataset.do;
+          if (d === "back") { stop(); render(Math.max(0, k - 1), false); }
+          if (d === "fwd") { stop(); if (k < beats.length) render(k + 1, true); }
+          if (d === "play") { stop(); render(0, false); playTo(beats.length); }
+        });
+
+        Deck.scene(slide, {
+          enter() { stop(); seen = 0; render(0, false); },
+          leave() { stop(); render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        // reserve the tallest state's height so the slide never jumps
+        let tallest = 0;
+        for (let i = 1; i <= beats.length; i++) {
+          render(i, false);
+          tallest = Math.max(tallest, mem.getBoundingClientRect().height);
+        }
+        mem.style.minHeight = tallest + "px";
+        render(0, false);
+      }
+      const tutor = (id, t) => Tutor(document.getElementById(id), t.beats);
+
+      // ================================================================ traces
+      tutor("basic", trace()
+        .set("greet", "function").L(2)
+        .L(4)
+        .call("greet").L(3, { o: "Hello!" })
+        .ret().set("greet_person", "function").L(7)
+        .L(9)
+        .call("greet_person", { name: "'Alice'" }).L(8, { o: "Hello, Alice!" })
+        .ret().set("add", "function").L(12)
+        .L(14)
+        .call("add", { a: 5, b: 3 }).L(13, { r: 8 })
+        .ret().set("result", 8).L(14));
+
+      tutor("combo", trace()
+        .set("func", "function").L(2)
+        .L(8)
+        .call("func", { a: 1, b: 2, args: "(3, 4)", key1: "'value'", kwargs: "{'x': 10, 'y': 20}" }).L(3, { o: "1 2" })
+        .L(4, { o: "(3, 4)" })
+        .L(5, { o: "value" })
+        .L(6, { o: "{'x': 10, 'y': 20}" })
+        .ret().L(8));
+
+      tutor("scope", trace()
+        .set("x", 10).L(2)
+        .set("func", "function").L(3)
+        .L(9)
+        .call("func").set("y", 20).L(5)
+        .L(6, { o: "10", n: "x found in global" })
+        .L(7, { o: "20", n: "y is local" })
+        .ret().L(9)
+        .L(10, { n: "func's frame is gone, and y with it" }));
+
+      tutor("global", trace()
+        .set("count", 0).L(2)
+        .set("increment", "function").L(3)
+        .L(7)
+        .call("increment").L(4, { n: "count now means the global one" })
+        .set("count", 1, "global").L(5)
+        .ret().L(8, { o: "1" }));
+
+      tutor("nonlocal", trace()
+        .set("outer", "function").L(2)
+        .L(10)
+        .call("outer").set("x", 10).L(3)
+        .set("inner", "function").L(4)
+        .L(7)
+        .call("inner").L(5, { n: "x now means outer's x" })
+        .set("x", 20, "outer").L(6)
+        .ret().L(8, { o: "20" })
+        .ret().L(10));
+
+      {
+        const t = trace().set("factorial", "function").L(2).L(7);
+        for (let n = 5; n >= 2; n--) t.call("factorial#" + n, { n }).L(3, { c: false, n: `${n} <= 1` }).L(5);
+        t.call("factorial#1", { n: 1 }).L(3, { c: true, n: "1 <= 1" }).L(4, { r: 1 });
+        let v = 1;
+        for (let n = 2; n <= 5; n++) {
+          t.ret().L(5, { n: `${n} * ${v}`, r: n * v });
+          v *= n;
+        }
+        t.ret().L(7, { e: 120 });
+        tutor("fact", t);
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

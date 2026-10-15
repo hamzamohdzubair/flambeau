@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mathematics</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .hub {
+        gap: 1.6rem;
+      }
+
+      .hub .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .hub h1 {
+        text-align: center;
+      }
+
+      .hub > p.muted {
+        max-width: 40rem;
+        text-align: center;
+      }
+
+      .hub .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      .hub .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      .hub .group h3 span {
+        margin-right: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .hub .tile {
+        min-height: 5.6rem;
+      }
+
+      .hub .tiles.big .tile {
+        min-height: 9rem;
+        font-size: 1.3rem;
+      }
+
+      .hub .soon {
+        opacity: 0.45;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide top hub" id="hub">
+      <span class="kicker">Formal science</span>
+      <h1>Mathematics</h1>
+
+      <div class="group">
+        <h3><span>Core</span>Core topics</h3>
+        <div class="tiles">
+          <a class="tile" href="linalg/index.html" style="--img:url('/assets/2025-09-30-22-21-30.png')"><span>Linear Algebra</span></a>
+          <div class="tile soon" style="--img:url('/assets/2025-09-30-23-16-17.png')"><span>Calculus<small>coming soon</small></span></div>
+          <div class="tile soon" style="--img:url('/assets/2025-10-07-19-42-23.png')"><span>Discrete Maths<small>coming soon</small></span></div>
+          <a class="tile" href="ag/index.html" style="--img:url('/assets/2025-09-30-23-13-40.png')"><span>Analytic Geometry</span></a>
+          <a class="tile" href="probstats/index.html" style="--img:url('/assets/2025-09-30-23-10-12.png')"><span>Probability &amp; Statistics</span></a>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span>Advanced</span>Advanced topics</h3>
+        <div class="tiles">
+          <div class="tile soon"><span>Differential Equations<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Real Analysis<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Complex Analysis<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Abstract Algebra<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Topology<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Number Theory<small>coming soon</small></span></div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

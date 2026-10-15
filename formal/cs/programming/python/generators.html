@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Generators</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tutor: code beside a live call stack and output ---------- */
+      .tutor {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 1fr);
+        gap: 1.4rem;
+        width: min(100%, 66rem);
+        align-items: start;
+      }
+
+      .tutor pre {
+        width: 100%;
+        font-size: 1.1rem;
+      }
+
+      .tutor .line {
+        border-radius: 4px;
+        transition:
+          background 0.3s,
+          box-shadow 0.3s,
+          opacity 0.3s;
+      }
+
+      .tutor pre.live .line:not(.ran):not(.answer):not(.cmt) {
+        opacity: 0.45;
+      }
+
+      .tutor pre.live .line.ran {
+        background: rgba(139, 92, 246, 0.13);
+      }
+
+      .tutor pre .line.now {
+        opacity: 1;
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.32), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      .tutor .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.7em;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: var(--amber);
+        border: 1px solid rgba(251, 191, 36, 0.45);
+        background: rgba(251, 191, 36, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        min-width: 0;
+      }
+
+      .mh {
+        font: 500 0.68rem var(--font-mono);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .stack,
+      .shelf {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.45rem;
+      }
+
+      .shelf-wrap {
+        display: none;
+      }
+
+      .tutor.has-shelf .shelf-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+
+      .shelf:empty::after {
+        content: "none";
+        font: 0.8rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .frame {
+        padding: 0.45rem 0.75rem 0.55rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0d0f20;
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s,
+          opacity 0.3s;
+      }
+
+      .frame.top {
+        border-color: rgba(34, 211, 238, 0.75);
+        box-shadow: 0 0 22px -6px rgba(34, 211, 238, 0.55);
+      }
+
+      .frame.paused {
+        border-style: dashed;
+        border-color: rgba(167, 139, 250, 0.55);
+        opacity: 0.8;
+      }
+
+      .frame .fn {
+        font: 600 0.82rem var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .frame[data-id="global"] .fn {
+        color: var(--faint);
+      }
+
+      .frame .vars {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 0.8rem;
+        font: 0.95rem/1.55 var(--font-mono);
+      }
+
+      .frame .row {
+        display: contents;
+      }
+
+      .frame .k {
+        color: var(--muted);
+      }
+
+      .frame .v {
+        color: var(--text);
+        overflow-wrap: anywhere;
+        border-radius: 4px;
+      }
+
+      .frame .ret {
+        margin-top: 0.3rem;
+        font: 0.85rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .frame .ret b,
+      .flychip {
+        display: inline-block;
+        padding: 0 0.55em;
+        border-radius: 999px;
+        font: 600 0.9rem/1.6 var(--font-mono);
+        color: #fff;
+        background: rgba(236, 72, 153, 0.35);
+        border: 1px solid var(--pink);
+      }
+
+      .flychip {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        box-shadow: 0 0 18px rgba(236, 72, 153, 0.7);
+      }
+
+      .console {
+        min-height: 2.4rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.45);
+        font: 0.95rem/1.5 var(--font-mono);
+        color: var(--green);
+        white-space: pre-wrap;
+      }
+
+      .tutor.no-out .out-h,
+      .tutor.no-out .console {
+        display: none;
+      }
+
+      .console .echo {
+        color: var(--cyan);
+      }
+
+      .console .err {
+        color: var(--red);
+      }
+
+      .ctl {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.2rem;
+      }
+
+      .ctl button {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 600 0.9rem var(--font);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .ctl button:hover {
+        color: var(--text);
+        border-color: rgba(167, 139, 250, 0.7);
+      }
+
+      .ctl span {
+        margin-left: 0.3rem;
+        font: 0.75rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .tutor {
+          grid-template-columns: 1fr;
+          gap: 0.8rem;
+        }
+
+        .tutor pre {
+          font-size: 0.82rem;
+        }
+
+        .frame .vars,
+        .console {
+          font-size: 0.82rem;
+        }
+      }
+      .slide > pre {
+        width: min(100%, 44rem);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · iterators &amp; generators</span>
+      <h1 class="grad-each"><span>Generators</span></h1>
+      <p>Functions that pause: <code>yield</code> hands out one value at a time and picks up where it left off.</p>
+    </section>
+
+    <section class="slide" id="howto">
+      <h2>A function that can pause</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Calling it runs nothing</h3><p>Calling a generator function only creates a generator object, with its frame parked and its body not yet started.</p></div>
+        <div class="card step"><h3><code>next()</code> resumes</h3><p>The frame goes back on the stack and runs until the next <code>yield</code>.</p></div>
+        <div class="card step"><h3><code>yield</code> pauses</h3><p>The value goes to the caller and the frame is parked again, local variables and all. Watch the <strong>Paused generators</strong> shelf.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ basics -->
+    <section class="slide" id="basics">
+      <h2>Generator function basics</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # generator with yield
+          def count_up_to(n):
+              count = 1
+              while count &lt;= n:
+                  yield count
+                  count += 1
+
+          for num in count_up_to(3):
+              print(num)
+          # ans: 1, 2, 3
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="yr">
+      <h2>Yield vs return</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # yield pauses function
+          def simple_gen():
+              yield 1
+              yield 2
+              yield 3
+
+          gen = simple_gen()
+          next(gen)
+          # ans: 1
+          next(gen)
+          # ans: 2
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint"><code>return</code> would end the call for good; <code>yield</code> keeps the frame for the next <code>next()</code>.</p>
+    </section>
+
+    <section class="slide" id="iter">
+      <h2>A generator is an iterator</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # generator is an iterator
+          def my_gen():
+              yield 1
+              yield 2
+
+          gen = my_gen()
+          next(gen)
+          # ans: 1
+          # can only iterate once
+          list(gen)
+          # ans: [2]
+          list(gen)
+          # ans: []
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="inf">
+      <h2>Infinite generator</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # infinite sequence
+          def infinite_counter():
+              count = 0
+              while True:
+                  yield count
+                  count += 1
+
+          # use with break or take first n
+          counter = infinite_counter()
+          for i, num in enumerate(counter):
+              if i &gt;= 3:
+                  break
+              print(num)
+          # ans: 0, 1, 2
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint">An endless loop is fine in a generator: it only runs when asked for the next value.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Generator with a condition</h2>
+      <pre><code class="language-python">
+        # filter in generator
+        def even_numbers(n):
+            for i in range(n):
+                if i % 2 == 0:
+                    yield i
+
+        list(even_numbers(10))
+        # ans: [0, 2, 4, 6, 8]
+      </code></pre>
+      <p class="hint">Only values that pass the test are yielded; the others are skipped inside the loop.</p>
+    </section>
+
+    <section class="slide" id="yf">
+      <h2>yield from</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # delegate to another generator
+          def generator1():
+              yield 1
+              yield 2
+
+          def generator2():
+              yield from generator1()
+              yield 3
+
+          list(generator2())
+          # ans: [1, 2, 3]
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint"><code>yield from</code> passes on every value of the inner generator, then carries on.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then press → to check.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # what is returned?
+          def gen():
+              yield 1
+
+          result = gen()
+          type(result)
+          # ans: &lt;class 'generator'&gt;
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # yield in loop?
+        def gen():
+            for i in range(3):
+                yield i
+
+        list(gen())
+        # ans: [0, 1, 2]
+      </code></pre>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # generator exhaustion?
+          def gen():
+              yield 1
+              yield 2
+
+          g = gen()
+          next(g)
+          # ans: 1
+          next(g)
+          # ans: 2
+          next(g)
+          # ans: StopIteration
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # multiple yields?
+        def gen():
+            yield 1
+            yield 2
+            return 3
+
+        list(gen())
+        # ans: [1, 2] (the return value is ignored)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        # generator vs list?
+        def gen():
+            yield 1
+
+        list(gen())
+        # ans: [1]
+        gen()
+        # ans: &lt;generator object&gt;
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        # fibonacci generator?
+        def fib(n):
+            a, b = 0, 1
+            for _ in range(n):
+                yield a
+                a, b = b, a + b
+
+        list(fib(5))
+        # ans: [0, 1, 1, 2, 3]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # yield from list?
+        def gen():
+            yield from [1, 2, 3]
+
+        list(gen())
+        # ans: [1, 2, 3]
+      </code></pre>
+    </section>
+
+    <section class="slide" id="e8">
+      <h2>Exercise 8</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # generator with return?
+          def gen():
+              yield 1
+              return 2
+
+          g = gen()
+          next(g)
+          # ans: 1
+          next(g)
+          # ans: StopIteration (with value 2)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e9">
+      <h2>Exercise 9</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # send to generator?
+          def gen():
+              value = yield
+              print(value)
+
+          g = gen()
+          next(g)  # prime
+          g.send("Hello")
+          # ans: prints "Hello"
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint"><code>send()</code> resumes the generator and makes the paused <code>yield</code> evaluate to the value sent.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # generator memory?
+        def gen():
+            for i in range(1000000):
+                yield i
+        # ans: memory efficient (lazy)
+
+        lst = [i for i in range(1000000)]
+        # ans: all in memory at once
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>Lazy</h3><p>Calling a generator function runs nothing until the first <code>next()</code>.</p></div>
+        <div class="card step"><h3>Pause and resume</h3><p>Each <code>yield</code> hands out a value and keeps the local variables for later.</p></div>
+        <div class="card step"><h3>One pass only</h3><p>Once exhausted, a generator raises <code>StopIteration</code> and gives nothing more.</p></div>
+        <div class="card step"><h3>Small memory</h3><p>Values are made one at a time instead of stored all at once.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ Tutor
+      // A trace is built by "running" the code by hand: set variables, call and
+      // return, then L(line) snapshots the state after that line ran.
+      const STEP = 0.85; // seconds per beat when playing
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function trace() {
+        const st = [{ id: "global", v: {} }];
+        const beats = [];
+        let at;
+        const top = () => [...st].reverse().find((f) => !f.p);
+        const find = (id) => st.find((f) => f.id === id);
+        const t = {
+          beats,
+          at(n) { at = n; return t; },
+          set(k, v, id) { (id ? find(id) : top()).v[k] = String(v); return t; },
+          call(id, vars = {}) { st.push({ id, v: Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, String(v)])) }); return t; },
+          ret() { st.splice(st.indexOf(top()), 1); return t; },
+          pause(id) { (id ? find(id) : top()).p = true; return t; },
+          resume(id) { const f = find(id); f.p = false; st.splice(st.indexOf(f), 1); st.push(f); return t; },
+          drop(id) { st.splice(st.indexOf(find(id)), 1); return t; },
+          L(l, o = {}) {
+            beats.push({ l, at, ...o, rid: o.r !== undefined ? top().id : null, s: st.map((f) => ({ id: f.id, v: { ...f.v }, p: !!f.p })) });
+            at = undefined;
+            return t;
+          },
+        };
+        return t;
+      }
+
+      function fly(text, from, to) {
+        const chip = document.createElement("span");
+        chip.className = "flychip";
+        chip.textContent = text;
+        document.body.appendChild(chip);
+        gsap.set(chip, { left: from.left, top: from.top });
+        gsap.to(chip, {
+          left: to.left,
+          top: to.top,
+          duration: 0.6,
+          ease: "power2.inOut",
+          onComplete: () => gsap.to(chip, { opacity: 0, duration: 0.25, onComplete: () => chip.remove() }),
+        });
+      }
+
+      function Tutor(slide, beats) {
+        const root = slide.querySelector(".tutor");
+        const pre = root.querySelector("pre");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const mem = root.querySelector(".mem");
+        mem.innerHTML = `<div class="mh">Frames</div><div class="stack"></div>
+          <div class="shelf-wrap"><div class="mh">Paused generators</div><div class="shelf"></div></div>
+          <div class="mh out-h">Output</div><div class="console"></div>
+          <div class="ctl" data-interactive><button data-do="back" title="Step back">‹</button><button data-do="play" title="Play from the start">▶</button><button data-do="fwd" title="Step forward">›</button><span></span></div>`;
+        const stack = mem.querySelector(".stack"), shelf = mem.querySelector(".shelf"), con = mem.querySelector(".console"), cnt = mem.querySelector(".ctl span");
+        root.classList.toggle("no-out", !beats.some((b) => b.o !== undefined || b.e !== undefined || b.err));
+        root.classList.toggle("has-shelf", beats.some((b) => b.s.some((f) => f.p)));
+        let a = 1;
+        for (const b of beats) a = b.at = b.at ?? a;
+        const frames = new Map();
+        let k = 0, tl = null, seen = 0, pending = null;
+
+        function makeFrame(id) {
+          const el = document.createElement("div");
+          el.className = "frame";
+          el.dataset.id = id;
+          el.innerHTML = `<div class="fn">${esc(id.split("#")[0])}</div><div class="vars"></div><div class="ret" hidden><span class="rl">return</span> <b></b></div>`;
+          return el;
+        }
+
+        function render(n, anim) {
+          const prev = k ? beats[k - 1] : null;
+          k = n;
+          cnt.textContent = `${n} / ${beats.length}`;
+          const b = n ? beats[n - 1] : null;
+          const state = b ? b.s : [{ id: "global", v: {}, p: false }];
+
+          // code lines
+          const ran = new Set(beats.slice(0, n).map((x) => x.l));
+          pre.classList.toggle("live", n > 0);
+          lines.forEach((el, i) => {
+            el.classList.toggle("now", !!b && b.l === i + 1);
+            el.classList.toggle("ran", ran.has(i + 1));
+            el.querySelector(".tb")?.remove();
+          });
+          if (b && (b.c !== undefined || b.n)) {
+            const tb = document.createElement("span");
+            tb.className = "tb" + (b.c === undefined ? "" : b.c ? " t" : " f");
+            tb.textContent = b.c === undefined ? b.n : (b.n ? b.n + " → " : "") + (b.c ? "True" : "False");
+            lines[b.l - 1].appendChild(tb);
+            if (anim) gsap.from(tb, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+
+          // remember where things were, for FLIP and the flying return value
+          const before = new Map([...frames].map(([id, el]) => [id, el.getBoundingClientRect()]));
+          const retEl = [...root.querySelectorAll(".ret")].find((r) => !r.hidden);
+          const retRect = anim && retEl ? retEl.querySelector("b").getBoundingClientRect() : null;
+          const retText = retEl?.querySelector("b").textContent;
+
+          // frames that are gone
+          const ids = new Set(state.map((f) => f.id));
+          for (const [id, el] of frames) {
+            if (ids.has(id)) continue;
+            frames.delete(id);
+            if (anim) {
+              const r = el.getBoundingClientRect();
+              const ghost = el.cloneNode(true);
+              Object.assign(ghost.style, { position: "fixed", left: r.left + "px", top: r.top + "px", width: r.width + "px", margin: 0, zIndex: 40 });
+              document.body.appendChild(ghost);
+              gsap.to(ghost, { opacity: 0, y: -24, scale: 0.92, duration: 0.35, ease: "power1.out", onComplete: () => ghost.remove() });
+            }
+            el.remove();
+          }
+
+          // frames that stay or arrive, in order
+          const changed = [];
+          const topId = [...state].reverse().find((f) => !f.p)?.id;
+          for (const f of state) {
+            let el = frames.get(f.id);
+            const isNew = !el;
+            if (isNew) frames.set(f.id, (el = makeFrame(f.id)));
+            (f.p ? shelf : stack).appendChild(el);
+            el.classList.toggle("paused", f.p);
+            el.classList.toggle("top", f.id === topId && state.length > 1);
+            const vars = el.querySelector(".vars");
+            const keys = Object.keys(f.v);
+            vars.querySelectorAll(".row").forEach((r) => keys.includes(r.dataset.k) || r.remove());
+            for (const key of keys) {
+              let row = vars.querySelector(`.row[data-k="${CSS.escape(key)}"]`);
+              const val = f.v[key];
+              if (!row) {
+                row = document.createElement("div");
+                row.className = "row";
+                row.dataset.k = key;
+                row.innerHTML = `<span class="k">${esc(key)}</span><span class="v"></span>`;
+                vars.appendChild(row);
+              }
+              const v = row.querySelector(".v");
+              if (v.textContent !== val) {
+                if (!isNew) changed.push(v);
+                v.textContent = val;
+              }
+            }
+            const ret = el.querySelector(".ret");
+            ret.hidden = !(b && b.rid === f.id);
+            if (!ret.hidden) {
+              ret.querySelector(".rl").textContent = b.rl || "return";
+              ret.querySelector("b").textContent = b.r;
+              if (anim) gsap.fromTo(ret, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 });
+            }
+          }
+
+          // output
+          const out = [];
+          for (const x of beats.slice(0, n)) {
+            for (const t of [].concat(x.o ?? [])) out.push(`<div>${esc(t)}</div>`);
+            if (x.e !== undefined) out.push(`<div class="echo">→ ${esc(x.e)}</div>`);
+            if (x.err) out.push(`<div class="err">${esc(x.err)}</div>`);
+          }
+          const grew = out.length > con.children.length;
+          const old = con.children.length;
+          con.innerHTML = out.join("");
+
+          for (const el of frames.values()) {
+            gsap.killTweensOf(el);
+            gsap.set(el, { x: 0, y: 0, opacity: 1, scale: 1 });
+          }
+          if (!anim) return;
+          // where a returned or yielded value lands (measured before anything moves)
+          const newLines = [...con.children].slice(old);
+          // delivered: the frame that showed the value has returned or paused
+          const was = prev && state.find((f) => f.id === prev.rid);
+          const delivered = retRect && prev && prev.rid && (!was || was.p);
+          const target = changed[0] || (grew ? newLines[0] : null) || (b && (lines[b.l - 1].querySelector(".tb") || lines[b.l - 1]));
+          const toRect = delivered && target ? target.getBoundingClientRect() : null;
+          for (const [id, el] of frames) {
+            const r0 = before.get(id);
+            if (!r0) {
+              gsap.fromTo(el, { opacity: 0, y: -16, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power2.out" });
+              continue;
+            }
+            const r1 = el.getBoundingClientRect();
+            const dx = r0.left - r1.left, dy = r0.top - r1.top;
+            if (Math.abs(dx) + Math.abs(dy) > 1) gsap.fromTo(el, { x: dx, y: dy }, { x: 0, y: 0, duration: 0.5, ease: "power2.inOut" });
+          }
+          let delay = 0;
+          if (toRect) {
+            fly(retText, retRect, toRect);
+            delay = 0.55;
+          }
+          changed.forEach((v) => gsap.fromTo(v, { backgroundColor: "rgba(236,72,153,0.4)" }, { backgroundColor: "rgba(236,72,153,0)", duration: 1.1, delay, immediateRender: false }));
+          if (newLines.length) gsap.fromTo(newLines, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.3, delay, stagger: 0.1 });
+        }
+
+        const stop = () => { tl?.kill(); tl = null; };
+        function playTo(t) {
+          stop();
+          const from = k;
+          tl = gsap.timeline();
+          for (let i = from + 1; i <= t; i++) tl.call(() => render(i, true), null, (i - from - 1) * STEP);
+        }
+        const target = () => beats.filter((x) => x.at <= Deck.step).length;
+        function sync(dir) {
+          const t = target();
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          if (dir < 0 || jump > 1 || t < k) { stop(); render(t, false); }
+          else if (t > k) playTo(t);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each answer waits for its part of the trace to play
+        const steps = [...slide.querySelectorAll(".step")];
+        steps.forEach((el, i) => el.style.setProperty("--ans-delay", beats.filter((x) => x.at === i + 1).length * STEP + "s"));
+
+        mem.querySelector(".ctl").addEventListener("click", (e) => {
+          const d = e.target.closest("button")?.dataset.do;
+          if (d === "back") { stop(); render(Math.max(0, k - 1), false); }
+          if (d === "fwd") { stop(); if (k < beats.length) render(k + 1, true); }
+          if (d === "play") { stop(); render(0, false); playTo(beats.length); }
+        });
+
+        Deck.scene(slide, {
+          enter() { stop(); seen = 0; render(0, false); },
+          leave() { stop(); render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        // reserve the tallest state's height so the slide never jumps
+        let tallest = 0;
+        for (let i = 1; i <= beats.length; i++) {
+          render(i, false);
+          tallest = Math.max(tallest, mem.getBoundingClientRect().height);
+        }
+        mem.style.minHeight = tallest + "px";
+        render(0, false);
+      }
+      const tutor = (id, t) => Tutor(document.getElementById(id), t.beats);
+
+      // ================================================================ traces
+      // A paused generator's frame sits on the shelf; next() moves it back on the stack.
+      const Y = { rl: "yield" };
+      {
+        const t = trace()
+          .set("count_up_to", "function").L(2)
+          .call("count_up_to", { n: 3 }).pause().L(8, { n: "creates a generator; nothing runs yet" })
+          .resume("count_up_to").set("count", 1).L(3)
+          .L(4, { c: true, n: "1 <= 3" });
+        for (let c = 1; c <= 3; c++) {
+          t.L(5, { ...Y, r: c })
+            .pause("count_up_to").set("num", c).L(8)
+            .L(9, { o: String(c) })
+            .resume("count_up_to").set("count", c + 1).L(6)
+            .L(4, { c: c < 3, n: `${c + 1} <= 3` });
+        }
+        t.drop("count_up_to").L(8, { n: "StopIteration ends the for loop" });
+        tutor("basics", t);
+      }
+
+      tutor("yr", trace()
+        .set("simple_gen", "function").L(2)
+        .call("simple_gen").pause().set("gen", "generator object").L(7)
+        .L(8)
+        .resume("simple_gen").L(3, { ...Y, r: 1 })
+        .pause("simple_gen").L(8, { e: 1 })
+        .at(2).L(10)
+        .resume("simple_gen").L(4, { ...Y, r: 2 })
+        .pause("simple_gen").L(10, { e: 2 }));
+
+      tutor("iter", trace()
+        .set("my_gen", "function").L(2)
+        .call("my_gen").pause().set("gen", "generator object").L(6)
+        .L(7)
+        .resume("my_gen").L(3, { ...Y, r: 1 })
+        .pause("my_gen").L(7, { e: 1 })
+        .at(2).L(10)
+        .resume("my_gen").L(4, { ...Y, r: 2 })
+        .pause("my_gen").L(10, { n: "list() keeps asking" })
+        .resume("my_gen").L(4, { n: "end of the body" })
+        .drop("my_gen").L(10, { e: "[2]" })
+        .at(3).L(12, { n: "exhausted: nothing left", e: "[]" }));
+
+      {
+        const t = trace()
+          .set("infinite_counter", "function").L(2)
+          .call("infinite_counter").pause().set("counter", "generator object").L(9)
+          .resume("infinite_counter").set("count", 0).L(3)
+          .L(4, { c: true, n: "while True" });
+        for (let i = 0; i <= 3; i++) {
+          t.L(5, { ...Y, r: i })
+            .pause("infinite_counter").set("i", i).set("num", i).L(10)
+            .L(11, { c: i >= 3, n: `${i} >= 3` });
+          if (i < 3) t.L(13, { o: String(i) }).resume("infinite_counter").set("count", i + 1).L(6);
+        }
+        t.L(12, { n: "break: the generator just stays paused" });
+        tutor("inf", t);
+      }
+
+      tutor("yf", trace()
+        .set("generator1", "function").L(2)
+        .set("generator2", "function").L(6)
+        .set("collected", "[]").L(10, { n: "list() pulls values" })
+        .call("generator2").L(7, { n: "delegates to generator1" })
+        .call("generator1").L(3, { ...Y, r: 1 })
+        .pause("generator1").pause("generator2").set("collected", "[1]").L(10)
+        .resume("generator2").resume("generator1").L(4, { ...Y, r: 2 })
+        .pause("generator1").pause("generator2").set("collected", "[1, 2]").L(10)
+        .resume("generator2").resume("generator1").L(4, { n: "generator1 is finished" })
+        .drop("generator1").L(8, { ...Y, r: 3 })
+        .pause("generator2").set("collected", "[1, 2, 3]").L(10)
+        .resume("generator2").L(8, { n: "generator2 is finished" })
+        .drop("generator2").L(10, { e: "[1, 2, 3]" }));
+
+      tutor("e1", trace()
+        .set("gen", "function").L(2)
+        .call("gen").pause().set("result", "generator object").L(5, { n: "the body has not run" })
+        .L(6, { e: "<class 'generator'>" }));
+
+      tutor("e3", trace()
+        .set("gen", "function").L(2)
+        .call("gen").pause().set("g", "generator object").L(6)
+        .L(7)
+        .resume("gen").L(3, { ...Y, r: 1 })
+        .pause("gen").L(7, { e: 1 })
+        .at(2).L(9)
+        .resume("gen").L(4, { ...Y, r: 2 })
+        .pause("gen").L(9, { e: 2 })
+        .at(3).L(11)
+        .resume("gen").L(4, { n: "end of the body" })
+        .drop("gen").L(11, { err: "StopIteration" }));
+
+      tutor("e8", trace()
+        .set("gen", "function").L(2)
+        .call("gen").pause().set("g", "generator object").L(6)
+        .L(7)
+        .resume("gen").L(3, { ...Y, r: 1 })
+        .pause("gen").L(7, { e: 1 })
+        .at(2).L(9)
+        .resume("gen").L(4, { r: 2 })
+        .drop("gen").L(9, { err: "StopIteration: 2" }));
+
+      tutor("e9", trace()
+        .set("gen", "function").L(2)
+        .call("gen").pause().set("g", "generator object").L(6)
+        .L(7)
+        .resume("gen").L(3, { ...Y, r: "None", n: "runs to the first yield" })
+        .pause("gen").L(7)
+        .L(8)
+        .resume("gen").set("value", "'Hello'").L(3, { n: "yield evaluates to 'Hello'" })
+        .L(4, { o: "Hello" })
+        .drop("gen").L(8, { n: "body ends", err: "StopIteration (send found no next yield)" }));
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

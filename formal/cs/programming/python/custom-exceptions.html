@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Custom Exceptions</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tracer: code lines light up in the order Python runs them ---------- */
+      pre code,
+      .mem,
+      .viz text {
+        font-variant-ligatures: none;
+      }
+
+      .tracer {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(14rem, 22rem);
+        gap: 1.5rem;
+        align-items: start;
+        justify-content: center;
+        width: min(100%, 64rem);
+      }
+
+      .tracer pre {
+        width: auto;
+        min-width: min(100%, 26rem);
+        max-width: 100%;
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.42;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.3;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.boom {
+        background: linear-gradient(90deg, rgba(248, 113, 113, 0.32), rgba(248, 113, 113, 0.05));
+        box-shadow: inset 3px 0 0 var(--red);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        white-space: nowrap;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border: 1px solid rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f,
+      .tb.x {
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb.n {
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      /* ---------- Memory panel beside traced code ---------- */
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem 1.1rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-size: 0.95rem;
+      }
+
+      .mem h4 {
+        margin: 0 0 0.35rem;
+        font: 600 0.72rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .mem .slots {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .slot {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font-mono);
+      }
+
+      .mem .slot b {
+        min-width: 3.2rem;
+        font-weight: 500;
+        color: var(--violet-soft);
+        text-align: right;
+      }
+
+      .mem .slot span {
+        flex: 1;
+        padding: 0.12rem 0.55rem;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        background: rgba(139, 92, 246, 0.12);
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console {
+        min-height: 1.9rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.35);
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        color: var(--green);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console div.err {
+        color: var(--red);
+      }
+
+      .mem .frames {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.3rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .frame {
+        padding: 0.25rem 0.6rem;
+        border-radius: 8px;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.08);
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .mem .frame.top {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.18);
+      }
+
+      .mem .frame.hurt {
+        border-color: var(--red);
+        background: rgba(248, 113, 113, 0.16);
+      }
+
+      .mem .frame em {
+        display: block;
+        font-style: normal;
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+
+      .mem .exc {
+        align-self: flex-start;
+        padding: 0.15rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--red);
+        background: rgba(248, 113, 113, 0.18);
+        color: #fecaca;
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+
+      .mem .exc.caught {
+        border-color: var(--green);
+        background: rgba(134, 239, 172, 0.14);
+        color: var(--green);
+      }
+
+      .replay {
+        align-self: flex-end;
+        padding: 0.25rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.8rem var(--font);
+        cursor: pointer;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      /* ---------- Value chips ---------- */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .try.step:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .tracer {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.8rem;
+        }
+
+        .tracer pre {
+          min-width: 0;
+        }
+
+        .mem {
+          padding: 0.7rem 0.8rem;
+          gap: 0.5rem;
+          font-size: 0.85rem;
+        }
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+      }
+
+      /* ---------- Class hierarchy: does this except clause catch that exception? ---------- */
+      .hier {
+        width: min(100%, 50rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      .hier .edge {
+        stroke: rgba(167, 139, 250, 0.45);
+        stroke-width: 2;
+        transition: stroke 0.3s;
+      }
+
+      .hier .edge.walk {
+        stroke: var(--cyan);
+        stroke-width: 3.5;
+      }
+
+      .hier .node rect {
+        fill: rgba(15, 18, 35, 0.9);
+        stroke: rgba(167, 139, 250, 0.6);
+        stroke-width: 2;
+        transition:
+          fill 0.3s,
+          stroke 0.3s;
+      }
+
+      .hier .node.custom rect {
+        stroke-dasharray: 6 4;
+      }
+
+      .hier .node.raised rect {
+        fill: rgba(248, 113, 113, 0.22);
+        stroke: var(--red);
+      }
+
+      .hier .node.walk rect {
+        stroke: var(--cyan);
+      }
+
+      .hier .node.handler rect {
+        stroke: var(--amber);
+        stroke-width: 3;
+      }
+
+      .hier .node.caught rect {
+        fill: rgba(134, 239, 172, 0.22);
+        stroke: var(--green);
+        stroke-width: 3;
+      }
+
+      .hier text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 15px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .catch-row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: center;
+        width: min(100%, 64rem);
+      }
+
+      .mini {
+        padding: 0.9rem 1.1rem;
+        border-radius: var(--radius);
+        background: rgba(10, 12, 26, 0.78);
+        border: 1px solid var(--border);
+        font: 0.95rem / 1.6 var(--font-mono);
+        white-space: pre;
+      }
+
+      .mini .kw {
+        color: #c4b5fd;
+      }
+
+      .mini .r {
+        color: var(--red);
+      }
+
+      .mini .h {
+        color: var(--amber);
+      }
+
+      .mini .s {
+        color: var(--green);
+      }
+
+      .pick {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .pick .try {
+        justify-content: flex-start;
+      }
+
+      .pick .try code {
+        min-width: 4.2rem;
+      }
+
+      .verdict {
+        min-height: 1.5em;
+        text-align: center;
+        font-weight: 500;
+        color: var(--muted);
+      }
+
+      .verdict.ok {
+        color: var(--green);
+      }
+
+      .verdict.no {
+        color: var(--red);
+      }
+
+      @media (max-width: 760px) {
+        .catch-row {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.6rem;
+        }
+
+        .chip {
+          min-width: 0;
+          padding: 0.2rem 0.5rem;
+          font-size: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · errors</span>
+      <h1 class="grad-each"><span>Custom</span> <span>Exceptions</span></h1>
+      <p>Define your own exception classes so errors carry a clear name and the data needed to handle them.</p>
+    </section>
+
+    <!-- ================================================================ simple -->
+    <section class="slide">
+      <h2>A simple custom exception</h2>
+      <pre class="steps"><code class="language-python">
+        # define custom exception
+        class CustomError(Exception):
+            pass
+        # ans: raise it
+        raise CustomError("Something went wrong")
+      </code></pre>
+      <p class="hint step">Inheriting from <code>Exception</code> is all it takes; <code>pass</code> keeps everything else from the parent.</p>
+    </section>
+
+    <!-- ================================================================ attributes -->
+    <section class="slide">
+      <h2>Exception with attributes</h2>
+      <pre class="steps"><code class="language-python">
+        # exception with data
+        class ValidationError(Exception):
+            def __init__(self, field, message):
+                self.field = field
+                self.message = message
+                super().__init__(f"{field}: {message}")
+      </code></pre>
+      <p class="hint step"><code>super().__init__(...)</code> sets the text you see when the exception is printed.</p>
+    </section>
+
+    <!-- ================================================================ using -->
+    <section class="slide" id="using">
+      <h2>Using a custom exception</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # raise custom exception
+          try:
+              raise ValidationError("email", "Invalid format")
+          except ValidationError as e:
+              print(e.field)
+              print(e.message)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step go" data-anim="none"></span>
+    </section>
+
+    <!-- ================================================================ hierarchy -->
+    <section class="slide">
+      <h2>Exception hierarchy</h2>
+      <pre class="steps"><code class="language-python">
+        # base exception
+        class DatabaseError(Exception):
+            pass
+        # ans: specific exceptions
+        class ConnectionError(DatabaseError):
+            pass
+        class QueryError(DatabaseError):
+            pass
+      </code></pre>
+      <p class="hint step">One base class lets callers catch every database problem with a single <code>except DatabaseError</code>. (This <code>ConnectionError</code> shadows Python's built-in one of the same name.)</p>
+    </section>
+
+    <section class="slide" id="catch">
+      <h2>Which except catches it?</h2>
+      <div class="catch-row">
+        <div class="mini"></div>
+        <div class="pick" data-interactive>
+          <div class="try raise-row"><code>raise</code></div>
+          <div class="try except-row"><code>except</code></div>
+        </div>
+      </div>
+      <svg class="hier" viewBox="0 0 780 300" aria-label="Class tree: BaseException above Exception and KeyboardInterrupt; Exception above ValueError, CustomError, ValidationError and DatabaseError; DatabaseError above ConnectionError and QueryError"></svg>
+      <p class="verdict"></p>
+      <p class="hint">An <code>except</code> clause matches its own class and every class below it: Python walks up from the raised class looking for it.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict, then reveal.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        # inherit from what?
+        class MyError(Exception):
+            pass
+        # ans: inherits from Exception
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # can inherit from BaseException?
+        class MyError(BaseException):
+            pass
+        # ans: yes, but use Exception instead
+      </code></pre>
+      <p class="hint step"><code>except Exception</code> would not catch it, just like <code>KeyboardInterrupt</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        # custom message?
+        class MyError(Exception):
+            pass
+        raise MyError("Custom message")
+        # ans: works!
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # catch custom exception?
+        try:
+            raise CustomError()
+        except CustomError:
+            print("Caught")
+        # ans: "Caught"
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre class="steps"><code class="language-python">
+        # exception with default message?
+        class MyError(Exception):
+            def __init__(self):
+                super().__init__("Default message")
+      </code></pre>
+      <p class="hint step"><code>raise MyError()</code> now shows <code>MyError: Default message</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre class="steps"><code class="language-python">
+        # multiple custom exceptions?
+        class Error1(Exception):
+            pass
+        class Error2(Exception):
+            pass
+        try:
+            pass
+        except (Error1, Error2):
+            pass
+      </code></pre>
+      <p class="hint step">A tuple in <code>except</code> catches any of the listed classes.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # exception hierarchy catch?
+        class Base(Exception):
+            pass
+        class Derived(Base):
+            pass
+        try:
+            raise Derived()
+        except Base:
+            print("Caught")
+        # ans: "Caught"
+      </code></pre>
+      <p class="hint step">A <code>Derived</code> is a kind of <code>Base</code>, so <code>except Base</code> matches it.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre class="steps"><code class="language-python">
+        # custom exception attributes?
+        class MyError(Exception):
+            def __init__(self, code):
+                self.code = code
+      </code></pre>
+      <p class="hint step">Handlers can read <code>e.code</code>. Without <code>super().__init__</code>, the printed message is just the code.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre class="steps"><code class="language-python">
+        # exception with __str__?
+        class MyError(Exception):
+            def __str__(self):
+                return "Custom string"
+      </code></pre>
+      <p class="hint step"><code>str(e)</code> and the traceback now show <code>Custom string</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # empty custom exception?
+        class MyError(Exception):
+            pass
+        # ans: valid minimal exception
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Inherit from <code>Exception</code></h3><p>Not <code>BaseException</code>; a bare <code>pass</code> body is enough.</p></div>
+        <div class="card step"><h3>Carry data</h3><p>Store fields in <code>__init__</code> and pass a message to <code>super().__init__</code>.</p></div>
+        <div class="card step"><h3>Build a family</h3><p>A base class per area lets callers catch broadly or narrowly.</p></div>
+        <div class="card step"><h3>Matching walks up</h3><p><code>except Parent</code> catches every child class too.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ tracer
+      // tracer(slide, frames, opts) replays a list of frames over the slide's
+      // <pre class="trace">, lighting lines in the order Python runs them and
+      // filling the slide's .mem panel. A frame is
+      //   { l: line (1-based), n: "note badge", c: true/false (condition badge),
+      //     v: { name: "repr" or null to delete }, o: "printed" or [...],
+      //     e: "error text for the output", s: ["<module>", "f(x=1)"] (call stack),
+      //     x: "ExceptionName" (raised; "" clears), k: true (exception caught) }
+      // It plays when the slide's .step.go (or its first answer line) is revealed.
+      const STEP = 0.55; // seconds per frame (opts.step overrides)
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function tracer(sel, frames, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        if (opts.chips && !frames.length) frames = opts.chips.frames(opts.chips.values[0]);
+        const pre = slide.querySelector("pre.trace");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const T = { slide, pre, lines, frames, tl: null };
+        const dt = opts.step || STEP;
+        const mem = slide.querySelector(".mem");
+        if (mem) {
+          const all = opts.chips ? opts.chips.values.flatMap((v) => opts.chips.frames(v)) : frames;
+          const has = (key) => all.some((f) => key.split(" ").some((q) => f[q] !== undefined));
+          const secs = opts.sections || [...(has("v") ? ["vars"] : []), ...(has("s") ? ["stack"] : []), ...(has("o e") || opts.chips ? ["out"] : [])];
+          const box = { vars: "slots", stack: "frames", out: "console" };
+          const title = { vars: opts.varsTitle || "Variables", stack: "Call stack", out: "Output" };
+          mem.innerHTML =
+            secs.map((s) => `<div class="sec-${s}"><h4>${title[s]}</h4><div class="${box[s]}"></div></div>`).join("") +
+            `<button class="replay" type="button" data-interactive>Replay</button>`;
+          mem.querySelector(".replay").addEventListener("click", () => T.play(false));
+        }
+        const $ = (q) => mem?.querySelector(q);
+
+        function stateAt(k) {
+          const st = { v: {}, o: [], s: null, x: "", caught: false };
+          for (let i = 0; i <= k; i++) {
+            const f = T.frames[i];
+            for (const [name, val] of Object.entries(f.v || {})) {
+              if (val === null) delete st.v[name];
+              else st.v[name] = val;
+            }
+            for (const o of [].concat(f.o ?? [])) st.o.push({ t: o });
+            if (f.e) st.o.push({ t: f.e, err: true });
+            if (f.s) st.s = f.s;
+            if (f.x !== undefined) {
+              st.x = f.x;
+              st.caught = false;
+            }
+            if (f.k) st.caught = true;
+          }
+          return st;
+        }
+
+        function render(k, anim) {
+          if (!mem) return;
+          const st = stateAt(k);
+          const slots = $(".slots");
+          if (slots) {
+            const have = new Map([...slots.children].map((el) => [el.dataset.name, el]));
+            for (const [name, el] of have) if (!(name in st.v)) el.remove();
+            for (const [name, val] of Object.entries(st.v)) {
+              let el = have.get(name);
+              if (!el) {
+                el = document.createElement("div");
+                el.className = "slot";
+                el.dataset.name = name;
+                el.innerHTML = `<b>${esc(name)}</b><span></span>`;
+                slots.appendChild(el);
+                if (anim) gsap.from(el, { opacity: 0, x: -14, duration: 0.35 });
+              }
+              const span = el.querySelector("span");
+              if (span.textContent !== val) {
+                span.textContent = val;
+                if (anim) gsap.fromTo(span, { backgroundColor: "rgba(34,211,238,0.5)" }, { backgroundColor: "rgba(139,92,246,0.12)", duration: 0.9 });
+              }
+            }
+          }
+          const con = $(".console");
+          if (con) {
+            if (con.children.length > st.o.length) con.innerHTML = "";
+            for (let i = con.children.length; i < st.o.length; i++) {
+              const d = document.createElement("div");
+              d.textContent = st.o[i].t;
+              if (st.o[i].err) d.className = "err";
+              con.appendChild(d);
+              if (anim) gsap.from(d, { opacity: 0, y: 8, duration: 0.3 });
+            }
+          }
+          const fr = $(".frames");
+          if (fr) {
+            const want = st.s || [];
+            if (!anim) fr.querySelectorAll(".gone").forEach((el) => el.remove());
+            const have = [...fr.children].filter((el) => !el.classList.contains("gone"));
+            let same = 0;
+            while (same < want.length && same < have.length && have[same].dataset.key === want[same]) same++;
+            // popped frames slide away (in red while an exception unwinds them)
+            have.slice(same).forEach((el) => {
+              if (!anim) return el.remove();
+              el.classList.add("gone");
+              el.classList.toggle("hurt", !!st.x && !st.caught);
+              gsap.to(el, { opacity: 0, x: 40, duration: 0.4, ease: "power1.in", onComplete: () => el.remove() });
+            });
+            want.slice(same).forEach((name) => {
+              const el = document.createElement("div");
+              el.className = "frame";
+              el.dataset.key = name;
+              const [head, sub] = name.split("|");
+              el.innerHTML = esc(head) + (sub ? `<em>${esc(sub)}</em>` : "");
+              fr.appendChild(el);
+              if (anim) gsap.from(el, { opacity: 0, y: -16, duration: 0.35, ease: "back.out(1.6)" });
+            });
+            [...fr.children].filter((el) => !el.classList.contains("gone")).forEach((el, i, all) => {
+              el.classList.toggle("top", i === all.length - 1);
+              el.classList.toggle("hurt", i === all.length - 1 && !!st.x && !st.caught);
+            });
+          }
+          let exc = $(".exc");
+          if (st.x) {
+            if (!exc) {
+              exc = document.createElement("div");
+              exc.className = "exc";
+              const at = (fr || slots || con)?.parentElement;
+              at ? at.after(exc) : mem.prepend(exc);
+              if (anim) gsap.from(exc, { scale: 0.4, opacity: 0, duration: 0.35, ease: "back.out(2)" });
+            }
+            exc.textContent = (st.caught ? "caught: " : "raised: ") + st.x;
+            exc.classList.toggle("caught", st.caught);
+          } else exc?.remove();
+        }
+
+        function mark(k, anim) {
+          const f = T.frames[k];
+          lines.forEach((l) => l.classList.remove("now", "boom"));
+          const el = lines[f.l - 1];
+          if (!el) return;
+          el.classList.add("run", f.x ? "boom" : "now");
+          el.querySelector(".tb")?.remove();
+          const text = f.c !== undefined ? (f.n ? `${f.n} → ` : "") + (f.c ? "True" : "False") : f.x ? f.x.split(":")[0] : f.n;
+          if (text) {
+            const b = document.createElement("span");
+            b.className = "tb " + (f.c !== undefined ? (f.c ? "t" : "f") : f.x ? "x" : "n");
+            b.textContent = text;
+            el.appendChild(b);
+            if (anim) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+        }
+
+        T.reset = () => {
+          T.tl?.kill();
+          pre.classList.remove("tracing", "traced");
+          lines.forEach((l) => {
+            l.classList.remove("run", "now", "boom");
+            l.querySelector(".tb")?.remove();
+          });
+          if (mem) {
+            mem.querySelectorAll(".slots, .console, .frames").forEach((b) => (b.innerHTML = ""));
+            mem.querySelector(".exc")?.remove();
+            if (opts.init) render(-1, false);
+          }
+          opts.onReset?.(T);
+        };
+
+        T.play = (instant) => {
+          T.reset();
+          pre.classList.add("tracing");
+          const done = () => {
+            lines.forEach((l) => l.classList.remove("now"));
+            pre.classList.replace("tracing", "traced");
+          };
+          if (instant) {
+            T.frames.forEach((f, k) => mark(k, false));
+            render(T.frames.length - 1, false);
+            opts.onFrame?.(T, T.frames.length - 1, true);
+            done();
+            const last = T.frames[T.frames.length - 1];
+            if (last?.x) lines[last.l - 1]?.classList.add("boom");
+            return;
+          }
+          const tl = gsap.timeline();
+          T.frames.forEach((f, k) =>
+            tl.call(() => {
+              mark(k, true);
+              render(k, true);
+              opts.onFrame?.(T, k, false);
+            }, null, k * dt)
+          );
+          tl.call(done, null, T.frames.length * dt);
+          T.tl = tl;
+        };
+
+        const go = slide.querySelector(".step.go") || pre.querySelector(".line.answer");
+        if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+
+        if (opts.chips) {
+          const C = opts.chips;
+          const box = slide.querySelector(".try");
+          box.insertAdjacentHTML("beforeend", C.values.map((v, i) => `<button class="chip" type="button" data-i="${i}">${esc(C.show ? C.show(v) : v)}</button>`).join(""));
+          T.choose = (i, run) => {
+            const v = C.values[i];
+            T.frames = C.frames(v);
+            C.patch?.(T, v);
+            box.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.i === i));
+            if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+            if (run) T.play(run === "instant");
+          };
+          box.addEventListener("click", (e) => {
+            const b = e.target.closest(".chip");
+            if (b) T.choose(+b.dataset.i, true);
+          });
+        }
+
+        Deck.scene(slide, {
+          enter() {
+            if (opts.chips) T.choose(0, false);
+            T.reset();
+            if (!go && opts.auto !== false) T.play(false);
+          },
+          leave: () => T.reset(),
+          step(s, n, els, d) {
+            // several steps at once (a ↓ jump) or going back: show the end state
+            if (go && els.includes(go)) queueMicrotask(() => T.play(d?.dir < 0 || Deck.step > n));
+          },
+          unstep(s, n, els) {
+            if (go && els.includes(go)) T.reset();
+          },
+        });
+        return T;
+      }
+
+      tracer("#using", [
+        { l: 2, n: "try" },
+        { l: 3, x: "ValidationError: email: Invalid format" },
+        { l: 4, k: true, n: "matches", v: { "e.field": "'email'", "e.message": "'Invalid format'" } },
+        { l: 5, o: "email" },
+        { l: 6, o: "Invalid format" },
+      ]);
+
+      // ------------------------------------------------------------ hierarchy explorer
+      {
+        const slide = document.querySelector("#catch");
+        const svg = slide.querySelector(".hier");
+        const T = {
+          BaseException: [390, 30, null],
+          Exception: [290, 105, "BaseException"],
+          KeyboardInterrupt: [600, 105, "BaseException"],
+          ValueError: [90, 185, "Exception"],
+          CustomError: [255, 185, "Exception"],
+          ValidationError: [425, 185, "Exception"],
+          DatabaseError: [610, 185, "Exception"],
+          ConnectionError: [530, 265, "DatabaseError"],
+          QueryError: [700, 265, "DatabaseError"],
+        };
+        const CUSTOM = ["CustomError", "ValidationError", "DatabaseError", "ConnectionError", "QueryError"];
+        svg.innerHTML =
+          Object.entries(T)
+            .filter(([, v]) => v[2])
+            .map(([k, [x, y, p]]) => `<line class="edge" data-c="${k}" x1="${T[p][0]}" y1="${T[p][1] + 17}" x2="${x}" y2="${y - 17}"/>`)
+            .join("") +
+          Object.entries(T)
+            .map(([k, [x, y]]) => `<g class="node${CUSTOM.includes(k) ? " custom" : ""}" data-c="${k}"><rect x="${x - Math.max(80, k.length * 4.7 + 8)}" y="${y - 17}" width="${2 * Math.max(80, k.length * 4.7 + 8)}" height="34" rx="9"/><text x="${x}" y="${y}">${k}</text></g>`)
+            .join("");
+        const RAISE = ["ConnectionError", "QueryError", "DatabaseError", "ValidationError", "ValueError"];
+        const EXCEPT = ["DatabaseError", "ConnectionError", "Exception", "ValueError", "BaseException"];
+        const rr = slide.querySelector(".raise-row");
+        const er = slide.querySelector(".except-row");
+        rr.insertAdjacentHTML("beforeend", RAISE.map((c) => `<button class="chip" type="button" data-c="${c}">${c}</button>`).join(""));
+        er.insertAdjacentHTML("beforeend", EXCEPT.map((c) => `<button class="chip" type="button" data-c="${c}">${c}</button>`).join(""));
+        const mini = slide.querySelector(".mini");
+        const verdict = slide.querySelector(".verdict");
+        let raised = RAISE[0];
+        let handler = EXCEPT[0];
+        let tl;
+        const node = (c) => svg.querySelector(`.node[data-c="${c}"]`);
+        const edge = (c) => svg.querySelector(`.edge[data-c="${c}"]`);
+
+        function run(animate) {
+          tl?.kill();
+          gsap.set(svg.querySelectorAll(".node"), { clearProps: "transform" });
+          rr.querySelectorAll(".chip").forEach((b) => b.classList.toggle("on", b.dataset.c === raised));
+          er.querySelectorAll(".chip").forEach((b) => b.classList.toggle("on", b.dataset.c === handler));
+          mini.innerHTML = `<span class="kw">try</span>:\n    <span class="kw">raise</span> <span class="r">${raised}</span>()\n<span class="kw">except</span> <span class="h">${handler}</span>:\n    print(<span class="s">"Caught"</span>)`;
+          svg.querySelectorAll(".node, .edge").forEach((e) => e.classList.remove("raised", "walk", "handler", "caught"));
+          node(handler).classList.add("handler");
+          node(raised).classList.add("raised");
+          verdict.className = "verdict";
+          verdict.textContent = "";
+          // the chain of classes from the raised one up to the root
+          const chain = [];
+          for (let c = raised; c; c = T[c][2]) chain.push(c);
+          const hit = chain.indexOf(handler);
+          const steps = hit < 0 ? chain : chain.slice(0, hit + 1);
+          const finish = () => {
+            if (hit >= 0) {
+              node(handler).classList.add("caught");
+              verdict.classList.add("ok");
+              verdict.textContent = hit === 0 ? `Caught: the same class` : `Caught: ${raised} is a kind of ${handler}`;
+            } else {
+              verdict.classList.add("no");
+              verdict.textContent = `Not caught: ${handler} is not above ${raised}, so the exception keeps travelling`;
+            }
+          };
+          if (!animate) {
+            steps.forEach((c, i) => {
+              if (i) node(c).classList.add("walk");
+              if (i) edge(steps[i - 1]).classList.add("walk");
+            });
+            return finish();
+          }
+          tl = gsap.timeline();
+          tl.from(node(raised), { scale: 1.25, transformOrigin: "50% 50%", duration: 0.4, ease: "back.out(3)" });
+          steps.slice(1).forEach((c, i) => {
+            tl.call(() => {
+              edge(steps[i]).classList.add("walk");
+              node(c).classList.add("walk");
+            }, null, "+=0.45");
+          });
+          tl.call(finish, null, "+=0.4");
+        }
+        slide.querySelector(".pick").addEventListener("click", (e) => {
+          const b = e.target.closest(".chip");
+          if (!b) return;
+          if (b.closest(".raise-row")) raised = b.dataset.c;
+          else handler = b.dataset.c;
+          run(true);
+        });
+        Deck.scene(slide, {
+          enter: () => run(true),
+          leave: () => tl?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

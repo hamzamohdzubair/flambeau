@@ -1,0 +1,1511 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Break &amp; Continue</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* tracer:start (shared by the Python decks: traced code beside variables, objects and output) */
+      pre code,
+      .viz,
+      .reduce {
+        font-variant-ligatures: none;
+      }
+
+      .viz {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(15rem, 23rem);
+        justify-content: center;
+        align-items: start;
+        gap: 1.6rem;
+        width: min(100%, 66rem);
+      }
+
+      .viz > pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+        max-width: 100%;
+        font-size: 1.08rem;
+      }
+
+      .viz.wide {
+        grid-template-columns: minmax(0, auto) minmax(15rem, 28rem);
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.42;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.3;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre .line.answer.shown {
+        transition-delay: var(--d, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 0.9em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+        white-space: nowrap;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f,
+      .tb.e {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb.s {
+        color: var(--amber);
+        border-color: rgba(251, 191, 36, 0.5);
+        background: rgba(251, 191, 36, 0.1);
+      }
+
+      .panel {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-width: 0;
+      }
+
+      /* With objects: variables on the left, objects on the right, arrows between */
+      .panel.mem2 {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 2.4rem;
+        row-gap: 0.75rem;
+        align-items: start;
+      }
+
+      .panel.mem2 > .box:not(.vars):not(.heap),
+      .panel.mem2 > .heap:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .panel.mem2 .vgrid,
+      .panel.mem2 .hgrid {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+      }
+
+      .panel .box {
+        position: relative;
+        padding: 0.55rem 0.8rem 0.75rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      .panel .bh {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 0.45rem;
+        font: 600 0.68rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .panel .replay {
+        padding: 0.1rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.7rem var(--font);
+        letter-spacing: 0.04em;
+        text-transform: none;
+        cursor: pointer;
+      }
+
+      .panel .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      .vgrid,
+      .hgrid {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.55rem 0.7rem;
+        min-height: 3.9rem;
+      }
+
+      .hgrid {
+        min-height: 2.5rem;
+      }
+
+      .var {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.12rem;
+        max-width: 100%;
+      }
+
+      .var .n {
+        font: 500 0.8rem var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .var .v,
+      .obj .fv {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-width: 3rem;
+        min-height: 2.1rem;
+        max-width: 100%;
+        padding: 0.25rem 0.6rem;
+        overflow: hidden;
+        border: 2px solid rgba(167, 139, 250, 0.55);
+        border-radius: 8px;
+        background: rgba(10, 12, 26, 0.9);
+        font: 500 0.92rem var(--font-mono);
+        color: var(--text);
+        white-space: pre;
+        transition:
+          border-color 0.4s,
+          box-shadow 0.4s;
+      }
+
+      .var .v b,
+      .obj .fv b {
+        font-weight: 500;
+      }
+
+      .var .v b.gone,
+      .obj .fv b.gone {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .var .t {
+        font: 0.62rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .var.hot .v,
+      .obj .fv.hot {
+        border-color: var(--cyan);
+        box-shadow: 0 0 14px rgba(34, 211, 238, 0.35);
+      }
+
+      .var.gone {
+        opacity: 0.3;
+      }
+
+      .dot {
+        display: inline-block;
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: var(--pink);
+        box-shadow: 0 0 8px var(--pink);
+      }
+
+      .obj {
+        min-width: 7rem;
+        border-radius: 10px;
+        border: 1px solid rgba(236, 72, 153, 0.5);
+        background: rgba(236, 72, 153, 0.07);
+        padding: 0.3rem 0.5rem 0.45rem;
+        font: 0.8rem var(--font-mono);
+      }
+
+      .obj .oh {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 0.25rem;
+        color: #f9a8d4;
+        font-weight: 600;
+      }
+
+      .obj .oh i {
+        font-style: normal;
+        font-weight: 400;
+        color: var(--faint);
+      }
+
+      .obj .fr {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+      }
+
+      .obj .fr > span {
+        color: var(--violet-soft);
+      }
+
+      .obj .fv {
+        min-height: 1.7rem;
+        min-width: 2.4rem;
+        font-size: 0.82rem;
+        padding: 0.1rem 0.45rem;
+      }
+
+      .panel svg.arrows {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: visible;
+      }
+
+      .panel svg.arrows path {
+        fill: none;
+        stroke: #f472b6;
+        stroke-width: 2;
+        opacity: 0.85;
+      }
+
+      .con {
+        min-height: 2.2rem;
+        max-height: 13rem;
+        overflow: auto;
+        font: 0.92rem/1.5 var(--font-mono);
+        color: #e2e8f0;
+        white-space: pre-wrap;
+        tab-size: 8;
+      }
+
+      .con .e {
+        color: var(--red);
+      }
+
+      .con .nl {
+        color: var(--faint);
+        font-style: normal;
+      }
+
+      .cells {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+      }
+
+      .cell {
+        position: relative;
+        min-width: 2rem;
+        padding: 0.2rem 0.4rem;
+        text-align: center;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        font: 0.85rem var(--font-mono);
+        color: var(--muted);
+        transition: all 0.3s;
+      }
+
+      .cell.now {
+        border-color: var(--cyan);
+        color: var(--text);
+        box-shadow: 0 0 12px rgba(34, 211, 238, 0.45);
+        transform: translateY(-3px);
+      }
+
+      .cell.ok {
+        background: rgba(134, 239, 172, 0.16);
+        border-color: rgba(134, 239, 172, 0.55);
+        color: var(--green);
+      }
+
+      .cell.skip {
+        background: rgba(251, 191, 36, 0.12);
+        border-color: rgba(251, 191, 36, 0.5);
+        color: var(--amber);
+        text-decoration: line-through;
+      }
+
+      .cell.stop {
+        background: rgba(248, 113, 113, 0.15);
+        border-color: rgba(248, 113, 113, 0.6);
+        color: var(--red);
+      }
+
+      .cell.done {
+        background: rgba(139, 92, 246, 0.18);
+        border-color: rgba(167, 139, 250, 0.5);
+        color: var(--text);
+      }
+
+      .cell.never {
+        opacity: 0.35;
+      }
+
+      .fl {
+        font: 0.85rem/1.55 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .fl div {
+        padding: 0 0.4rem;
+        border-radius: 4px;
+        white-space: pre;
+        transition: all 0.3s;
+      }
+
+      .fl div.now {
+        color: var(--text);
+        background: rgba(34, 211, 238, 0.18);
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      .fl div.done {
+        color: var(--text);
+      }
+
+      /* Step-by-step evaluation of one expression */
+      .reduce {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 0.7em;
+        list-style: none;
+        margin: 0;
+        padding: 0.8rem 1.2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        font: 1.15rem/1.9 var(--font-mono);
+      }
+
+      .reduce.v {
+        flex-direction: column;
+      }
+
+      .reduce li {
+        padding: 0;
+        margin: 0;
+        white-space: pre;
+      }
+
+      .reduce li::marker {
+        content: "";
+      }
+
+      .reduce li + li::before {
+        content: "→ ";
+        color: var(--faint);
+      }
+
+      .reduce mark {
+        padding: 0 0.2em;
+        border-radius: 4px;
+        color: var(--text);
+        background: rgba(34, 211, 238, 0.22);
+        box-shadow: inset 0 -2px 0 var(--cyan);
+      }
+
+      .reduce s {
+        color: var(--faint);
+        text-decoration-color: var(--red);
+      }
+
+      .reduce li:last-child {
+        color: var(--green);
+      }
+
+      .reduce .why {
+        margin-left: 0.6em;
+        font: 0.75em var(--font);
+        color: var(--muted);
+        white-space: normal;
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .viz,
+        .viz.wide {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.9rem;
+        }
+
+        .viz > pre {
+          min-width: 0;
+          font-size: 0.82rem;
+        }
+
+        .reduce {
+          font-size: 0.9rem;
+          padding: 0.6rem 0.8rem;
+        }
+
+        .con {
+          max-height: 8rem;
+        }
+      }
+      /* tracer:end */
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem 1.2rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .legend .cell {
+        display: inline-block;
+        margin-right: 0.35rem;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · control flow</span>
+      <h1 class="grad-each"><span>Break</span> <span>&amp;</span> <span>Continue</span></h1>
+      <p>Leave a loop early with <code>break</code>, or skip the rest of one pass with <code>continue</code>.</p>
+    </section>
+
+    <section class="slide" id="legend">
+      <h2>Reading the loop panels</h2>
+      <div class="cards" style="width: min(100%, 56rem)">
+        <div class="card step"><h3>The items</h3><p>Each loop panel shows the values the loop walks over; the highlighted cell is the current one.</p></div>
+        <div class="card step"><h3>What happened</h3><p class="legend"><span><span class="cell ok">0</span>printed</span><span><span class="cell skip">2</span>skipped by continue</span><span><span class="cell stop">5</span>break</span><span><span class="cell never">6</span>never reached</span></p></div>
+      </div>
+    </section>
+
+    <section class="slide" id="brk">
+      <h2>The <code>break</code> statement</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # break exits the loop
+          for i in range(10):
+              if i == 5:
+                  break
+              print(i)
+          # ans: 0, 1, 2, 3, 4
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="cont">
+      <h2>The <code>continue</code> statement</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # continue skips current iteration
+          for i in range(5):
+              if i == 2:
+                  continue
+              print(i)
+          # ans: 0, 1, 3, 4
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="wbrk">
+      <h2>Break in while</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # break in while loop
+          count = 0
+          while True:
+              count += 1
+              if count == 3:
+                  break
+          # ans: count is 3
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+      <p class="hint"><code>while True</code> never ends on its own: <code>break</code> is the only way out.</p>
+    </section>
+
+    <section class="slide" id="wcont">
+      <h2>Continue in while</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # continue in while
+          x = 0
+          while x &lt; 5:
+              x += 1
+              if x == 3:
+                  continue
+              print(x)
+          # ans: 1, 2, 4, 5 (skips 3)
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+      <p class="hint">The <code>x += 1</code> comes before the <code>continue</code>; put it after and the loop would never end.</p>
+    </section>
+
+    <section class="slide" id="nest">
+      <h2>Break in a nested loop</h2>
+      <div class="viz wide">
+        <pre><code class="language-python">
+          # break only exits inner loop
+          for i in range(3):
+              for j in range(3):
+                  if j == 1:
+                      break
+                  print(f"i={i}, j={j}")
+          # ans: i=0,j=0 then i=1,j=0 then i=2,j=0
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Write down the output, then press → to run the loop.</p>
+    </section>
+
+    <section class="slide" id="ex1">
+      <h2>Exercise 1</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # what prints?
+          for i in range(5):
+              if i == 3:
+                  break
+              print(i)
+          # ans: 0, 1, 2
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex2">
+      <h2>Exercise 2</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # continue effect?
+          for i in range(5):
+              if i % 2 == 0:
+                  continue
+              print(i)
+          # ans: 1, 3 (skips even numbers)
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex3">
+      <h2>Exercise 3</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # multiple breaks?
+          for i in range(10):
+              if i == 3:
+                  break
+              if i == 5:
+                  break
+              print(i)
+          # ans: 0, 1, 2 (first break stops it)
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex4">
+      <h2>Exercise 4</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # what is i?
+          for i in range(10):
+              if i == 5:
+                  break
+          # ans: i is 5
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex5">
+      <h2>Exercise 5</h2>
+      <div class="viz wide">
+        <pre><code class="language-python">
+          # nested break?
+          for i in range(3):
+              for j in range(3):
+                  if i == j == 1:
+                      break
+                  print(i, j)
+          # ans: (0,0) (0,1) (0,2) (1,0) (2,0) (2,1) (2,2)
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex6">
+      <h2>Exercise 6</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # what happens?
+          for i in range(5):
+              continue
+              print(i)
+          # ans: nothing (continue skips print)
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex7">
+      <h2>Exercise 7</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # tricky continue?
+          for i in range(3):
+              if i == 1:
+                  i = 10
+                  continue
+              print(i)
+          # ans: 0, 2 (i=10 doesn't affect next iteration)
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex8">
+      <h2>Exercise 8</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # what prints?
+          for i in range(5):
+              if i &lt; 2:
+                  continue
+              if i &gt; 3:
+                  break
+              print(i)
+          # ans: 2, 3
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex9">
+      <h2>Exercise 9</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # break immediately?
+          for i in range(5):
+              break
+              print(i)
+          # ans: nothing (breaks before print)
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex10">
+      <h2>Exercise 10</h2>
+      <div class="viz">
+        <pre><code class="language-python">
+          # continue then break?
+          for i in range(10):
+              if i % 2 == 0:
+                  continue
+              if i == 5:
+                  break
+              print(i)
+          # ans: 1, 3
+        </code></pre>
+        <div class="panel"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3><code>break</code></h3><p>Leaves the loop at once; the remaining items are never reached.</p></div>
+        <div class="card step"><h3><code>continue</code></h3><p>Skips the rest of this pass and goes straight to the next item.</p></div>
+        <div class="card step"><h3>Innermost only</h3><p>In nested loops, both affect only the loop they are directly inside.</p></div>
+        <div class="card step"><h3>The loop variable</h3><p>After a <code>break</code>, it keeps the value it had; changing it inside a <code>for</code> does not change the next item.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      /* tracer:start (shared by the Python decks) */
+      // A tracer plays a snippet line by line beside panels for its variables,
+      // objects, the items a loop walks over, a file, and printed output.
+      // A program is a list of events, grouped into beats keyed by the slide's
+      // step number: beat k plays when step k is revealed (beat 0 on enter).
+      //   { l: 3 | "x = 5", set: { x: 5, s: "'hi'" }, out: "text", end: "",
+      //     cond: true, note: "5 > 3", val: "15", err: "ZeroDivisionError",
+      //     say: "text", del: ["x"], heap: { id: { cls, f: {...}, v } },
+      //     clear: true (fresh run), tape: [index, "ok" | "skip" | "stop" | "done", which], file: { line } | { add } }
+      // Strings in `set` are Python reprs written as they print ("'Alice'", "2.0");
+      // "@id" is a reference to a heap object. `l` as a string means the next line
+      // (searching down from the current one, wrapping) that starts with that text.
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      const repr = (v) =>
+        v === true ? "True" : v === false ? "False" : v == null ? "None" : Array.isArray(v) ? "[" + v.map(repr).join(", ") + "]" : String(v);
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const typeName = (r, heap) => {
+        if (r.startsWith("@")) return heap.get(r.slice(1))?.cls ?? "object";
+        if (/^-?\d+$/.test(r)) return "int";
+        if (/^-?(\d+\.\d*(e-?\d+)?|inf|nan)$/.test(r)) return "float";
+        if (/^[rbf]?['"]/.test(r)) return "str";
+        if (r === "True" || r === "False") return "bool";
+        if (r === "None") return "NoneType";
+        if (r[0] === "[") return "list";
+        if (r[0] === "(") return "tuple";
+        if (r[0] === "{") return r === "{}" || r.includes(":") ? "dict" : "set";
+        return "";
+      };
+      // Record a program with ordinary JS control flow: t(line, set, more)
+      const rec = (fn) => {
+        const ev = [];
+        fn((l, set, more) => ev.push({ l, set, ...more }), ev);
+        return ev;
+      };
+      const SVGNS = "http://www.w3.org/2000/svg";
+      let arrowIds = 0;
+
+      class Tracer {
+        constructor(viz, cfg) {
+          this.viz = viz;
+          this.cfg = cfg;
+          this.dt = cfg.dt ?? 0.5;
+          this.pre = viz.querySelector("pre");
+          this.pre.classList.add("trace");
+          this.lines = [...this.pre.querySelectorAll(".line")];
+          this.lines.forEach((l) => l.classList.toggle("cmt", /^\s*(#|$)/.test(l.textContent) && !l.classList.contains("answer")));
+          this.slide = viz.closest(".slide");
+          this.beats = cfg.beats || { 0: cfg.run || [] };
+          this.shown = 0;
+          this.build();
+        }
+
+        build() {
+          const c = this.cfg;
+          const want = c.panels || ["vars", "out"];
+          const p = (this.panel = this.viz.querySelector(".panel") || this.viz.appendChild(document.createElement("div")));
+          p.classList.add("panel");
+          p.setAttribute("data-interactive", "");
+          p.innerHTML = "";
+          const box = (cls, title) => {
+            const b = document.createElement("div");
+            b.className = "box " + cls;
+            b.innerHTML = `<div class="bh"><span>${title}</span></div>`;
+            p.appendChild(b);
+            return b;
+          };
+          const tapes = c.tape ? [].concat(c.tape) : [];
+          this.tapes = [];
+          for (const name of want) {
+            if (name === "tape") {
+              for (const tp of tapes) {
+                const b = box("tape", tp.label);
+                const row = b.appendChild(document.createElement("div"));
+                row.className = "cells";
+                row.innerHTML = tp.items.map((x) => `<span class="cell">${esc(repr(x))}</span>`).join("");
+                this.tapes.push([...row.children]);
+              }
+            } else if (name === "file") {
+              const b = box("file", c.file.name);
+              this.fileEl = b.appendChild(document.createElement("div"));
+              this.fileEl.className = "fl";
+            } else if (name === "vars") {
+              this.vgrid = box("vars", c.varsTitle || "Variables").appendChild(document.createElement("div"));
+              this.vgrid.className = "vgrid";
+            } else if (name === "heap") {
+              this.hgrid = box("heap", "Objects in memory").appendChild(document.createElement("div"));
+              this.hgrid.className = "hgrid";
+            } else if (name === "out") {
+              this.con = box("out", c.outTitle || "Output").appendChild(document.createElement("div"));
+              this.con.className = "con";
+            }
+          }
+          const btn = document.createElement("button");
+          btn.className = "replay";
+          btn.textContent = "replay";
+          btn.addEventListener("click", () => this.renderTo(this.shown, "all"));
+          p.querySelector(".bh").appendChild(btn);
+          if (want.includes("heap")) {
+            p.classList.add("mem2");
+            this.svg = document.createElementNS(SVGNS, "svg");
+            this.svg.classList.add("arrows");
+            const id = "tr-arrow-" + ++arrowIds;
+            this.svg.innerHTML = `<defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f472b6"/></marker></defs><g></g>`;
+            this.marker = id;
+            p.appendChild(this.svg);
+          }
+        }
+
+        reset() {
+          this.tl?.kill();
+          this.tl = null;
+          this.cur = -1;
+          this.vars = new Map();
+          this.heap = new Map();
+          this.objEls = new Map();
+          this.pre.classList.remove("tracing", "traced");
+          this.lines.forEach((l) => {
+            l.classList.remove("run", "now");
+            l.querySelector(".tb")?.remove();
+          });
+          if (this.vgrid) this.vgrid.innerHTML = "";
+          if (this.hgrid) this.hgrid.innerHTML = "";
+          if (this.con) this.con.innerHTML = "";
+          this.tapes.forEach((cells) => cells.forEach((x) => (x.className = "cell")));
+          if (this.fileEl) this.fileEl.innerHTML = (this.cfg.file.text ?? "").split("\n").filter((s, i, a) => s || i < a.length - 1).map((s) => `<div>${esc(s) || " "}</div>`).join("");
+          this.drawArrows();
+        }
+
+        find(l) {
+          const L = this.lines;
+          if (typeof l === "number") return l - 1;
+          for (let k = 1; k <= L.length; k++) {
+            const i = (this.cur + k + L.length) % L.length;
+            if (!L[i].classList.contains("answer") && L[i].textContent.trim().startsWith(l)) return i;
+          }
+          console.warn("tracer: no line starts with", l);
+          return -1;
+        }
+
+        badge(el, e, anim) {
+          el.querySelector(".tb")?.remove();
+          const b = document.createElement("span");
+          let cls = "", txt;
+          if (e.err) (cls = "e"), (txt = e.err);
+          else if (e.cond !== undefined) (cls = e.cond ? "t" : "f"), (txt = (e.note ? e.note + " → " : "") + (e.cond ? "True" : "False"));
+          else if (e.val !== undefined) txt = "→ " + e.val;
+          else (cls = e.skip ? "s" : ""), (txt = e.say);
+          b.className = "tb " + cls;
+          b.textContent = txt;
+          el.appendChild(b);
+          if (anim) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+        }
+
+        valueHTML(r) {
+          return r.startsWith("@") ? `<i class="dot"></i>` : esc(r);
+        }
+
+        swapValue(holder, r, anim) {
+          const old = holder.querySelector("b:not(.gone)");
+          if (old && old.dataset.r === r) return false;
+          const nb = document.createElement("b");
+          nb.dataset.r = r;
+          nb.innerHTML = this.valueHTML(r);
+          if (r.startsWith("@")) holder.dataset.ref = r.slice(1);
+          else delete holder.dataset.ref;
+          holder.appendChild(nb);
+          if (old) {
+            if (anim) {
+              old.classList.add("gone");
+              gsap.to(old, { y: -22, opacity: 0, duration: 0.3, onComplete: () => old.remove() });
+              gsap.from(nb, { y: 22, opacity: 0, duration: 0.35, ease: "power2.out" });
+            } else old.remove();
+          }
+          return true;
+        }
+
+        flash(el, anim) {
+          if (!anim) return;
+          el.classList.add("hot");
+          setTimeout(() => el.classList.remove("hot"), 650);
+        }
+
+        setVar(n, v, anim) {
+          const r = repr(v);
+          let box = this.vars.get(n);
+          if (!box) {
+            box = document.createElement("div");
+            box.className = "var";
+            box.innerHTML = `<span class="n">${esc(n)}</span><span class="v"></span><span class="t"></span>`;
+            this.vgrid.appendChild(box);
+            this.vars.set(n, box);
+            this.swapValue(box.querySelector(".v"), r, false);
+            if (anim) gsap.from(box, { scale: 0.3, opacity: 0, duration: 0.4, ease: "back.out(2)" });
+          } else if (this.swapValue(box.querySelector(".v"), r, anim)) this.flash(box, anim);
+          box.classList.remove("gone");
+          box.querySelector(".t").textContent = typeName(r, this.heap);
+        }
+
+        setObj(id, o, anim) {
+          const prev = this.heap.get(id) || { f: {} };
+          const obj = { cls: o.cls ?? prev.cls, f: { ...prev.f, ...(o.f || {}) }, v: o.v ?? prev.v };
+          this.heap.set(id, obj);
+          let el = this.objEls.get(id);
+          if (!el) {
+            el = document.createElement("div");
+            el.className = "obj";
+            el.innerHTML = `<div class="oh"><span>${esc(obj.cls)}</span><i>${esc(o.label ?? "")}</i></div>`;
+            this.hgrid.appendChild(el);
+            this.objEls.set(id, el);
+            if (anim) gsap.from(el, { scale: 0.4, opacity: 0, duration: 0.4, ease: "back.out(2)" });
+          }
+          const rows = o.v !== undefined ? { "": o.v } : o.f || {};
+          for (const [k, v] of Object.entries(rows)) {
+            let row = [...el.querySelectorAll(".fr")].find((x) => x.dataset.k === k);
+            if (!row) {
+              row = document.createElement("div");
+              row.className = "fr";
+              row.dataset.k = k;
+              row.innerHTML = `${k ? `<span>${esc(k)}</span>` : ""}<span class="fv"></span>`;
+              el.appendChild(row);
+              this.swapValue(row.querySelector(".fv"), repr(v), false);
+              if (anim) gsap.from(row, { opacity: 0, x: -10, duration: 0.3 });
+            } else if (this.swapValue(row.querySelector(".fv"), repr(v), anim)) this.flash(row.querySelector(".fv"), anim);
+          }
+        }
+
+        print(text, anim, err) {
+          const s = document.createElement("span");
+          if (err) s.className = "e";
+          s.innerHTML = this.cfg.showEnd ? esc(text).replace(/\n/g, '<i class="nl">↵</i>\n') : esc(text);
+          this.con.appendChild(s);
+          this.con.scrollTop = this.con.scrollHeight;
+          if (anim) gsap.from(s, { opacity: 0, duration: 0.35 });
+        }
+
+        apply(e, anim) {
+          if (e.clear) {
+            // a fresh run: forget variables, objects and output
+            this.vars.forEach((b) => b.remove());
+            this.vars.clear();
+            this.objEls.forEach((b) => b.remove());
+            this.objEls.clear();
+            this.heap.clear();
+            if (this.con) this.con.innerHTML = "";
+          }
+          if (e.l != null) {
+            const i = this.find(e.l);
+            if (i >= 0) {
+              this.lines.forEach((x) => x.classList.remove("now"));
+              const el = this.lines[i];
+              el.classList.add("run", "now");
+              this.cur = i;
+              this.pre.classList.add("tracing");
+              this.pre.classList.remove("traced");
+              if (e.err || e.cond !== undefined || e.val !== undefined || e.say) this.badge(el, e, anim);
+            }
+          }
+          if (e.heap) for (const [id, o] of Object.entries(e.heap)) this.setObj(id, o, anim);
+          if (e.set) for (const [n, v] of Object.entries(e.set)) this.setVar(n, v, anim);
+          if (e.del)
+            e.del.forEach((n) => {
+              this.vars.get(n)?.remove();
+              this.vars.delete(n);
+            });
+          if (e.out !== undefined) this.print(e.out + (e.end ?? "\n"), anim, false);
+          if (e.err && this.con) this.print(e.err + "\n", anim, true);
+          if (e.tape) {
+            const [i, cls, w = 0] = e.tape;
+            const cells = this.tapes[w];
+            cells.forEach((x) => x.classList.remove("now"));
+            if (cells[i]) {
+              cells[i].classList.add("now");
+              if (cls) cells[i].classList.add(cls);
+            }
+          }
+          if (e.tapeEnd) {
+            const [cls, w = 0] = e.tapeEnd;
+            this.tapes[w].forEach((x) => {
+              x.classList.remove("now");
+              if (cls && !/ok|skip|stop|done/.test(x.className)) x.classList.add(cls);
+            });
+          }
+          if (e.tapeClear !== undefined) this.tapes[e.tapeClear].forEach((x) => (x.className = "cell"));
+          if (e.file && this.fileEl) {
+            const rows = [...this.fileEl.children];
+            rows.forEach((x) => x.classList.remove("now"));
+            if (e.file.line !== undefined && rows[e.file.line]) rows[e.file.line].classList.add("now", "done");
+            if (e.file.add !== undefined) {
+              const d = document.createElement("div");
+              d.textContent = e.file.add || " ";
+              d.className = "now done";
+              this.fileEl.appendChild(d);
+              if (anim) gsap.from(d, { opacity: 0, x: -12, duration: 0.35 });
+            }
+          }
+          if (e.heap || e.set || e.del) this.arrowsSoon();
+        }
+
+        settle() {
+          this.lines.forEach((l) => l.classList.remove("now"));
+          if (this.pre.classList.contains("tracing")) this.pre.classList.replace("tracing", "traced");
+          this.tapes.forEach((cells) => cells.forEach((x) => x.classList.remove("now")));
+          this.arrowsSoon();
+        }
+
+        keys() {
+          return Object.keys(this.beats).map(Number).sort((a, b) => a - b);
+        }
+
+        duration(k) {
+          return (this.beats[k]?.length || 0) * this.dt;
+        }
+
+        // mode: false = instant, "last" = animate beat k only, "all" = animate beats 0..k
+        renderTo(k, mode) {
+          this.reset();
+          this.shown = k;
+          const play = [];
+          for (const b of this.keys()) {
+            if (b > k) continue;
+            if (mode === "all" || (mode === "last" && b === k)) play.push(...this.beats[b]);
+            else this.beats[b].forEach((e) => this.apply(e, false));
+          }
+          if (!play.length) return this.settle();
+          const tl = gsap.timeline();
+          play.forEach((e, j) => tl.call(() => this.apply(e, true), null, j * this.dt));
+          tl.call(() => this.settle(), null, play.length * this.dt);
+          this.tl = tl;
+        }
+
+        arrowsSoon(ms = 700) {
+          if (!this.svg) return;
+          const until = performance.now() + ms;
+          const tick = () => {
+            this.drawArrows();
+            if (performance.now() < until) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+
+        drawArrows() {
+          if (!this.svg) return;
+          const g = this.svg.querySelector("g");
+          g.innerHTML = "";
+          const pr = this.panel.getBoundingClientRect();
+          if (!pr.width) return;
+          const sx = this.panel.offsetWidth / pr.width || 1;
+          const rel = (r) => ({ l: (r.left - pr.left) * sx, r: (r.right - pr.left) * sx, t: (r.top - pr.top) * sx, b: (r.bottom - pr.top) * sx });
+          for (const src of this.panel.querySelectorAll("[data-ref]")) {
+            const tgt = this.objEls.get(src.dataset.ref);
+            if (!tgt || !src.isConnected) continue;
+            const a = rel(src.querySelector(".dot")?.getBoundingClientRect() ?? src.getBoundingClientRect());
+            const b = rel(tgt.getBoundingClientRect());
+            const ax = (a.l + a.r) / 2, ay = (a.t + a.b) / 2;
+            let d;
+            if (b.t > ay + 12) {
+              const bx = Math.min(Math.max(ax, b.l + 14), b.r - 14);
+              d = `M${ax} ${ay} C${ax} ${(ay + b.t) / 2} ${bx} ${(ay + b.t) / 2} ${bx} ${b.t - 2}`;
+            } else if (b.l > ax + 12) {
+              const by = (b.t + b.b) / 2;
+              d = `M${ax} ${ay} C${(ax + b.l) / 2} ${ay} ${(ax + b.l) / 2} ${by} ${b.l - 2} ${by}`;
+            } else {
+              const by = b.t + 14, x = Math.max(a.r, b.r) + 26;
+              d = `M${a.r} ${ay} C${x} ${ay} ${x} ${by} ${b.r + 2} ${by}`;
+            }
+            const path = document.createElementNS(SVGNS, "path");
+            path.setAttribute("d", d);
+            path.setAttribute("marker-end", `url(#${this.marker})`);
+            g.appendChild(path);
+          }
+        }
+      }
+
+      // Which elements each step of a slide reveals (mirrors deck.js)
+      const stepGroups = (slide) => {
+        let auto = 0;
+        const by = new Map();
+        for (const e of slide.querySelectorAll(".step, .answer")) {
+          const k = e.dataset.step !== undefined ? parseFloat(e.dataset.step) : ++auto;
+          if (!by.has(k)) by.set(k, []);
+          by.get(k).push(e);
+        }
+        return [...by.entries()].sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+      };
+
+      const tracers = new Map();
+      const trace = (sel, cfg) => {
+        const viz = typeof sel === "string" ? document.querySelector(sel) : sel;
+        if (!viz) return console.warn("tracer: missing", sel);
+        const t = new Tracer(viz, cfg);
+        const groups = stepGroups(t.slide);
+        const max = Math.max(...t.keys());
+        if (max > groups.length) console.warn(`tracer: ${t.slide.id || "slide"} has beat ${max} but ${groups.length} steps`);
+        if (!tracers.has(t.slide)) tracers.set(t.slide, []);
+        tracers.get(t.slide).push(t);
+        return t;
+      };
+
+      const delays = (slide, on) => {
+        stepGroups(slide).forEach((g, i) => {
+          const d = on ? Math.max(0, ...(tracers.get(slide) || []).map((t) => t.duration(i + 1))) : 0;
+          g.forEach((e) => e.classList.contains("answer") && e.style.setProperty("--d", d + "s"));
+        });
+      };
+
+      const pending = new Map();
+      const queue = (slide, k, dir) => {
+        const ts = tracers.get(slide);
+        if (!ts) return;
+        if (dir < 0) delays(slide, false);
+        let p = pending.get(slide);
+        if (!p) {
+          p = { n: 0 };
+          pending.set(slide, p);
+          queueMicrotask(() => {
+            pending.delete(slide);
+            const instant = p.dir < 0 || p.n > 1;
+            if (instant) delays(slide, false);
+            ts.forEach((t) => t.renderTo(p.k, instant ? false : "last"));
+          });
+        }
+        p.n++;
+        p.k = k;
+        p.dir = dir;
+      };
+
+      // Call once, after every trace(): hooks the tracers to the deck's events
+      const startTracers = () => {
+        Deck.on("enter", (slide) => {
+          const ts = tracers.get(slide);
+          if (!ts) return;
+          delays(slide, true);
+          ts.forEach((t) => {
+            t.renderTo(0, t.cfg.auto ? "all" : false);
+            t.arrowsSoon(1200);
+          });
+        });
+        Deck.on("step", (slide, i, d) => queue(slide, d.step, d.dir));
+        Deck.on("unstep", (slide, i, d) => queue(slide, d.step - 1, -1));
+        Deck.on("leave", (slide) => (tracers.get(slide) || []).forEach((t) => t.tl?.kill()));
+        addEventListener("resize", () => tracers.forEach((ts) => ts.forEach((t) => t.drawArrows())));
+
+        // Reductions: an expression rewritten one evaluation at a time
+        const playReduce = (r, instant) => {
+          const rows = r.querySelectorAll("li");
+          gsap.killTweensOf(rows);
+          if (instant) gsap.set(rows, { opacity: 1, x: 0 });
+          else gsap.fromTo(rows, { opacity: 0, x: -14 }, { opacity: 1, x: 0, stagger: 0.75, duration: 0.4, delay: 0.15 });
+        };
+        document.querySelectorAll(".reduce").forEach((r) => {
+          if (r.classList.contains("step")) r.addEventListener("step:show", (e) => e.target === r && playReduce(r, e.detail.dir < 0));
+        });
+        Deck.on("enter", (slide, i, d) => slide.querySelectorAll(".reduce:not(.step)").forEach((r) => playReduce(r, d?.dir < 0)));
+      };
+
+      const cover = (sel) =>
+        Deck.scene(sel, {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+            gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+          },
+        });
+      /* tracer:end */
+
+      cover("#title");
+      const R = (n) => ({ label: `range(${n})`, items: [...Array(n).keys()] });
+      const L = (n, extra = {}) => ({ panels: ["tape", "vars", "out"], tape: R(n), dt: 0.32, ...extra });
+      const never = { tapeEnd: ["never"] };
+
+      trace("#brk .viz", {
+        ...L(10),
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 10; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("if i == 5", null, { cond: i === 5, note: `${i} == 5` });
+              if (i === 5) {
+                t("break", null, { tape: [i, "stop"] });
+                t(null, null, never);
+                break;
+              }
+              t("print(i)", null, { out: String(i), tape: [i, "ok"] });
+            }
+          }),
+        },
+      });
+      trace("#cont .viz", {
+        ...L(5),
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 5; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("if i == 2", null, { cond: i === 2, note: `${i} == 2` });
+              if (i === 2) {
+                t("continue", null, { tape: [i, "skip"] });
+                continue;
+              }
+              t("print(i)", null, { out: String(i), tape: [i, "ok"] });
+            }
+          }),
+        },
+      });
+      trace("#wbrk .viz", {
+        panels: ["vars"],
+        dt: 0.4,
+        beats: {
+          1: rec((t) => {
+            t("count = 0", { count: 0 });
+            for (let c = 1; ; c++) {
+              t("while True", null, { cond: true });
+              t("count += 1", { count: c });
+              t("if count == 3", null, { cond: c === 3, note: `${c} == 3` });
+              if (c === 3) {
+                t("break");
+                break;
+              }
+            }
+          }),
+        },
+      });
+      trace("#wcont .viz", {
+        panels: ["vars", "out"],
+        dt: 0.32,
+        beats: {
+          1: rec((t) => {
+            t("x = 0", { x: 0 });
+            let x = 0;
+            while (true) {
+              t("while x < 5", null, { cond: x < 5, note: `${x} < 5` });
+              if (x >= 5) break;
+              x++;
+              t("x += 1", { x });
+              t("if x == 3", null, { cond: x === 3, note: `${x} == 3` });
+              if (x === 3) {
+                t("continue");
+                continue;
+              }
+              t("print(x)", null, { out: String(x) });
+            }
+          }),
+        },
+      });
+      const twoTapes = { panels: ["tape", "vars", "out"], tape: [{ label: "i in range(3)", items: [0, 1, 2] }, { label: "j in range(3)", items: [0, 1, 2] }], dt: 0.3 };
+      trace("#nest .viz", {
+        ...twoTapes,
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 3; i++) {
+              t("for i", { i }, { tape: [i, "done", 0], tapeClear: 1 });
+              for (let j = 0; j < 3; j++) {
+                t("for j", { j }, { tape: [j, null, 1] });
+                t("if j == 1", null, { cond: j === 1, note: `${j} == 1` });
+                if (j === 1) {
+                  t("break", null, { tape: [j, "stop", 1] });
+                  t(null, null, { tapeEnd: ["never", 1] });
+                  break;
+                }
+                t("print(f", null, { out: `i=${i}, j=${j}`, tape: [j, "ok", 1] });
+              }
+            }
+          }),
+        },
+      });
+
+      trace("#ex1 .viz", {
+        ...L(5),
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 5; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("if i == 3", null, { cond: i === 3, note: `${i} == 3` });
+              if (i === 3) {
+                t("break", null, { tape: [i, "stop"] });
+                t(null, null, never);
+                break;
+              }
+              t("print(i)", null, { out: String(i), tape: [i, "ok"] });
+            }
+          }),
+        },
+      });
+      trace("#ex2 .viz", {
+        ...L(5),
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 5; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("if i % 2", null, { cond: i % 2 === 0, note: `${i} % 2 == 0` });
+              if (i % 2 === 0) {
+                t("continue", null, { tape: [i, "skip"] });
+                continue;
+              }
+              t("print(i)", null, { out: String(i), tape: [i, "ok"] });
+            }
+          }),
+        },
+      });
+      trace("#ex3 .viz", {
+        ...L(10),
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 10; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("if i == 3", null, { cond: i === 3, note: `${i} == 3` });
+              if (i === 3) {
+                t("break", null, { tape: [i, "stop"] });
+                t(null, null, never);
+                break;
+              }
+              t("if i == 5", null, { cond: false, note: `${i} == 5` });
+              t("print(i)", null, { out: String(i), tape: [i, "ok"] });
+            }
+          }),
+        },
+      });
+      trace("#ex4 .viz", {
+        ...L(10, { panels: ["tape", "vars"] }),
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 10; i++) {
+              t("for i", { i }, { tape: [i, i < 5 ? "done" : null] });
+              t("if i == 5", null, { cond: i === 5, note: `${i} == 5` });
+              if (i === 5) {
+                t("break", null, { tape: [i, "stop"] });
+                t(null, null, never);
+                break;
+              }
+            }
+          }),
+        },
+      });
+      trace("#ex5 .viz", {
+        ...twoTapes,
+        dt: 0.25,
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 3; i++) {
+              t("for i", { i }, { tape: [i, "done", 0], tapeClear: 1 });
+              for (let j = 0; j < 3; j++) {
+                t("for j", { j }, { tape: [j, null, 1] });
+                const hit = i === j && j === 1;
+                t("if i == j", null, { cond: hit, note: `${i} == ${j} == 1` });
+                if (hit) {
+                  t("break", null, { tape: [j, "stop", 1] });
+                  t(null, null, { tapeEnd: ["never", 1] });
+                  break;
+                }
+                t("print(i, j)", null, { out: `${i} ${j}`, tape: [j, "ok", 1] });
+              }
+            }
+          }),
+        },
+      });
+      trace("#ex6 .viz", {
+        ...L(5),
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 5; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("continue", null, { tape: [i, "skip"] });
+            }
+          }),
+        },
+      });
+      trace("#ex7 .viz", {
+        ...L(3),
+        dt: 0.45,
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 3; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("if i == 1", null, { cond: i === 1, note: `${i} == 1` });
+              if (i === 1) {
+                t("i = 10", { i: 10 });
+                t("continue", null, { tape: [i, "skip"] });
+                continue;
+              }
+              t("print(i)", null, { out: String(i), tape: [i, "ok"] });
+            }
+          }),
+        },
+      });
+      trace("#ex8 .viz", {
+        ...L(5),
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 5; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("if i < 2", null, { cond: i < 2, note: `${i} < 2` });
+              if (i < 2) {
+                t("continue", null, { tape: [i, "skip"] });
+                continue;
+              }
+              t("if i > 3", null, { cond: i > 3, note: `${i} > 3` });
+              if (i > 3) {
+                t("break", null, { tape: [i, "stop"] });
+                break;
+              }
+              t("print(i)", null, { out: String(i), tape: [i, "ok"] });
+            }
+          }),
+        },
+      });
+      trace("#ex9 .viz", {
+        ...L(5),
+        dt: 0.5,
+        beats: { 1: [{ l: "for i", set: { i: 0 }, tape: [0] }, { l: "break", tape: [0, "stop"] }, never] },
+      });
+      trace("#ex10 .viz", {
+        ...L(10),
+        dt: 0.28,
+        beats: {
+          1: rec((t) => {
+            for (let i = 0; i < 10; i++) {
+              t("for i", { i }, { tape: [i] });
+              t("if i % 2", null, { cond: i % 2 === 0, note: `${i} % 2 == 0` });
+              if (i % 2 === 0) {
+                t("continue", null, { tape: [i, "skip"] });
+                continue;
+              }
+              t("if i == 5", null, { cond: i === 5, note: `${i} == 5` });
+              if (i === 5) {
+                t("break", null, { tape: [i, "stop"] });
+                t(null, null, never);
+                break;
+              }
+              t("print(i)", null, { out: String(i), tape: [i, "ok"] });
+            }
+          }),
+        },
+      });
+      startTracers();
+    </script>
+  </body>
+</html>

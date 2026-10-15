@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Variables &amp; Assignment</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ================= shared lesson widgets (tracer, strip, rewrite) ================= */
+      pre code,
+      .strip,
+      .rw {
+        font-variant-ligatures: none;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 30rem);
+        max-width: 100%;
+        font-size: 1.3rem;
+      }
+
+      .slide pre.small {
+        font-size: 1.15rem;
+      }
+
+      .slide pre.tiny {
+        font-size: 1rem;
+      }
+
+      /* ---------- Tracer: lines light up in the order Python runs them ---------- */
+      .tracer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 1.2rem;
+        width: min(100%, 64rem);
+      }
+
+      .tracer > pre {
+        flex: 0 1 auto;
+      }
+
+      .state {
+        flex: 0 0 15rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.8rem;
+        font-size: 1rem;
+      }
+
+      .state .box {
+        min-width: 0;
+        padding: 0.7rem 0.9rem;
+        border-radius: 12px;
+        background: var(--glass);
+        border: 1px solid var(--border);
+      }
+
+      .state h4 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 0 0.4rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .state .vars {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.2rem 0.8rem;
+        font-family: var(--font-mono);
+        min-height: 1.6em;
+      }
+
+      .state .vars .k {
+        color: var(--muted);
+      }
+
+      .state .vars .v {
+        color: var(--text);
+        border-radius: 4px;
+        padding: 0 0.3em;
+        transition: background 0.4s;
+      }
+
+      .state .vars .v.flash {
+        background: rgba(34, 211, 238, 0.35);
+        transition: none;
+      }
+
+      .state .out {
+        font-family: var(--font-mono);
+        color: var(--green);
+        min-height: 1.6em;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .state .out .err {
+        color: var(--red);
+      }
+
+      .state .empty {
+        color: var(--faint);
+        font-family: var(--font);
+        font-size: 0.85rem;
+      }
+
+      .replay {
+        border: 1px solid var(--border);
+        background: var(--glass-light);
+        color: var(--muted);
+        border-radius: 999px;
+        font: 500 0.7rem var(--font);
+        padding: 0.1rem 0.6rem;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        text-transform: none;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.4;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.28;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb + .tb {
+        margin-left: 0.4em;
+      }
+
+      /* chips to try other values */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .try:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- Strip: the characters / items of a sequence with their indices ---------- */
+      .strip {
+        display: grid;
+        justify-items: center;
+        gap: 0.6rem;
+        width: min(100%, 60rem);
+      }
+
+      .strip .cells {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 0.25rem;
+        max-width: 100%;
+      }
+
+      .strip .cell {
+        display: grid;
+        justify-items: center;
+        gap: 0.15rem;
+        font-family: var(--font-mono);
+      }
+
+      .strip .ix {
+        font-size: 0.7rem;
+        color: var(--faint);
+        transition: color 0.3s;
+      }
+
+      .strip .ch {
+        display: grid;
+        place-items: center;
+        width: var(--cw, 2.3rem);
+        height: 2.6rem;
+        border-radius: 8px;
+        background: rgba(15, 18, 35, 0.85);
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        font-size: 1.2rem;
+        white-space: pre;
+        transition:
+          background 0.35s,
+          border-color 0.35s,
+          opacity 0.35s;
+      }
+
+      .strip .ch.sp {
+        color: var(--faint);
+      }
+
+      .strip.picking .cell:not(.pick) .ch {
+        opacity: 0.35;
+      }
+
+      .strip .cell.pick .ch {
+        background: rgba(236, 72, 153, 0.28);
+        border-color: var(--pink);
+      }
+
+      .strip .cell.pick .ix {
+        color: #f0abfc;
+      }
+
+      .strip .ord {
+        font-size: 0.65rem;
+        color: var(--cyan);
+        height: 0.9rem;
+      }
+
+      .strip .res {
+        min-height: 2.2rem;
+        font: 500 1.25rem var(--font-mono);
+        color: var(--green);
+      }
+
+      .strip .res .lbl {
+        color: var(--faint);
+        font-size: 0.85rem;
+        margin-right: 0.6rem;
+      }
+
+      /* ---------- Rewrite: an expression turning into what Python actually runs ---------- */
+      .rw {
+        display: grid;
+        justify-items: center;
+        width: min(100%, 56rem);
+      }
+
+      .rw > .rs {
+        grid-area: 1 / 1;
+        display: grid;
+        justify-items: center;
+        gap: 0.4rem;
+        opacity: 0;
+        transform: translateY(0.8rem);
+        transition:
+          opacity 0.45s var(--ease),
+          transform 0.45s var(--ease);
+        pointer-events: none;
+      }
+
+      .slide .rw > .rs:not(.cur) {
+        opacity: 0;
+        filter: none;
+        transform: translateY(0.8rem);
+      }
+
+      .slide .rw > .rs.past:not(.cur) {
+        transform: translateY(-0.8rem);
+      }
+
+      .slide .rw > .rs.cur {
+        opacity: 1;
+        filter: none;
+        transform: none;
+      }
+
+      .rw .ex {
+        font: 500 1.35rem var(--font-mono);
+        padding: 0.55rem 1.1rem;
+        border-radius: 12px;
+        background: rgba(10, 12, 26, 0.78);
+        border: 1px solid var(--border);
+        white-space: pre;
+        color: var(--text);
+      }
+
+      .rw .ex mark {
+        color: #f0abfc;
+        background: rgba(236, 72, 153, 0.18);
+        border-radius: 4px;
+        padding: 0 0.1em;
+      }
+
+      .rw small {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .rw-dots {
+        display: flex;
+        gap: 0.35rem;
+        justify-content: center;
+        margin-top: 0.4rem;
+      }
+
+      .rw-dots i {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: var(--border);
+        transition: background 0.3s;
+      }
+
+      .rw-dots i.on {
+        background: var(--cyan);
+      }
+
+      @media (max-width: 760px) {
+        .slide pre,
+        .slide pre.small {
+          font-size: 0.85rem;
+          min-width: 0;
+        }
+
+        .slide pre.tiny {
+          font-size: 0.72rem;
+        }
+
+        .state {
+          flex: 1 1 100%;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          font-size: 0.85rem;
+        }
+
+        .strip .ch {
+          width: var(--cwm, min(1.9rem, 6.6vw));
+          height: 2.1rem;
+          font-size: 0.95rem;
+        }
+
+        .strip .cells {
+          gap: 0.12rem;
+        }
+
+        .rw .ex {
+          font-size: 0.9rem;
+          white-space: pre-wrap;
+        }
+      }
+      /* ---------- names and values diagrams ---------- */
+      .nv .cols {
+        grid-template-columns: auto minmax(0, 30rem);
+        justify-content: center;
+        align-items: center;
+        gap: 2.5rem;
+        width: min(100%, 62rem);
+      }
+
+      .nv svg {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+        overflow: visible;
+      }
+
+      .nv .name rect {
+        fill: rgba(139, 92, 246, 0.2);
+        stroke: var(--violet-soft);
+        stroke-width: 2;
+      }
+
+      .nv .val rect {
+        fill: rgba(15, 18, 35, 0.9);
+        stroke: rgba(34, 211, 238, 0.7);
+        stroke-width: 2;
+      }
+
+      .nv .tup rect {
+        fill: rgba(236, 72, 153, 0.15);
+        stroke: var(--pink);
+        stroke-width: 2;
+      }
+
+      .nv text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 20px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .nv text.hd {
+        font-family: var(--font);
+        font-size: 13px;
+        fill: var(--muted);
+        letter-spacing: 0.12em;
+      }
+
+      .nv .ptr {
+        stroke: #f0abfc;
+        stroke-width: 2.5;
+        marker-end: url(#nvarrow);
+      }
+
+      .nv .cap {
+        min-height: 1.6em;
+        text-align: center;
+        color: var(--cyan);
+      }
+
+      @media (max-width: 760px) {
+        .nv .cols {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .nv svg {
+          max-height: 34vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · basics</span>
+      <h1 class="grad-each"><span>Variables</span> <span>&amp;</span> <span>Assignment</span></h1>
+      <p>Give a value a name with <code>=</code>, several at once, and swap them in one line.</p>
+    </section>
+
+    <!-- ================================================================ basics -->
+    <section class="slide">
+      <h2>Basic assignment</h2>
+      <pre class="trace" data-upto data-trace="2 {x=5}; 4 {name='Alice'}; 6 {pi=3.14}"><code class="language-python">
+        # variable assignment
+        x = 5
+        # ans: x is 5
+        name = "Alice"
+        # ans: name is "Alice"
+        pi = 3.14
+        # ans: pi is 3.14
+      </code></pre>
+    </section>
+
+    <section class="slide nv" id="labels">
+      <h2>Names are labels</h2>
+      <div class="cols">
+        <pre class="steps"><code class="language-python">
+          a = 5
+          b = a
+          a = 10
+        </code></pre>
+        <svg viewBox="0 0 440 250" aria-label="Names on the left point to values on the right">
+          <defs>
+            <marker id="nvarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#f0abfc" />
+            </marker>
+          </defs>
+          <text class="hd" x="80" y="16">NAMES</text>
+          <text class="hd" x="360" y="16">VALUES</text>
+          <g class="name" data-id="a"><rect x="40" y="50" width="80" height="44" rx="10" /><text x="80" y="72">a</text></g>
+          <g class="name" data-id="b"><rect x="40" y="160" width="80" height="44" rx="10" /><text x="80" y="182">b</text></g>
+          <g class="val" data-id="v5"><rect x="320" y="70" width="80" height="44" rx="22" /><text x="360" y="92">5</text></g>
+          <g class="val" data-id="v10"><rect x="320" y="180" width="80" height="44" rx="22" /><text x="360" y="202">10</text></g>
+          <line class="ptr" data-from="a" x1="120" y1="72" x2="120" y2="72" />
+          <line class="ptr" data-from="b" x1="120" y1="182" x2="120" y2="182" />
+        </svg>
+      </div>
+      <p class="cap"></p>
+    </section>
+
+    <section class="slide">
+      <h2>Multiple assignment</h2>
+      <pre class="trace" data-upto data-trace="2 {a=1|b=2|c=3}; 5 {x=10|y=20}"><code class="language-python">
+        # assign multiple variables
+        a, b, c = 1, 2, 3
+        # ans: a=1, b=2, c=3
+        # what are the values?
+        x, y = 10, 20
+        # ans: x=10, y=20
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Swapping values</h2>
+      <pre class="trace small" data-upto data-trace="2 {x=5|y=10}; 3 {temp=5}; 4 {x=10}; 5 {y=5}; 8 {x=5|y=10}; 9 {x=10|y=5}"><code class="language-python">
+        # traditional swap needs a temp variable
+        x, y = 5, 10
+        temp = x
+        x = y
+        y = temp
+        # ans: x=10, y=5
+        # python swap
+        x, y = 5, 10
+        x, y = y, x
+        # ans: x=10, y=5
+      </code></pre>
+    </section>
+
+    <section class="slide nv" id="swap">
+      <h2>How <code>x, y = y, x</code> works</h2>
+      <div class="cols">
+        <pre class="steps"><code class="language-python">
+          x, y = 5, 10
+          x, y = y, x
+        </code></pre>
+        <svg viewBox="0 0 440 250" aria-label="The right side is packed into a tuple first, then unpacked into the names">
+          <text class="hd" x="80" y="16">NAMES</text>
+          <text class="hd" x="360" y="16">VALUES</text>
+          <g class="name" data-id="x"><rect x="40" y="50" width="80" height="44" rx="10" /><text x="80" y="72">x</text></g>
+          <g class="name" data-id="y"><rect x="40" y="160" width="80" height="44" rx="10" /><text x="80" y="182">y</text></g>
+          <g class="val" data-id="v5"><rect x="320" y="50" width="80" height="44" rx="22" /><text x="360" y="72">5</text></g>
+          <g class="val" data-id="v10"><rect x="320" y="160" width="80" height="44" rx="22" /><text x="360" y="182">10</text></g>
+          <g class="tup"><rect x="170" y="100" width="100" height="50" rx="10" /><text x="220" y="125">(10, 5)</text></g>
+          <line class="ptr" data-from="x" x1="120" y1="72" x2="120" y2="72" />
+          <line class="ptr" data-from="y" x1="120" y1="182" x2="120" y2="182" />
+        </svg>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <p class="cap"></p>
+    </section>
+
+    <section class="slide">
+      <h2>Chained assignment</h2>
+      <pre class="trace" data-upto data-trace="2 {x=0|y=0|z=0}; 4 {a='same'|b='same'|c='same'}"><code class="language-python">
+        # assign the same value to several variables
+        x = y = z = 0
+        # ans: x=0, y=0, z=0
+        a = b = c = "same"
+        # ans: all are "same"
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Each press reveals one answer and runs the code up to it.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre class="trace tiny" data-upto data-trace="2 {x=10}; 5 {a=5|b=15}; 6 {a=15|b=5}; 9 {x=1|y=2|z=3}; 10 {z=3}; 13 {x=0|y=0|z=0}"><code class="language-python">
+        # what is the value of x?
+        x = 10
+        # ans: 10
+        # what happens after this swap?
+        a, b = 5, 15
+        a, b = b, a
+        # ans: a=15, b=5
+        # what is z after this?
+        x, y, z = 1, 2, 3
+        z = x + y
+        # ans: 3
+        # can you assign like this?
+        x = y = z = 0
+        # ans: yes, all are 0
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre class="trace tiny" data-upto data-trace="2 {a=5}; 3 {b=5}; 4 {a=10}; 7 E[ValueError] &gt; ValueError: too many values to unpack (expected 2); 10 {x=5|y=5}; 11 {x=6}"><code class="language-python">
+        # what is the value of b?
+        a = 5
+        b = a
+        a = 10
+        # ans: 5
+        # what does this produce?
+        x, y = 1, 2, 3
+        # ans: Error: too many values to unpack
+        # what is y?
+        x = y = 5
+        x = x + 1
+        # ans: 5
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre class="trace tiny" data-upto data-trace="2 {a=10|b=20}; 3 {a=30|b=-10}; 6 {x=1}; 7 {x=1}; 10 {x=5|y=10}; 11 {x=10|y=15}"><code class="language-python">
+        # multiple assignment with calculation?
+        a, b = 10, 20
+        a, b = a+b, a-b
+        # ans: a=30, b=-10
+        # what happens here?
+        x = 1
+        x = x
+        # ans: x is still 1
+        # tricky swap
+        x, y = 5, 10
+        x, y = y, x+y
+        # ans: x=10, y=15
+      </code></pre>
+      <p class="hint">The whole right side is worked out first, using the old values, before anything is assigned.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre class="trace small" data-upto data-trace="2 {a=3|b=3}; 3 {b=5}; 6 {x=10}; 9 E[ValueError] &gt; ValueError: too many values to unpack (expected 2)"><code class="language-python">
+        # assignment from right to left?
+        a = b = 3
+        b = 5
+        # ans: a=3, b=5
+        # what is x?
+        x = 10
+        # ans: 10
+        # unpacking with extra values?
+        x, y = [1, 2, 3]
+        # ans: Error: too many values
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre class="trace small" data-upto data-trace="2 {a='a'|b='b'|c='c'}; 5 {x=1|y=2|z=3}; 6 {x=3|y=1|z=2}; 9 {x=[]|y=[]}"><code class="language-python">
+        # what about this?
+        a, b, c = "abc"
+        # ans: a='a', b='b', c='c'
+        # swap three variables?
+        x, y, z = 1, 2, 3
+        x, y, z = z, x, y
+        # ans: x=3, y=1, z=2
+        # empty assignment?
+        x, y = [], []
+        # ans: x=[], y=[]
+      </code></pre>
+    </section>
+
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Right side first</h3><p>Python evaluates everything right of <code>=</code>, then binds the names on the left.</p></div>
+        <div class="card step"><h3>Unpacking counts</h3><p><code>x, y = …</code> needs exactly two values, or it raises <code>ValueError</code>.</p></div>
+        <div class="card step"><h3>Names are labels</h3><p><code>b = a</code> makes <code>b</code> point at the same value; reassigning <code>a</code> later doesn't change <code>b</code>.</p></div>
+        <div class="card step"><h3>Swap in one line</h3><p><code>x, y = y, x</code>: no temp variable needed.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      // ================= shared lesson widgets (tracer, strip, rewrite) =================
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ------------------------------------------------------------ tracer
+      // data-trace on a <pre class="trace">: beats separated by ";". Each beat is
+      //   N            light code line N (1-based)
+      //   T[note] F[note] E[note] ~[note]   a badge: True / False / error / neutral
+      //   {a=1|b=2}    set variables (an empty value deletes one)
+      //   > text       print a line of output
+      const BEAT = /^\s*(\d+)\s*(?:([TFE~])(?:\x5B([^\x5D]*)\x5D)?)?\s*(?:\{([^}]*)\})?\s*(?:>\s?(.*))?$/; // \x5B \x5D are [ ], spelled so KaTeX isn't triggered
+      const parseTrace = (s) =>
+        (s || "").split(";").filter((t) => t.trim()).map((t) => {
+          const m = t.match(BEAT);
+          if (!m) throw new Error("bad trace beat: " + t);
+          const vars = m[4] ? m[4].split("|").map((kv) => { const i = kv.indexOf("="); return [kv.slice(0, i).trim(), kv.slice(i + 1).trim()]; }) : null;
+          return { line: +m[1], kind: m[2], note: m[3], vars, out: m[5] };
+        });
+      const speed = (n) => Math.max(0.28, Math.min(0.5, 8 / Math.max(n, 1)));
+
+      function buildPanel(pre) {
+        const seq = parseTrace(pre.dataset.trace);
+        const needs = pre.hasAttribute("data-panel") || seq.some((s) => s.vars || s.out !== undefined);
+        if (!needs || pre._panel) return;
+        const wrap = document.createElement("div");
+        wrap.className = "tracer";
+        pre.replaceWith(wrap);
+        wrap.appendChild(pre);
+        const st = document.createElement("div");
+        st.className = "state";
+        st.innerHTML = `<div class="box"><h4>Variables <button class="replay" title="Run the trace again">replay</button></h4><div class="vars"></div></div><div class="box"><h4>Output</h4><div class="out"></div></div>`;
+        st.setAttribute("data-interactive", "");
+        wrap.appendChild(st);
+        pre._panel = st;
+        st.querySelector(".replay").addEventListener("click", () => trace(pre, false));
+        clearPanel(pre);
+      }
+
+      function clearPanel(pre) {
+        const st = pre._panel;
+        if (!st) return;
+        pre._vars = new Map();
+        st.querySelector(".vars").innerHTML = `<span class="empty">none yet</span>`;
+        st.querySelector(".out").innerHTML = `<span class="empty">nothing printed</span>`;
+        pre._outN = 0;
+      }
+
+      function setVars(pre, vars, instant) {
+        const box = pre._panel.querySelector(".vars");
+        for (const [k, v] of vars) v === "" ? pre._vars.delete(k) : pre._vars.set(k, v);
+        box.innerHTML = pre._vars.size ? [...pre._vars].map(([k, v]) => `<span class="k">${esc(k)}</span><span class="v" data-k="${esc(k)}">${esc(v)}</span>`).join("") : `<span class="empty">none</span>`;
+        if (instant) return;
+        for (const [k, v] of vars) {
+          const el = [...box.querySelectorAll(".v")].find((e) => e.dataset.k === k);
+          if (!el) continue;
+          el.classList.add("flash");
+          requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove("flash")));
+        }
+      }
+
+      function print(pre, text, err, instant) {
+        const out = pre._panel.querySelector(".out");
+        if (!pre._outN) out.innerHTML = "";
+        pre._outN++;
+        const d = document.createElement("div");
+        if (err) d.className = "err";
+        d.textContent = text;
+        out.appendChild(d);
+        if (!instant) gsap.from(d, { x: -12, opacity: 0, duration: 0.3 });
+      }
+
+      function reset(pre) {
+        pre._tl?.kill();
+        pre.classList.remove("tracing", "traced");
+        pre.querySelectorAll(".line").forEach((l) => {
+          l.classList.remove("run", "now");
+          l.querySelectorAll(".tb").forEach((b) => b.remove());
+        });
+        clearPanel(pre);
+        pre._onReset?.();
+      }
+
+      function trace(pre, instant, from = 0, to) {
+        reset(pre);
+        const seq = parseTrace(pre.dataset.trace);
+        to = to ?? seq.length;
+        const STEP = speed(seq.length);
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        pre.classList.add("tracing");
+        const tl = gsap.timeline();
+        seq.slice(0, to).forEach((s, k) => {
+          const fast = instant || k < from;
+          tl.call(() => {
+            lines.forEach((l) => l.classList.remove("now"));
+            const el = lines[s.line - 1];
+            if (el) el.classList.add("run", "now");
+            if (s.kind && el) {
+              el.querySelectorAll(".tb").forEach((o) => o.remove());
+              const b = document.createElement("span");
+              b.className = "tb " + ({ T: "t", F: "f", E: "f", "~": "" })[s.kind];
+              b.textContent = s.note ?? (s.kind === "T" ? "True" : s.kind === "F" ? "False" : "");
+              el.appendChild(b);
+              if (!fast) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+            }
+            if (s.vars && pre._panel) setVars(pre, s.vars, fast);
+            if (s.out !== undefined && pre._panel) print(pre, s.out, s.kind === "E", fast);
+            pre._onBeat?.(s, k, fast);
+          }, null, Math.max(0, k - from) * STEP);
+        });
+        tl.call(() => {
+          lines.forEach((l) => l.classList.remove("now"));
+          pre.classList.replace("tracing", "traced");
+        }, null, Math.max(0, to - from) * STEP);
+        if (instant) tl.progress(1);
+        pre._tl = tl;
+      }
+
+      const traces = [...document.querySelectorAll("pre.trace[data-trace]")];
+      traces.forEach(buildPanel);
+      const setDelay = (pre) => pre.style.setProperty("--ans-delay", parseTrace(pre.dataset.trace).length * speed(parseTrace(pre.dataset.trace).length) + "s");
+      traces.filter((p) => !p.hasAttribute("data-upto")).forEach(setDelay);
+      const firstAnswer = (pre) => pre.querySelector(".line.answer");
+
+      // A trace runs when its first answer line is revealed, or on a [data-go] step
+      Deck.on("step", (slide, i, d) => {
+        for (const el of d.elements) {
+          let pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el !== firstAnswer(pre)) pre = null;
+          if (!pre && el.hasAttribute("data-go")) pre = slide.querySelector("pre.trace[data-trace]");
+          if (pre) trace(pre, d.dir < 0);
+        }
+      });
+      Deck.on("unstep", (slide, i, d) => {
+        for (const el of d.elements) {
+          const pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el === firstAnswer(pre)) reset(pre);
+          if (el.hasAttribute("data-go")) slide.querySelectorAll("pre.trace[data-trace]").forEach(reset);
+        }
+      });
+      Deck.on("enter", (slide, i, d) => {
+        slide.querySelectorAll("pre.trace[data-trace]").forEach((pre) => {
+          reset(pre);
+          if (pre.hasAttribute("data-auto")) trace(pre, d.dir < 0);
+        });
+      });
+      Deck.on("leave", (slide) => slide.querySelectorAll("pre.trace").forEach(reset));
+
+      // data-upto: straight-line code with several answers. Each revealed answer
+      // runs the code up to its own line.
+      function upto(slide, instant) {
+        for (const pre of slide.querySelectorAll("pre.trace[data-upto]")) {
+          const answers = [...pre.querySelectorAll(".line.answer")];
+          const n = answers.filter((a) => a.classList.contains("shown")).length;
+          const prev = pre._upto || 0;
+          if (!n) {
+            reset(pre);
+            pre._upto = 0;
+            continue;
+          }
+          const lines = [...pre.querySelectorAll(".line")];
+          const L = lines.indexOf(answers[n - 1]) + 1;
+          const seq = parseTrace(pre.dataset.trace);
+          let to = seq.findIndex((b) => b.line > L);
+          if (to < 0) to = seq.length;
+          if (to > prev && !instant) trace(pre, false, prev, to);
+          else trace(pre, true, 0, to);
+          pre._upto = to;
+        }
+      }
+      Deck.on("step", (slide, i, d) => upto(slide, d.dir < 0 || d.elements.length > 1));
+      Deck.on("unstep", (slide) => upto(slide, true));
+      Deck.on("enter", (slide) => slide.querySelectorAll("pre.trace[data-upto]").forEach((p) => (p._upto = 0)));
+
+      // Chips: try the same code with another value. Each chip carries the new
+      // literal (data-lit, written into line data-lit-line), its trace and output.
+      for (const box of document.querySelectorAll(".try")) {
+        const slide = box.closest(".slide");
+        const pre = slide.querySelector("pre.trace");
+        const chips = [...box.querySelectorAll(".chip[data-trace]")];
+        if (!pre || !chips.length) continue;
+        const apply = (chip, run) => {
+          chips.forEach((c) => c.classList.toggle("on", c === chip));
+          const line = pre.querySelectorAll(".line")[+pre.dataset.litLine - 1];
+          const lit = line?.querySelector(".hljs-string, .hljs-number, .hljs-literal, .hljs-keyword:last-child");
+          if (lit) lit.textContent = chip.dataset.lit;
+          const ans = firstAnswer(pre);
+          if (ans) (ans.querySelector(".hljs-comment") || ans).textContent = "# " + chip.dataset.out;
+          pre.dataset.trace = chip.dataset.trace;
+          setDelay(pre);
+          if (run) trace(pre, false);
+        };
+        box.addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (c) apply(c, true);
+        });
+        Deck.scene(slide, { enter: () => apply(chips[0], false) });
+      }
+
+      // ------------------------------------------------------------ strip
+      // <div class="strip" data-s="Hello"> (characters) or data-items='[1,2]' with
+      // data-kind="list|tuple|array". data-sel: one selection per answer line of the
+      // slide, separated by ";": an index, a slice a:b:c, a list [i,j], #sub (count),
+      // @sub (find), "-" (nothing). Add "=>text" to override the result shown.
+      function pyIndices(n, sel) {
+        sel = sel.trim();
+        if (sel === "-" || sel === "") return [];
+        if (sel.startsWith("[")) return JSON.parse(sel).map((i) => (i < 0 ? n + i : i));
+        if (!sel.includes(":")) {
+          const i = +sel;
+          return [i < 0 ? n + i : i];
+        }
+        let [a, b, c] = sel.split(":").map((x) => (x.trim() === "" ? null : +x));
+        c = c ?? 1;
+        const norm = (x, d) => (x === null ? d : x < 0 ? Math.max(n + x, c < 0 ? -1 : 0) : Math.min(x, c < 0 ? n - 1 : n));
+        a = norm(a, c > 0 ? 0 : n - 1);
+        b = norm(b, c > 0 ? n : -1);
+        const out = [];
+        for (let i = a; c > 0 ? i < b : i > b; i += c) out.push(i);
+        return out;
+      }
+
+      for (const strip of document.querySelectorAll(".strip")) {
+        const items = strip.dataset.items ? JSON.parse(strip.dataset.items) : [...strip.dataset.s];
+        const isStr = !strip.dataset.items || strip.hasAttribute("data-chars");
+        const kind = strip.dataset.kind || (isStr ? "str" : "list");
+        const n = items.length;
+        const show = (v) => (isStr ? (v === " " ? "␣" : v) : typeof v === "string" ? `'${v}'` : String(v));
+        const rep = (v) => (isStr ? `'${v}'` : typeof v === "string" ? `'${v}'` : String(v));
+        strip.innerHTML =
+          `<div class="cells">` +
+          items.map((v, i) => `<div class="cell"><span class="ord"></span><span class="ix">${i}</span><span class="ch${v === " " ? " sp" : ""}">${esc(show(v))}</span><span class="ix">${i - n}</span></div>`).join("") +
+          `</div><div class="res"></div>`;
+        if (strip.dataset.neg === "off") strip.querySelectorAll(".cell .ix:last-child").forEach((e) => (e.style.visibility = "hidden"));
+        const cells = [...strip.querySelectorAll(".cell")];
+        const res = strip.querySelector(".res");
+        const sels = (strip.dataset.sel || "").split(";");
+        const slide = strip.closest(".slide");
+        let cur = -2;
+
+        function pick(k, instant) {
+          if (k === cur) return;
+          cur = k;
+          gsap.killTweensOf(strip.querySelectorAll(".ch, .res"));
+          cells.forEach((c) => {
+            c.classList.remove("pick");
+            c.querySelector(".ord").textContent = "";
+          });
+          gsap.set(strip.querySelectorAll(".ch"), { y: 0 });
+          gsap.set(res, { clearProps: "opacity,transform" });
+          if (k < 0 || !sels[k] || sels[k].trim() === "-") {
+            strip.classList.remove("picking");
+            res.innerHTML = "";
+            return;
+          }
+          let [sel, override] = sels[k].split("=>");
+          sel = sel.trim();
+          let idx, text;
+          if (sel.startsWith("#") || sel.startsWith("@")) {
+            const sub = sel.slice(1);
+            const s = items.join("");
+            idx = [];
+            let first = -1;
+            for (let p = s.indexOf(sub); p >= 0; p = s.indexOf(sub, p + sub.length)) {
+              if (first < 0) first = p;
+              for (let j = 0; j < sub.length; j++) idx.push(p + j);
+              if (sel[0] === "@") break;
+            }
+            text = sel[0] === "#" ? String(idx.length / Math.max(sub.length, 1)) : String(first);
+          } else {
+            idx = pyIndices(n, sel);
+            const vals = idx.map((i) => items[i]);
+            const single = !sel.includes(":") && !sel.startsWith("[");
+            if (single) text = rep(vals[0]);
+            else if (isStr) text = `'${vals.join("")}'`;
+            else if (kind === "tuple") text = vals.length === 1 ? `(${rep(vals[0])},)` : `(${vals.map(rep).join(", ")})`;
+            else if (kind === "array") text = `array([${vals.map(rep).join(", ")}])`;
+            else text = `[${vals.map(rep).join(", ")}]`;
+          }
+          if (override !== undefined) text = override.trim();
+          strip.classList.add("picking");
+          res.innerHTML = `<span class="lbl">result</span>${esc(text)}`;
+          idx.forEach((i, o) => {
+            const c = cells[i];
+            if (!c) return;
+            c.classList.add("pick");
+            if (idx.length > 1 && !sel.startsWith("#") && !sel.startsWith("@")) {
+              const od = c.querySelector(".ord");
+              od.textContent = od.textContent ? od.textContent + "," + (o + 1) : o + 1;
+            }
+            if (!instant) gsap.fromTo(c.querySelector(".ch"), { y: 0 }, { y: -8, duration: 0.25, delay: o * 0.12, yoyo: true, repeat: 1, ease: "power2.out" });
+          });
+          if (!instant) gsap.from(res, { opacity: 0, y: 8, duration: 0.4, delay: idx.length * 0.12 });
+        }
+        const sync = (instant) => {
+          const scope = strip.dataset.scope ? slide.querySelector(strip.dataset.scope) : slide;
+          let k = scope.querySelectorAll(".line.answer.shown, .sel.shown").length - 1;
+          if (strip.hasAttribute("data-lines")) {
+            // one selection per code line; blank entries keep the previous one
+            const n = scope.querySelectorAll("pre .line.step.shown").length;
+            k = -1;
+            for (let i = n - 1; i >= 0; i--) if (sels[i] && sels[i].trim()) { k = i; break; }
+          }
+          pick(k, instant);
+        };
+        Deck.scene(slide, {
+          enter: () => {
+            cur = -2;
+            pick(-1, true);
+          },
+          step: (s, n, els, d) => sync(d.dir < 0 || els.length > 1),
+          unstep: () => sync(true),
+        });
+      }
+
+      // ------------------------------------------------------------ rewrite
+      // <div class="rw"><div class="rs">first</div><div class="rs step" data-anim="none">next</div>…</div>
+      for (const rw of document.querySelectorAll(".rw")) {
+        const states = [...rw.querySelectorAll(":scope > .rs")];
+        const dots = document.createElement("div");
+        dots.className = "rw-dots";
+        dots.innerHTML = states.map(() => "<i></i>").join("");
+        rw.after(dots);
+        const sync = () => {
+          let k = 0;
+          states.forEach((s, i) => {
+            if (i === 0 || s.classList.contains("shown")) k = i;
+          });
+          states.forEach((s, i) => {
+            s.classList.toggle("cur", i === k);
+            s.classList.toggle("past", i < k);
+          });
+          [...dots.children].forEach((d, i) => d.classList.toggle("on", i <= k));
+        };
+        sync();
+        const slide = rw.closest(".slide");
+        Deck.scene(slide, { enter: sync, step: sync, unstep: sync });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+      // ================= end shared widgets =================
+
+      // ------------------------------------------------------------ names-and-values diagrams
+      // Each state lists which names/values are visible and where each name points.
+      const box = (svg, id) => svg.querySelector(`[data-id="${id}"] rect`);
+      function pointAt(svg, name, target, instant) {
+        const line = svg.querySelector(`.ptr[data-from="${name}"]`);
+        const n = box(svg, name);
+        const y1 = +n.getAttribute("y") + 22;
+        let x2 = 120, y2 = y1;
+        if (target) {
+          const r = target === "tup" ? svg.querySelector(".tup rect") : box(svg, target);
+          x2 = +r.getAttribute("x") - 4;
+          y2 = +r.getAttribute("y") + +r.getAttribute("height") / 2;
+        }
+        gsap.to(line, { attr: { x1: 120, y1, x2, y2 }, opacity: target ? 1 : 0, duration: instant ? 0 : 0.6, ease: "power2.inOut" });
+      }
+      function show(svg, sel, on, instant) {
+        svg.querySelectorAll(sel).forEach((e) => gsap.to(e, { opacity: on ? 1 : 0, duration: instant ? 0 : 0.4 }));
+      }
+      function diagram(id, states) {
+        const slide = document.getElementById(id);
+        const svg = slide.querySelector("svg");
+        const cap = slide.querySelector(".cap");
+        const render = (instant) => {
+          const n = slide.querySelectorAll(".step.shown").length;
+          const s = states[Math.min(n, states.length - 1)];
+          svg.querySelectorAll(".name, .val, .tup").forEach((g) => {
+            const key = g.dataset.id || "tup";
+            gsap.to(g, { opacity: s.show.includes(key) ? 1 : 0, duration: instant ? 0 : 0.4 });
+          });
+          for (const name of s.names) pointAt(svg, name, s.ptr[name], instant);
+          cap.textContent = s.cap;
+        };
+        Deck.scene(slide, {
+          enter: () => render(true),
+          step: (sl, k, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+        });
+      }
+      diagram("labels", [
+        { show: [], names: ["a", "b"], ptr: {}, cap: "" },
+        { show: ["a", "v5"], names: ["a", "b"], ptr: { a: "v5" }, cap: "a = 5 creates the value 5 and points the name a at it" },
+        { show: ["a", "b", "v5"], names: ["a", "b"], ptr: { a: "v5", b: "v5" }, cap: "b = a points b at the same value: no copy is made" },
+        { show: ["a", "b", "v5", "v10"], names: ["a", "b"], ptr: { a: "v10", b: "v5" }, cap: "a = 10 moves only the label a; b still points at 5" },
+      ]);
+      diagram("swap", [
+        { show: [], names: ["x", "y"], ptr: {}, cap: "" },
+        { show: ["x", "y", "v5", "v10"], names: ["x", "y"], ptr: { x: "v5", y: "v10" }, cap: "x points at 5, y at 10" },
+        { show: ["x", "y", "v5", "v10", "tup"], names: ["x", "y"], ptr: { x: "v5", y: "v10" }, cap: "first the right side y, x is packed into a tuple: (10, 5)" },
+        { show: ["x", "y", "v5", "v10"], names: ["x", "y"], ptr: { x: "v10", y: "v5" }, cap: "then the tuple is unpacked, left to right: x gets 10, y gets 5" },
+      ]);
+    </script>
+  </body>
+</html>

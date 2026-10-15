@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Magic Methods</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ================= shared lesson widgets (tracer, strip, rewrite) ================= */
+      pre code,
+      .strip,
+      .rw {
+        font-variant-ligatures: none;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 30rem);
+        max-width: 100%;
+        font-size: 1.3rem;
+      }
+
+      .slide pre.small {
+        font-size: 1.15rem;
+      }
+
+      .slide pre.tiny {
+        font-size: 1rem;
+      }
+
+      /* ---------- Tracer: lines light up in the order Python runs them ---------- */
+      .tracer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 1.2rem;
+        width: min(100%, 64rem);
+      }
+
+      .tracer > pre {
+        flex: 0 1 auto;
+      }
+
+      .state {
+        flex: 0 0 15rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.8rem;
+        font-size: 1rem;
+      }
+
+      .state .box {
+        min-width: 0;
+        padding: 0.7rem 0.9rem;
+        border-radius: 12px;
+        background: var(--glass);
+        border: 1px solid var(--border);
+      }
+
+      .state h4 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 0 0.4rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .state .vars {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.2rem 0.8rem;
+        font-family: var(--font-mono);
+        min-height: 1.6em;
+      }
+
+      .state .vars .k {
+        color: var(--muted);
+      }
+
+      .state .vars .v {
+        color: var(--text);
+        border-radius: 4px;
+        padding: 0 0.3em;
+        transition: background 0.4s;
+      }
+
+      .state .vars .v.flash {
+        background: rgba(34, 211, 238, 0.35);
+        transition: none;
+      }
+
+      .state .out {
+        font-family: var(--font-mono);
+        color: var(--green);
+        min-height: 1.6em;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .state .out .err {
+        color: var(--red);
+      }
+
+      .state .empty {
+        color: var(--faint);
+        font-family: var(--font);
+        font-size: 0.85rem;
+      }
+
+      .replay {
+        border: 1px solid var(--border);
+        background: var(--glass-light);
+        color: var(--muted);
+        border-radius: 999px;
+        font: 500 0.7rem var(--font);
+        padding: 0.1rem 0.6rem;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        text-transform: none;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.4;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.28;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb + .tb {
+        margin-left: 0.4em;
+      }
+
+      /* chips to try other values */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .try:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- Strip: the characters / items of a sequence with their indices ---------- */
+      .strip {
+        display: grid;
+        justify-items: center;
+        gap: 0.6rem;
+        width: min(100%, 60rem);
+      }
+
+      .strip .cells {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 0.25rem;
+        max-width: 100%;
+      }
+
+      .strip .cell {
+        display: grid;
+        justify-items: center;
+        gap: 0.15rem;
+        font-family: var(--font-mono);
+      }
+
+      .strip .ix {
+        font-size: 0.7rem;
+        color: var(--faint);
+        transition: color 0.3s;
+      }
+
+      .strip .ch {
+        display: grid;
+        place-items: center;
+        width: var(--cw, 2.3rem);
+        height: 2.6rem;
+        border-radius: 8px;
+        background: rgba(15, 18, 35, 0.85);
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        font-size: 1.2rem;
+        white-space: pre;
+        transition:
+          background 0.35s,
+          border-color 0.35s,
+          opacity 0.35s;
+      }
+
+      .strip .ch.sp {
+        color: var(--faint);
+      }
+
+      .strip.picking .cell:not(.pick) .ch {
+        opacity: 0.35;
+      }
+
+      .strip .cell.pick .ch {
+        background: rgba(236, 72, 153, 0.28);
+        border-color: var(--pink);
+      }
+
+      .strip .cell.pick .ix {
+        color: #f0abfc;
+      }
+
+      .strip .ord {
+        font-size: 0.65rem;
+        color: var(--cyan);
+        height: 0.9rem;
+      }
+
+      .strip .res {
+        min-height: 2.2rem;
+        font: 500 1.25rem var(--font-mono);
+        color: var(--green);
+      }
+
+      .strip .res .lbl {
+        color: var(--faint);
+        font-size: 0.85rem;
+        margin-right: 0.6rem;
+      }
+
+      /* ---------- Rewrite: an expression turning into what Python actually runs ---------- */
+      .rw {
+        display: grid;
+        justify-items: center;
+        width: min(100%, 56rem);
+      }
+
+      .rw > .rs {
+        grid-area: 1 / 1;
+        display: grid;
+        justify-items: center;
+        gap: 0.4rem;
+        opacity: 0;
+        transform: translateY(0.8rem);
+        transition:
+          opacity 0.45s var(--ease),
+          transform 0.45s var(--ease);
+        pointer-events: none;
+      }
+
+      .slide .rw > .rs:not(.cur) {
+        opacity: 0;
+        filter: none;
+        transform: translateY(0.8rem);
+      }
+
+      .slide .rw > .rs.past:not(.cur) {
+        transform: translateY(-0.8rem);
+      }
+
+      .slide .rw > .rs.cur {
+        opacity: 1;
+        filter: none;
+        transform: none;
+      }
+
+      .rw .ex {
+        font: 500 1.35rem var(--font-mono);
+        padding: 0.55rem 1.1rem;
+        border-radius: 12px;
+        background: rgba(10, 12, 26, 0.78);
+        border: 1px solid var(--border);
+        white-space: pre;
+        color: var(--text);
+      }
+
+      .rw .ex mark {
+        color: #f0abfc;
+        background: rgba(236, 72, 153, 0.18);
+        border-radius: 4px;
+        padding: 0 0.1em;
+      }
+
+      .rw small {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .rw-dots {
+        display: flex;
+        gap: 0.35rem;
+        justify-content: center;
+        margin-top: 0.4rem;
+      }
+
+      .rw-dots i {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: var(--border);
+        transition: background 0.3s;
+      }
+
+      .rw-dots i.on {
+        background: var(--cyan);
+      }
+
+      @media (max-width: 760px) {
+        .slide pre,
+        .slide pre.small {
+          font-size: 0.85rem;
+          min-width: 0;
+        }
+
+        .slide pre.tiny {
+          font-size: 0.72rem;
+        }
+
+        .state {
+          flex: 1 1 100%;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          font-size: 0.85rem;
+        }
+
+        .strip .ch {
+          width: var(--cwm, min(1.9rem, 6.6vw));
+          height: 2.1rem;
+          font-size: 0.95rem;
+        }
+
+        .strip .cells {
+          gap: 0.12rem;
+        }
+
+        .rw .ex {
+          font-size: 0.9rem;
+          white-space: pre-wrap;
+        }
+      }
+      .pair {
+        display: grid;
+        gap: 1.4rem;
+        justify-items: center;
+        width: 100%;
+      }
+
+      #map .rows {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        gap: 0.6rem 1.2rem;
+        align-items: center;
+        font: 500 1.2rem var(--font-mono);
+      }
+
+      #map .rows .syn {
+        justify-self: end;
+        color: var(--text);
+      }
+
+      #map .rows .arr {
+        color: var(--pink);
+      }
+
+      #map .rows .dun {
+        color: #f0abfc;
+      }
+
+      @media (max-width: 760px) {
+        #map .rows {
+          font-size: 0.8rem;
+          gap: 0.45rem 0.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · object-oriented</span>
+      <h1 class="grad-each"><span>Magic</span> <span>Methods</span></h1>
+      <p>Double-underscore ("dunder") methods let your own classes work with <code>len()</code>, <code>+</code>, <code>==</code>, <code>[]</code>, <code>print</code> and more.</p>
+    </section>
+
+    <!-- ================================================================ the map -->
+    <section class="slide" id="map">
+      <h2>Syntax is a method call</h2>
+      <div class="rows">
+        <span class="syn step" data-step="1">str(x)</span><span class="arr step" data-step="1">→</span><span class="dun step" data-step="1">x.__str__()</span>
+        <span class="syn step" data-step="2">len(x)</span><span class="arr step" data-step="2">→</span><span class="dun step" data-step="2">x.__len__()</span>
+        <span class="syn step" data-step="3">x[i]</span><span class="arr step" data-step="3">→</span><span class="dun step" data-step="3">x.__getitem__(i)</span>
+        <span class="syn step" data-step="4">a + b</span><span class="arr step" data-step="4">→</span><span class="dun step" data-step="4">a.__add__(b)</span>
+        <span class="syn step" data-step="5">a == b</span><span class="arr step" data-step="5">→</span><span class="dun step" data-step="5">a.__eq__(b)</span>
+        <span class="syn step" data-step="6">item in s</span><span class="arr step" data-step="6">→</span><span class="dun step" data-step="6">s.__contains__(item)</span>
+        <span class="syn step" data-step="7">f(5)</span><span class="arr step" data-step="7">→</span><span class="dun step" data-step="7">f.__call__(5)</span>
+      </div>
+      <p class="hint">Define the method on the right, and the syntax on the left starts working for your class.</p>
+    </section>
+
+    <!-- ================================================================ lessons -->
+    <section class="slide">
+      <h2>__str__ and __repr__</h2>
+      <div class="pair">
+        <pre class="small"><code class="language-python">
+          # string representation
+          class Point:
+              def __init__(self, x, y):
+                  self.x = x
+                  self.y = y
+              def __str__(self):
+                  return f"Point({self.x}, {self.y})"
+          str(Point(3, 4))
+          # ans: "Point(3, 4)"
+          print(Point(3, 4))
+          # ans: Point(3, 4)
+        </code></pre>
+        <div class="rw">
+          <div class="rs"><div class="ex">str(p)</div><small>p is Point(3, 4)</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">p.<mark>__str__</mark>()</div><small>Python calls your method</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">f"Point({<mark>3</mark>}, {<mark>4</mark>})"  →  "Point(3, 4)"</div><small><code>print</code> does the same, then shows the text without quotes</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>__len__</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # len() support
+          class MyList:
+              def __init__(self, items):
+                  self.items = items
+              def __len__(self):
+                  return len(self.items)
+          len(MyList([1, 2, 3]))
+          # ans: 3
+        </code></pre>
+        <div class="rw">
+          <div class="rs"><div class="ex">len(ml)</div><small>ml wraps [1, 2, 3]</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">ml.<mark>__len__</mark>()</div><small>len() asks the object</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">len(self.items)  →  <mark>3</mark></div><small>which asks its list</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>__getitem__ and __setitem__</h2>
+      <div class="pair">
+        <pre class="small"><code class="language-python">
+          # indexing support
+          class MyList:
+              def __init__(self):
+                  self.items = []
+              def __getitem__(self, index):
+                  return self.items[index]
+              def __setitem__(self, index, value):
+                  self.items[index] = value
+          ml = MyList()
+          ml.items = [1, 2, 3]
+          ml[0]
+          # ans: 1
+        </code></pre>
+        <div class="rw">
+          <div class="rs"><div class="ex">ml[0]           ml[0] = 9</div><small>reading and writing with brackets</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">ml.<mark>__getitem__</mark>(0)   ml.<mark>__setitem__</mark>(0, 9)</div><small>become these two calls</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>__add__ and __sub__</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # operator overloading
+          class Vector:
+              def __init__(self, x):
+                  self.x = x
+              def __add__(self, other):
+                  return Vector(self.x + other.x)
+          Vector(5) + Vector(3)
+          # ans: a new Vector with x = 8
+        </code></pre>
+        <div class="rw">
+          <div class="rs"><div class="ex">Vector(5) + Vector(3)</div><small>the left operand decides</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">Vector(5).<mark>__add__</mark>(Vector(3))</div><small>self is the left, other the right</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">Vector(<mark>5 + 3</mark>)  →  Vector(8)</div><small><code>__sub__</code> works the same way for <code>-</code></small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>__eq__ and __lt__</h2>
+      <div class="pair">
+        <pre class="small"><code class="language-python">
+          # comparison operators
+          class Point:
+              def __init__(self, x):
+                  self.x = x
+              def __eq__(self, other):
+                  return self.x == other.x
+              def __lt__(self, other):
+                  return self.x &lt; other.x
+          Point(5) == Point(5)
+          # ans: True
+        </code></pre>
+        <div class="rw">
+          <div class="rs"><div class="ex">Point(5) == Point(5)</div><small>two different objects...</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">Point(5).<mark>__eq__</mark>(Point(5))</div><small>...compared by your rule</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">5 == 5  →  <mark>True</mark></div><small>without <code>__eq__</code>, == would compare identity and give False</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict each result, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        # __str__ vs __repr__?
+        class MyClass:
+            def __str__(self):
+                return "str"
+            def __repr__(self):
+                return "repr"
+        str(MyClass())
+        # ans: "str"
+        repr(MyClass())
+        # ans: "repr"
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # __len__ return type?
+        class MyClass:
+            def __len__(self):
+                return 5.5
+        len(MyClass())
+        # ans: TypeError (__len__ must return an int)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre class="trace small" data-trace="7 ~[__getitem__(0)] {i=0}; 4 F[0 &gt;= 3]; 6 ~[return 0]; 7 {x=0}; 8 &gt; 0; 7 ~[__getitem__(1)] {i=1}; 4 F[1 &gt;= 3]; 6 ~[return 1]; 7 {x=1}; 8 &gt; 1; 7 ~[__getitem__(2)] {i=2}; 4 F[2 &gt;= 3]; 6 ~[return 2]; 7 {x=2}; 8 &gt; 2; 7 ~[__getitem__(3)] {i=3}; 4 T[3 &gt;= 3]; 5 E[IndexError]; 7 ~[IndexError ends the loop]"><code class="language-python">
+        # __getitem__ for iteration?
+        class MyClass:
+            def __getitem__(self, i):
+                if i &gt;= 3:
+                    raise IndexError
+                return i
+        for x in MyClass():
+            print(x)
+        # ans: 0, 1, 2
+      </code></pre>
+      <p class="hint">With no <code>__iter__</code>, a for loop calls <code>__getitem__(0)</code>, <code>(1)</code>, … until <code>IndexError</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # __add__ with an int?
+        class MyClass:
+            def __init__(self, x):
+                self.x = x
+            def __add__(self, other):
+                return MyClass(self.x + other)
+        MyClass(5) + 3
+        # ans: a new MyClass with x = 8
+      </code></pre>
+      <p class="hint step"><code>3 + MyClass(5)</code> would fail: that needs <code>__radd__</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        # __contains__?
+        class MySet:
+            def __init__(self, items):
+                self.items = set(items)
+            def __contains__(self, item):
+                return item in self.items
+        2 in MySet([1, 2, 3])
+        # ans: True
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <div class="pair">
+        <pre class="small"><code class="language-python">
+          # __call__?
+          class Multiplier:
+              def __init__(self, n):
+                  self.n = n
+              def __call__(self, x):
+                  return x * self.n
+          double = Multiplier(2)
+          double(5)
+          # ans: 10
+        </code></pre>
+        <div class="rw">
+          <div class="rs"><div class="ex">double(5)</div><small>an object used like a function</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">double.<mark>__call__</mark>(5)</div><small>becomes a method call</small></div>
+          <div class="rs step" data-anim="none"><div class="ex">5 * <mark>2</mark>  →  10</div><small><code>self.n</code> is 2</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # __bool__?
+        class MyClass:
+            def __bool__(self):
+                return False
+        bool(MyClass())
+        # ans: False
+      </code></pre>
+      <p class="hint">So <code>if MyClass():</code> would skip its block.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre><code class="language-python">
+        # __iter__?
+        class MyRange:
+            def __init__(self, n):
+                self.n = n
+            def __iter__(self):
+                return iter(range(self.n))
+        list(MyRange(3))
+        # ans: [0, 1, 2]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre class="trace" data-trace="7 ~[__enter__()]; 4 ~[returns self] {ctx=&lt;MyContext&gt;}; 8; 6 ~[__exit__() on the way out]"><code class="language-python">
+        # __enter__ and __exit__?
+        class MyContext:
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                pass
+        with MyContext() as ctx:
+            pass
+        # ans: __enter__ runs as the block starts, __exit__ as it ends
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre class="trace" data-trace="5 {obj=&lt;MyClass&gt;}; 6 ~[last reference gone] {obj=}; 4 &gt; Deleted"><code class="language-python">
+        # __del__?
+        class MyClass:
+            def __del__(self):
+                print("Deleted")
+        obj = MyClass()
+        del obj
+        # ans: prints Deleted
+      </code></pre>
+      <p class="hint"><code>del</code> removes the name; CPython calls <code>__del__</code> when no references remain.</p>
+    </section>
+
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Hooks, not calls</h3><p>You rarely call dunders yourself; syntax and built-ins call them for you.</p></div>
+        <div class="card step"><h3>Left operand first</h3><p><code>a + b</code> tries <code>a.__add__(b)</code>.</p></div>
+        <div class="card step"><h3>Return the right type</h3><p><code>__len__</code> must return an int, <code>__bool__</code> a bool, <code>__str__</code> a str.</p></div>
+        <div class="card step"><h3><code>__str__</code> vs <code>__repr__</code></h3><p>Friendly text for users vs an unambiguous one for developers.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      // ================= shared lesson widgets (tracer, strip, rewrite) =================
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ------------------------------------------------------------ tracer
+      // data-trace on a <pre class="trace">: beats separated by ";". Each beat is
+      //   N            light code line N (1-based)
+      //   T[note] F[note] E[note] ~[note]   a badge: True / False / error / neutral
+      //   {a=1|b=2}    set variables (an empty value deletes one)
+      //   > text       print a line of output
+      const BEAT = /^\s*(\d+)\s*(?:([TFE~])(?:\x5B([^\x5D]*)\x5D)?)?\s*(?:\{([^}]*)\})?\s*(?:>\s?(.*))?$/; // \x5B \x5D are [ ], spelled so KaTeX isn't triggered
+      const parseTrace = (s) =>
+        (s || "").split(";").filter((t) => t.trim()).map((t) => {
+          const m = t.match(BEAT);
+          if (!m) throw new Error("bad trace beat: " + t);
+          const vars = m[4] ? m[4].split("|").map((kv) => { const i = kv.indexOf("="); return [kv.slice(0, i).trim(), kv.slice(i + 1).trim()]; }) : null;
+          return { line: +m[1], kind: m[2], note: m[3], vars, out: m[5] };
+        });
+      const speed = (n) => Math.max(0.28, Math.min(0.5, 8 / Math.max(n, 1)));
+
+      function buildPanel(pre) {
+        const seq = parseTrace(pre.dataset.trace);
+        const needs = pre.hasAttribute("data-panel") || seq.some((s) => s.vars || s.out !== undefined);
+        if (!needs || pre._panel) return;
+        const wrap = document.createElement("div");
+        wrap.className = "tracer";
+        pre.replaceWith(wrap);
+        wrap.appendChild(pre);
+        const st = document.createElement("div");
+        st.className = "state";
+        st.innerHTML = `<div class="box"><h4>Variables <button class="replay" title="Run the trace again">replay</button></h4><div class="vars"></div></div><div class="box"><h4>Output</h4><div class="out"></div></div>`;
+        st.setAttribute("data-interactive", "");
+        wrap.appendChild(st);
+        pre._panel = st;
+        st.querySelector(".replay").addEventListener("click", () => trace(pre, false));
+        clearPanel(pre);
+      }
+
+      function clearPanel(pre) {
+        const st = pre._panel;
+        if (!st) return;
+        pre._vars = new Map();
+        st.querySelector(".vars").innerHTML = `<span class="empty">none yet</span>`;
+        st.querySelector(".out").innerHTML = `<span class="empty">nothing printed</span>`;
+        pre._outN = 0;
+      }
+
+      function setVars(pre, vars, instant) {
+        const box = pre._panel.querySelector(".vars");
+        for (const [k, v] of vars) v === "" ? pre._vars.delete(k) : pre._vars.set(k, v);
+        box.innerHTML = pre._vars.size ? [...pre._vars].map(([k, v]) => `<span class="k">${esc(k)}</span><span class="v" data-k="${esc(k)}">${esc(v)}</span>`).join("") : `<span class="empty">none</span>`;
+        if (instant) return;
+        for (const [k, v] of vars) {
+          const el = [...box.querySelectorAll(".v")].find((e) => e.dataset.k === k);
+          if (!el) continue;
+          el.classList.add("flash");
+          requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove("flash")));
+        }
+      }
+
+      function print(pre, text, err, instant) {
+        const out = pre._panel.querySelector(".out");
+        if (!pre._outN) out.innerHTML = "";
+        pre._outN++;
+        const d = document.createElement("div");
+        if (err) d.className = "err";
+        d.textContent = text;
+        out.appendChild(d);
+        if (!instant) gsap.from(d, { x: -12, opacity: 0, duration: 0.3 });
+      }
+
+      function reset(pre) {
+        pre._tl?.kill();
+        pre.classList.remove("tracing", "traced");
+        pre.querySelectorAll(".line").forEach((l) => {
+          l.classList.remove("run", "now");
+          l.querySelectorAll(".tb").forEach((b) => b.remove());
+        });
+        clearPanel(pre);
+        pre._onReset?.();
+      }
+
+      function trace(pre, instant, from = 0, to) {
+        reset(pre);
+        const seq = parseTrace(pre.dataset.trace);
+        to = to ?? seq.length;
+        const STEP = speed(seq.length);
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        pre.classList.add("tracing");
+        const tl = gsap.timeline();
+        seq.slice(0, to).forEach((s, k) => {
+          const fast = instant || k < from;
+          tl.call(() => {
+            lines.forEach((l) => l.classList.remove("now"));
+            const el = lines[s.line - 1];
+            if (el) el.classList.add("run", "now");
+            if (s.kind && el) {
+              el.querySelectorAll(".tb").forEach((o) => o.remove());
+              const b = document.createElement("span");
+              b.className = "tb " + ({ T: "t", F: "f", E: "f", "~": "" })[s.kind];
+              b.textContent = s.note ?? (s.kind === "T" ? "True" : s.kind === "F" ? "False" : "");
+              el.appendChild(b);
+              if (!fast) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+            }
+            if (s.vars && pre._panel) setVars(pre, s.vars, fast);
+            if (s.out !== undefined && pre._panel) print(pre, s.out, s.kind === "E", fast);
+            pre._onBeat?.(s, k, fast);
+          }, null, Math.max(0, k - from) * STEP);
+        });
+        tl.call(() => {
+          lines.forEach((l) => l.classList.remove("now"));
+          pre.classList.replace("tracing", "traced");
+        }, null, Math.max(0, to - from) * STEP);
+        if (instant) tl.progress(1);
+        pre._tl = tl;
+      }
+
+      const traces = [...document.querySelectorAll("pre.trace[data-trace]")];
+      traces.forEach(buildPanel);
+      const setDelay = (pre) => pre.style.setProperty("--ans-delay", parseTrace(pre.dataset.trace).length * speed(parseTrace(pre.dataset.trace).length) + "s");
+      traces.filter((p) => !p.hasAttribute("data-upto")).forEach(setDelay);
+      const firstAnswer = (pre) => pre.querySelector(".line.answer");
+
+      // A trace runs when its first answer line is revealed, or on a [data-go] step
+      Deck.on("step", (slide, i, d) => {
+        for (const el of d.elements) {
+          let pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el !== firstAnswer(pre)) pre = null;
+          if (!pre && el.hasAttribute("data-go")) pre = slide.querySelector("pre.trace[data-trace]");
+          if (pre) trace(pre, d.dir < 0);
+        }
+      });
+      Deck.on("unstep", (slide, i, d) => {
+        for (const el of d.elements) {
+          const pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el === firstAnswer(pre)) reset(pre);
+          if (el.hasAttribute("data-go")) slide.querySelectorAll("pre.trace[data-trace]").forEach(reset);
+        }
+      });
+      Deck.on("enter", (slide, i, d) => {
+        slide.querySelectorAll("pre.trace[data-trace]").forEach((pre) => {
+          reset(pre);
+          if (pre.hasAttribute("data-auto")) trace(pre, d.dir < 0);
+        });
+      });
+      Deck.on("leave", (slide) => slide.querySelectorAll("pre.trace").forEach(reset));
+
+      // data-upto: straight-line code with several answers. Each revealed answer
+      // runs the code up to its own line.
+      function upto(slide, instant) {
+        for (const pre of slide.querySelectorAll("pre.trace[data-upto]")) {
+          const answers = [...pre.querySelectorAll(".line.answer")];
+          const n = answers.filter((a) => a.classList.contains("shown")).length;
+          const prev = pre._upto || 0;
+          if (!n) {
+            reset(pre);
+            pre._upto = 0;
+            continue;
+          }
+          const lines = [...pre.querySelectorAll(".line")];
+          const L = lines.indexOf(answers[n - 1]) + 1;
+          const seq = parseTrace(pre.dataset.trace);
+          let to = seq.findIndex((b) => b.line > L);
+          if (to < 0) to = seq.length;
+          if (to > prev && !instant) trace(pre, false, prev, to);
+          else trace(pre, true, 0, to);
+          pre._upto = to;
+        }
+      }
+      Deck.on("step", (slide, i, d) => upto(slide, d.dir < 0 || d.elements.length > 1));
+      Deck.on("unstep", (slide) => upto(slide, true));
+      Deck.on("enter", (slide) => slide.querySelectorAll("pre.trace[data-upto]").forEach((p) => (p._upto = 0)));
+
+      // Chips: try the same code with another value. Each chip carries the new
+      // literal (data-lit, written into line data-lit-line), its trace and output.
+      for (const box of document.querySelectorAll(".try")) {
+        const slide = box.closest(".slide");
+        const pre = slide.querySelector("pre.trace");
+        const chips = [...box.querySelectorAll(".chip[data-trace]")];
+        if (!pre || !chips.length) continue;
+        const apply = (chip, run) => {
+          chips.forEach((c) => c.classList.toggle("on", c === chip));
+          const line = pre.querySelectorAll(".line")[+pre.dataset.litLine - 1];
+          const lit = line?.querySelector(".hljs-string, .hljs-number, .hljs-literal, .hljs-keyword:last-child");
+          if (lit) lit.textContent = chip.dataset.lit;
+          const ans = firstAnswer(pre);
+          if (ans) (ans.querySelector(".hljs-comment") || ans).textContent = "# " + chip.dataset.out;
+          pre.dataset.trace = chip.dataset.trace;
+          setDelay(pre);
+          if (run) trace(pre, false);
+        };
+        box.addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (c) apply(c, true);
+        });
+        Deck.scene(slide, { enter: () => apply(chips[0], false) });
+      }
+
+      // ------------------------------------------------------------ strip
+      // <div class="strip" data-s="Hello"> (characters) or data-items='[1,2]' with
+      // data-kind="list|tuple|array". data-sel: one selection per answer line of the
+      // slide, separated by ";": an index, a slice a:b:c, a list [i,j], #sub (count),
+      // @sub (find), "-" (nothing). Add "=>text" to override the result shown.
+      function pyIndices(n, sel) {
+        sel = sel.trim();
+        if (sel === "-" || sel === "") return [];
+        if (sel.startsWith("[")) return JSON.parse(sel).map((i) => (i < 0 ? n + i : i));
+        if (!sel.includes(":")) {
+          const i = +sel;
+          return [i < 0 ? n + i : i];
+        }
+        let [a, b, c] = sel.split(":").map((x) => (x.trim() === "" ? null : +x));
+        c = c ?? 1;
+        const norm = (x, d) => (x === null ? d : x < 0 ? Math.max(n + x, c < 0 ? -1 : 0) : Math.min(x, c < 0 ? n - 1 : n));
+        a = norm(a, c > 0 ? 0 : n - 1);
+        b = norm(b, c > 0 ? n : -1);
+        const out = [];
+        for (let i = a; c > 0 ? i < b : i > b; i += c) out.push(i);
+        return out;
+      }
+
+      for (const strip of document.querySelectorAll(".strip")) {
+        const items = strip.dataset.items ? JSON.parse(strip.dataset.items) : [...strip.dataset.s];
+        const isStr = !strip.dataset.items || strip.hasAttribute("data-chars");
+        const kind = strip.dataset.kind || (isStr ? "str" : "list");
+        const n = items.length;
+        const show = (v) => (isStr ? (v === " " ? "␣" : v) : typeof v === "string" ? `'${v}'` : String(v));
+        const rep = (v) => (isStr ? `'${v}'` : typeof v === "string" ? `'${v}'` : String(v));
+        strip.innerHTML =
+          `<div class="cells">` +
+          items.map((v, i) => `<div class="cell"><span class="ord"></span><span class="ix">${i}</span><span class="ch${v === " " ? " sp" : ""}">${esc(show(v))}</span><span class="ix">${i - n}</span></div>`).join("") +
+          `</div><div class="res"></div>`;
+        if (strip.dataset.neg === "off") strip.querySelectorAll(".cell .ix:last-child").forEach((e) => (e.style.visibility = "hidden"));
+        const cells = [...strip.querySelectorAll(".cell")];
+        const res = strip.querySelector(".res");
+        const sels = (strip.dataset.sel || "").split(";");
+        const slide = strip.closest(".slide");
+        let cur = -2;
+
+        function pick(k, instant) {
+          if (k === cur) return;
+          cur = k;
+          gsap.killTweensOf(strip.querySelectorAll(".ch, .res"));
+          cells.forEach((c) => {
+            c.classList.remove("pick");
+            c.querySelector(".ord").textContent = "";
+          });
+          gsap.set(strip.querySelectorAll(".ch"), { y: 0 });
+          gsap.set(res, { clearProps: "opacity,transform" });
+          if (k < 0 || !sels[k] || sels[k].trim() === "-") {
+            strip.classList.remove("picking");
+            res.innerHTML = "";
+            return;
+          }
+          let [sel, override] = sels[k].split("=>");
+          sel = sel.trim();
+          let idx, text;
+          if (sel.startsWith("#") || sel.startsWith("@")) {
+            const sub = sel.slice(1);
+            const s = items.join("");
+            idx = [];
+            let first = -1;
+            for (let p = s.indexOf(sub); p >= 0; p = s.indexOf(sub, p + sub.length)) {
+              if (first < 0) first = p;
+              for (let j = 0; j < sub.length; j++) idx.push(p + j);
+              if (sel[0] === "@") break;
+            }
+            text = sel[0] === "#" ? String(idx.length / Math.max(sub.length, 1)) : String(first);
+          } else {
+            idx = pyIndices(n, sel);
+            const vals = idx.map((i) => items[i]);
+            const single = !sel.includes(":") && !sel.startsWith("[");
+            if (single) text = rep(vals[0]);
+            else if (isStr) text = `'${vals.join("")}'`;
+            else if (kind === "tuple") text = vals.length === 1 ? `(${rep(vals[0])},)` : `(${vals.map(rep).join(", ")})`;
+            else if (kind === "array") text = `array([${vals.map(rep).join(", ")}])`;
+            else text = `[${vals.map(rep).join(", ")}]`;
+          }
+          if (override !== undefined) text = override.trim();
+          strip.classList.add("picking");
+          res.innerHTML = `<span class="lbl">result</span>${esc(text)}`;
+          idx.forEach((i, o) => {
+            const c = cells[i];
+            if (!c) return;
+            c.classList.add("pick");
+            if (idx.length > 1 && !sel.startsWith("#") && !sel.startsWith("@")) {
+              const od = c.querySelector(".ord");
+              od.textContent = od.textContent ? od.textContent + "," + (o + 1) : o + 1;
+            }
+            if (!instant) gsap.fromTo(c.querySelector(".ch"), { y: 0 }, { y: -8, duration: 0.25, delay: o * 0.12, yoyo: true, repeat: 1, ease: "power2.out" });
+          });
+          if (!instant) gsap.from(res, { opacity: 0, y: 8, duration: 0.4, delay: idx.length * 0.12 });
+        }
+        const sync = (instant) => {
+          const scope = strip.dataset.scope ? slide.querySelector(strip.dataset.scope) : slide;
+          let k = scope.querySelectorAll(".line.answer.shown, .sel.shown").length - 1;
+          if (strip.hasAttribute("data-lines")) {
+            // one selection per code line; blank entries keep the previous one
+            const n = scope.querySelectorAll("pre .line.step.shown").length;
+            k = -1;
+            for (let i = n - 1; i >= 0; i--) if (sels[i] && sels[i].trim()) { k = i; break; }
+          }
+          pick(k, instant);
+        };
+        Deck.scene(slide, {
+          enter: () => {
+            cur = -2;
+            pick(-1, true);
+          },
+          step: (s, n, els, d) => sync(d.dir < 0 || els.length > 1),
+          unstep: () => sync(true),
+        });
+      }
+
+      // ------------------------------------------------------------ rewrite
+      // <div class="rw"><div class="rs">first</div><div class="rs step" data-anim="none">next</div>…</div>
+      for (const rw of document.querySelectorAll(".rw")) {
+        const states = [...rw.querySelectorAll(":scope > .rs")];
+        const dots = document.createElement("div");
+        dots.className = "rw-dots";
+        dots.innerHTML = states.map(() => "<i></i>").join("");
+        rw.after(dots);
+        const sync = () => {
+          let k = 0;
+          states.forEach((s, i) => {
+            if (i === 0 || s.classList.contains("shown")) k = i;
+          });
+          states.forEach((s, i) => {
+            s.classList.toggle("cur", i === k);
+            s.classList.toggle("past", i < k);
+          });
+          [...dots.children].forEach((d, i) => d.classList.toggle("on", i <= k));
+        };
+        sync();
+        const slide = rw.closest(".slide");
+        Deck.scene(slide, { enter: sync, step: sync, unstep: sync });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+      // ================= end shared widgets =================
+    </script>
+  </body>
+</html>

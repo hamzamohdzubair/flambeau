@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Generator Expressions</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Iterator view: a cursor walking over an iterable ---------- */
+      .itv {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        min-width: 0;
+      }
+
+      .itv .src {
+        max-width: 100%;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+
+      .itv .lbl {
+        padding-top: 0.9rem;
+        font: 500 0.8rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .itv .cells {
+        min-width: 0;
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2.6rem 0.4rem;
+        padding-bottom: 2.6rem;
+      }
+
+      .itv .cell.gstart:not(:first-child) {
+        margin-left: 1.1rem;
+      }
+
+      .itv.small .cell {
+        min-width: 2.3rem;
+        height: 2.5rem;
+        padding: 0 0.35rem;
+        font-size: 0.95rem;
+      }
+
+      .itv .outs .build b {
+        color: var(--green);
+      }
+
+      .itv .cell {
+        display: grid;
+        place-items: center;
+        min-width: 3rem;
+        height: 3rem;
+        padding: 0 0.6rem;
+        border-radius: 10px;
+        border: 1.5px solid rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.14);
+        font: 600 1.15rem var(--font-mono);
+        color: var(--text);
+        transition:
+          opacity 0.35s,
+          border-color 0.35s,
+          background 0.35s;
+      }
+
+      .itv .cell.taken {
+        opacity: 0.35;
+        border-style: dashed;
+        background: transparent;
+      }
+
+      .itv .cell.skip {
+        opacity: 0.4;
+        border-color: var(--red);
+        border-style: dashed;
+        background: transparent;
+        text-decoration: line-through;
+        text-decoration-color: var(--red);
+      }
+
+      .itv .ptr {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 3rem;
+        font: 600 0.75rem var(--font-mono);
+        color: var(--cyan);
+        white-space: nowrap;
+        transition: opacity 0.3s;
+      }
+
+      .itv .ptr::before {
+        content: "";
+        width: 0;
+        height: 0;
+        border: 0.45rem solid transparent;
+        border-bottom: 0.6rem solid var(--cyan);
+        border-top: 0;
+        margin-bottom: 0.15rem;
+      }
+
+      .itv .ptr.end {
+        color: var(--red);
+      }
+
+      .itv .ptr.end::before {
+        border-bottom-color: var(--red);
+      }
+
+      .itv .outs {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: min(100%, 18rem);
+        min-height: 2.4rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 0.95rem/1.5 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .itv .outs b {
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      .itv .outs .err b {
+        color: var(--red);
+      }
+
+      .flyval {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        padding: 0 0.5em;
+        border-radius: 8px;
+        font: 600 1.05rem/1.7 var(--font-mono);
+        color: #fff;
+        background: rgba(34, 211, 238, 0.35);
+        border: 1px solid var(--cyan);
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
+      }
+
+      @media (max-width: 760px) {
+        .itv .cells {
+          gap: 0.25rem;
+        }
+
+        .itv .cell {
+          min-width: 1.9rem;
+          height: 2.3rem;
+          padding: 0 0.3rem;
+          font-size: 0.9rem;
+        }
+
+        .itv .src {
+          flex-direction: column;
+          align-items: center;
+          gap: 0.2rem;
+        }
+
+        .itv .lbl {
+          padding-top: 0;
+        }
+
+        .itv .outs {
+          font-size: 0.8rem;
+        }
+      }
+
+      .itv-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .itv-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: center;
+        width: min(100%, 64rem);
+      }
+
+      .itv-cols.stack {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 1.2rem;
+      }
+
+      .itv-cols.stack pre {
+        width: min(100%, 44rem);
+      }
+
+      .itv-cols pre {
+        width: 100%;
+      }
+
+      @media (max-width: 760px) {
+        .itv-cols {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+      }
+      .slide > pre {
+        width: min(100%, 44rem);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- list vs generator memory ---------- */
+      .mem2 {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 1.4rem;
+        width: min(100%, 60rem);
+      }
+
+      .mem2 .panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 1rem 1.2rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      .mem2 h3 {
+        font-size: 1.05rem;
+        margin: 0;
+      }
+
+      .mem2 .dots {
+        display: grid;
+        grid-template-columns: repeat(40, 1fr);
+        gap: 2px;
+        width: 100%;
+      }
+
+      .mem2 .dots i {
+        aspect-ratio: 1;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .mem2 .dots i.on {
+        background: var(--violet);
+      }
+
+      .mem2 .one {
+        display: grid;
+        place-items: center;
+        width: 7rem;
+        height: 4rem;
+        border-radius: 12px;
+        border: 2px solid var(--cyan);
+        background: rgba(34, 211, 238, 0.12);
+        font: 600 1.4rem var(--font-mono);
+        color: var(--text);
+      }
+
+      .mem2 .sz {
+        font: 0.9rem var(--font-mono);
+        color: var(--muted);
+        text-align: center;
+      }
+
+      /* ---------- getsizeof bars ---------- */
+      .bars {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 0.8rem 1rem;
+        align-items: center;
+        width: min(100%, 44rem);
+        font: 0.95rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .bars .track {
+        position: relative;
+        height: 2.2rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .bars .bar {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 0;
+        border-radius: 8px;
+        background: var(--gradient);
+      }
+
+      .bars .val {
+        position: absolute;
+        left: 0.6rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text);
+        white-space: nowrap;
+      }
+
+      @media (max-width: 760px) {
+        .mem2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · comprehensions</span>
+      <h1 class="grad-each"><span>Generator</span> <span>Expressions</span></h1>
+      <p>A comprehension in round brackets: it describes the values, and computes each one only when it is asked for.</p>
+    </section>
+
+    <!-- ================================================================ basic -->
+    <section class="slide" id="basic">
+      <h2>Basic generator expression</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # generator expression (lazy)
+          gen = (x**2 for x in range(5))
+          # ans: &lt;generator object&gt;
+          list(gen)
+          # ans: [0, 1, 4, 9, 16]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">Making <code>gen</code> computes nothing. <code>list()</code> pulls the values through one by one, squaring each as it passes.</p>
+    </section>
+
+    <!-- ================================================================ vs list -->
+    <section class="slide" id="vslist">
+      <h2>Generator vs list</h2>
+      <pre><code class="language-python">
+        # list - all in memory
+        lst = [x**2 for x in range(1000)]
+        # generator - on demand
+        gen = (x**2 for x in range(1000))
+      </code></pre>
+      <div class="mem2">
+        <div class="panel">
+          <h3>List: all 1000 squares are stored</h3>
+          <div class="dots"></div>
+          <p class="sz">computed up front, held in memory</p>
+        </div>
+        <div class="panel">
+          <h3>Generator: one at a time</h3>
+          <div class="one">0</div>
+          <p class="sz">x = <span class="xv">0</span>: only the current value exists</p>
+        </div>
+      </div>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <!-- ================================================================ iterate once -->
+    <section class="slide" id="once">
+      <h2>Iterating a generator</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # iterate once
+          gen = (x for x in range(3))
+          for val in gen:
+              print(val)
+          # ans: 0, 1, 2
+          # ans: exhausted after iteration
+          for val in gen:
+              print(val)
+          # ans: (nothing)
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ in functions -->
+    <section class="slide">
+      <h2>Generators inside function calls</h2>
+      <pre><code class="language-python">
+        # use in sum
+        sum(x**2 for x in range(10))
+        # ans: 285
+        # use in max
+        max(x for x in range(10) if x % 2 == 0)
+        # ans: 8
+      </code></pre>
+      <p class="hint">When the generator is the only argument, its own brackets can be dropped. No list is ever built.</p>
+    </section>
+
+    <!-- ================================================================ condition -->
+    <section class="slide" id="cond">
+      <h2>Generator with a condition</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          # filter with generator
+          gen = (x for x in range(10) if x % 2 == 0)
+          list(gen)
+          # ans: [0, 2, 4, 6, 8]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">Odd values are checked and skipped (red); only even ones come out.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        # generator type?
+        gen = (x for x in range(3))
+        type(gen)
+        # ans: &lt;class 'generator'&gt;
+      </code></pre>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # can iterate twice?
+          gen = (x for x in range(3))
+          list(gen)
+          # ans: [0, 1, 2]
+          list(gen)
+          # ans: [] (exhausted)
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        # memory efficiency?
+        import sys
+        lst = [x for x in range(1000)]
+        gen = (x for x in range(1000))
+        sys.getsizeof(lst)
+        # ans: ~9000 bytes
+        sys.getsizeof(gen)
+        # ans: ~200 bytes
+      </code></pre>
+      <div class="bars">
+        <span>lst</span><div class="track"><div class="bar" data-v="9000"></div><span class="val">~9000 bytes</span></div>
+        <span>gen</span><div class="track"><div class="bar" data-v="200"></div><span class="val">~200 bytes</span></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # next() on generator?
+          gen = (x for x in range(3))
+          next(gen)
+          # ans: 0
+          next(gen)
+          # ans: 1
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # generator with if-else?
+          gen = (x if x &gt; 0 else 0 for x in [-1, 1, 2])
+          list(gen)
+          # ans: [0, 1, 2]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">An <code>if</code>-<code>else</code> before <code>for</code> transforms every value; nothing is filtered out.</p>
+    </section>
+
+    <section class="slide" id="e6">
+      <h2>Exercise 6</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # chaining generators?
+          gen1 = (x for x in range(5))
+          gen2 = (x*2 for x in gen1)
+          list(gen2)
+          # ans: [0, 2, 4, 6, 8]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">Each value is pulled from <code>gen1</code> and doubled by <code>gen2</code> on its way out.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # generator in sum?
+        sum(x for x in range(101))
+        # ans: 5050
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre><code class="language-python">
+        # empty generator?
+        gen = (x for x in [])
+        list(gen)
+        # ans: []
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # generator vs range?
+        range(10)  # range object
+        (x for x in range(10))  # generator
+        # ans: both are lazy
+      </code></pre>
+      <p class="hint step">But a <code>range</code> can be iterated again and indexed; a generator is used up after one pass.</p>
+    </section>
+
+    <section class="slide" id="e10">
+      <h2>Exercise 10</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # convert to list?
+          gen = (x**2 for x in range(3))
+          lst = list(gen)
+          # ans: [0, 1, 4]
+          # ans: gen is now exhausted
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>Round brackets</h3><p><code>(expr for x in it if cond)</code> makes a generator, not a tuple.</p></div>
+        <div class="card step"><h3>Lazy</h3><p>Values are computed when asked for, so memory stays tiny.</p></div>
+        <div class="card step"><h3>One pass</h3><p>After it is exhausted, it gives nothing more.</p></div>
+        <div class="card step"><h3>Feed functions</h3><p><code>sum</code>, <code>max</code>, <code>list</code> and friends consume generators directly.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ Iterator view
+      // An iterable's items in a row, and an iterator's cursor under the next one.
+      // Each deck step runs some operations: "next", "list" (drain the rest) or
+      // "loop" (a for loop: print each, then StopIteration ends it quietly).
+      const escI = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const BEAT = 0.6;
+      const dur = (e) => (e.build ? 0.25 : e.skip !== undefined || (e.take !== undefined && !e.line && !e.add) ? BEAT / 2 : BEAT);
+
+      function Itv(slide, cfg) {
+        const root = cfg.root || slide.querySelector(".itv");
+        root.classList.toggle("small", !!cfg.small);
+        const items = cfg.items;
+        root.innerHTML = `<div class="src"><span class="lbl">${escI(cfg.name || "")}</span><div class="cells">${items.map((v, i) => `<span class="cell${cfg.groups?.includes(i) ? " gstart" : ""}">${escI(v)}</span>`).join("")}<span class="ptr">${escI(cfg.ptr || "iterator")}</span></div></div><div class="outs"></div>`;
+        const cells = [...root.querySelectorAll(".cell")];
+        const ptr = root.querySelector(".ptr");
+        const outs = root.querySelector(".outs");
+        let tl = null, seen = 0, pending = null, fliers = [];
+
+        // cfg.f maps an item to the value handed out; cfg.keep filters items
+        const F = cfg.f || ((v) => v);
+        const keep = cfg.keep || (() => true);
+        function events(k) {
+          const groups = [];
+          let pos = 0;
+          const skipTo = (ev) => {
+            while (pos < items.length && !keep(items[pos])) ev.push({ skip: pos++ });
+          };
+          for (let s = 0; s < k && s < cfg.steps.length; s++) {
+            const ev = [];
+            for (let op of [].concat(cfg.steps[s])) {
+              if (typeof op === "string") op = { op };
+              const call = op.call || cfg.call || "next(iterator)";
+              if (op.op === "next") {
+                skipTo(ev);
+                if (pos < items.length) ev.push({ take: pos, val: F(items[pos]), line: `${escI(call)} → <b>${escI(op.show ?? F(items[pos]))}</b>` }), pos++;
+                else ev.push({ stop: true, line: `${escI(call)} → <b>StopIteration</b>`, err: true });
+              } else if (op.op === "list") {
+                const got = [];
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos }), got.push(F(items[pos]));
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+                ev.push({ line: `${escI(op.call || "list(" + (cfg.ptrName || "it") + ")")} → <b>${escI(op.show ?? "[" + got.join(", ") + "]")}</b>` });
+              } else if (op.op === "loop") {
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos, val: F(items[pos]), line: `${escI(op.call || "print")} → <b>${escI(F(items[pos]))}</b>` });
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+                ev.push({ stop: true, line: `StopIteration → <b>${escI(op.end || "loop ends")}</b>` });
+              } else if (op.op === "build") {
+                // a comprehension: kept items are transformed and added to a growing list
+                ev.push({ build: op.call || "result" });
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos, val: F(items[pos]), add: true });
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+              } else if (op.op === "say") ev.push({ line: op.line, err: op.err });
+            }
+            groups.push(ev);
+          }
+          return groups;
+        }
+
+        function placePtr(pos, anim) {
+          const last = cells[cells.length - 1];
+          const at = pos < cells.length ? cells[pos] : last;
+          const x = pos < cells.length ? at.offsetLeft + at.offsetWidth / 2 : last.offsetLeft + last.offsetWidth + 16;
+          const y = at.offsetTop + at.offsetHeight + 4;
+          ptr.classList.toggle("end", pos >= cells.length);
+          ptr.textContent = pos >= cells.length ? "end" : cfg.ptr || "iterator";
+          const w = ptr.offsetWidth;
+          gsap.killTweensOf(ptr, "x,y");
+          if (anim) gsap.to(ptr, { x: x - w / 2, y, duration: 0.4, ease: "power2.inOut" });
+          else gsap.set(ptr, { x: x - w / 2, y });
+        }
+
+        function clear() {
+          tl?.kill();
+          fliers.forEach((f) => f.remove());
+          fliers = [];
+          cells.forEach((c) => c.classList.remove("taken", "skip"));
+          outs.innerHTML = "";
+          gsap.killTweensOf(ptr);
+          gsap.set(ptr, { rotate: 0 });
+          placePtr(0, false);
+        }
+
+        function apply(e, anim) {
+          if (e.skip !== undefined) {
+            cells[e.skip].classList.add("skip");
+            placePtr(e.skip + 1, anim);
+            if (anim) gsap.fromTo(cells[e.skip], { x: -4 }, { x: 0, duration: 0.3, ease: "elastic.out(1, 0.3)" });
+            return;
+          }
+          let line = null;
+          if (e.build) {
+            line = document.createElement("div");
+            line.className = "build";
+            line.innerHTML = `${escI(e.build)} = [<span class="acc"></span>]`;
+            outs.appendChild(line);
+            if (anim) gsap.fromTo(line, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+            return;
+          }
+          if (e.add) {
+            const acc = [...outs.querySelectorAll(".build .acc")].pop();
+            if (acc.children.length) acc.append(", ");
+            line = document.createElement("b");
+            line.textContent = e.val;
+            acc.appendChild(line);
+          }
+          if (e.line) {
+            line = document.createElement("div");
+            if (e.err) line.className = "err";
+            line.innerHTML = e.line;
+            outs.appendChild(line);
+          }
+          if (e.take !== undefined) {
+            const cell = cells[e.take];
+            if (anim && line) {
+              const from = cell.getBoundingClientRect();
+              const to = (line.matches("b") ? line : line.querySelector("b")).getBoundingClientRect();
+              gsap.set(line, { opacity: 0 });
+              const f = document.createElement("span");
+              f.className = "flyval";
+              f.textContent = e.val ?? cell.textContent;
+              document.body.appendChild(f);
+              fliers.push(f);
+              gsap.set(f, { left: from.left, top: from.top });
+              gsap.to(f, { left: to.left, top: to.top - 4, duration: 0.5, ease: "power2.inOut", onComplete: () => { f.remove(); gsap.to(line, { opacity: 1, duration: 0.2 }); } });
+            }
+            cell.classList.add("taken");
+            if (anim && !line) gsap.fromTo(cell, { y: -10 }, { y: 0, duration: 0.3 });
+            placePtr(e.take + 1, anim);
+          } else if (anim && line) {
+            gsap.fromTo(line, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 });
+            if (e.stop) gsap.fromTo(ptr, { rotate: -12 }, { rotate: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+          }
+          if (e.stop) placePtr(cells.length, anim);
+        }
+
+        function render(k, anim) {
+          clear();
+          const groups = events(k);
+          const lastAnim = anim ? groups.pop() : null;
+          groups.flat().forEach((e) => apply(e, false));
+          if (!lastAnim) return;
+          tl = gsap.timeline();
+          let t = 0;
+          lastAnim.forEach((e) => {
+            tl.call(() => apply(e, true), null, t);
+            t += dur(e);
+          });
+        }
+
+        function sync(dir) {
+          const n = Deck.step - (cfg.offset || 0);
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          render(Math.max(0, n), dir > 0 && jump === 1 && n > 0 && n <= cfg.steps.length);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each step's answer waits for its animation
+        const steps = [...slide.querySelectorAll(".step")];
+        cfg.steps.forEach((ops, i) => {
+          const el = steps[i + (cfg.offset || 0)];
+          const ev = events(i + 1)[i];
+          const t = ev.slice(0, -1).reduce((a, e) => a + dur(e), 0);
+          if (el && ev.length > 1) el.style.setProperty("--ans-delay", t + 0.5 + "s");
+        });
+
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        render(0, false);
+      }
+      const itv = (id, cfg) => Itv(document.getElementById(id), cfg);
+      // ================================================================ lazy views
+      const r = (n) => Array.from({ length: n }, (_, i) => String(i));
+      const sq = (x) => String(x * x);
+      itv("basic", { items: r(5), name: "range(5)", ptr: "gen", f: sq, steps: [{ op: "say", line: "gen → <b>&lt;generator object&gt;</b>, nothing computed yet" }, { op: "list", call: "list(gen)" }] });
+      itv("once", { items: r(3), name: "range(3)", ptr: "gen", steps: [{ op: "loop", call: "print(val)" }, { op: "say", line: "gen is <b>exhausted</b>" }, { op: "loop", call: "print(val)", end: "loop ends at once" }] });
+      itv("cond", { items: r(10), name: "range(10)", ptr: "gen", keep: (x) => x % 2 === 0, steps: [{ op: "list", call: "list(gen)" }] });
+      itv("e2", { items: r(3), name: "range(3)", ptr: "gen", steps: [{ op: "list", call: "list(gen)" }, { op: "list", call: "list(gen)" }] });
+      itv("e4", { items: r(3), name: "range(3)", ptr: "gen", call: "next(gen)", steps: ["next", "next"] });
+      itv("e5", { items: ["-1", "1", "2"], name: "[-1, 1, 2]", ptr: "gen", f: (x) => String(x > 0 ? +x : 0), steps: [{ op: "list", call: "list(gen)" }] });
+      itv("e6", { items: r(5), name: "gen1", ptr: "gen2", f: (x) => String(x * 2), steps: [{ op: "list", call: "list(gen2)" }] });
+      itv("e10", { items: r(3), name: "range(3)", ptr: "gen", f: sq, steps: [{ op: "list", call: "lst = list(gen)" }, { op: "say", line: "gen is <b>exhausted</b>" }] });
+
+      // ================================================================ list vs generator memory
+      {
+        const slide = document.getElementById("vslist");
+        const dots = slide.querySelector(".dots");
+        dots.innerHTML = "<i></i>".repeat(1000);
+        const cells = [...dots.children];
+        const one = slide.querySelector(".one"), xv = slide.querySelector(".xv");
+        let tl, ticker;
+        const stop = () => {
+          tl?.kill();
+          clearInterval(ticker);
+        };
+        const reset = () => {
+          stop();
+          cells.forEach((c) => c.classList.remove("on"));
+          one.textContent = "0";
+          xv.textContent = "0";
+        };
+        const run = (instant) => {
+          stop();
+          if (instant) cells.forEach((c) => c.classList.add("on"));
+          else {
+            tl = gsap.timeline();
+            cells.forEach((c, i) => tl.call(() => c.classList.add("on"), null, i * 0.0012));
+          }
+          let x = 0;
+          ticker = setInterval(() => {
+            x = (x + 1) % 1000;
+            one.textContent = x * x;
+            xv.textContent = x;
+          }, 90);
+        };
+        Deck.scene(slide, {
+          enter: reset,
+          leave: reset,
+          step: (s, n, els, d) => run(d.dir < 0),
+          unstep: reset,
+        });
+      }
+
+      // ================================================================ getsizeof bars
+      {
+        const slide = document.getElementById("e3");
+        const bars = [...slide.querySelectorAll(".bar")];
+        const show = () =>
+          requestAnimationFrame(() =>
+            bars.forEach((b, i) => gsap.to(b, { width: i < Deck.step ? (+b.dataset.v / 9000) * 100 + "%" : 0, duration: 0.8, ease: "power3.out" }))
+          );
+        Deck.scene(slide, { enter: show, step: show, unstep: show });
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

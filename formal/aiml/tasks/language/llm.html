@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #next .sentence {
+        font-family: var(--font-mono);
+        font-size: clamp(1.1rem, 3vw, 1.6rem);
+        color: var(--text);
+        text-align: center;
+        min-height: 2.4em;
+      }
+
+      #next .sentence .tok {
+        padding: 0.05em 0.2em;
+        border-radius: 6px;
+        background: rgba(139, 92, 246, 0.25);
+      }
+
+      #next .cands {
+        display: grid;
+        gap: 0.5rem;
+        width: min(100%, 30rem);
+      }
+
+      #next .cand {
+        display: grid;
+        grid-template-columns: 6rem minmax(0, 1fr) 3.4rem;
+        gap: 0.8rem;
+        align-items: center;
+        font-family: var(--font-mono);
+      }
+
+      #next .cand i {
+        display: block;
+        height: 0.9rem;
+        border-radius: 6px;
+        background: var(--gradient);
+        transform-origin: left;
+      }
+
+      #next .cand.pick span {
+        color: var(--pink);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · Language</span>
+      <h1>LLM</h1>
+      <p>Large language models: text in, the most likely next token out, again and again.</p>
+    </section>
+
+    <section class="slide" id="next">
+      <h2>One token at a time</h2>
+      <p class="sentence"></p>
+      <div class="cands"></div>
+      <p class="center muted">An illustration: the words and probabilities are made up for the picture.</p>
+    </section>
+
+    <section class="slide section">
+      <h2>Aligned Query Expansion</h2>
+      <p class="center muted">Slides for this topic are being written.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // Each round: show candidate next tokens with probabilities, pick the top one, append it
+      const slide = document.querySelector("#next");
+      const sentence = slide.querySelector(".sentence");
+      const cands = slide.querySelector(".cands");
+      const prompt = "The cat sat on the";
+      const rounds = [
+        [["mat", 0.62], ["floor", 0.21], ["sofa", 0.12]],
+        [["and", 0.48], [".", 0.33], ["while", 0.1]],
+        [["purred", 0.55], ["slept", 0.3], ["the", 0.08]],
+        [[".", 0.81], ["loudly", 0.12], ["and", 0.05]],
+      ];
+      let tl = null;
+      function run() {
+        tl?.kill();
+        sentence.textContent = prompt;
+        tl = gsap.timeline({ repeat: -1, repeatDelay: 1.5, onRepeat: () => (sentence.textContent = prompt) });
+        rounds.forEach((r) => {
+          tl.call(() => {
+            cands.innerHTML = r.map(([w, p]) => `<div class="cand"><span>${w}</span><i style="width:${p * 100}%"></i><b>${p.toFixed(2)}</b></div>`).join("");
+            gsap.from(cands.querySelectorAll("i"), { scaleX: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" });
+          });
+          tl.call(() => cands.firstElementChild.classList.add("pick"), [], "+=1.1");
+          tl.call(() => {
+            const w = r[0][0];
+            const s = document.createElement("span");
+            s.className = "tok";
+            s.textContent = w;
+            sentence.append(w === "." ? "" : " ", s);
+            gsap.from(s, { opacity: 0, y: -14, duration: 0.4 });
+          }, [], "+=0.5");
+          tl.to({}, { duration: 0.7 });
+        });
+      }
+      Deck.scene("#next", {
+        enter: run,
+        leave: () => tl?.kill(),
+      });
+    </script>
+  </body>
+</html>

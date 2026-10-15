@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>For Loops</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tracer: code lines light up in the order Python runs them ---------- */
+      pre code,
+      .mem,
+      .viz text {
+        font-variant-ligatures: none;
+      }
+
+      .tracer {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(14rem, 22rem);
+        gap: 1.5rem;
+        align-items: start;
+        justify-content: center;
+        width: min(100%, 64rem);
+      }
+
+      .tracer pre {
+        width: auto;
+        min-width: min(100%, 26rem);
+        max-width: 100%;
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.42;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.3;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.boom {
+        background: linear-gradient(90deg, rgba(248, 113, 113, 0.32), rgba(248, 113, 113, 0.05));
+        box-shadow: inset 3px 0 0 var(--red);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        white-space: nowrap;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border: 1px solid rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f,
+      .tb.x {
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb.n {
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      /* ---------- Memory panel beside traced code ---------- */
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem 1.1rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-size: 0.95rem;
+      }
+
+      .mem h4 {
+        margin: 0 0 0.35rem;
+        font: 600 0.72rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .mem .slots {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .slot {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font-mono);
+      }
+
+      .mem .slot b {
+        min-width: 3.2rem;
+        font-weight: 500;
+        color: var(--violet-soft);
+        text-align: right;
+      }
+
+      .mem .slot span {
+        flex: 1;
+        padding: 0.12rem 0.55rem;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        background: rgba(139, 92, 246, 0.12);
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console {
+        min-height: 1.9rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.35);
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        color: var(--green);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console div.err {
+        color: var(--red);
+      }
+
+      .mem .frames {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.3rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .frame {
+        padding: 0.25rem 0.6rem;
+        border-radius: 8px;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.08);
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .mem .frame.top {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.18);
+      }
+
+      .mem .frame.hurt {
+        border-color: var(--red);
+        background: rgba(248, 113, 113, 0.16);
+      }
+
+      .mem .frame em {
+        display: block;
+        font-style: normal;
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+
+      .mem .exc {
+        align-self: flex-start;
+        padding: 0.15rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--red);
+        background: rgba(248, 113, 113, 0.18);
+        color: #fecaca;
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+
+      .mem .exc.caught {
+        border-color: var(--green);
+        background: rgba(134, 239, 172, 0.14);
+        color: var(--green);
+      }
+
+      .replay {
+        align-self: flex-end;
+        padding: 0.25rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.8rem var(--font);
+        cursor: pointer;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      /* ---------- Value chips ---------- */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .try.step:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .tracer {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.8rem;
+        }
+
+        .tracer pre {
+          min-width: 0;
+        }
+
+        .mem {
+          padding: 0.7rem 0.8rem;
+          gap: 0.5rem;
+          font-size: 0.85rem;
+        }
+      }
+
+      /* ---------- The iterable as a ribbon of boxes; the current item glows ---------- */
+      .ribbon {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.45rem;
+        min-height: 2.6rem;
+      }
+
+      .ribbon .cell {
+        position: relative;
+        min-width: 2.6rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 10px;
+        border: 1px solid rgba(167, 139, 250, 0.4);
+        background: rgba(139, 92, 246, 0.1);
+        font: 500 1rem var(--font-mono);
+        text-align: center;
+        transition:
+          background 0.3s,
+          border-color 0.3s,
+          opacity 0.3s,
+          transform 0.3s;
+      }
+
+      .ribbon .cell small {
+        position: absolute;
+        top: -1.15rem;
+        left: 0;
+        right: 0;
+        font: 0.68rem var(--font);
+        color: var(--faint);
+      }
+
+      .ribbon .cell.done {
+        opacity: 0.45;
+      }
+
+      .ribbon .cell.cur {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.22);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px -8px rgba(34, 211, 238, 0.7);
+      }
+
+      .ribbon-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        padding-top: 1rem;
+      }
+
+      .ribbon-wrap .label {
+        font-size: 0.8rem;
+        color: var(--faint);
+      }
+
+      /* ---------- range() on a number line ---------- */
+      #explore .viz {
+        width: min(100%, 50rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      .viz .axis {
+        stroke: rgba(167, 139, 250, 0.45);
+        stroke-width: 2;
+      }
+
+      .viz .tick {
+        stroke: rgba(167, 139, 250, 0.45);
+        stroke-width: 2;
+      }
+
+      .viz text {
+        fill: var(--muted);
+        font-family: var(--font-mono);
+        font-size: 15px;
+        text-anchor: middle;
+      }
+
+      .viz .hop {
+        fill: none;
+        stroke: var(--pink);
+        stroke-width: 2.5;
+      }
+
+      .viz .dot {
+        fill: #f0abfc;
+        filter: drop-shadow(0 0 8px #ec4899);
+      }
+
+      .viz .stop line {
+        stroke: var(--red);
+        stroke-width: 2.5;
+        stroke-dasharray: 6 5;
+      }
+
+      .viz .stop text {
+        fill: var(--red);
+        font-family: var(--font);
+        font-size: 13px;
+      }
+
+      .viz .start text {
+        fill: var(--green);
+        font-family: var(--font);
+        font-size: 13px;
+      }
+
+      .viz .start circle {
+        fill: none;
+        stroke: var(--green);
+        stroke-width: 2;
+      }
+
+      .rng {
+        font: 500 1.5rem var(--font-mono);
+      }
+
+      .rng .a {
+        color: var(--green);
+      }
+
+      .rng .b {
+        color: var(--red);
+      }
+
+      .rng .c {
+        color: var(--pink);
+      }
+
+      .produced {
+        min-height: 1.6em;
+        font: 1.15rem var(--font-mono);
+        color: var(--cyan);
+      }
+
+      @media (max-width: 760px) {
+        .rng {
+          font-size: 1.15rem;
+        }
+
+        .ribbon .cell {
+          min-width: 2.2rem;
+          padding: 0.25rem 0.5rem;
+          font-size: 0.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · control flow</span>
+      <h1 class="grad-each"><span>For</span> <span>Loops</span></h1>
+      <p>Run the same block once for every item in a sequence: numbers, list items or characters.</p>
+    </section>
+
+    <!-- ================================================================ basic -->
+    <section class="slide" id="basic">
+      <h2>Basic for loop</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # iterate over range
+          for i in range(5):
+              print(i)
+          # ans: prints 0, 1, 2, 3, 4 (one per line)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <div class="ribbon-wrap"><div class="ribbon" data-cells="0 1 2 3 4"></div><span class="label">range(5)</span></div>
+      <p class="hint">Each pass, <code>i</code> takes the next value from <code>range(5)</code>; the loop stops when the values run out.</p>
+    </section>
+
+    <!-- ================================================================ start/stop -->
+    <section class="slide" id="startstop">
+      <h2>Range with start and stop</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # range(start, stop)
+          for i in range(2, 7):
+              print(i)
+          # ans: 2, 3, 4, 5, 6
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <div class="ribbon-wrap"><div class="ribbon" data-cells="2 3 4 5 6"></div><span class="label">range(2, 7): the stop value 7 is not included</span></div>
+    </section>
+
+    <!-- ================================================================ step -->
+    <section class="slide" id="stepped">
+      <h2>Range with a step</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # range(start, stop, step)
+          for i in range(0, 10, 2):
+              print(i)
+          # ans: 0, 2, 4, 6, 8
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <div class="ribbon-wrap"><div class="ribbon" data-cells="0 2 4 6 8"></div><span class="label">range(0, 10, 2): count up in twos</span></div>
+    </section>
+
+    <!-- ================================================================ explorer -->
+    <section class="slide" id="explore">
+      <h2>How range() counts</h2>
+      <p class="rng"></p>
+      <svg class="viz" viewBox="0 30 760 180" aria-label="A number line from -1 to 10; range values appear as dots joined by hops, and the stop value is marked in red">
+        <line class="axis" x1="40" y1="130" x2="720" y2="130" />
+        <g class="ticks"></g>
+        <g class="hops"></g>
+        <g class="dots"></g>
+        <g class="start"><circle r="16" cy="25" /><text y="62">start</text></g>
+        <g class="stop"><line y1="-34" y2="20" /><text y="-42">stop (excluded)</text></g>
+      </svg>
+      <p class="produced"></p>
+      <div class="try" data-interactive></div>
+      <p class="hint">Start at <span style="color: var(--green)">start</span>, add <span style="color: var(--pink)">step</span> each time, and stop before reaching <span style="color: var(--red)">stop</span>.</p>
+    </section>
+
+    <!-- ================================================================ list -->
+    <section class="slide" id="list">
+      <h2>Iterate over a list</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # iterate list items
+          fruits = ["apple", "banana", "cherry"]
+          for fruit in fruits:
+              print(fruit)
+          # ans: apple, banana, cherry (one per line)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <div class="ribbon-wrap"><div class="ribbon" data-cells="'apple' 'banana' 'cherry'"></div><span class="label">fruits</span></div>
+      <p class="hint">No index needed: the loop variable is each item itself.</p>
+    </section>
+
+    <!-- ================================================================ enumerate -->
+    <section class="slide" id="enum">
+      <h2>Iterate with an index</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # enumerate for index and value
+          fruits = ["apple", "banana"]
+          for i, fruit in enumerate(fruits):
+              print(i, fruit)
+          # ans: 0 apple
+          # ans: 1 banana
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <div class="ribbon-wrap"><div class="ribbon" data-cells="(0,'apple') (1,'banana')"></div><span class="label">enumerate(fruits) hands out (index, item) pairs</span></div>
+    </section>
+
+    <!-- ================================================================ string -->
+    <section class="slide" id="string">
+      <h2>Iterate over a string</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # iterate over characters
+          for char in "abc":
+              print(char)
+          # ans: a, b, c (one per line)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <div class="ribbon-wrap"><div class="ribbon" data-cells="'a' 'b' 'c'"></div><span class="label">a string is a sequence of characters</span></div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then press → to trace the loop and check.</p>
+    </section>
+
+    <section class="slide" id="ex1">
+      <h2>Exercise 1</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # how many iterations?
+          for i in range(10):
+              pass
+          # ans: 10 iterations
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex2">
+      <h2>Exercise 2</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what is i after the loop?
+          for i in range(3):
+              pass
+          # ans: i is 2 (the last value)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex3">
+      <h2>Exercise 3</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what prints?
+          for i in range(3, 3):
+              print(i)
+          # ans: nothing (empty range)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex4">
+      <h2>Exercise 4</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # negative step?
+          for i in range(5, 0, -1):
+              print(i)
+          # ans: 5, 4, 3, 2, 1
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex5">
+      <h2>Exercise 5</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what is the sum?
+          total = 0
+          for i in range(1, 6):
+              total += i
+          # ans: 15 (1+2+3+4+5)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex6">
+      <h2>Exercise 6</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # enumerate start?
+          for i, x in enumerate(['a', 'b'], start=1):
+              print(i)
+          # ans: 1, 2
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex7">
+      <h2>Exercise 7</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what is the final i?
+          for i in range(5):
+              if i == 3:
+                  pass
+          # ans: i is 4 (the loop continues)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex8">
+      <h2>Exercise 8</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # nested loop count?
+          count = 0
+          for i in range(3):
+              for j in range(2):
+                  count += 1
+          # ans: count is 6
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex9">
+      <h2>Exercise 9</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # empty list?
+          for item in []:
+              print(item)
+          # ans: nothing (empty list)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex10">
+      <h2>Exercise 10</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what prints?
+          for i in range(1, 10, 3):
+              print(i)
+          # ans: 1, 4, 7
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="ex11">
+      <h2>Exercise 11</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # modify the loop variable?
+          for i in range(3):
+              i = 10
+              print(i)
+          # ans: 10, 10, 10 (but it doesn't affect the iteration)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3><code>range(stop)</code></h3><p>Counts from 0 up to, but not including, <code>stop</code>.</p></div>
+        <div class="card step"><h3><code>range(start, stop, step)</code></h3><p>A negative step counts down; an empty range runs the body zero times.</p></div>
+        <div class="card step"><h3>Any sequence</h3><p>Lists, strings and <code>enumerate(...)</code> pairs all work in a <code>for</code>.</p></div>
+        <div class="card step"><h3>The loop variable</h3><p>Keeps its last value after the loop; reassigning it inside does not change what comes next.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ tracer
+      // tracer(slide, frames, opts) replays a list of frames over the slide's
+      // <pre class="trace">, lighting lines in the order Python runs them and
+      // filling the slide's .mem panel. A frame is
+      //   { l: line (1-based), n: "note badge", c: true/false (condition badge),
+      //     v: { name: "repr" or null to delete }, o: "printed" or [...],
+      //     e: "error text for the output", s: ["<module>", "f(x=1)"] (call stack),
+      //     x: "ExceptionName" (raised; "" clears), k: true (exception caught) }
+      // It plays when the slide's .step.go (or its first answer line) is revealed.
+      const STEP = 0.55; // seconds per frame (opts.step overrides)
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function tracer(sel, frames, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        if (opts.chips && !frames.length) frames = opts.chips.frames(opts.chips.values[0]);
+        const pre = slide.querySelector("pre.trace");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const T = { slide, pre, lines, frames, tl: null };
+        const dt = opts.step || STEP;
+        const mem = slide.querySelector(".mem");
+        if (mem) {
+          const all = opts.chips ? opts.chips.values.flatMap((v) => opts.chips.frames(v)) : frames;
+          const has = (key) => all.some((f) => key.split(" ").some((q) => f[q] !== undefined));
+          const secs = opts.sections || [...(has("v") ? ["vars"] : []), ...(has("s") ? ["stack"] : []), ...(has("o e") || opts.chips ? ["out"] : [])];
+          const box = { vars: "slots", stack: "frames", out: "console" };
+          const title = { vars: opts.varsTitle || "Variables", stack: "Call stack", out: "Output" };
+          mem.innerHTML =
+            secs.map((s) => `<div class="sec-${s}"><h4>${title[s]}</h4><div class="${box[s]}"></div></div>`).join("") +
+            `<button class="replay" type="button" data-interactive>Replay</button>`;
+          mem.querySelector(".replay").addEventListener("click", () => T.play(false));
+        }
+        const $ = (q) => mem?.querySelector(q);
+
+        function stateAt(k) {
+          const st = { v: {}, o: [], s: null, x: "", caught: false };
+          for (let i = 0; i <= k; i++) {
+            const f = T.frames[i];
+            for (const [name, val] of Object.entries(f.v || {})) {
+              if (val === null) delete st.v[name];
+              else st.v[name] = val;
+            }
+            for (const o of [].concat(f.o ?? [])) st.o.push({ t: o });
+            if (f.e) st.o.push({ t: f.e, err: true });
+            if (f.s) st.s = f.s;
+            if (f.x !== undefined) {
+              st.x = f.x;
+              st.caught = false;
+            }
+            if (f.k) st.caught = true;
+          }
+          return st;
+        }
+
+        function render(k, anim) {
+          if (!mem) return;
+          const st = stateAt(k);
+          const slots = $(".slots");
+          if (slots) {
+            const have = new Map([...slots.children].map((el) => [el.dataset.name, el]));
+            for (const [name, el] of have) if (!(name in st.v)) el.remove();
+            for (const [name, val] of Object.entries(st.v)) {
+              let el = have.get(name);
+              if (!el) {
+                el = document.createElement("div");
+                el.className = "slot";
+                el.dataset.name = name;
+                el.innerHTML = `<b>${esc(name)}</b><span></span>`;
+                slots.appendChild(el);
+                if (anim) gsap.from(el, { opacity: 0, x: -14, duration: 0.35 });
+              }
+              const span = el.querySelector("span");
+              if (span.textContent !== val) {
+                span.textContent = val;
+                if (anim) gsap.fromTo(span, { backgroundColor: "rgba(34,211,238,0.5)" }, { backgroundColor: "rgba(139,92,246,0.12)", duration: 0.9 });
+              }
+            }
+          }
+          const con = $(".console");
+          if (con) {
+            if (con.children.length > st.o.length) con.innerHTML = "";
+            for (let i = con.children.length; i < st.o.length; i++) {
+              const d = document.createElement("div");
+              d.textContent = st.o[i].t;
+              if (st.o[i].err) d.className = "err";
+              con.appendChild(d);
+              if (anim) gsap.from(d, { opacity: 0, y: 8, duration: 0.3 });
+            }
+          }
+          const fr = $(".frames");
+          if (fr) {
+            const want = st.s || [];
+            if (!anim) fr.querySelectorAll(".gone").forEach((el) => el.remove());
+            const have = [...fr.children].filter((el) => !el.classList.contains("gone"));
+            let same = 0;
+            while (same < want.length && same < have.length && have[same].dataset.key === want[same]) same++;
+            // popped frames slide away (in red while an exception unwinds them)
+            have.slice(same).forEach((el) => {
+              if (!anim) return el.remove();
+              el.classList.add("gone");
+              el.classList.toggle("hurt", !!st.x && !st.caught);
+              gsap.to(el, { opacity: 0, x: 40, duration: 0.4, ease: "power1.in", onComplete: () => el.remove() });
+            });
+            want.slice(same).forEach((name) => {
+              const el = document.createElement("div");
+              el.className = "frame";
+              el.dataset.key = name;
+              const [head, sub] = name.split("|");
+              el.innerHTML = esc(head) + (sub ? `<em>${esc(sub)}</em>` : "");
+              fr.appendChild(el);
+              if (anim) gsap.from(el, { opacity: 0, y: -16, duration: 0.35, ease: "back.out(1.6)" });
+            });
+            [...fr.children].filter((el) => !el.classList.contains("gone")).forEach((el, i, all) => {
+              el.classList.toggle("top", i === all.length - 1);
+              el.classList.toggle("hurt", i === all.length - 1 && !!st.x && !st.caught);
+            });
+          }
+          let exc = $(".exc");
+          if (st.x) {
+            if (!exc) {
+              exc = document.createElement("div");
+              exc.className = "exc";
+              const at = (fr || slots || con)?.parentElement;
+              at ? at.after(exc) : mem.prepend(exc);
+              if (anim) gsap.from(exc, { scale: 0.4, opacity: 0, duration: 0.35, ease: "back.out(2)" });
+            }
+            exc.textContent = (st.caught ? "caught: " : "raised: ") + st.x;
+            exc.classList.toggle("caught", st.caught);
+          } else exc?.remove();
+        }
+
+        function mark(k, anim) {
+          const f = T.frames[k];
+          lines.forEach((l) => l.classList.remove("now", "boom"));
+          const el = lines[f.l - 1];
+          if (!el) return;
+          el.classList.add("run", f.x ? "boom" : "now");
+          el.querySelector(".tb")?.remove();
+          const text = f.c !== undefined ? (f.n ? `${f.n} → ` : "") + (f.c ? "True" : "False") : f.x ? f.x.split(":")[0] : f.n;
+          if (text) {
+            const b = document.createElement("span");
+            b.className = "tb " + (f.c !== undefined ? (f.c ? "t" : "f") : f.x ? "x" : "n");
+            b.textContent = text;
+            el.appendChild(b);
+            if (anim) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+        }
+
+        T.reset = () => {
+          T.tl?.kill();
+          pre.classList.remove("tracing", "traced");
+          lines.forEach((l) => {
+            l.classList.remove("run", "now", "boom");
+            l.querySelector(".tb")?.remove();
+          });
+          if (mem) {
+            mem.querySelectorAll(".slots, .console, .frames").forEach((b) => (b.innerHTML = ""));
+            mem.querySelector(".exc")?.remove();
+            if (opts.init) render(-1, false);
+          }
+          opts.onReset?.(T);
+        };
+
+        T.play = (instant) => {
+          T.reset();
+          pre.classList.add("tracing");
+          const done = () => {
+            lines.forEach((l) => l.classList.remove("now"));
+            pre.classList.replace("tracing", "traced");
+          };
+          if (instant) {
+            T.frames.forEach((f, k) => mark(k, false));
+            render(T.frames.length - 1, false);
+            opts.onFrame?.(T, T.frames.length - 1, true);
+            done();
+            const last = T.frames[T.frames.length - 1];
+            if (last?.x) lines[last.l - 1]?.classList.add("boom");
+            return;
+          }
+          const tl = gsap.timeline();
+          T.frames.forEach((f, k) =>
+            tl.call(() => {
+              mark(k, true);
+              render(k, true);
+              opts.onFrame?.(T, k, false);
+            }, null, k * dt)
+          );
+          tl.call(done, null, T.frames.length * dt);
+          T.tl = tl;
+        };
+
+        const go = slide.querySelector(".step.go") || pre.querySelector(".line.answer");
+        if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+
+        if (opts.chips) {
+          const C = opts.chips;
+          const box = slide.querySelector(".try");
+          box.insertAdjacentHTML("beforeend", C.values.map((v, i) => `<button class="chip" type="button" data-i="${i}">${esc(C.show ? C.show(v) : v)}</button>`).join(""));
+          T.choose = (i, run) => {
+            const v = C.values[i];
+            T.frames = C.frames(v);
+            C.patch?.(T, v);
+            box.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.i === i));
+            if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+            if (run) T.play(run === "instant");
+          };
+          box.addEventListener("click", (e) => {
+            const b = e.target.closest(".chip");
+            if (b) T.choose(+b.dataset.i, true);
+          });
+        }
+
+        Deck.scene(slide, {
+          enter() {
+            if (opts.chips) T.choose(0, false);
+            T.reset();
+            if (!go && opts.auto !== false) T.play(false);
+          },
+          leave: () => T.reset(),
+          step(s, n, els, d) {
+            // several steps at once (a ↓ jump) or going back: show the end state
+            if (go && els.includes(go)) queueMicrotask(() => T.play(d?.dir < 0 || Deck.step > n));
+          },
+          unstep(s, n, els) {
+            if (go && els.includes(go)) T.reset();
+          },
+        });
+        return T;
+      }
+
+      // ------------------------------------------------------------ loop traces
+      // Build frames for "for <name> in <vals>: <body>", with r = index into the ribbon
+      function loop(vals, { name = "i", head = 2, body = [], show = String, pre = [], post = [] } = {}) {
+        const f = [...pre];
+        vals.forEach((v, r) => {
+          f.push({ l: head, n: `${name} = ${show(v)}`, v: { [name]: show(v) }, r });
+          for (const b of body) f.push(typeof b === "function" ? b(v, r) : { ...b });
+        });
+        f.push({ l: head, n: "no more items", r: vals.length });
+        return f.concat(post);
+      }
+
+      // The ribbon under a tracer follows frame.r
+      function ribbon(T, k) {
+        const cells = T.slide.querySelectorAll(".ribbon .cell");
+        if (!cells.length) return;
+        let r = -1;
+        for (let i = 0; i <= k; i++) if (T.frames[i].r !== undefined) r = T.frames[i].r;
+        cells.forEach((c, i) => {
+          c.classList.toggle("cur", i === r);
+          c.classList.toggle("done", i < r);
+        });
+      }
+      document.querySelectorAll(".ribbon[data-cells]").forEach((rb) => {
+        const items = rb.dataset.cells.match(/\([^)]*\)|'[^']*'|\S+/g);
+        rb.innerHTML = items.map((t, i) => `<div class="cell"><small>${i}</small>${esc(t)}</div>`).join("");
+      });
+      const withRibbon = { onFrame: ribbon, onReset: (T) => ribbon(T, -1) };
+      const range = (a, b, s = 1) => {
+        const out = [];
+        for (let v = a; s > 0 ? v < b : v > b; v += s) out.push(v);
+        return out;
+      };
+      const pr = (v) => ({ l: 3, o: String(v) });
+
+      tracer("#basic", loop(range(0, 5), { body: [pr] }), withRibbon);
+      tracer("#startstop", loop(range(2, 7), { body: [pr] }), withRibbon);
+      tracer("#stepped", loop(range(0, 10, 2), { body: [pr] }), withRibbon);
+      tracer("#list", loop(["apple", "banana", "cherry"], { name: "fruit", head: 3, show: (s) => `'${s}'`, pre: [{ l: 2, v: { fruits: "['apple', 'banana', 'cherry']" } }], body: [(v) => ({ l: 4, o: v })] }), withRibbon);
+      tracer(
+        "#enum",
+        [
+          { l: 2, v: { fruits: "['apple', 'banana']" } },
+          ...[["0", "apple"], ["1", "banana"]].flatMap(([i, f], r) => [
+            { l: 3, n: `i, fruit = ${i}, '${f}'`, v: { i, fruit: `'${f}'` }, r },
+            { l: 4, o: `${i} ${f}` },
+          ]),
+          { l: 3, n: "no more pairs", r: 2 },
+        ],
+        withRibbon
+      );
+      tracer("#string", loop(["a", "b", "c"], { name: "char", show: (s) => `'${s}'`, body: [(v) => ({ l: 3, o: v })] }), withRibbon);
+
+      // ------------------------------------------------------------ exercises
+      tracer("#ex1", loop(range(0, 10), { body: [(v) => ({ l: 3, n: `pass #${v + 1}` })] }), { step: 0.22 });
+      tracer("#ex2", loop(range(0, 3), { body: [{ l: 3 }], post: [{ l: 3, n: "after the loop: i is still 2" }] }));
+      tracer("#ex3", [{ l: 2, n: "range(3, 3) is empty", v: {} }, { l: 2, n: "body never runs" }], { sections: ["vars", "out"] });
+      tracer("#ex4", loop(range(5, 0, -1), { body: [pr] }));
+      tracer("#ex5", loop(range(1, 6), { head: 3, pre: [{ l: 2, v: { total: "0" } }], body: [(v) => ({ l: 4, n: `total += ${v}`, v: { total: String(((v * (v + 1)) / 2) | 0) } })] }));
+      tracer(
+        "#ex6",
+        [
+          ...[["1", "a"], ["2", "b"]].flatMap(([i, x]) => [
+            { l: 2, n: `i, x = ${i}, '${x}'`, v: { i, x: `'${x}'` } },
+            { l: 3, o: i },
+          ]),
+          { l: 2, n: "no more pairs" },
+        ]
+      );
+      tracer("#ex7", loop(range(0, 5), { body: [(v) => ({ l: 3, c: v === 3, n: `${v} == 3` }), (v) => (v === 3 ? { l: 4 } : { l: 3 })] }), { step: 0.4 });
+      {
+        const f = [{ l: 2, v: { count: "0" } }];
+        let c = 0;
+        for (let i = 0; i < 3; i++) {
+          f.push({ l: 3, n: `i = ${i}`, v: { i: String(i) } });
+          for (let j = 0; j < 2; j++) {
+            f.push({ l: 4, n: `j = ${j}`, v: { j: String(j) } });
+            f.push({ l: 5, n: `count = ${++c}`, v: { count: String(c) } });
+          }
+          f.push({ l: 4, n: "inner loop done" });
+        }
+        f.push({ l: 3, n: "outer loop done" });
+        tracer("#ex8", f, { step: 0.38 });
+      }
+      tracer("#ex9", [{ l: 2, n: "[] has no items" }, { l: 2, n: "body never runs" }], { sections: ["vars", "out"] });
+      tracer("#ex10", loop(range(1, 10, 3), { body: [pr] }));
+      tracer("#ex11", loop(range(0, 3), { body: [{ l: 3, n: "i = 10", v: { i: "10" } }, { l: 4, o: "10" }] }));
+
+      // ------------------------------------------------------------ range() on a number line
+      {
+        const slide = document.querySelector("#explore");
+        const svg = slide.querySelector(".viz");
+        const NS = "http://www.w3.org/2000/svg";
+        const X = (v) => 70 + (v + 1) * 56; // -1 .. 10
+        const Y = 130;
+        const ticks = svg.querySelector(".ticks");
+        for (let v = -1; v <= 10; v++) {
+          ticks.insertAdjacentHTML("beforeend", `<line class="tick" x1="${X(v)}" x2="${X(v)}" y1="${Y - 7}" y2="${Y + 7}"/><text x="${X(v)}" y="${Y + 30}">${v}</text>`);
+        }
+        const RANGES = [
+          [0, 5, 1],
+          [2, 7, 1],
+          [0, 10, 2],
+          [1, 10, 3],
+          [5, 0, -1],
+          [3, 3, 1],
+        ];
+        const label = ([a, b, s]) => (s === 1 && a === 0 ? `range(${b})` : s === 1 ? `range(${a}, ${b})` : `range(${a}, ${b}, ${s})`);
+        const box = slide.querySelector(".try");
+        box.innerHTML = RANGES.map((r, i) => `<button class="chip" type="button" data-i="${i}">${label(r)}</button>`).join("");
+        let tl;
+
+        function show(i, instant) {
+          const [a, b, s] = RANGES[i];
+          tl?.kill();
+          box.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.i === i));
+          const isPlain = s === 1 && a === 0;
+          slide.querySelector(".rng").innerHTML = isPlain
+            ? `for i in range(<span class="b">${b}</span>):`
+            : `for i in range(<span class="a">${a}</span>, <span class="b">${b}</span>${s === 1 ? "" : `, <span class="c">${s}</span>`}):`;
+          const vals = range(a, b, s);
+          const hops = svg.querySelector(".hops");
+          const dots = svg.querySelector(".dots");
+          hops.innerHTML = "";
+          dots.innerHTML = "";
+          const out = slide.querySelector(".produced");
+          out.textContent = vals.length ? "i takes: " : "start == stop: the loop body never runs";
+          gsap.set(svg.querySelector(".start"), { x: X(a), y: Y });
+          gsap.set(svg.querySelector(".stop"), { x: X(b), y: Y });
+          tl = gsap.timeline();
+          vals.forEach((v, k) => {
+            const dot = document.createElementNS(NS, "circle");
+            dot.setAttribute("class", "dot");
+            dot.setAttribute("cx", X(v));
+            dot.setAttribute("cy", Y);
+            dot.setAttribute("r", 9);
+            dots.appendChild(dot);
+            let hop;
+            if (k > 0) {
+              const x0 = X(vals[k - 1]), x1 = X(v), h = Math.min(70, 18 + Math.abs(x1 - x0) * 0.35);
+              hop = document.createElementNS(NS, "path");
+              hop.setAttribute("class", "hop");
+              hop.setAttribute("d", `M${x0} ${Y - 10} Q${(x0 + x1) / 2} ${Y - 10 - h * 1.6} ${x1} ${Y - 10}`);
+              hops.appendChild(hop);
+              const len = hop.getTotalLength();
+              gsap.set(hop, { strokeDasharray: len, strokeDashoffset: len });
+              tl.to(hop, { strokeDashoffset: 0, duration: 0.35, ease: "power1.inOut" });
+            }
+            gsap.set(dot, { scale: 0, transformOrigin: "center" });
+            tl.to(dot, { scale: 1, duration: 0.3, ease: "back.out(2.5)" }, k ? ">-0.05" : 0.2);
+            tl.call(() => (out.textContent = "i takes: " + vals.slice(0, k + 1).join(", ")));
+          });
+          if (instant) tl.progress(1);
+        }
+        box.addEventListener("click", (e) => {
+          const b = e.target.closest(".chip");
+          if (b) show(+b.dataset.i);
+        });
+        Deck.scene(slide, {
+          enter: () => show(0),
+          leave: () => tl?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Beta Distribution</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Plots ---------- */
+      .plot {
+        width: min(100%, 52rem);
+        height: auto;
+        max-height: 58vh;
+        overflow: visible;
+      }
+
+      .plot .axis text {
+        fill: var(--muted);
+        font: 13px var(--font-mono);
+      }
+
+      .plot .axis path,
+      .plot .axis line {
+        stroke: rgba(255, 255, 255, 0.25);
+      }
+
+      .plot .grid line {
+        stroke: rgba(255, 255, 255, 0.06);
+      }
+
+      .plot .area {
+        fill: url(#betaFill);
+        opacity: 0.55;
+      }
+
+      .plot .curve {
+        fill: none;
+        stroke: url(#betaStroke);
+        stroke-width: 3.5;
+      }
+
+      .plot .curve.c2 {
+        stroke: var(--amber);
+      }
+
+      .plot .marker line {
+        stroke-width: 2;
+        stroke-dasharray: 5 5;
+      }
+
+      .plot .marker text {
+        font: 600 13px var(--font);
+        text-anchor: middle;
+      }
+
+      .plot .mean line {
+        stroke: var(--cyan);
+      }
+
+      .plot .mean text {
+        fill: var(--cyan);
+      }
+
+      .plot .mode line {
+        stroke: var(--pink);
+      }
+
+      .plot .mode text {
+        fill: var(--pink);
+      }
+
+      .plot .label {
+        fill: var(--text);
+        font: 600 20px var(--font-display);
+      }
+
+      .plot .xl {
+        fill: var(--muted);
+        font: italic 15px var(--font);
+        text-anchor: middle;
+      }
+
+      /* ---------- Controls ---------- */
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem 1.4rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font-mono);
+      }
+
+      .controls output {
+        min-width: 3.2rem;
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: min(14rem, 36vw);
+        accent-color: var(--violet);
+      }
+
+      .chip {
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.9rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover,
+      .chip.on {
+        border-color: var(--violet-soft);
+        color: var(--text);
+        background: rgba(139, 92, 246, 0.3);
+      }
+
+      .readout {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem 1.6rem;
+        font: 0.95rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .readout b {
+        font-weight: 500;
+      }
+
+      .readout .m1 {
+        color: var(--cyan);
+      }
+
+      .readout .m2 {
+        color: var(--pink);
+      }
+
+      /* ---------- Stats table ---------- */
+      #stats table {
+        width: min(100%, 50rem);
+        font-size: 1.1rem;
+      }
+
+      #stats td:first-child {
+        font-weight: 600;
+        color: var(--violet-soft);
+        white-space: nowrap;
+      }
+
+      #demo figure.frame {
+        width: min(100%, 64rem);
+      }
+
+      #demo figure.frame iframe {
+        height: 64vh;
+        background: #fff;
+      }
+
+      #priors .cols {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+        align-items: center;
+        width: min(100%, 64rem);
+      }
+
+      #priors .legend {
+        display: grid;
+        gap: 0.8rem;
+        font-size: 1.15rem;
+      }
+
+      .sw {
+        display: inline-block;
+        width: 1.6rem;
+        height: 4px;
+        margin-right: 0.6rem;
+        border-radius: 2px;
+        vertical-align: middle;
+        background: var(--gradient);
+      }
+
+      .sw.amber {
+        background: var(--amber);
+      }
+
+      #lambda .cols {
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        align-items: center;
+        width: min(100%, 70rem);
+      }
+
+      .grid-fig img {
+        max-height: 66vh;
+      }
+
+      #gridfig .fam {
+        grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+        align-items: center;
+        width: min(100%, 76rem);
+      }
+
+      #gridfig .cards {
+        grid-template-columns: 1fr;
+      }
+
+      @media (max-width: 760px) {
+        #priors .cols,
+        #lambda .cols,
+        #gridfig .fam {
+          grid-template-columns: 1fr;
+        }
+
+        .plot {
+          max-height: 40vh;
+        }
+
+        #stats table {
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Shared gradient definitions for every plot -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <linearGradient id="betaStroke" gradientUnits="userSpaceOnUse" x1="48" x2="744" y1="0" y2="0">
+          <stop offset="0" stop-color="#a78bfa" />
+          <stop offset="0.5" stop-color="#f0abfc" />
+          <stop offset="1" stop-color="#67e8f9" />
+        </linearGradient>
+        <linearGradient id="betaFill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.8" />
+          <stop offset="1" stop-color="#22d3ee" stop-opacity="0.05" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Probability · distribution theory</span>
+      <h1 class="grad-each"><span>Beta</span> <span>Distribution</span></h1>
+      <p>A distribution over probabilities: two numbers, α and β, bend it into almost any shape on [0, 1].</p>
+    </section>
+
+    <!-- ================================================================ shape explorer -->
+    <section class="slide" id="shape">
+      <h2>What does a beta look like?</h2>
+      <p class="center muted">$$f(\theta) = \frac{\theta^{\alpha-1}(1-\theta)^{\beta-1}}{B(\alpha,\beta)}, \quad 0 \le \theta \le 1$$</p>
+      <svg class="plot" viewBox="0 0 760 330" aria-label="Density of a Beta distribution, changing with alpha and beta"></svg>
+      <div class="controls" data-interactive>
+        <label>α <input type="range" name="a" min="0.5" max="10" step="0.1" value="2" /><output>2.0</output></label>
+        <label>β <input type="range" name="b" min="0.5" max="10" step="0.1" value="2" /><output>2.0</output></label>
+        <button class="chip tour">▶ tour the shapes</button>
+      </div>
+      <div class="readout">
+        <span class="m1">mean <b class="vmean"></b></span>
+        <span class="m2">mode <b class="vmode"></b></span>
+        <span>variance <b class="vvar"></b></span>
+      </div>
+    </section>
+
+    <section class="slide" id="gridfig">
+      <h2>The family at a glance</h2>
+      <div class="cols fam">
+      <figure class="grid-fig"><img src="/assets/2025-09-30-08-36-11.png" alt="A 4 by 4 grid of Beta densities for alpha and beta in 0.5, 1, 2 and 4" /><figcaption>Rows: β = 0.5, 1, 2, 4. Columns: α = 0.5, 1, 2, 4.</figcaption></figure>
+      <div class="cards">
+        <div class="card step"><h3>α = β</h3><p>Symmetric about 0.5</p></div>
+        <div class="card step"><h3>α &gt; β</h3><p>Mass pushed towards 1</p></div>
+        <div class="card step"><h3>α, β &lt; 1</h3><p>U-shaped: piles up at both ends</p></div>
+      </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ stats -->
+    <section class="slide" id="stats">
+      <h2>Beta stats</h2>
+      <table>
+        <tbody>
+          <tr class="step"><td>Mean</td><td>\( \dfrac{\alpha}{\alpha+\beta} \)</td></tr>
+          <tr class="step"><td>Median</td><td>\( \approx \dfrac{\alpha - 1/3}{\alpha+\beta-2/3} \), for \( \alpha, \beta > 1 \)</td></tr>
+          <tr class="step"><td>Mode</td><td>\( \dfrac{\alpha - 1}{\alpha+\beta-2} \), for \( \alpha, \beta > 1 \)</td></tr>
+          <tr class="step"><td>Variance</td><td>\( \dfrac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)} \)</td></tr>
+          <tr class="step"><td>Skewness</td><td>\( \dfrac{2(\beta-\alpha)\sqrt{\alpha+\beta+1}}{(\alpha+\beta+2)\sqrt{\alpha\beta}} \)</td></tr>
+          <tr class="step"><td>Excess kurtosis</td><td>\( \dfrac{6\left[(\alpha-\beta)^2(\alpha+\beta+1) - \alpha\beta(\alpha+\beta+2)\right]}{\alpha\beta(\alpha+\beta+2)(\alpha+\beta+3)} \)</td></tr>
+        </tbody>
+      </table>
+      <p class="muted center step">The mean and mode are the dashed lines on the shape explorer.</p>
+    </section>
+
+    <!-- ================================================================ demo -->
+    <section class="slide" id="demo">
+      <h2>Demo</h2>
+      <figure class="frame">
+        <iframe data-src="https://mathlets.org/mathlets/beta-distribution" title="MIT Mathlets: Beta distribution"></iframe>
+        <figcaption><a href="https://mathlets.org/mathlets/beta-distribution" target="_blank" rel="noopener">mathlets.org/mathlets/beta-distribution</a></figcaption>
+      </figure>
+    </section>
+
+    <!-- ================================================================ priors -->
+    <section class="slide" id="priors">
+      <h2>Common beta priors</h2>
+      <div class="cols">
+        <div class="legend">
+          <div class="step" data-step="1"><span class="sw"></span><strong>Uniform prior</strong>: \( \beta(1,1) \)<br /><span class="muted">every probability equally likely</span></div>
+          <div class="step" data-step="2"><span class="sw amber"></span><strong>Laplacian prior</strong>: \( \beta(2,2) \)<br /><span class="muted">a gentle lean towards 0.5</span></div>
+        </div>
+        <svg class="plot" viewBox="0 0 760 330" aria-label="Beta(1,1) is flat at 1; Beta(2,2) is an arch peaking at 1.5"></svg>
+      </div>
+    </section>
+
+    <section class="slide" id="more">
+      <h2>More beta priors</h2>
+      <figure class="step zoom-on-reveal"><img src="/assets/2025-09-30-08-41-14.png" alt="Bayes' prior Beta(1,1), Jeffreys' prior Beta(0.5,0.5), Haldane's prior Beta(0,0) and an empirical prior Beta(0.27,0.27)" style="max-height: 66vh" /></figure>
+    </section>
+
+    <!-- ================================================================ lambda continuum -->
+    <section class="slide" id="lambda">
+      <h2>Lambda continuum</h2>
+      <div class="cols">
+        <div>
+          <svg class="plot" viewBox="0 0 760 330" aria-label="Symmetric Beta(lambda/2, lambda/2) densities as lambda grows from 0.5 to 16"></svg>
+          <div class="controls" data-interactive>
+            <label>λ <input type="range" name="l" min="0.5" max="16" step="0.1" value="2" /><output>2.0</output></label>
+            <button class="chip sweep">▶ sweep</button>
+          </div>
+        </div>
+        <div>
+          <p>\( f_\lambda(p) = \beta\!\left(\tfrac{\lambda}{2}, \tfrac{\lambda}{2}\right) \)</p>
+          <ul>
+            <li class="step">\( \lambda &lt; 2 \): mass at the extremes</li>
+            <li class="step">\( \lambda = 2 \): uniform</li>
+            <li class="step">\( \lambda \to \infty \): concentrates on \( p = 0.5 \)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Lambda continuum, the original figure</h2>
+      <figure class="zoom-on-reveal"><img src="/assets/2025-09-30-08-42-14.png" alt="Six panels of symmetric Beta densities for lambda = 0.5, 1, 2, 4, 8, 16" style="max-height: 66vh" /></figure>
+    </section>
+
+    <script type="module">
+      // The external demo only loads when its slide is first shown
+      Deck.scene("#demo", {
+        enter(slide) {
+          const f = slide.querySelector("iframe");
+          if (!f.src) f.src = f.dataset.src;
+        },
+      });
+
+      const gsap = await Deck.load("gsap");
+      const d3 = await Deck.load("d3");
+
+      // ---------- maths ----------
+      const G = [676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+      function lgamma(z) {
+        if (z < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * z))) - lgamma(1 - z);
+        z -= 1;
+        let x = 0.99999999999980993;
+        for (let i = 0; i < 8; i++) x += G[i] / (z + i + 1);
+        const t = z + 7.5;
+        return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+      }
+      const lbeta = (a, b) => lgamma(a) + lgamma(b) - lgamma(a + b);
+      const pdf = (x, a, b) => Math.exp((a - 1) * Math.log(x) + (b - 1) * Math.log(1 - x) - lbeta(a, b));
+      const xs = d3.range(0.002, 0.999, 0.002);
+
+      // ---------- a reusable plot ----------
+      function makePlot(svgEl, { curves = 1, markers = false } = {}) {
+        const W = 760, H = 330, m = { l: 48, r: 16, t: 14, b: 42 };
+        const svg = d3.select(svgEl);
+        const x = d3.scaleLinear().domain([0, 1]).range([m.l, W - m.r]);
+        const y = d3.scaleLinear().domain([0, 3]).range([H - m.b, m.t]);
+        const clipId = "clip" + Math.random().toString(36).slice(2);
+        svg.append("clipPath").attr("id", clipId).append("rect").attr("x", m.l).attr("y", m.t - 4).attr("width", W - m.l - m.r).attr("height", H - m.b - m.t + 4);
+        const gGrid = svg.append("g").attr("class", "grid");
+        const gx = svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`);
+        const gy = svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`);
+        gx.call(d3.axisBottom(x).ticks(4).tickFormat(d3.format(".2f")));
+        svg.append("text").attr("class", "xl").attr("x", (m.l + W - m.r) / 2).attr("y", H - 4).text("θ");
+        const body = svg.append("g").attr("clip-path", `url(#${clipId})`);
+        const area = body.append("path").attr("class", "area");
+        const lines = d3.range(curves).map((i) => body.append("path").attr("class", "curve c" + (i + 1)));
+        let mk = null;
+        if (markers) {
+          mk = ["mean", "mode"].map((k) => {
+            const g = svg.append("g").attr("class", "marker " + k);
+            g.append("line").attr("y1", m.t + 30).attr("y2", H - m.b);
+            g.append("text").attr("y", k === "mean" ? m.t + 4 : m.t + 22).text(k);
+            return g;
+          });
+        }
+        const label = svg.append("text").attr("class", "label").attr("x", W - m.r - 8).attr("y", m.t + 22).attr("text-anchor", "end");
+        let ymax = 3;
+        function setY(top) {
+          ymax = top;
+          y.domain([0, top]);
+          gy.call(d3.axisLeft(y).ticks(5));
+          gGrid.selectAll("line").data(y.ticks(5)).join("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y).attr("y2", y);
+        }
+        setY(3);
+        const lineGen = d3.line().x((d) => x(d[0])).y((d) => y(Math.min(d[1], ymax * 1.2)));
+        const areaGen = d3.area().x((d) => x(d[0])).y0(y(0)).y1((d) => y(Math.min(d[1], ymax * 1.2)));
+        return {
+          draw(params, text, fill = true) {
+            const data = params.map(([a, b]) => xs.map((t) => [t, pdf(t, a, b)]));
+            // Auto-scale to the tallest interior peak, capped so spikes at the edges get clipped
+            const peak = d3.max(data.flat().filter((d) => d[0] > 0.04 && d[0] < 0.96), (d) => d[1]);
+            setY(Math.max(1.2, Math.min(6, Math.ceil(peak * 1.15 * 2) / 2)));
+            data.forEach((d, i) => lines[i].attr("d", lineGen(d)));
+            area.attr("d", fill ? areaGen(data[0]) : null);
+            label.text(text || "");
+            if (mk) {
+              const [a, b] = params[0];
+              const mean = a / (a + b);
+              const mode = a > 1 && b > 1 ? (a - 1) / (a + b - 2) : null;
+              mk[0].attr("transform", `translate(${x(mean)},0)`).attr("opacity", 1);
+              mk[1].attr("transform", `translate(${mode == null ? x(0.5) : x(mode)},0)`).attr("opacity", mode == null ? 0 : 1);
+            }
+          },
+          lines,
+          area,
+        };
+      }
+
+      const fmt = (v) => (Number.isInteger(v) ? v.toFixed(1) : (+v.toFixed(2)).toString());
+
+      // ---------- shape explorer ----------
+      {
+        const slide = document.querySelector("#shape");
+        const plot = makePlot(slide.querySelector(".plot"), { markers: true });
+        const [ia, ib] = slide.querySelectorAll("input");
+        const [oa, ob] = slide.querySelectorAll("output");
+        const tourBtn = slide.querySelector(".tour");
+        const st = { a: 2, b: 2 };
+        let tl = null;
+        function render() {
+          const { a, b } = st;
+          ia.value = a;
+          ib.value = b;
+          oa.textContent = fmt(a);
+          ob.textContent = fmt(b);
+          plot.draw([[a, b]], `β(${fmt(a)}, ${fmt(b)})`);
+          slide.querySelector(".vmean").textContent = (a / (a + b)).toFixed(3);
+          slide.querySelector(".vmode").textContent = a > 1 && b > 1 ? ((a - 1) / (a + b - 2)).toFixed(3) : "none (needs α, β > 1)";
+          slide.querySelector(".vvar").textContent = ((a * b) / ((a + b) ** 2 * (a + b + 1))).toFixed(4);
+        }
+        function stop() {
+          tl?.kill();
+          tl = null;
+          tourBtn.classList.remove("on");
+          tourBtn.textContent = "▶ tour the shapes";
+        }
+        // A walk through the shapes in the classic 4x4 grid
+        const stops = [[1, 1], [2, 2], [4, 4], [8, 8], [4, 2], [4, 1], [2, 1], [1, 2], [2, 5], [0.5, 4], [0.5, 0.5], [1, 0.5], [6, 3], [2, 2]];
+        function tour() {
+          stop();
+          tourBtn.classList.add("on");
+          tourBtn.textContent = "■ stop";
+          tl = gsap.timeline({ onUpdate: render, onComplete: stop });
+          stops.forEach(([a, b]) => tl.to(st, { a, b, duration: 1.1, ease: "power2.inOut" }).to({}, { duration: 0.6 }));
+        }
+        ia.addEventListener("input", () => (stop(), (st.a = +ia.value), render()));
+        ib.addEventListener("input", () => (stop(), (st.b = +ib.value), render()));
+        tourBtn.addEventListener("click", () => (tl ? stop() : tour()));
+        render();
+        Deck.scene("#shape", {
+          enter: () => tour(),
+          leave: () => stop(),
+        });
+      }
+
+      // ---------- common priors: draw the two curves in on their steps ----------
+      {
+        const slide = document.querySelector("#priors");
+        const plot = makePlot(slide.querySelector(".plot"), { curves: 2 });
+        plot.draw([[1, 1], [2, 2]], "", false);
+        plot.lines.forEach((l) => {
+          const len = l.node().getTotalLength();
+          l.attr("stroke-dasharray", len).attr("stroke-dashoffset", len);
+        });
+        const show = (i, on, instant) => {
+          const l = plot.lines[i].node();
+          gsap.to(l, { strokeDashoffset: on ? 0 : l.getTotalLength(), duration: instant ? 0 : 1.2, ease: "power2.inOut" });
+        };
+        Deck.scene("#priors", {
+          step: (s, n, els, d) => show(n - 1, true, d.dir < 0),
+          unstep: (s, n) => show(n - 1, false, true),
+        });
+      }
+
+      // ---------- lambda continuum ----------
+      {
+        const slide = document.querySelector("#lambda");
+        const plot = makePlot(slide.querySelector(".plot"));
+        const input = slide.querySelector("input");
+        const out = slide.querySelector("output");
+        const btn = slide.querySelector(".sweep");
+        const st = { l: 2 };
+        let tl = null;
+        function render() {
+          input.value = st.l;
+          out.textContent = fmt(st.l);
+          plot.draw([[st.l / 2, st.l / 2]], `λ = ${fmt(st.l)}`);
+        }
+        function stop() {
+          tl?.kill();
+          tl = null;
+          btn.textContent = "▶ sweep";
+          btn.classList.remove("on");
+        }
+        function sweep() {
+          stop();
+          btn.textContent = "■ stop";
+          btn.classList.add("on");
+          tl = gsap.timeline({ onUpdate: render, onComplete: stop });
+          [0.5, 1, 2, 4, 8, 16].forEach((l, k) => tl.to(st, { l, duration: k ? 1.2 : 0.6, ease: "power1.inOut" }).to({}, { duration: 0.7 }));
+        }
+        input.addEventListener("input", () => (stop(), (st.l = +input.value), render()));
+        btn.addEventListener("click", () => (tl ? stop() : sweep()));
+        render();
+        Deck.scene("#lambda", { enter: () => sweep(), leave: () => stop() });
+      }
+    </script>
+  </body>
+</html>

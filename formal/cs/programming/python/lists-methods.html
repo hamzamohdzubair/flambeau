@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>List Methods</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- List view: a list as indexed boxes ---------- */
+      .lv {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.9rem;
+        min-width: 0;
+      }
+
+      .lv .lname {
+        font: 500 0.85rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .lv .lcells {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem;
+        min-height: 5.6rem;
+        align-items: center;
+      }
+
+      .lv .lc {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+      }
+
+      .lv .lc b {
+        display: grid;
+        place-items: center;
+        min-width: 3.2rem;
+        height: 3rem;
+        padding: 0 0.7rem;
+        border-radius: 10px;
+        border: 1.5px solid rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.14);
+        font: 600 1.05rem var(--font-mono);
+        color: var(--text);
+        white-space: nowrap;
+        transition:
+          border-color 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .lv .lc i {
+        font: normal 500 0.75rem var(--font-mono);
+        color: var(--violet-soft);
+        min-height: 1em;
+      }
+
+      .lv .lc i.in {
+        color: var(--pink);
+      }
+
+      .lv:not(.neg) .lc i.in,
+      .lv.noidx .lc i {
+        visibility: hidden;
+      }
+
+      .lv .lc.hit b {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.2);
+        box-shadow: 0 0 18px -4px var(--cyan);
+      }
+
+      .lv .lc.dim b {
+        opacity: 0.35;
+      }
+
+      .lv .lc.ghost b {
+        border-style: dashed;
+        border-color: var(--red);
+        background: transparent;
+        color: var(--red);
+      }
+
+      .lv .lempty {
+        font: 1rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .lv .louts {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: min(100%, 18rem);
+        min-height: 2.4rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 0.95rem/1.5 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .lv .louts b {
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      .lv .louts .err b {
+        color: var(--red);
+      }
+
+      .lv .louts:empty {
+        visibility: hidden;
+      }
+
+      .flylv {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        padding: 0 0.5em;
+        border-radius: 8px;
+        font: 600 1rem/1.7 var(--font-mono);
+        color: #fff;
+        background: rgba(34, 211, 238, 0.35);
+        border: 1px solid var(--cyan);
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
+        white-space: nowrap;
+      }
+
+      .lv-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: center;
+        width: min(100%, 64rem);
+      }
+
+      .lv-cols pre {
+        width: 100%;
+      }
+
+      .lv-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      @media (max-width: 760px) {
+        .lv-cols {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .lv .lc b {
+          min-width: 2.2rem;
+          height: 2.4rem;
+          padding: 0 0.4rem;
+          font-size: 0.85rem;
+        }
+
+        .lv .louts {
+          font-size: 0.8rem;
+        }
+      }
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      #recap table {
+        font-size: 0.95rem;
+      }
+
+      #recap td:first-child {
+        font-family: var(--font-mono);
+        color: #f0abfc;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · data structures</span>
+      <h1 class="grad-each"><span>List</span> <span>Methods</span></h1>
+      <p>Add, remove, reorder and search: the methods that change a list in place.</p>
+    </section>
+
+    <!-- ================================================================ adding -->
+    <section class="slide" id="append">
+      <h2>append</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # add to end
+          fruits = ["apple", "banana"]
+          fruits.append("cherry")
+          # ans: ["apple", "banana", "cherry"]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="insert">
+      <h2>insert</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # insert at index
+          fruits = ["apple", "cherry"]
+          fruits.insert(1, "banana")
+          # ans: ["apple", "banana", "cherry"]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint">Everything from index 1 onwards shifts one place right to make room.</p>
+    </section>
+
+    <section class="slide" id="extend">
+      <h2>extend</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # add multiple items
+          fruits = ["apple"]
+          fruits.extend(["banana", "cherry"])
+          # ans: ["apple", "banana", "cherry"]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ removing -->
+    <section class="slide" id="remove">
+      <h2>remove</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # remove by value
+          fruits = ["apple", "banana", "cherry"]
+          fruits.remove("banana")
+          # ans: ["apple", "cherry"]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="pop">
+      <h2>pop</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # remove and return
+          fruits = ["apple", "banana", "cherry"]
+          last = fruits.pop()
+          # ans: last is "cherry"
+          # ans: fruits is ["apple", "banana"]
+          first = fruits.pop(0)
+          # ans: first is "apple"
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint">Without an index, <code>pop()</code> takes the last item; <code>pop(0)</code> takes the first.</p>
+    </section>
+
+    <!-- ================================================================ ordering -->
+    <section class="slide" id="sort">
+      <h2>sort</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # sort in place
+          numbers = [3, 1, 4, 1, 5]
+          numbers.sort()
+          # ans: [1, 1, 3, 4, 5]
+          numbers.sort(reverse=True)
+          # ans: [5, 4, 3, 1, 1]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="reverse">
+      <h2>reverse</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # reverse in place
+          lst = [1, 2, 3]
+          lst.reverse()
+          # ans: [3, 2, 1]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ searching -->
+    <section class="slide" id="count">
+      <h2>count</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # count occurrences
+          numbers = [1, 2, 3, 2, 4, 2]
+          numbers.count(2)
+          # ans: 3
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="index">
+      <h2>index</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # find index
+          fruits = ["apple", "banana", "cherry"]
+          fruits.index("banana")
+          # ans: 1
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint"><code>index</code> scans from the left and stops at the first match.</p>
+    </section>
+
+    <section class="slide" id="clear">
+      <h2>clear</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # remove all
+          fruits = ["apple", "banana"]
+          fruits.clear()
+          # ans: []
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the result, then press → to check.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # what is lst after append?
+          lst = [1, 2]
+          lst.append(3)
+          # ans: [1, 2, 3]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # insert at position?
+          lst = [1, 3, 4]
+          lst.insert(1, 2)
+          # ans: [1, 2, 3, 4]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # extend vs append?
+          lst = [1, 2]
+          lst.extend([3, 4])
+          # ans: [1, 2, 3, 4]
+          lst = [1, 2]
+          lst.append([3, 4])
+          # ans: [1, 2, [3, 4]]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint"><code>extend</code> adds each item; <code>append</code> adds the whole list as one item.</p>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # pop without argument?
+          lst = [1, 2, 3]
+          lst.pop()
+          # ans: 3
+          # ans: lst is [1, 2]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # remove first occurrence?
+          lst = [1, 2, 2, 3]
+          lst.remove(2)
+          # ans: [1, 2, 3]
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e6">
+      <h2>Exercise 6</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # sort return value?
+          lst = [3, 1, 2]
+          result = lst.sort()
+          # ans: result is None (sorts in place)
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+      <p class="hint">Use <code>sorted(lst)</code> when you want a new sorted list back.</p>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # index not found?
+          lst = [1, 2, 3]
+          lst.index(5)
+          # ans: ValueError
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e8">
+      <h2>Exercise 8</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # count non-existent?
+          lst = [1, 2, 3]
+          lst.count(5)
+          # ans: 0
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e9">
+      <h2>Exercise 9</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # reverse return?
+          lst = [1, 2, 3]
+          result = lst.reverse()
+          # ans: result is None (reverses in place)
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e10">
+      <h2>Exercise 10</h2>
+      <div class="lv-cols">
+        <pre><code class="language-python">
+          # clear return?
+          lst = [1, 2, 3]
+          result = lst.clear()
+          # ans: result is None
+          # ans: lst is []
+        </code></pre>
+        <div class="lv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <table class="step">
+        <tr><th>Method</th><th>Does</th><th>Returns</th></tr>
+        <tr><td>append(x)</td><td>adds x at the end</td><td>None</td></tr>
+        <tr><td>insert(i, x)</td><td>adds x before index i</td><td>None</td></tr>
+        <tr><td>extend(items)</td><td>adds each item</td><td>None</td></tr>
+        <tr><td>remove(x)</td><td>deletes the first x</td><td>None</td></tr>
+        <tr><td>pop(i=-1)</td><td>deletes item i</td><td>that item</td></tr>
+        <tr><td>sort() / reverse()</td><td>reorders in place</td><td>None</td></tr>
+        <tr><td>count(x) / index(x)</td><td>searches</td><td>a number</td></tr>
+        <tr><td>clear()</td><td>empties the list</td><td>None</td></tr>
+      </table>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ List view
+      // A list drawn as boxes with their indexes. Each deck step runs a few
+      // operations (indexing, slicing, append, pop, sort, ...) and animates them.
+      const escL = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function Lv(slide, cfg) {
+        const root = cfg.root || slide.querySelector(".lv");
+        root.classList.toggle("neg", !!cfg.neg);
+        root.classList.toggle("noidx", cfg.idx === false);
+        root.innerHTML = `${cfg.name ? `<div class="lname">${escL(cfg.name)}</div>` : ""}<div class="lcells"></div><div class="louts"></div>`;
+        const box = root.querySelector(".lcells"), outs = root.querySelector(".louts");
+        let cells = [], extras = [], fliers = [], tl = null, seen = 0, pending = null;
+
+        const mk = (v) => {
+          const c = document.createElement("span");
+          c.className = "lc";
+          c.innerHTML = `<i class="ip"></i><b>${escL(v)}</b><i class="in"></i>`;
+          return c;
+        };
+        const val = (c) => c.querySelector("b").textContent;
+        function relabel() {
+          cells.forEach((c, i) => {
+            c.querySelector(".ip").textContent = i;
+            c.querySelector(".in").textContent = i - cells.length;
+          });
+          box.querySelector(".lempty")?.remove();
+          if (!cells.length && !extras.length) box.insertAdjacentHTML("beforeend", `<span class="lempty">[ ]  empty list</span>`);
+        }
+        const hits = (idx = []) => cells.forEach((c, i) => c.classList.toggle("hit", idx.includes(i)));
+
+        function reset() {
+          tl?.kill();
+          fliers.forEach((f) => f.remove());
+          fliers = [];
+          box.innerHTML = "";
+          cells = cfg.items.map(mk);
+          cells.forEach((c) => box.appendChild(c));
+          extras = [];
+          outs.innerHTML = "";
+          relabel();
+        }
+
+        function line(html, err) {
+          const d = document.createElement("div");
+          if (err) d.className = "err";
+          d.innerHTML = html;
+          outs.appendChild(d);
+          return d;
+        }
+
+        function fly(fromEl, toEl, text) {
+          const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+          const f = document.createElement("span");
+          f.className = "flylv";
+          f.textContent = text;
+          document.body.appendChild(f);
+          fliers.push(f);
+          gsap.set(toEl, { opacity: 0 });
+          gsap.set(f, { left: a.left, top: a.top });
+          gsap.to(f, { left: b.left, top: b.top - 3, duration: 0.5, ease: "power2.inOut", onComplete: () => { f.remove(); gsap.to(toEl, { opacity: 1, duration: 0.15 }); } });
+        }
+
+        // change the cells, then slide every surviving cell from where it was
+        function flip(mutate, anim) {
+          const before = new Map(cells.map((c) => [c, c.getBoundingClientRect()]));
+          const gone = mutate() || [];
+          for (const c of gone) {
+            if (anim) {
+              const r = c.getBoundingClientRect();
+              const g = c.cloneNode(true);
+              Object.assign(g.style, { position: "fixed", left: r.left + "px", top: r.top + "px", margin: 0, zIndex: 40 });
+              document.body.appendChild(g);
+              fliers.push(g);
+              gsap.to(g, { opacity: 0, y: -26, duration: 0.45, onComplete: () => g.remove() });
+            }
+            c.remove();
+          }
+          box.innerHTML = "";
+          cells.forEach((c) => box.appendChild(c));
+          extras.forEach((c) => box.appendChild(c));
+          relabel();
+          if (!anim) return;
+          cells.forEach((c) => {
+            const r0 = before.get(c);
+            gsap.killTweensOf(c);
+            if (!r0) return gsap.fromTo(c, { opacity: 0, y: -22, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(2)" });
+            const r1 = c.getBoundingClientRect();
+            gsap.fromTo(c, { x: r0.left - r1.left, y: r0.top - r1.top }, { x: 0, y: 0, duration: 0.55, ease: "power2.inOut" });
+          });
+        }
+
+        const norm = (i) => (i < 0 ? cells.length + i : i);
+        const range = (a, b, s = 1) => {
+          const n = cells.length, out = [];
+          const cl = (x, d) => (x === undefined ? d : x < 0 ? Math.max(0, n + x) : Math.min(n, x));
+          if (s > 0) for (let i = cl(a, 0); i < cl(b, n); i += s) out.push(i);
+          else {
+            const st = a === undefined ? n - 1 : Math.min(n - 1, a < 0 ? n + a : a);
+            const en = b === undefined ? -1 : b < 0 ? n + b : b;
+            for (let i = st; i > en; i += s) out.push(i);
+          }
+          return out;
+        };
+        const numSort = (arr, rev) => {
+          const num = arr.every((c) => !isNaN(+val(c)));
+          const k = (c) => (num ? +val(c) : val(c));
+          arr.sort((x, y) => (k(x) < k(y) ? -1 : k(x) > k(y) ? 1 : 0));
+          if (rev) arr.reverse();
+          return arr;
+        };
+
+        // run one operation starting at time t; returns how long it takes when animated
+        function run(o, t, anim) {
+          const at = (dt, fn) => (anim ? tl.call(fn, null, t + dt) : fn());
+          const call = o.call || "";
+          switch (o.op) {
+            case "get": {
+              const i = norm(o.i);
+              at(0, () => hits([i]));
+              at(0.35, () => {
+                const l = line(`${escL(call)} → <b>${escL(val(cells[i]))}</b>`);
+                if (anim) fly(cells[i], l.querySelector("b"), val(cells[i]));
+              });
+              return 1;
+            }
+            case "slice": {
+              const idx = range(o.a, o.b, o.s);
+              // light the picked items in the order the slice takes them
+              idx.forEach((i, k) => at(k * 0.18, () => hits(idx.slice(0, k + 1))));
+              if (!idx.length) at(0, () => hits([]));
+              at(idx.length * 0.18 + 0.25, () => {
+                const text = "[" + idx.map((i) => val(cells[i])).join(", ") + "]";
+                const l = line(`${escL(call)} → <b>${escL(text)}</b>`);
+                if (anim) gsap.fromTo(l, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.3 });
+              });
+              return idx.length * 0.18 + 0.7;
+            }
+            case "len": {
+              at(0, () => hits(cells.map((c, i) => i)));
+              at(0.35, () => line(`${escL(call)} → <b>${cells.length}</b>`));
+              return 0.8;
+            }
+            case "set": {
+              const i = norm(o.i);
+              at(0, () => hits([i]));
+              at(0.35, () => {
+                const b = cells[i].querySelector("b");
+                b.textContent = o.v;
+                if (anim) gsap.fromTo(b, { rotateX: 90 }, { rotateX: 0, duration: 0.45, ease: "back.out(2)" });
+                if (o.say) line(o.say);
+              });
+              return 1;
+            }
+            case "setslice": {
+              const idx = range(o.a, o.b);
+              at(0, () => hits(idx));
+              at(0.45, () =>
+                flip(() => {
+                  const gone = cells.splice(idx[0], idx.length, ...o.vals.map(mk));
+                  return gone;
+                }, anim)
+              );
+              at(1.1, () => hits([]));
+              if (o.say) at(1.1, () => line(o.say));
+              return 1.3;
+            }
+            case "err": {
+              at(0, () => {
+                const g = mk("?");
+                g.classList.add("ghost");
+                g.querySelector(".ip").textContent = o.i;
+                extras.push(g);
+                box.appendChild(g);
+                if (anim) gsap.fromTo(g, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35 });
+              });
+              at(0.4, () => line(`${escL(call)} → <b>${escL(o.msg || "IndexError")}</b>`, true));
+              return 0.9;
+            }
+            case "append":
+            case "insert": {
+              at(0, () => {
+                hits([]);
+                flip(() => { cells.splice(o.op === "append" ? cells.length : o.i, 0, mk(o.v)); }, anim);
+              });
+              if (o.say) at(0.5, () => line(o.say));
+              return 0.8;
+            }
+            case "extend": {
+              o.vals.forEach((v, k) => at(k * 0.35, () => flip(() => { cells.push(mk(v)); }, anim)));
+              return o.vals.length * 0.35 + 0.5;
+            }
+            case "remove": {
+              const i = cells.findIndex((c) => val(c) === o.v);
+              at(0, () => hits([i]));
+              at(0.45, () => flip(() => cells.splice(i, 1), anim));
+              return 1.1;
+            }
+            case "pop": {
+              const i = o.i === undefined ? cells.length - 1 : norm(o.i);
+              at(0, () => hits([i]));
+              at(0.4, () => {
+                const c = cells[i];
+                const l = line(`${escL(call)} → <b>${escL(val(c))}</b>`);
+                if (anim) fly(c, l.querySelector("b"), val(c));
+                flip(() => cells.splice(i, 1), anim);
+              });
+              return 1.2;
+            }
+            case "sort":
+            case "reverse": {
+              at(0, () => {
+                hits([]);
+                flip(() => { o.op === "sort" ? numSort(cells, o.rev) : cells.reverse(); }, anim);
+              });
+              if (o.say) at(0.6, () => line(o.say));
+              return 1;
+            }
+            case "count": {
+              const idx = cells.map((c, i) => (val(c) === o.v ? i : -1)).filter((i) => i >= 0);
+              idx.forEach((i, k) => at(k * 0.3, () => hits(idx.slice(0, k + 1))));
+              at(idx.length * 0.3 + 0.2, () => line(`${escL(call)} → <b>${idx.length}</b>`));
+              return idx.length * 0.3 + 0.7;
+            }
+            case "index": {
+              const found = cells.findIndex((c) => val(c) === o.v);
+              const upto = found < 0 ? cells.length : found + 1;
+              for (let k = 0; k < upto; k++) at(k * 0.3, () => hits([k]));
+              at(upto * 0.3 + 0.1, () => {
+                if (found < 0) hits([]);
+                line(found < 0 ? `${escL(call)} → <b>ValueError</b>` : `${escL(call)} → <b>${found}</b>`, found < 0);
+              });
+              return upto * 0.3 + 0.6;
+            }
+            case "clear": {
+              at(0, () => flip(() => cells.splice(0, cells.length), anim));
+              if (o.say) at(0.5, () => line(o.say));
+              return 0.8;
+            }
+            case "load": {
+              at(0, () => {
+                hits([]);
+                flip(() => cells.splice(0, cells.length, ...o.items.map(mk)), anim);
+              });
+              return 0.7;
+            }
+            case "say": {
+              at(0, () => {
+                hits(o.hit || []);
+                const l = line(o.line, o.err);
+                if (anim) gsap.fromTo(l, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+              });
+              return 0.4;
+            }
+          }
+          return 0;
+        }
+
+        function render(k, anim) {
+          reset();
+          for (let s = 0; s < k && s < cfg.steps.length; s++) {
+            const last = s === k - 1 && anim;
+            if (last) tl = gsap.timeline();
+            let t = 0;
+            for (const o of [].concat(cfg.steps[s])) t += run(o, t, last);
+          }
+        }
+
+        function sync(dir) {
+          const n = Deck.step - (cfg.offset || 0);
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          render(Math.max(0, n), dir > 0 && jump === 1 && n > 0 && n <= cfg.steps.length);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each step's answer waits for its animation (measured by a dry run)
+        {
+          reset();
+          const steps = [...slide.querySelectorAll(".step")];
+          cfg.steps.forEach((ops, i) => {
+            let t = 0;
+            for (const o of [].concat(ops)) t += run(o, t, false);
+            const el = steps[i + (cfg.offset || 0)];
+            if (el) el.style.setProperty("--ans-delay", Math.max(0, t - 0.4) + "s");
+          });
+        }
+
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        render(0, false);
+        return {
+          // run some operations at once, outside the deck's steps (for playgrounds)
+          show(ops) {
+            reset();
+            for (const o of ops) run(o, 0, false);
+          },
+        };
+      }
+      const lv = (id, cfg) => Lv(document.getElementById(id), cfg);
+      // ================================================================ methods in motion
+      const A = '"apple"', B = '"banana"', C = '"cherry"';
+      lv("append", { items: [A, B], name: "fruits", steps: [{ op: "append", v: C }] });
+      lv("insert", { items: [A, C], name: "fruits", steps: [{ op: "insert", i: 1, v: B }] });
+      lv("extend", { items: [A], name: "fruits", steps: [{ op: "extend", vals: [B, C] }] });
+      lv("remove", { items: [A, B, C], name: "fruits", steps: [{ op: "remove", v: B }] });
+      lv("pop", { items: [A, B, C], name: "fruits", steps: [{ op: "pop", call: "last" }, { op: "say", line: 'fruits is <b>["apple", "banana"]</b>' }, { op: "pop", i: 0, call: "first" }] });
+      lv("sort", { items: ["3", "1", "4", "1", "5"], name: "numbers", steps: [{ op: "sort" }, { op: "sort", rev: true }] });
+      lv("reverse", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "reverse" }] });
+      lv("count", { items: ["1", "2", "3", "2", "4", "2"], name: "numbers", steps: [{ op: "count", v: "2", call: "numbers.count(2)" }] });
+      lv("index", { items: [A, B, C], name: "fruits", steps: [{ op: "index", v: B, call: 'fruits.index("banana")' }] });
+      lv("clear", { items: [A, B], name: "fruits", steps: [{ op: "clear" }] });
+
+      lv("e1", { items: ["1", "2"], name: "lst", steps: [{ op: "append", v: "3" }] });
+      lv("e2", { items: ["1", "3", "4"], name: "lst", steps: [{ op: "insert", i: 1, v: "2" }] });
+      lv("e3", { items: ["1", "2"], name: "lst", steps: [{ op: "extend", vals: ["3", "4"] }, [{ op: "load", items: ["1", "2"] }, { op: "append", v: "[3, 4]" }]] });
+      lv("e4", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "pop", call: "lst.pop()" }, { op: "say", line: "lst is <b>[1, 2]</b>" }] });
+      lv("e5", { items: ["1", "2", "2", "3"], name: "lst", steps: [{ op: "remove", v: "2" }] });
+      lv("e6", { items: ["3", "1", "2"], name: "lst", steps: [{ op: "sort", say: "result → <b>None</b>" }] });
+      lv("e7", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "index", v: "5", call: "lst.index(5)" }] });
+      lv("e8", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "count", v: "5", call: "lst.count(5)" }] });
+      lv("e9", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "reverse", say: "result → <b>None</b>" }] });
+      lv("e10", { items: ["1", "2", "3"], name: "lst", steps: [{ op: "clear", say: "result → <b>None</b>" }, { op: "say", line: "lst is <b>[]</b>" }] });
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

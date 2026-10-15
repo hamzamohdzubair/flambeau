@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Logical Operations</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .ev-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+        gap: 2rem;
+        align-items: center;
+        width: min(100%, 64rem);
+      }
+
+      .ev-cols pre {
+        width: 100%;
+      }
+
+      .ev-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- evaluator: an expression worked out left to right ---------- */
+      .evs {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-width: 0;
+      }
+
+      .evrow {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.2rem 0;
+        padding: 0.7rem 0.9rem 0.5rem;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font: 500 1.15rem var(--font-mono);
+        font-variant-ligatures: none;
+        transition: border-color 0.3s;
+      }
+
+      .evrow.live {
+        border-color: rgba(34, 211, 238, 0.5);
+      }
+
+      .tok {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        white-space: pre;
+        color: var(--text);
+      }
+
+      .tok > span {
+        padding: 0 0.1em;
+        border-radius: 6px;
+        transition:
+          background 0.3s,
+          opacity 0.3s;
+      }
+
+      .tok.on > span {
+        background: rgba(34, 211, 238, 0.22);
+      }
+
+      .tok.skip > span {
+        opacity: 0.35;
+        text-decoration: line-through;
+        text-decoration-color: var(--faint);
+      }
+
+      .tok .bd {
+        min-height: 1.5rem;
+        margin-top: 0.2rem;
+        padding: 0 0.5em;
+        border-radius: 999px;
+        font: 500 0.72rem/1.5rem var(--font);
+        white-space: nowrap;
+        visibility: hidden;
+      }
+
+      .tok .bd.t {
+        visibility: visible;
+        color: var(--green);
+        background: rgba(134, 239, 172, 0.12);
+        border: 1px solid rgba(134, 239, 172, 0.45);
+      }
+
+      .tok .bd.f {
+        visibility: visible;
+        color: var(--red);
+        background: rgba(248, 113, 113, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.45);
+      }
+
+      .tok .bd.n {
+        visibility: visible;
+        color: var(--amber);
+        background: rgba(251, 191, 36, 0.1);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+      }
+
+      .tok .bd.skip {
+        visibility: visible;
+        color: var(--faint);
+        border: 1px dashed var(--faint);
+      }
+
+      .evres {
+        align-self: flex-start;
+        margin-left: 0.6rem;
+        padding: 0 0.6em;
+        border-radius: 8px;
+        background: var(--gradient);
+        color: #fff;
+        font-weight: 600;
+        visibility: hidden;
+      }
+
+      .evres.show {
+        visibility: visible;
+      }
+
+      /* ---------- truth tables ---------- */
+      .tt {
+        font-family: var(--font-mono);
+        font-size: 1.05rem;
+        margin: 0 auto;
+      }
+
+      .tt td,
+      .tt th {
+        text-align: center;
+        padding: 0.5em 1.2em;
+        transition: background 0.35s;
+      }
+
+      .tt td.r {
+        font-weight: 600;
+      }
+
+      .tt td.r span {
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+
+      .tt tr.done td.r span {
+        opacity: 1;
+      }
+
+      .tt tr.cur td {
+        background: rgba(34, 211, 238, 0.16);
+      }
+
+      .tt .T {
+        color: var(--green);
+      }
+
+      .tt .F {
+        color: var(--red);
+      }
+
+      @media (max-width: 760px) {
+        .ev-cols {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .evrow {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · basics</span>
+      <h1 class="grad-each"><span>Logical</span> <span>Operations</span></h1>
+      <p>Combine conditions with <code>and</code>, <code>or</code> and <code>not</code>, and see why Python sometimes stops early.</p>
+    </section>
+
+    <!-- ================================================================ and -->
+    <section class="slide" id="and">
+      <h2>The and operator</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # and - both must be True
+          True and True
+          # ans: True
+          True and False
+          # ans: False
+          False and True
+          # ans: False
+          False and False
+          # ans: False
+        </code></pre>
+        <table class="tt">
+          <tr><th>a</th><th>b</th><th>a and b</th></tr>
+          <tr><td class="T">True</td><td class="T">True</td><td class="r T"><span>True</span></td></tr>
+          <tr><td class="T">True</td><td class="F">False</td><td class="r F"><span>False</span></td></tr>
+          <tr><td class="F">False</td><td class="T">True</td><td class="r F"><span>False</span></td></tr>
+          <tr><td class="F">False</td><td class="F">False</td><td class="r F"><span>False</span></td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide" id="or">
+      <h2>The or operator</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # or - at least one True
+          True or False
+          # ans: True
+          False or True
+          # ans: True
+          False or False
+          # ans: False
+          True or True
+          # ans: True
+        </code></pre>
+        <table class="tt">
+          <tr><th>a</th><th>b</th><th>a or b</th></tr>
+          <tr><td class="T">True</td><td class="F">False</td><td class="r T"><span>True</span></td></tr>
+          <tr><td class="F">False</td><td class="T">True</td><td class="r T"><span>True</span></td></tr>
+          <tr><td class="F">False</td><td class="F">False</td><td class="r F"><span>False</span></td></tr>
+          <tr><td class="T">True</td><td class="T">True</td><td class="r T"><span>True</span></td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide" id="not">
+      <h2>The not operator</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # not - inverts boolean
+          not True
+          # ans: False
+          not False
+          # ans: True
+          not (5 &gt; 3)
+          # ans: False
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="combine">
+      <h2>Combining conditions</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # combining with and
+          x = 10
+          x &gt; 5 and x &lt; 15
+          # ans: True
+          # combining with or
+          x &lt; 5 or x &gt; 8
+          # ans: True
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="short">
+      <h2>Short-circuit evaluation</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # and stops at first False
+          False and (1/0)
+          # ans: False (no error, 1/0 is never evaluated)
+          # or stops at first True
+          True or (1/0)
+          # ans: True (no error)
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+      <p class="hint">Once the left side decides the answer, Python doesn't even look at the right side.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict each result, then press → to work it out.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # what is the result?
+          True and True
+          # ans: True
+          # short circuit evaluation?
+          False and (1/0)
+          # ans: False (no error, the second part is skipped)
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # short circuit with or?
+          True or (1/0)
+          # ans: True (no error)
+          # what about this?
+          not False
+          # ans: True
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # chaining and/or?
+          True or False and False
+          # ans: True (and has higher precedence)
+          # boolean with comparison?
+          5 &gt; 3 and 10 &lt; 20
+          # ans: True
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # tricky: what is this?
+          bool([]) and bool([1])
+          # ans: False
+          # what evaluates?
+          0 or 5
+          # ans: 5 (or returns the first truthy value)
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # and returns?
+          5 and 10
+          # ans: 10 (returns the last value if all are truthy)
+          # mixed types?
+          "hello" and ""
+          # ans: "" (returns the first falsy value)
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+      <p class="hint"><code>and</code> and <code>or</code> return one of their operands, not necessarily <code>True</code> or <code>False</code>.</p>
+    </section>
+
+    <section class="slide" id="e6">
+      <h2>Exercise 6</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # what about this?
+          not not True
+          # ans: True
+          # De Morgan's law?
+          not (True and False)
+          # ans: True
+          not True or not False
+          # ans: True
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+      <p class="hint">De Morgan: <code>not (a and b)</code> equals <code>not a or not b</code>.</p>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="ev-cols">
+        <pre><code class="language-python">
+          # order of precedence?
+          True and False or True
+          # ans: True (and first, then or)
+          # empty values?
+          [] or [1, 2]
+          # ans: [1, 2]
+        </code></pre>
+        <div class="evs"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3><code>and</code></h3><p>True only if both are; stops at the first falsy value and returns it.</p></div>
+        <div class="card step"><h3><code>or</code></h3><p>True if either is; stops at the first truthy value and returns it.</p></div>
+        <div class="card step"><h3><code>not</code></h3><p>Flips truthiness and always returns <code>True</code> or <code>False</code>.</p></div>
+        <div class="card step"><h3>Precedence</h3><p><code>not</code>, then <code>and</code>, then <code>or</code>. Use brackets when in doubt.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      const BEAT = 0.6;
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ================================================================ evaluator
+      // Each row is one expression split into parts. Its plan visits parts in
+      // order: { p, v, c } puts a badge (c: t, f, n or skip) under part p, and
+      // { r } shows the result. Row i plays when step i is revealed.
+      function Evaluator(slide, rows) {
+        const box = slide.querySelector(".evs");
+        box.innerHTML = rows
+          .map((r) => `<div class="evrow">${r.parts.map((p) => `<span class="tok"><span>${esc(p)}</span><i class="bd"></i></span>`).join("")}<span class="evres"></span></div>`)
+          .join("");
+        const rowEls = [...box.children];
+        let tl = null, seen = 0, pending = null;
+
+        function paint(i, upto) {
+          const el = rowEls[i];
+          const toks = [...el.querySelectorAll(".tok")];
+          toks.forEach((t) => { t.classList.remove("on", "skip"); const b = t.querySelector(".bd"); b.className = "bd"; b.textContent = ""; });
+          const res = el.querySelector(".evres");
+          res.classList.remove("show");
+          el.classList.remove("live");
+          rows[i].plan.slice(0, upto).forEach((s, k) => {
+            if (s.r !== undefined) {
+              res.textContent = "→ " + s.r;
+              res.classList.add("show");
+              return;
+            }
+            const t = toks[s.p];
+            t.classList.toggle("skip", s.c === "skip");
+            toks.forEach((x) => x.classList.remove("on"));
+            if (s.c !== "skip" && k === upto - 1) t.classList.add("on");
+            const b = t.querySelector(".bd");
+            b.className = "bd " + s.c;
+            b.textContent = s.v ?? (s.c === "skip" ? "skipped" : "");
+          });
+        }
+
+        function render(n, anim) {
+          tl?.kill();
+          rows.forEach((r, i) => paint(i, i < n ? r.plan.length : 0));
+          if (!anim || n < 1 || n > rows.length) return;
+          const i = n - 1;
+          paint(i, 0);
+          rowEls[i].classList.add("live");
+          tl = gsap.timeline();
+          rows[i].plan.forEach((s, k) =>
+            tl.call(() => {
+              paint(i, k + 1);
+              rowEls[i].classList.add("live");
+              const el = s.r !== undefined ? rowEls[i].querySelector(".evres") : rowEls[i].querySelectorAll(".tok .bd")[s.p];
+              gsap.fromTo(el, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" });
+            }, null, k * BEAT)
+          );
+          tl.call(() => rowEls[i].classList.remove("live"), null, rows[i].plan.length * BEAT + 0.3);
+        }
+
+        function sync(dir) {
+          const n = Deck.step, jump = n - seen;
+          seen = n;
+          render(n, dir > 0 && jump === 1);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+        // each answer appears once its row has been worked out
+        [...slide.querySelectorAll(".step")].forEach((el, i) => rows[i] && el.style.setProperty("--ans-delay", (rows[i].plan.length - 1) * BEAT + 0.2 + "s"));
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        render(0, false);
+      }
+      const ev = (id, rows) => Evaluator(document.getElementById(id), rows);
+      const T = (p, v = "True") => ({ p, v, c: "t" });
+      const F = (p, v = "False") => ({ p, v, c: "f" });
+      const N = (p, v) => ({ p, v, c: "n" });
+      const S = (p, v) => ({ p, v, c: "skip" });
+      const R = (r) => ({ r });
+
+      ev("not", [
+        { parts: ["not ", "True"], plan: [T(1), N(0, "flip"), R("False")] },
+        { parts: ["not ", "False"], plan: [F(1), N(0, "flip"), R("True")] },
+        { parts: ["not ", "(5 > 3)"], plan: [T(1), N(0, "flip"), R("False")] },
+      ]);
+      ev("combine", [
+        { parts: ["x > 5", " and ", "x < 15"], plan: [T(0, "10 > 5: True"), T(2, "10 < 15: True"), R("True")] },
+        { parts: ["x < 5", " or ", "x > 8"], plan: [F(0, "10 < 5: False"), T(2, "10 > 8: True"), R("True")] },
+      ]);
+      ev("short", [
+        { parts: ["False", " and ", "(1/0)"], plan: [F(0), S(2), R("False")] },
+        { parts: ["True", " or ", "(1/0)"], plan: [T(0), S(2), R("True")] },
+      ]);
+      ev("e1", [
+        { parts: ["True", " and ", "True"], plan: [T(0), T(2), R("True")] },
+        { parts: ["False", " and ", "(1/0)"], plan: [F(0), S(2), R("False")] },
+      ]);
+      ev("e2", [
+        { parts: ["True", " or ", "(1/0)"], plan: [T(0), S(2), R("True")] },
+        { parts: ["not ", "False"], plan: [F(1), N(0, "flip"), R("True")] },
+      ]);
+      ev("e3", [
+        { parts: ["True", " or ", "False and False"], plan: [T(0), S(2, "skipped: and groups first"), R("True")] },
+        { parts: ["5 > 3", " and ", "10 < 20"], plan: [T(0), T(2), R("True")] },
+      ]);
+      ev("e4", [
+        { parts: ["bool([])", " and ", "bool([1])"], plan: [F(0), S(2), R("False")] },
+        { parts: ["0", " or ", "5"], plan: [F(0, "falsy"), T(2, "truthy"), R("5")] },
+      ]);
+      ev("e5", [
+        { parts: ["5", " and ", "10"], plan: [T(0, "truthy"), T(2, "truthy"), R("10")] },
+        { parts: ['"hello"', " and ", '""'], plan: [T(0, "truthy"), F(2, "falsy"), R('""')] },
+      ]);
+      ev("e6", [
+        { parts: ["not ", "not ", "True"], plan: [T(2), N(1, "False"), N(0, "True"), R("True")] },
+        { parts: ["not ", "(True and False)"], plan: [F(1), N(0, "flip"), R("True")] },
+        { parts: ["not True", " or ", "not False"], plan: [F(0), T(2), R("True")] },
+      ]);
+      ev("e7", [
+        { parts: ["True and False", " or ", "True"], plan: [F(0, "and first: False"), T(2), R("True")] },
+        { parts: ["[]", " or ", "[1, 2]"], plan: [F(0, "falsy"), T(2, "truthy"), R("[1, 2]")] },
+      ]);
+
+      // ================================================================ truth tables follow the answers
+      for (const id of ["and", "or"]) {
+        const slide = document.getElementById(id);
+        const trs = [...slide.querySelectorAll(".tt tr")].slice(1);
+        const show = () =>
+          requestAnimationFrame(() =>
+            trs.forEach((tr, i) => {
+              tr.classList.toggle("done", i < Deck.step);
+              tr.classList.toggle("cur", i === Deck.step - 1);
+            })
+          );
+        Deck.scene(slide, { enter: show, step: show, unstep: show });
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -14,7 +14,9 @@
 
       .slide pre {
         width: auto;
-        min-width: min(100%, 28rem);
+        min-width: min(100%, 36rem);
+        font-size: 1.3rem;
+        flex-shrink: 0;
       }
 
       /* The answer waits for the pipeline to finish */
@@ -172,26 +174,68 @@
         border-color: var(--violet-soft);
       }
 
-      @container slide (max-width: 760px) {
-        .pipe {
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .stage + .stage::before {
-          content: "↓";
-          left: 50%;
-          top: -1.05rem;
-          transform: translateX(-50%);
-        }
-
-        .stage {
-          padding: 0.45rem 0.6rem;
-        }
-
-        .tok {
-          font-size: 0.75rem;
-        }
+      /* ---------- 1600x900 canvas sizing ---------- */
+      .pipe {
+        width: 100%;
+        gap: 2.2rem;
+      }
+      .stage {
+        gap: 0.8rem;
+        padding: 1rem 1.2rem;
+      }
+      .stage + .stage::before {
+        left: -1.75rem;
+        font-size: 1.6rem;
+      }
+      .stage h4 {
+        font-size: 0.8rem;
+      }
+      .stage > code {
+        font-size: 1.55rem;
+      }
+      .stage .items {
+        gap: 0.5rem;
+        min-height: 2.8rem;
+      }
+      .tok {
+        padding: 0.3rem 0.75rem;
+        font-size: 1.45rem;
+      }
+      .pipe-note {
+        font-size: 1.3rem;
+      }
+      .hint {
+        font-size: 1.2rem;
+      }
+      .replay {
+        font-size: 0.9rem;
+        padding: 0.3rem 1rem;
+      }
+      #dict-if .tok {
+        font-size: 1.25rem;
+      }
+      #dict-if .stage.src {
+        flex: 2;
+      }
+      #dict-if .stage.dst {
+        flex: 1.6;
+      }
+      .slide > .replay {
+        position: absolute;
+        right: 5rem;
+        bottom: 2.4rem;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 62rem);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
       }
     </style>
   </head>
@@ -206,7 +250,7 @@
     <!-- ================================================================ dict basic -->
     <section class="slide" id="dict-basic">
       <h2>Dict comprehension</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.9rem"><code class="language-python">
         # basic dict comprehension
         squares = {x: x**2 for x in range(5)}
         # ans: {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
@@ -218,7 +262,7 @@
     <!-- ================================================================ zip -->
     <section class="slide" id="dict-zip">
       <h2>Dict from two lists</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.5rem"><code class="language-python">
         # zip two lists
         keys = ["a", "b", "c"]
         values = [1, 2, 3]
@@ -232,7 +276,7 @@
     <!-- ================================================================ condition -->
     <section class="slide" id="dict-if">
       <h2>Dict with a condition</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.2rem"><code class="language-python">
         # filter dict
         numbers = range(10)
         even_squares = {x: x**2 for x in numbers
@@ -246,7 +290,7 @@
     <!-- ================================================================ swap -->
     <section class="slide" id="dict-swap">
       <h2>Swap keys and values</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.7rem"><code class="language-python">
         # swap dict
         original = {"a": 1, "b": 2}
         swapped = {v: k for k, v in original.items()}
@@ -259,7 +303,7 @@
     <!-- ================================================================ set basic -->
     <section class="slide" id="set-basic">
       <h2>Set comprehension</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.9rem"><code class="language-python">
         # basic set comprehension
         squares = {x**2 for x in range(5)}
         # ans: {0, 1, 4, 9, 16}
@@ -271,7 +315,7 @@
     <!-- ================================================================ set dups -->
     <section class="slide" id="set-dups">
       <h2>A set removes duplicates</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.7rem"><code class="language-python">
         # auto-removes duplicates
         numbers = [1, 2, 2, 3, 3, 3]
         unique = {x for x in numbers}
@@ -284,7 +328,7 @@
     <!-- ================================================================ set if -->
     <section class="slide" id="set-if">
       <h2>Set with a condition</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.9rem"><code class="language-python">
         # filter set
         evens = {x for x in range(10) if x % 2 == 0}
         # ans: {0, 2, 4, 6, 8}
@@ -299,9 +343,9 @@
       <p class="center">Predict the result, then press → to run the comprehension and check.</p>
     </section>
 
-    <section class="slide" id="ex1">
+    <section class="slide ex" id="ex1">
       <h2>Exercise 1</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.9rem"><code class="language-python">
         # dict comprehension?
         {x: x*2 for x in range(3)}
         # ans: {0: 0, 1: 2, 2: 4}
@@ -310,9 +354,9 @@
       <p class="pipe-note"></p>
     </section>
 
-    <section class="slide" id="ex2">
+    <section class="slide ex" id="ex2">
       <h2>Exercise 2</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.7rem"><code class="language-python">
         # dict from pairs?
         pairs = [("a", 1), ("b", 2)]
         {k: v for k, v in pairs}
@@ -322,9 +366,9 @@
       <p class="pipe-note"></p>
     </section>
 
-    <section class="slide" id="ex3">
+    <section class="slide ex" id="ex3">
       <h2>Exercise 3</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.7rem"><code class="language-python">
         # dict with if-else?
         {x: "even" if x % 2 == 0 else "odd"
          for x in range(3)}
@@ -336,7 +380,7 @@
 
     <section class="slide">
       <h2>Exercise 4</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.00rem"><code class="language-python">
         # nested dict?
         {i: {j: i*j for j in range(2)}
             for i in range(2)}
@@ -345,9 +389,9 @@
       <p class="hint step">The inner comprehension runs once for each <code>i</code>, building that key's value.</p>
     </section>
 
-    <section class="slide" id="ex5">
+    <section class="slide ex" id="ex5">
       <h2>Exercise 5</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.9rem"><code class="language-python">
         # set comprehension duplicates?
         {x % 3 for x in range(10)}
         # ans: {0, 1, 2} (only unique values)
@@ -358,7 +402,7 @@
 
     <section class="slide">
       <h2>Exercise 6</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.00rem"><code class="language-python">
         # set vs list comprehension?
         [x for x in [1,2,2,3]]
         # ans: [1, 2, 2, 3]
@@ -367,9 +411,9 @@
       </code></pre>
     </section>
 
-    <section class="slide" id="ex7">
+    <section class="slide ex" id="ex7">
       <h2>Exercise 7</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.4rem"><code class="language-python">
         # dict filter values?
         d = {"a": 1, "b": 2, "c": 3}
         {k: v for k, v in d.items() if v &gt; 1}
@@ -379,9 +423,9 @@
       <p class="pipe-note"></p>
     </section>
 
-    <section class="slide" id="ex8">
+    <section class="slide ex" id="ex8">
       <h2>Exercise 8</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.7rem"><code class="language-python">
         # dict transform values?
         d = {"a": 1, "b": 2}
         {k: v*2 for k, v in d.items()}
@@ -391,9 +435,9 @@
       <p class="pipe-note"></p>
     </section>
 
-    <section class="slide" id="ex9">
+    <section class="slide ex" id="ex9">
       <h2>Exercise 9</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 1.9rem"><code class="language-python">
         # set from string?
         {c for c in "hello"}
         # ans: {'h', 'e', 'l', 'o'}
@@ -405,7 +449,7 @@
 
     <section class="slide">
       <h2>Exercise 10</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
         # empty dict vs set?
         {}  # dict
         {x for x in []}  # set()
@@ -416,7 +460,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 60rem)">
+      <div class="cards">
         <div class="card step"><h3><code>{k: v for ...}</code></h3><p>A colon makes a dict. A repeated key keeps the last value.</p></div>
         <div class="card step"><h3><code>{x for ...}</code></h3><p>No colon makes a set: duplicates disappear, order is not kept.</p></div>
         <div class="card step"><h3><code>if</code> at the end</h3><p>Filters which items get in.</p></div>
@@ -483,7 +527,8 @@
         const centre = (el, tok) => {
           const p = pipe.getBoundingClientRect();
           const r = el.getBoundingClientRect();
-          return { x: r.left - p.left + r.width / 2 - tok.offsetWidth / 2, y: r.top - p.top + r.height / 2 - tok.offsetHeight / 2 };
+          const k = p.width / pipe.offsetWidth || 1; // the canvas is scaled to the window
+          return { x: (r.left - p.left + r.width / 2) / k - tok.offsetWidth / 2, y: (r.top - p.top + r.height / 2) / k - tok.offsetHeight / 2 };
         };
         function play(instant) {
           reset();

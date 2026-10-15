@@ -11,14 +11,14 @@
       .tutor {
         display: grid;
         grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 1fr);
-        gap: 1.4rem;
-        width: min(100%, 66rem);
+        gap: 2rem;
+        width: min(100%, 80rem);
         align-items: start;
       }
 
       .tutor pre {
         width: 100%;
-        font-size: 1.1rem;
+        font-size: 1.3rem;
       }
 
       .tutor .line {
@@ -53,7 +53,7 @@
         padding: 0 0.6em;
         border-radius: 999px;
         font-family: var(--font);
-        font-size: 0.7em;
+        font-size: max(0.75em, 0.8rem);
         line-height: 1.6;
         vertical-align: 0.1em;
         color: var(--amber);
@@ -76,12 +76,12 @@
       .mem {
         display: flex;
         flex-direction: column;
-        gap: 0.45rem;
+        gap: 0.3rem;
         min-width: 0;
       }
 
       .mh {
-        font: 500 0.68rem var(--font-mono);
+        font: 500 0.8rem var(--font-mono);
         letter-spacing: 0.16em;
         text-transform: uppercase;
         color: var(--faint);
@@ -106,12 +106,12 @@
 
       .shelf:empty::after {
         content: "none";
-        font: 0.8rem var(--font-mono);
+        font: 0.95rem var(--font-mono);
         color: var(--faint);
       }
 
       .frame {
-        padding: 0.45rem 0.75rem 0.55rem;
+        padding: 0.5rem 0.9rem 0.6rem;
         border-radius: 12px;
         border: 1px solid var(--border);
         background: #0d0f20;
@@ -133,7 +133,7 @@
       }
 
       .frame .fn {
-        font: 600 0.82rem var(--font-mono);
+        font: 600 1rem var(--font-mono);
         color: var(--violet-soft);
       }
 
@@ -145,7 +145,7 @@
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
         column-gap: 0.8rem;
-        font: 0.95rem/1.55 var(--font-mono);
+        font: 1.15rem/1.4 var(--font-mono);
       }
 
       .frame .row {
@@ -164,7 +164,7 @@
 
       .frame .ret {
         margin-top: 0.3rem;
-        font: 0.85rem var(--font-mono);
+        font: 1.05rem var(--font-mono);
         color: var(--muted);
       }
 
@@ -173,7 +173,7 @@
         display: inline-block;
         padding: 0 0.55em;
         border-radius: 999px;
-        font: 600 0.9rem/1.6 var(--font-mono);
+        font: 600 1.1rem/1.6 var(--font-mono);
         color: #fff;
         background: rgba(236, 72, 153, 0.35);
         border: 1px solid var(--pink);
@@ -192,7 +192,7 @@
         border-radius: 12px;
         border: 1px solid var(--border);
         background: rgba(0, 0, 0, 0.45);
-        font: 0.95rem/1.5 var(--font-mono);
+        font: 1.15rem/1.5 var(--font-mono);
         color: var(--green);
         white-space: pre-wrap;
       }
@@ -210,11 +210,16 @@
         color: var(--red);
       }
 
+      .mhrow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
       .ctl {
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        margin-top: 0.2rem;
       }
 
       .ctl button {
@@ -224,7 +229,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 600 0.9rem var(--font);
+        font: 600 1.1rem var(--font);
         cursor: pointer;
         transition: all 0.2s;
       }
@@ -236,31 +241,16 @@
 
       .ctl span {
         margin-left: 0.3rem;
-        font: 0.75rem var(--font-mono);
+        font: 0.9rem var(--font-mono);
         color: var(--faint);
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         color: var(--faint);
         text-align: center;
       }
 
-      @container slide (max-width: 760px) {
-        .tutor {
-          grid-template-columns: 1fr;
-          gap: 0.8rem;
-        }
-
-        .tutor pre {
-          font-size: 0.82rem;
-        }
-
-        .frame .vars,
-        .console {
-          font-size: 0.82rem;
-        }
-      }
       /* ---------- Iterator view: a cursor walking over an iterable ---------- */
       .itv {
         display: flex;
@@ -278,8 +268,8 @@
       }
 
       .itv .lbl {
-        padding-top: 0.9rem;
-        font: 500 0.8rem var(--font-mono);
+        padding-top: 1.1rem;
+        font: 500 1.1rem var(--font-mono);
         color: var(--faint);
       }
 
@@ -298,10 +288,10 @@
       }
 
       .itv.small .cell {
-        min-width: 2.3rem;
-        height: 2.5rem;
-        padding: 0 0.35rem;
-        font-size: 0.95rem;
+        min-width: 3rem;
+        height: 3.2rem;
+        padding: 0 0.4rem;
+        font-size: 1.25rem;
       }
 
       .itv .outs .build b {
@@ -311,13 +301,13 @@
       .itv .cell {
         display: grid;
         place-items: center;
-        min-width: 3rem;
-        height: 3rem;
-        padding: 0 0.6rem;
-        border-radius: 10px;
-        border: 1.5px solid rgba(167, 139, 250, 0.6);
+        min-width: 3.6rem;
+        height: 3.6rem;
+        padding: 0 0.7rem;
+        border-radius: 12px;
+        border: 2px solid rgba(167, 139, 250, 0.6);
         background: rgba(139, 92, 246, 0.14);
-        font: 600 1.15rem var(--font-mono);
+        font: 600 1.5rem var(--font-mono);
         color: var(--text);
         transition:
           opacity 0.35s,
@@ -347,8 +337,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 3rem;
-        font: 600 0.75rem var(--font-mono);
+        width: 3.6rem;
+        font: 600 1rem var(--font-mono);
         color: var(--cyan);
         white-space: nowrap;
         transition: opacity 0.3s;
@@ -376,13 +366,13 @@
         display: flex;
         flex-direction: column;
         gap: 0.2rem;
-        min-width: min(100%, 18rem);
-        min-height: 2.4rem;
-        padding: 0.45rem 0.9rem;
+        min-width: min(100%, 24rem);
+        min-height: 3.2rem;
+        padding: 0.6rem 1.2rem;
         border-radius: 12px;
         border: 1px solid var(--border);
         background: rgba(0, 0, 0, 0.42);
-        font: 0.95rem/1.5 var(--font-mono);
+        font: 1.2rem/1.5 var(--font-mono);
         color: var(--muted);
       }
 
@@ -401,39 +391,13 @@
         pointer-events: none;
         padding: 0 0.5em;
         border-radius: 8px;
-        font: 600 1.05rem/1.7 var(--font-mono);
+        font: 600 1.4rem/1.7 var(--font-mono);
         color: #fff;
         background: rgba(34, 211, 238, 0.35);
         border: 1px solid var(--cyan);
         box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
       }
 
-      @container slide (max-width: 760px) {
-        .itv .cells {
-          gap: 0.25rem;
-        }
-
-        .itv .cell {
-          min-width: 1.9rem;
-          height: 2.3rem;
-          padding: 0 0.3rem;
-          font-size: 0.9rem;
-        }
-
-        .itv .src {
-          flex-direction: column;
-          align-items: center;
-          gap: 0.2rem;
-        }
-
-        .itv .lbl {
-          padding-top: 0;
-        }
-
-        .itv .outs {
-          font-size: 0.8rem;
-        }
-      }
 
       .itv-cols .line.answer.shown {
         transition-delay: var(--ans-delay, 0s);
@@ -442,9 +406,9 @@
       .itv-cols {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 2rem;
+        gap: 2.5rem;
         align-items: center;
-        width: min(100%, 64rem);
+        width: min(100%, 80rem);
       }
 
       .itv-cols.stack {
@@ -454,25 +418,48 @@
       }
 
       .itv-cols.stack pre {
-        width: min(100%, 44rem);
+        width: min(100%, 60rem);
       }
 
       .itv-cols pre {
         width: 100%;
+        font-size: 1.3rem;
       }
 
-      @container slide (max-width: 760px) {
-        .itv-cols {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-      }
       .slide > pre {
-        width: min(100%, 44rem);
+        width: min(100%, 66rem);
+        font-size: 1.45rem;
       }
 
-      #forloop .itv {
-        margin-top: 0.4rem;
+      .slide > pre.xl {
+        font-size: 1.85rem;
+      }
+
+      #forloop .codecol {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      #forloop .itv-cols {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      }
+
+      #custom .tutor {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      }
+
+      #custom .tutor pre .line {
+        min-height: 1.45em;
+      }
+
+      #custom .tutor pre {
+        font-size: 1.05rem;
+        line-height: 1.45;
+      }
+
+      #ivi .itv-cols pre {
+        font-size: 1.1rem;
       }
 
       /* ---------- Iterable vs iterator diagram ---------- */
@@ -498,7 +485,7 @@
       .ivi text {
         fill: var(--text);
         font-family: var(--font-mono);
-        font-size: 16px;
+        font-size: 24px;
         text-anchor: middle;
         dominant-baseline: central;
       }
@@ -506,7 +493,7 @@
       .ivi text.lbl {
         fill: var(--muted);
         font-family: var(--font);
-        font-size: 13px;
+        font-size: 19px;
       }
 
       .ivi g path {
@@ -536,7 +523,25 @@
       }
 
       #ivi .itv-cols {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      }
+
+      /* ---------- recap / overview cards, scaled for the 1600x900 canvas ---------- */
+      .big-cards {
+        width: min(100%, 80rem);
+      }
+
+      .big-cards .card {
+        padding: 1.6rem 1.8rem;
+      }
+
+      .big-cards h3 {
+        font-size: 1.6rem;
+      }
+
+      .big-cards p {
+        font-size: 1.3rem;
+        line-height: 1.5;
       }
     </style>
   </head>
@@ -575,6 +580,7 @@
     <section class="slide" id="forloop">
       <h2>A for loop uses iterators</h2>
       <div class="itv-cols">
+        <div class="codecol">
         <pre><code class="language-python">
           # for loop = iterator protocol
           for num in [1, 2, 3]:
@@ -590,8 +596,9 @@
               except StopIteration:
                   break
         </code></pre>
+        </div>
+        <div class="itv"></div>
       </div>
-      <div class="itv"></div>
       <span class="step" data-anim="none"></span>
     </section>
 
@@ -643,18 +650,18 @@
           next(iterator)
           # ans: 1
         </code></pre>
-        <svg class="ivi" viewBox="0 0 400 330" aria-label="iter(numbers) makes an iterator; next(numbers) fails; iter(iterator) returns the same iterator; next(iterator) gives 1">
+        <svg class="ivi" viewBox="-50 30 530 440" aria-label="iter(numbers) makes an iterator; next(numbers) fails; iter(iterator) returns the same iterator; next(iterator) gives 1">
           <defs>
             <marker id="iviArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="#a78bfa" />
             </marker>
           </defs>
-          <g class="able"><rect x="20" y="30" width="150" height="60" rx="12" /><text x="95" y="52">numbers</text><text class="lbl" x="95" y="74">iterable: __iter__</text></g>
-          <g class="tor"><rect x="20" y="210" width="150" height="60" rx="12" /><text x="95" y="232">iterator</text><text class="lbl" x="95" y="254">__iter__ + __next__</text></g>
-          <g data-s="1"><path d="M95 92 L95 206" /><text class="lbl" x="135" y="150">iter()</text></g>
-          <g data-s="2" class="bad"><path d="M172 60 L300 60" /><text x="320" y="60">✕</text><text class="lbl" x="236" y="44">next(numbers)</text><text class="lbl" x="300" y="88">TypeError</text></g>
-          <g data-s="3"><path d="M20 250 C -30 300, 60 330, 70 274" /><text class="lbl" x="10" y="312">iter() → itself</text></g>
-          <g data-s="4"><path d="M172 240 L290 240" /><text class="lbl" x="232" y="224">next()</text><text x="320" y="240">1</text></g>
+          <g class="able"><rect x="28" y="42" width="210" height="84" rx="17" /><text x="133" y="73">numbers</text><text class="lbl" x="133" y="104">iterable: __iter__</text></g>
+          <g class="tor"><rect x="28" y="294" width="210" height="84" rx="17" /><text x="133" y="325">iterator</text><text class="lbl" x="133" y="356">__iter__ + __next__</text></g>
+          <g data-s="1"><path d="M133 129 L133 288" /><text class="lbl" x="189" y="210">iter()</text></g>
+          <g data-s="2" class="bad"><path d="M241 84 L420 84" /><text x="448" y="84">✕</text><text class="lbl" x="330" y="62">next(numbers)</text><text class="lbl" x="420" y="123">TypeError</text></g>
+          <g data-s="3"><path d="M28 350 C -42 420, 84 462, 98 384" /><text class="lbl" x="14" y="437">iter() → itself</text></g>
+          <g data-s="4"><path d="M241 336 L406 336" /><text class="lbl" x="325" y="314">next()</text><text x="448" y="336">1</text></g>
         </svg>
       </div>
     </section>
@@ -667,7 +674,7 @@
 
     <section class="slide">
       <h2>Exercise 1</h2>
-      <pre><code class="language-python">
+      <pre class="xl"><code class="language-python">
         # what is iter()?
         lst = [1, 2, 3]
         it = iter(lst)
@@ -720,7 +727,7 @@
 
     <section class="slide">
       <h2>Exercise 5</h2>
-      <pre><code class="language-python">
+      <pre class="xl"><code class="language-python">
         # iter on iterator?
         it = iter([1, 2, 3])
         iter(it) is it
@@ -803,7 +810,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 62rem)">
+      <div class="cards big-cards">
         <div class="card step"><h3>Iterable</h3><p>Can make an iterator: <code>iter(x)</code> works. Lists, strings, ranges, dicts.</p></div>
         <div class="card step"><h3>Iterator</h3><p>Hands out values with <code>next()</code> and remembers where it is.</p></div>
         <div class="card step"><h3>StopIteration</h3><p>Signals the end; a <code>for</code> loop catches it and stops.</p></div>
@@ -866,10 +873,9 @@
         const lines = [...pre.querySelectorAll(".line")];
         lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
         const mem = root.querySelector(".mem");
-        mem.innerHTML = `<div class="mh">Frames</div><div class="stack"></div>
+        mem.innerHTML = `<div class="mhrow"><div class="mh">Frames</div><div class="ctl" data-interactive><button data-do="back" title="Step back">‹</button><button data-do="play" title="Play from the start">▶</button><button data-do="fwd" title="Step forward">›</button><span></span></div></div><div class="stack"></div>
           <div class="shelf-wrap"><div class="mh">Paused generators</div><div class="shelf"></div></div>
-          <div class="mh out-h">Output</div><div class="console"></div>
-          <div class="ctl" data-interactive><button data-do="back" title="Step back">‹</button><button data-do="play" title="Play from the start">▶</button><button data-do="fwd" title="Step forward">›</button><span></span></div>`;
+          <div class="mh out-h">Output</div><div class="console"></div>`;
         const stack = mem.querySelector(".stack"), shelf = mem.querySelector(".shelf"), con = mem.querySelector(".console"), cnt = mem.querySelector(".ctl span");
         root.classList.toggle("no-out", !beats.some((b) => b.o !== undefined || b.e !== undefined || b.err));
         root.classList.toggle("has-shelf", beats.some((b) => b.s.some((f) => f.p)));
@@ -1052,7 +1058,7 @@
         let tallest = 0;
         for (let i = 1; i <= beats.length; i++) {
           render(i, false);
-          tallest = Math.max(tallest, mem.getBoundingClientRect().height);
+          tallest = Math.max(tallest, mem.offsetHeight);
         }
         mem.style.minHeight = tallest + "px";
         render(0, false);
@@ -1243,6 +1249,13 @@
           step: (s, n, els, d) => schedule(d.dir),
           unstep: (s, n, els, d) => schedule(d.dir),
         });
+        // reserve the tallest output so the slide never grows mid-animation
+        let tallest = 0;
+        for (let k = 0; k <= cfg.steps.length; k++) {
+          render(k, false);
+          tallest = Math.max(tallest, outs.offsetHeight);
+        }
+        outs.style.minHeight = tallest + "px";
         render(0, false);
       }
       const itv = (id, cfg) => Itv(document.getElementById(id), cfg);

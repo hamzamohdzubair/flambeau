@@ -8,9 +8,18 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #triangle svg {
-        width: min(100%, 44rem, 80cqh);
+        width: 100%;
+        max-height: 64cqh;
         height: auto;
         overflow: visible;
+      }
+
+      #triangle > span.step {
+        position: absolute;
+      }
+
+      #triangle > p {
+        font-size: 1.35rem;
       }
 
       #triangle .edge {
@@ -34,7 +43,7 @@
 
       #triangle .node .sub {
         font-family: var(--font);
-        font-size: 14px;
+        font-size: 19px;
         font-weight: 400;
         fill: var(--muted);
       }
@@ -48,6 +57,8 @@
       }
 
       #source img {
+        height: 64cqh;
+        max-height: 64cqh;
         background: #fff;
       }
     </style>

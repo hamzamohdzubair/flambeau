@@ -24,8 +24,8 @@
       }
 
       .itv .lbl {
-        padding-top: 0.9rem;
-        font: 500 0.8rem var(--font-mono);
+        padding-top: 1.1rem;
+        font: 500 1.1rem var(--font-mono);
         color: var(--faint);
       }
 
@@ -44,10 +44,10 @@
       }
 
       .itv.small .cell {
-        min-width: 2.3rem;
-        height: 2.5rem;
-        padding: 0 0.35rem;
-        font-size: 0.95rem;
+        min-width: 3rem;
+        height: 3.2rem;
+        padding: 0 0.4rem;
+        font-size: 1.25rem;
       }
 
       .itv .outs .build b {
@@ -57,13 +57,13 @@
       .itv .cell {
         display: grid;
         place-items: center;
-        min-width: 3rem;
-        height: 3rem;
-        padding: 0 0.6rem;
-        border-radius: 10px;
-        border: 1.5px solid rgba(167, 139, 250, 0.6);
+        min-width: 3.6rem;
+        height: 3.6rem;
+        padding: 0 0.7rem;
+        border-radius: 12px;
+        border: 2px solid rgba(167, 139, 250, 0.6);
         background: rgba(139, 92, 246, 0.14);
-        font: 600 1.15rem var(--font-mono);
+        font: 600 1.5rem var(--font-mono);
         color: var(--text);
         transition:
           opacity 0.35s,
@@ -93,8 +93,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 3rem;
-        font: 600 0.75rem var(--font-mono);
+        width: 3.6rem;
+        font: 600 1rem var(--font-mono);
         color: var(--cyan);
         white-space: nowrap;
         transition: opacity 0.3s;
@@ -122,13 +122,13 @@
         display: flex;
         flex-direction: column;
         gap: 0.2rem;
-        min-width: min(100%, 18rem);
-        min-height: 2.4rem;
-        padding: 0.45rem 0.9rem;
+        min-width: min(100%, 24rem);
+        min-height: 3.2rem;
+        padding: 0.6rem 1.2rem;
         border-radius: 12px;
         border: 1px solid var(--border);
         background: rgba(0, 0, 0, 0.42);
-        font: 0.95rem/1.5 var(--font-mono);
+        font: 1.2rem/1.5 var(--font-mono);
         color: var(--muted);
       }
 
@@ -147,39 +147,13 @@
         pointer-events: none;
         padding: 0 0.5em;
         border-radius: 8px;
-        font: 600 1.05rem/1.7 var(--font-mono);
+        font: 600 1.4rem/1.7 var(--font-mono);
         color: #fff;
         background: rgba(34, 211, 238, 0.35);
         border: 1px solid var(--cyan);
         box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
       }
 
-      @container slide (max-width: 760px) {
-        .itv .cells {
-          gap: 0.25rem;
-        }
-
-        .itv .cell {
-          min-width: 1.9rem;
-          height: 2.3rem;
-          padding: 0 0.3rem;
-          font-size: 0.9rem;
-        }
-
-        .itv .src {
-          flex-direction: column;
-          align-items: center;
-          gap: 0.2rem;
-        }
-
-        .itv .lbl {
-          padding-top: 0;
-        }
-
-        .itv .outs {
-          font-size: 0.8rem;
-        }
-      }
 
       .itv-cols .line.answer.shown {
         transition-delay: var(--ans-delay, 0s);
@@ -188,9 +162,9 @@
       .itv-cols {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 2rem;
+        gap: 2.5rem;
         align-items: center;
-        width: min(100%, 64rem);
+        width: min(100%, 80rem);
       }
 
       .itv-cols.stack {
@@ -200,19 +174,14 @@
       }
 
       .itv-cols.stack pre {
-        width: min(100%, 44rem);
+        width: min(100%, 60rem);
       }
 
       .itv-cols pre {
         width: 100%;
+        font-size: 1.3rem;
       }
 
-      @container slide (max-width: 760px) {
-        .itv-cols {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-      }
       /* ---------- Combinatorics grid: which (row, column) pairs come out, in order ---------- */
       .cgrid {
         display: flex;
@@ -223,15 +192,15 @@
       }
 
       .cgrid .ttl {
-        font: 500 0.85rem var(--font-mono);
+        font: 500 1.05rem var(--font-mono);
         color: var(--faint);
       }
 
       .cgrid table {
         border-collapse: separate;
-        border-spacing: 0.3rem;
+        border-spacing: 0.35rem;
         background: none;
-        font: 600 0.95rem var(--font-mono);
+        font: 600 1rem var(--font-mono);
       }
 
       .cgrid th {
@@ -243,7 +212,7 @@
       }
 
       .cgrid td {
-        min-width: 4.4rem;
+        min-width: 4.6rem;
         padding: 0.45rem 0.5rem;
         border-radius: 10px;
         border: 1.5px dashed rgba(167, 139, 250, 0.35);
@@ -276,19 +245,19 @@
 
       .cgrid td .n {
         display: block;
-        font-size: 0.65rem;
+        font-size: 0.8rem;
         color: var(--amber);
         min-height: 0.9em;
       }
 
       .cgrid .gout {
         max-width: 100%;
-        min-height: 2.2rem;
-        padding: 0.4rem 0.9rem;
+        min-height: 2.8rem;
+        padding: 0.5rem 1.1rem;
         border-radius: 12px;
         border: 1px solid var(--border);
         background: rgba(0, 0, 0, 0.42);
-        font: 0.9rem/1.5 var(--font-mono);
+        font: 1.15rem/1.5 var(--font-mono);
         color: var(--green);
         overflow-wrap: anywhere;
       }
@@ -297,19 +266,13 @@
         visibility: hidden;
       }
 
-      @container slide (max-width: 760px) {
-        .cgrid td {
-          min-width: 3rem;
-          font-size: 0.75rem;
-          padding: 0.3rem;
-        }
-      }
       .slide > pre {
-        width: min(100%, 46rem);
+        width: min(100%, 66rem);
+        font-size: 1.45rem;
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         color: var(--faint);
         text-align: center;
       }
@@ -319,6 +282,94 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 2rem;
+      }
+
+      #perm .itv-cols,
+      #comb .itv-cols,
+      #e8 .itv-cols {
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      }
+
+      #perm .itv-cols pre,
+      #comb .itv-cols pre,
+      #e8 .itv-cols pre {
+        font-size: 1.1rem;
+      }
+
+      #count pre,
+      #cycle pre {
+        font-size: 1.05rem;
+      }
+
+      #count pre .line,
+      #cycle pre .line {
+        min-height: 1.5em;
+      }
+
+      #count .itv .cells,
+      #cycle .itv .cells {
+        padding-bottom: 2.2rem;
+      }
+
+      #e9 .outs {
+        flex-direction: row;
+        gap: 1.6rem;
+      }
+
+      #e10 pre {
+        font-size: 1.2rem;
+      }
+
+      #e10 .zipv {
+        gap: 0.5rem;
+      }
+
+      #e10 .zipv td {
+        padding: 0.45rem;
+      }
+
+      #e7 pre {
+        font-size: 1.1rem;
+      }
+
+      .itv-cols.stack {
+        gap: 0.7rem;
+      }
+
+      #e7 .cgrid {
+        gap: 0.4rem;
+      }
+
+      #count .outs,
+      #cycle .outs {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        column-gap: 2rem;
+        width: max-content;
+      }
+
+      #cycle .outs {
+        column-gap: 1.2rem;
+        font-size: 1.1rem;
+      }
+
+      #e5 .itv .src {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      #e5 .itv .lbl {
+        padding-top: 0;
+      }
+
+      #e5 .itv .cells {
+        gap: 2.6rem 0.25rem;
+      }
+
+      #e5 .itv.small .cell {
+        min-width: 2.5rem;
+        padding: 0 0.2rem;
       }
 
       .itv-cols .cgrid + .cgrid {
@@ -339,22 +390,22 @@
 
       .zipv table {
         border-collapse: separate;
-        border-spacing: 0.35rem;
+        border-spacing: 0.4rem;
         background: none;
-        font: 600 1rem var(--font-mono);
+        font: 600 1.4rem var(--font-mono);
       }
 
       .zipv th {
         background: none;
         border: none;
         color: var(--faint);
-        font: 500 0.8rem var(--font-mono);
+        font: 500 1.1rem var(--font-mono);
         text-align: right;
       }
 
       .zipv td {
-        min-width: 3.4rem;
-        padding: 0.5rem;
+        min-width: 4.4rem;
+        padding: 0.6rem;
         border-radius: 10px;
         border: 1.5px solid rgba(167, 139, 250, 0.5);
         background: rgba(139, 92, 246, 0.12) !important;
@@ -381,17 +432,35 @@
       }
 
       .zipv .gout {
-        min-height: 2.2rem;
-        padding: 0.4rem 0.9rem;
+        min-height: 2.8rem;
+        padding: 0.5rem 1.1rem;
         border-radius: 12px;
         border: 1px solid var(--border);
         background: rgba(0, 0, 0, 0.42);
-        font: 0.9rem/1.5 var(--font-mono);
+        font: 1.2rem/1.5 var(--font-mono);
         color: var(--green);
       }
 
       .zipv .gout:empty {
         visibility: hidden;
+      }
+
+      /* ---------- recap / overview cards, scaled for the 1600x900 canvas ---------- */
+      .big-cards {
+        width: min(100%, 80rem);
+      }
+
+      .big-cards .card {
+        padding: 1.6rem 1.8rem;
+      }
+
+      .big-cards h3 {
+        font-size: 1.6rem;
+      }
+
+      .big-cards p {
+        font-size: 1.3rem;
+        line-height: 1.5;
       }
     </style>
   </head>
@@ -456,7 +525,7 @@
     <!-- ================================================================ chain islice -->
     <section class="slide" id="chain">
       <h2>chain</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           from itertools import chain
           # combine iterables
@@ -472,26 +541,34 @@
       <h2>islice</h2>
       <div class="itv-cols stack">
         <pre><code class="language-python">
-          from itertools import islice, count
-          # slice iterator
+          from itertools import islice
+          # slice iterator: islice(it, start, stop, step)
           list(islice(range(10), 2, 8, 2))
           # ans: [2, 4, 6]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">Like list slicing, but for any iterator: it stops at <code>stop</code> without looking further.</p>
+    </section>
+
+    <section class="slide" id="islice2">
+      <h2>islice: take the first n</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import islice, count
           # take first n
           list(islice(count(), 5))
           # ans: [0, 1, 2, 3, 4]
         </code></pre>
-        <div class="two">
-          <div class="itv a"></div>
-          <div class="itv b"></div>
-        </div>
+        <div class="itv"></div>
       </div>
-      <p class="hint">Like list slicing, but for any iterator, even an infinite one: it stops at <code>stop</code> without looking further.</p>
+      <p class="hint">This works even on an infinite iterator like <code>count()</code>: only 5 values are ever made.</p>
     </section>
 
     <!-- ================================================================ combinatoric -->
     <section class="slide" id="product">
       <h2>product</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           from itertools import product
           # cartesian product
@@ -556,7 +633,7 @@
 
     <section class="slide" id="e2">
       <h2>Exercise 2</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           from itertools import cycle
           # cycle repeats?
@@ -570,7 +647,7 @@
 
     <section class="slide" id="e3">
       <h2>Exercise 3</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           from itertools import repeat, islice
           # repeat without count?
@@ -623,7 +700,7 @@
 
     <section class="slide" id="e7">
       <h2>Exercise 7</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           from itertools import permutations, combinations
           # permutations vs combinations?
@@ -655,7 +732,7 @@
 
     <section class="slide" id="e9">
       <h2>Exercise 9</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           from itertools import groupby
           # group consecutive
@@ -670,7 +747,7 @@
 
     <section class="slide" id="e10">
       <h2>Exercise 10</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           from itertools import zip_longest
           # zip with fillvalue
@@ -685,7 +762,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 64rem)">
+      <div class="cards big-cards">
         <div class="card step"><h3>Infinite</h3><p><code>count</code>, <code>cycle</code>, <code>repeat</code>: pair them with <code>break</code> or <code>islice</code>.</p></div>
         <div class="card step"><h3>Plumbing</h3><p><code>chain</code>, <code>islice</code>, <code>groupby</code>, <code>zip_longest</code> reshape streams lazily.</p></div>
         <div class="card step"><h3>Combinatorics</h3><p><code>product</code> (all pairs), <code>permutations</code> (order matters), <code>combinations</code> (it doesn't).</p></div>
@@ -890,6 +967,13 @@
           step: (s, n, els, d) => schedule(d.dir),
           unstep: (s, n, els, d) => schedule(d.dir),
         });
+        // reserve the tallest output so the slide never grows mid-animation
+        let tallest = 0;
+        for (let k = 0; k <= cfg.steps.length; k++) {
+          render(k, false);
+          tallest = Math.max(tallest, outs.offsetHeight);
+        }
+        outs.style.minHeight = tallest + "px";
         render(0, false);
       }
       const itv = (id, cfg) => Itv(document.getElementById(id), cfg);
@@ -958,6 +1042,8 @@
           step: (s, n, els, d) => schedule(d.dir),
           unstep: (s, n, els, d) => schedule(d.dir),
         });
+        paint(order.length);
+        out.style.minHeight = out.offsetHeight + "px";
         render(false);
       }
       const grid = (id, cfg) => Grid(document.getElementById(id), cfg);
@@ -966,11 +1052,11 @@
 
       // ================================================================ infinite iterators
       itv("count", { items: ["10", "12", "14", "16", "18", "20", "22", "24", "…"], name: "count(10, 2)", ptr: "i", steps: [{ op: "loop", call: "print(i)", upto: 7, endLine: "22 > 20 → <b>break</b>" }] });
-      itv("cycle", { items: ["red", "green", "blue", "red", "green", "blue", "red", "…"], groups: [0, 3, 6], name: "cycle(colors)", ptr: "color", small: true, steps: [{ op: "loop", call: "print(color)", upto: 6, endLine: "i = 5 → <b>break</b>" }] });
+      itv("cycle", { items: ["red", "green", "blue", "red", "green", "blue", "red", "…"], groups: [0, 3, 6], name: "cycle(colors)", ptr: "color", steps: [{ op: "loop", call: "print(color)", upto: 6, endLine: "i = 5 → <b>break</b>" }] });
       itv("repeat", { items: ["10", "10", "10"], name: "repeat(10, 3)", ptr: "it", steps: [{ op: "list", call: "list(repeat(10, 3))" }] });
       itv("chain", { items: r(7).slice(1), groups: [0, 2, 4], name: "chain(...)", ptr: "it", steps: [{ op: "list", call: "list(chain(...))" }] });
-      Itv(S("islice"), { root: S("islice").querySelector(".itv.a"), items: r(10), name: "range(10)", ptr: "it", small: true, keep: (x) => x >= 2 && x % 2 === 0, steps: [{ op: "list", upto: 8, call: "islice(range(10), 2, 8, 2)" }] });
-      Itv(S("islice"), { root: S("islice").querySelector(".itv.b"), items: [...r(7), "…"], name: "count()", ptr: "it", small: true, offset: 1, steps: [{ op: "list", upto: 5, call: "islice(count(), 5)" }] });
+      itv("islice", { items: r(10), name: "range(10)", ptr: "it", keep: (x) => x >= 2 && x % 2 === 0, steps: [{ op: "list", upto: 8, call: "islice(range(10), 2, 8, 2)" }] });
+      itv("islice2", { items: [...r(8), "…"], name: "count()", ptr: "it", steps: [{ op: "list", upto: 5, call: "islice(count(), 5)" }] });
 
       // ================================================================ combinatorics
       grid("product", { rows: ["1", "2"], cols: ["'a'", "'b'"], pick: () => true });
@@ -1018,6 +1104,8 @@
           step: (s, k, els, d) => requestAnimationFrame(() => { const j = Deck.step - seen; seen = Deck.step; render(Deck.step > 0, d.dir > 0 && j === 1); }),
           unstep: () => requestAnimationFrame(() => { seen = Deck.step; render(Deck.step > 0, false); }),
         });
+        paint(n);
+        out.style.minHeight = out.offsetHeight + "px";
         render(false);
       }
 

@@ -21,32 +21,45 @@
       }
 
       #topics .tiles {
-        grid-template-columns: minmax(0, 22rem);
+        grid-template-columns: minmax(0, 36rem);
         justify-content: center;
       }
 
       #topics .tile {
-        min-height: 11rem;
-        font-size: 1.4rem;
+        min-height: 20rem;
+        font-size: 2.2rem;
+      }
+
+      #topics .tile small {
+        font-size: 1rem;
       }
 
       #contents ol {
         display: grid;
-        gap: 0.6rem;
+        gap: 1rem;
         font-family: var(--font-display);
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         color: var(--text);
       }
 
       #contents small {
         font-family: var(--font);
-        font-size: 0.85rem;
+        font-size: 1rem;
         color: var(--faint);
       }
 
       #fire svg.net {
-        width: min(100%, 50rem);
+        width: 100%;
+        max-height: 64cqh;
         height: auto;
+      }
+
+      #fire > span.step {
+        position: absolute;
+      }
+
+      #fire p {
+        font-size: 1.3rem;
       }
 
       .net line {
@@ -62,13 +75,14 @@
 
       .net text {
         font-family: var(--font-mono);
-        font-size: 13px;
+        font-size: 18px;
         fill: var(--muted);
         text-anchor: middle;
       }
 
       #book img {
-        max-height: 56cqh;
+        height: 66cqh;
+        max-height: 66cqh;
       }
     </style>
   </head>

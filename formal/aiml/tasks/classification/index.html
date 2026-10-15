@@ -9,16 +9,16 @@
     <style>
       #contents ol {
         display: grid;
-        gap: 0.6rem;
+        gap: 1.2rem;
         font-family: var(--font-display);
-        font-size: 1.6rem;
+        font-size: 2.6rem;
         color: var(--text);
       }
 
       .maths {
         display: grid;
-        gap: 0.6rem;
-        font-size: 1.4rem;
+        gap: 1rem;
+        font-size: 2rem;
       }
 
       .maths p {
@@ -26,22 +26,26 @@
       }
 
       .maths .katex {
-        font-size: 1.5em;
+        font-size: 2em;
+      }
+
+      .maths + p {
+        font-size: 1.35rem;
       }
 
       /* ---------- Boundary demo ---------- */
       #boundary .stage {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(12rem, 17rem);
-        gap: 1.6rem;
+        grid-template-columns: minmax(0, 1fr) 22rem;
+        gap: 2.5rem;
         align-items: center;
-        width: min(100%, 60rem);
+        width: 100%;
       }
 
       #boundary svg {
         width: 100%;
         height: auto;
-        max-height: 60cqh;
+        max-height: 62cqh;
         border-radius: 16px;
         border: 1px solid var(--border);
         background: rgba(10, 12, 26, 0.6);
@@ -49,17 +53,25 @@
 
       #boundary .side {
         display: grid;
-        gap: 0.9rem;
+        gap: 1.2rem;
+      }
+
+      #boundary .side > p:not(.stat) {
+        font-size: 1.2rem;
+      }
+
+      #boundary > p {
+        font-size: 1.25rem;
       }
 
       #boundary .stat {
         font-family: var(--font-mono);
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         color: var(--muted);
       }
 
       #boundary .stat b {
-        font-size: 1.6rem;
+        font-size: 2.4rem;
         color: var(--text);
       }
 
@@ -73,12 +85,12 @@
       }
 
       #boundary .chip {
-        padding: 0.35rem 0.9rem;
+        padding: 0.5rem 1.2rem;
         border-radius: 999px;
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.85rem var(--font);
+        font: 500 1.05rem var(--font);
         cursor: pointer;
       }
 
@@ -102,11 +114,6 @@
         stroke-width: 2;
       }
 
-      @container slide (max-width: 700px) {
-        #boundary .stage {
-          grid-template-columns: 1fr;
-        }
-      }
     </style>
   </head>
   <body>

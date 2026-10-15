@@ -277,6 +277,19 @@ h1,
   font-size: 3.2rem;
 }
 
+/* A divider (or any slide holding only its title) sits in the middle */
+.slide.section > *,
+.slide.section > h2:first-of-type + *,
+.slide > h2:only-child {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.slide > h2:only-child {
+  margin: auto 0;
+  font-size: 3.2rem;
+}
+
 /* ---------- Text ---------- */
 
 p {
@@ -822,6 +835,11 @@ tr:nth-child(2n) td {
   opacity: 1;
   filter: none;
   transform: none;
+}
+
+/* An empty <span class="step"> is a script-only beat: it takes no space */
+span.step:empty {
+  display: none;
 }
 
 /* Answers stay hidden behind a red blur until revealed */

@@ -8,17 +8,22 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #chapters .tiles {
-        grid-template-columns: minmax(0, 24rem);
+        grid-template-columns: minmax(0, 34rem);
         justify-content: center;
       }
 
       #chapters .tile {
-        min-height: 12rem;
-        font-size: 1.5rem;
+        min-height: 19rem;
+        font-size: 2rem;
+      }
+
+      #chapters .tile small {
+        font-size: 1rem;
       }
 
       #births svg {
-        width: min(100%, 60rem);
+        width: 100%;
+        max-height: 68cqh;
         height: auto;
         overflow: visible;
       }
@@ -60,8 +65,13 @@
         opacity: 0;
       }
 
+      #timeline img {
+        height: 68cqh;
+        max-height: 68cqh;
+      }
+
       #books .figs img {
-        max-height: 50cqh;
+        max-height: 62cqh;
         object-fit: contain;
       }
     </style>
@@ -112,7 +122,7 @@
       </div>
     </section>
 
-    <section class="slide">
+    <section class="slide" id="timeline">
       <h2>A timeline of AI</h2>
       <figure class="step"><img src="/assets/2025-10-12-16-09-42.png" alt="AI timeline from 1950 to 2017: Turing test, AI named, Unimate, ELIZA, Shakey, AI winter, Deep Blue, Kismet, AIBO, Roomba, Siri, Watson, Eugene Goostman, Alexa, Tay, AlphaGo" /><figcaption><a href="https://media.licdn.com/dms/image/v2/D4D12AQEt4g6pTNlDIA/article-cover_image-shrink_720_1280/">Source</a></figcaption></figure>
     </section>

@@ -10,7 +10,7 @@
       .defs {
         display: grid;
         gap: 1rem;
-        width: min(100%, 52rem);
+        width: min(100%, 56rem);
       }
 
       .defs .card p {
@@ -22,7 +22,7 @@
       }
 
       .tag {
-        font: 500 0.75rem var(--font-mono);
+        font: 500 0.9rem var(--font-mono);
         letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--cyan);
@@ -30,7 +30,7 @@
 
       /* ---------- Walk: distance vs displacement ---------- */
       .track {
-        width: min(100%, 56rem);
+        width: 100%;
         height: auto;
         overflow: visible;
       }
@@ -46,7 +46,7 @@
 
       .track .tl {
         fill: var(--muted);
-        font: 14px var(--font-mono);
+        font: 18px var(--font-mono);
         text-anchor: middle;
       }
 
@@ -69,7 +69,7 @@
       }
 
       .track .lbl {
-        font: 600 15px var(--font);
+        font: 600 20px var(--font);
       }
 
       .stats {
@@ -77,11 +77,11 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 1rem 3rem;
-        font-size: 1.15rem;
+        font-size: 1.35rem;
       }
 
       .stats b {
-        font: 600 1.5rem var(--font-mono);
+        font: 600 1.8rem var(--font-mono);
       }
 
       .stats .d1 b {
@@ -96,19 +96,19 @@
       #eqs .cols {
         grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
         align-items: center;
-        width: min(100%, 62rem);
+        width: 100%;
       }
 
       #eqs ol li {
-        margin: 0.4rem 0;
-        font-size: 1.15rem;
+        margin: 0.6rem 0;
+        font-size: 1.6rem;
       }
 
       /* ---------- Simulator ---------- */
       #sim .stage {
         display: grid;
-        gap: 0.8rem;
-        width: min(100%, 64rem);
+        gap: 0.7rem;
+        width: 100%;
       }
 
       #sim .road {
@@ -124,7 +124,7 @@
 
       #sim .road .tl {
         fill: var(--muted);
-        font: 13px var(--font-mono);
+        font: 18px var(--font-mono);
         text-anchor: middle;
       }
 
@@ -198,7 +198,7 @@
 
       #sim .graph text {
         fill: var(--muted);
-        font: 13px var(--font-mono);
+        font: 18px var(--font-mono);
       }
 
       .controls {
@@ -207,7 +207,7 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem 1.2rem;
-        font-size: 0.92rem;
+        font-size: 1.05rem;
         color: var(--muted);
       }
 
@@ -224,7 +224,7 @@
       }
 
       input[type="range"] {
-        width: min(10rem, 30cqw);
+        width: 12rem;
         accent-color: var(--violet);
       }
 
@@ -234,7 +234,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.85rem var(--font-mono);
+        font: 500 1rem var(--font-mono);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -247,7 +247,9 @@
       }
 
       .readout {
-        font: 0.95rem var(--font-mono);
+        margin: 0;
+        font: 1.1rem var(--font-mono);
+        white-space: pre;
         color: var(--muted);
         text-align: center;
       }
@@ -267,8 +269,8 @@
       /* ---------- Exercises ---------- */
       .qa {
         display: grid;
-        gap: 0.9rem;
-        width: min(100%, 54rem);
+        gap: 1.1rem;
+        width: 60rem;
       }
 
       .qa > div {
@@ -278,31 +280,30 @@
 
       .qa .q {
         margin: 0;
-        font-size: 1.2rem;
+        font-size: 1.4rem;
       }
 
       .qa .answer {
         margin: 0 0 0 1.2rem;
+        font-size: 1.3rem;
         color: var(--green);
       }
 
-      @container slide (max-width: 760px) {
-        #eqs .cols {
-          grid-template-columns: 1fr;
-        }
+      .beats {
+        position: absolute;
+      }
 
-        #sim .graphs {
-          grid-template-columns: 1fr 1fr;
-          gap: 0.4rem;
-        }
+      .cards .card p,
+      .defs .card p {
+        font-size: 1.3rem;
+      }
 
-        .qa .q {
-          font-size: 1rem;
-        }
+      #sim .preset {
+        font-size: 0.92rem;
+      }
 
-        .qa .answer {
-          font-size: 0.9rem;
-        }
+      #eqs .card p {
+        font-size: 1.3rem;
       }
     </style>
   </head>
@@ -347,8 +348,10 @@
         <span class="d1">distance <b class="vd">0 m</b></span>
         <span class="d2">displacement <b class="vx">0 m</b></span>
       </div>
-      <span class="step" data-anim="none"></span>
-      <span class="step" data-anim="none"></span>
+      <div class="beats">
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+      </div>
       <p class="center muted step">Distance adds up every metre walked; displacement only cares where you ended up.</p>
     </section>
 
@@ -395,15 +398,15 @@
     <section class="slide top" id="sim">
       <h2>See it move</h2>
       <div class="stage">
-        <svg class="road" viewBox="0 0 800 110" aria-label="An object moving along a line, with its velocity arrow in cyan and acceleration arrow in amber">
+        <svg class="road" viewBox="0 0 1000 110" aria-label="An object moving along a line, with its velocity arrow in cyan and acceleration arrow in amber">
           <g class="ticks"></g>
           <line class="aarrow" />
           <line class="varrow" />
           <g class="car"><rect x="-18" y="-12" width="36" height="24" rx="8" /></g>
         </svg>
         <div class="graphs">
-          <svg class="graph gx" viewBox="0 0 380 190" aria-label="Position against time"><path class="full" /><path class="trace" /><line class="tan" /><circle class="pt" r="5" /></svg>
-          <svg class="graph gv" viewBox="0 0 380 190" aria-label="Velocity against time"><path class="full" /><path class="trace" /><circle class="pt" r="5" /></svg>
+          <svg class="graph gx" viewBox="0 0 520 200" aria-label="Position against time"><path class="full" /><path class="trace" /><line class="tan" /><circle class="pt" r="5" /></svg>
+          <svg class="graph gv" viewBox="0 0 520 200" aria-label="Velocity against time"><path class="full" /><path class="trace" /><circle class="pt" r="5" /></svg>
         </div>
         <p class="readout"></p>
         <div class="controls" data-interactive>
@@ -518,12 +521,12 @@
           const fwd = Math.min(st.dist, 5), back = Math.max(0, st.dist - 5);
           walker.setAttribute("cx", X(st.pos));
           walker.setAttribute("cy", Y);
-          p1.setAttribute("d", fwd > 0 ? `M${X(0)},${Y - 48} H${X(fwd)}` : "");
-          p2.setAttribute("d", back > 0 ? `M${X(5)},${Y - 66} H${X(5 - back)}` : "");
+          p1.setAttribute("d", fwd > 0 ? `M${X(0)},${Y - 58} H${X(fwd)}` : "");
+          p2.setAttribute("d", back > 0 ? `M${X(5)},${Y - 80} H${X(5 - back)}` : "");
           const show = Math.abs(st.pos) > 0.05;
           Object.entries({ x1: X(0), y1: Y - 26, x2: X(st.pos), y2: Y - 26 }).forEach(([k, v]) => disp.setAttribute(k, v));
           disp.style.opacity = show ? 1 : 0;
-          l1.setAttribute("x", X(5) + 10); l1.setAttribute("y", Y - 72);
+          l1.setAttribute("x", X(5) + 10); l1.setAttribute("y", Y - 86);
           l1.textContent = st.dist > 0.05 ? "path" : "";
           l2.setAttribute("x", X(st.pos / 2)); l2.setAttribute("y", Y - 34); l2.setAttribute("text-anchor", "middle");
           l2.textContent = show ? "Δx" : "";
@@ -579,11 +582,11 @@
           if (hi - lo < 10) hi = lo + 10;
           const pad = (hi - lo) * 0.06;
           range = [lo - pad, hi + pad];
-          X = (x) => 40 + ((x - range[0]) / (range[1] - range[0])) * 720;
+          X = (x) => 40 + ((x - range[0]) / (range[1] - range[0])) * 920;
           // Road ticks
           const tk = road.querySelector(".ticks");
           tk.replaceChildren();
-          el("line", { class: "axis", x1: 40, x2: 760, y1: 80, y2: 80 }, tk);
+          el("line", { class: "axis", x1: 40, x2: 960, y1: 80, y2: 80 }, tk);
           const step = [5, 10, 20, 25, 50][[5, 10, 20, 25, 50].findIndex((s) => (range[1] - range[0]) / s <= 10)] || 50;
           for (let m = Math.ceil(range[0] / step) * step; m <= range[1]; m += step) {
             el("line", { class: "axis", x1: X(m), x2: X(m), y1: 74, y2: 86 }, tk);
@@ -599,7 +602,7 @@
           drawFull(gv, vAt, gScale.v, "v (m/s)");
         }
 
-        const GW = 380, GH = 190, gm = { l: 44, r: 12, t: 14, b: 26 };
+        const GW = 520, GH = 200, gm = { l: 50, r: 12, t: 26, b: 32 };
         const gxp = (t) => gm.l + (t / P.T) * (GW - gm.l - gm.r);
         const gyp = (val, [lo, hi]) => GH - gm.b - ((val - lo) / (hi - lo)) * (GH - gm.t - gm.b);
 
@@ -608,10 +611,10 @@
           el("line", { class: "ax", x1: gm.l, x2: gm.l, y1: gm.t, y2: GH - gm.b }, svg);
           el("line", { class: "ax", x1: gm.l, x2: GW - gm.r, y1: GH - gm.b, y2: GH - gm.b }, svg);
           if (dom[0] < 0 && dom[1] > 0) el("line", { class: "zero", x1: gm.l, x2: GW - gm.r, y1: gyp(0, dom), y2: gyp(0, dom) }, svg);
-          el("text", { x: 6, y: gm.t + 10 }, svg).textContent = name;
-          el("text", { x: GW - gm.r - 44, y: GH - 6 }, svg).textContent = "t (s)";
-          el("text", { x: gm.l + 4, y: GH - 6 }, svg).textContent = "0";
-          el("text", { x: GW - gm.r - 88, y: GH - 6 }, svg).textContent = P.T + "s";
+          el("text", { x: 8, y: 20 }, svg).textContent = name;
+          el("text", { x: GW - gm.r - 56, y: GH - 8 }, svg).textContent = "t (s)";
+          el("text", { x: gm.l + 4, y: GH - 8 }, svg).textContent = "0";
+          el("text", { x: GW - gm.r - 110, y: GH - 8 }, svg).textContent = P.T + "s";
           const d = Array.from({ length: 81 }, (_, i) => {
             const t = (P.T * i) / 80;
             return `${i ? "L" : "M"}${gxp(t).toFixed(1)},${gyp(f(t), dom).toFixed(1)}`;

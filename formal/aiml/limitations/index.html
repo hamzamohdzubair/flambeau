@@ -8,11 +8,27 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #topics .tiles {
-        width: min(100%, 48rem);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 66rem);
       }
 
       #topics .tile {
-        min-height: 8rem;
+        min-height: 15rem;
+        font-size: 1.6rem;
+      }
+
+      #topics .tile small {
+        font-size: 0.9rem;
+      }
+
+      #bias img {
+        height: 62cqh;
+        max-height: 62cqh;
+      }
+
+      #bias p {
+        font-size: 1.3rem;
       }
     </style>
   </head>
@@ -32,7 +48,7 @@
       </div>
     </section>
 
-    <section class="slide">
+    <section class="slide" id="bias">
       <h2>Bias</h2>
       <figure class="step">
         <img src="/assets/2025-10-22-17-48-07.png" alt="BBC: Amazon scrapped 'sexist AI' tool" />

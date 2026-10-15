@@ -13,7 +13,7 @@
         grid-template-columns: 1fr auto 1fr auto 1fr;
         align-items: center;
         gap: 1rem;
-        width: min(100%, 68rem);
+        width: 100%;
       }
 
       .bridge .end {
@@ -25,36 +25,38 @@
         border: 1px solid var(--border);
         background: var(--glass);
         text-align: center;
-        min-height: 9rem;
+        min-height: 14rem;
         align-content: center;
       }
 
       .bridge .end small {
-        font: 500 0.75rem var(--font-mono);
+        font: 500 0.85rem var(--font-mono);
         letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--cyan);
       }
 
       .bridge .idea {
-        font-size: 1.25rem;
+        font-size: 1.6rem;
         color: var(--text);
       }
 
       .bridge .code {
-        font: 500 1.6rem var(--font-mono);
+        font: 500 2.1rem var(--font-mono);
+        white-space: nowrap;
         color: #c4b5fd;
       }
 
       .bridge .bits {
-        font: 500 1.05rem var(--font-mono);
+        font: 500 1.2rem var(--font-mono);
+        white-space: nowrap;
         color: var(--green);
         letter-spacing: 0.06em;
         line-height: 1.5;
       }
 
       .bridge .arrow {
-        width: 3rem;
+        width: 4rem;
         height: 2px;
         background: var(--gradient);
         position: relative;
@@ -89,8 +91,21 @@
         -webkit-text-fill-color: var(--faint);
       }
 
-      .cards .card p {
+      .cards .card p,
+      .langs .card p {
         margin-top: 0.3rem;
+        font-size: 1.3rem;
+      }
+
+      #conclusion .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 56rem;
+      }
+
+      #conclusion .card p {
+        margin: 0;
+        font-size: 1.45rem;
+        color: var(--text);
       }
 
       .langs {
@@ -104,35 +119,23 @@
         font-family: var(--font-mono);
       }
 
-      @container slide (max-width: 760px) {
-        .bridge {
-          grid-template-columns: 1fr;
-        }
+      /* Point lists: one glass row per point, big enough to read from the back */
+      .slide > ul {
+        display: grid;
+        gap: 1rem;
+        width: 56rem;
+        padding: 0;
+        list-style: none;
+        font-size: 1.45rem;
+      }
 
-        .bridge .arrow {
-          width: 2px;
-          height: 1.6rem;
-          justify-self: center;
-        }
-
-        .bridge .arrow::after {
-          right: -5px;
-          top: auto;
-          bottom: -4px;
-          border-left: 6px solid transparent;
-          border-right: 6px solid transparent;
-          border-top: 10px solid #06b6d4;
-          border-bottom: 0;
-        }
-
-        .bridge .end {
-          min-height: 0;
-          padding: 0.7rem;
-        }
-
-        .bridge .pulse {
-          display: none;
-        }
+      .slide > ul > li {
+        margin: 0;
+        padding: 1.1rem 1.6rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--violet-soft);
+        background: var(--glass);
       }
     </style>
   </head>
@@ -252,7 +255,7 @@
     </section>
 
     <!-- ================================================================ conclusion -->
-    <section class="slide">
+    <section class="slide" id="conclusion">
       <h2>Conclusion</h2>
       <p class="lead center">Programming languages are essential tools that:</p>
       <div class="cards">

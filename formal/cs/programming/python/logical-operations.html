@@ -9,14 +9,16 @@
     <style>
       .ev-cols {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-        gap: 2rem;
+        grid-template-columns: max-content minmax(0, 1fr);
+        gap: 2.5rem;
         align-items: center;
-        width: min(100%, 64rem);
+        width: 100%;
       }
 
       .ev-cols pre {
-        width: 100%;
+        width: auto;
+        min-width: 28rem;
+        font-size: 1.25rem;
       }
 
       .ev-cols .line.answer.shown {
@@ -24,7 +26,7 @@
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         color: var(--faint);
         text-align: center;
       }
@@ -33,7 +35,7 @@
       .evs {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.2rem;
         min-width: 0;
       }
 
@@ -42,11 +44,11 @@
         flex-wrap: wrap;
         align-items: flex-start;
         gap: 0.2rem 0;
-        padding: 0.7rem 0.9rem 0.5rem;
+        padding: 0.8rem 1.1rem 0.6rem;
         border-radius: 14px;
         border: 1px solid var(--border);
         background: rgba(10, 12, 26, 0.7);
-        font: 500 1.15rem var(--font-mono);
+        font: 500 1.4rem var(--font-mono);
         font-variant-ligatures: none;
         transition: border-color 0.3s;
       }
@@ -82,11 +84,11 @@
       }
 
       .tok .bd {
-        min-height: 1.5rem;
-        margin-top: 0.2rem;
+        min-height: 1.9rem;
+        margin-top: 0.25rem;
         padding: 0 0.5em;
         border-radius: 999px;
-        font: 500 0.72rem/1.5rem var(--font);
+        font: 500 0.95rem/1.9rem var(--font);
         white-space: nowrap;
         visibility: hidden;
       }
@@ -136,14 +138,15 @@
       /* ---------- truth tables ---------- */
       .tt {
         font-family: var(--font-mono);
-        font-size: 1.05rem;
+        font-size: 1.6rem;
         margin: 0 auto;
       }
 
       .tt td,
       .tt th {
         text-align: center;
-        padding: 0.5em 1.2em;
+        white-space: nowrap;
+        padding: 0.35em 1.1em;
         transition: background 0.35s;
       }
 
@@ -172,16 +175,6 @@
         color: var(--red);
       }
 
-      @container slide (max-width: 760px) {
-        .ev-cols {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-
-        .evrow {
-          font-size: 0.9rem;
-        }
-      }
     </style>
   </head>
   <body>
@@ -279,7 +272,7 @@
         <pre><code class="language-python">
           # and stops at first False
           False and (1/0)
-          # ans: False (no error, 1/0 is never evaluated)
+          # ans: False (no error: 1/0 never runs)
           # or stops at first True
           True or (1/0)
           # ans: True (no error)
@@ -304,7 +297,7 @@
           # ans: True
           # short circuit evaluation?
           False and (1/0)
-          # ans: False (no error, the second part is skipped)
+          # ans: False (no error: 1/0 is skipped)
         </code></pre>
         <div class="evs"></div>
       </div>
@@ -349,7 +342,7 @@
           # ans: False
           # what evaluates?
           0 or 5
-          # ans: 5 (or returns the first truthy value)
+          # ans: 5 (the first truthy value)
         </code></pre>
         <div class="evs"></div>
       </div>
@@ -361,10 +354,10 @@
         <pre><code class="language-python">
           # and returns?
           5 and 10
-          # ans: 10 (returns the last value if all are truthy)
+          # ans: 10 (all truthy: returns the last)
           # mixed types?
           "hello" and ""
-          # ans: "" (returns the first falsy value)
+          # ans: "" (the first falsy value)
         </code></pre>
         <div class="evs"></div>
       </div>

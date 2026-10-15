@@ -26,7 +26,7 @@
         width: var(--kc);
         height: var(--kc);
         border-radius: 6px;
-        font-size: calc(var(--kc) * 0.36);
+        font-size: max(0.78rem, calc(var(--kc) * 0.36));
         font-weight: 500;
         color: var(--text);
       }
@@ -41,11 +41,11 @@
       }
 
       .kgrid.small {
-        --kc: 1.9rem;
+        --kc: 2.5rem;
       }
 
       .kgrid.tiny {
-        --kc: 1.45rem;
+        --kc: 2.1rem;
       }
 
       .kcard {
@@ -81,7 +81,7 @@
       }
 
       .codek .side p {
-        font-size: 0.9rem;
+        font-size: 1rem;
         text-align: center;
       }
 
@@ -154,7 +154,7 @@
 
       /* ---------- Sliding-kernel demo ---------- */
       #slide-demo {
-        --cell: min(2.9rem, 10.2cqw, 6.4cqh);
+        --cell: 2.85rem;
       }
 
       .conv {
@@ -210,7 +210,7 @@
         top: 1px;
         right: 3px;
         font-style: normal;
-        font-size: calc(var(--cell) * 0.22);
+        font-size: max(0.75rem, calc(var(--cell) * 0.25));
         color: var(--cyan);
         opacity: 0;
         transition: opacity 0.25s;
@@ -276,13 +276,13 @@
         height: calc(var(--cell) * 0.82);
         border-radius: 5px;
         font-family: var(--font-mono);
-        font-size: calc(var(--cell) * 0.27);
+        font-size: calc(var(--cell) * 0.32);
         background: rgba(255, 255, 255, 0.04);
       }
 
       .conv .sum {
         font-family: var(--font-mono);
-        font-size: 1.05rem;
+        font-size: 1.2rem;
         text-align: center;
         min-height: 3.2em;
       }
@@ -293,7 +293,7 @@
 
       .conv .sum small {
         display: block;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         color: var(--muted);
       }
 
@@ -333,7 +333,7 @@
       /* ---------- Edge handling ---------- */
       .pads {
         display: grid;
-        gap: 0.9rem;
+        gap: 0.7rem;
         width: min(100%, 50rem);
       }
 
@@ -353,7 +353,7 @@
       .pad-row .name code {
         display: block;
         margin-top: 0.2rem;
-        font-size: 0.68rem;
+        font-size: 0.8rem;
         width: max-content;
       }
 
@@ -424,7 +424,7 @@
 
       #slide-edges .problem svg {
         flex: none;
-        width: 9rem;
+        width: 6.6rem;
       }
 
       /* ---------- Playground ---------- */
@@ -454,7 +454,26 @@
       }
 
       #slide-play .chips {
-        max-width: 40rem;
+        max-width: 44rem;
+      }
+
+      #slide-play .kgrid {
+        --kc: 1.7rem;
+      }
+
+      #slide-demo .note {
+        max-width: 16rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.45;
+        text-align: left;
+      }
+
+      #slide-conv ol {
+        display: grid;
+        grid-template-rows: repeat(3, auto);
+        grid-auto-flow: column;
+        column-gap: 4rem;
       }
 
       /* ---------- Exercises ---------- */
@@ -488,7 +507,7 @@
 
       .qa pre {
         width: 100%;
-        font-size: 0.92rem;
+        font-size: 1rem;
       }
 
       .qa p.answer {
@@ -501,66 +520,6 @@
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1.1rem;
-      }
-
-      @container slide (max-width: 760px) {
-        .conv {
-          grid-template-columns: auto;
-          gap: 0.8rem;
-        }
-
-        #slide-demo {
-          --cell: min(2.15rem, 9cqw);
-        }
-
-        .conv > div {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .conv h4 {
-          margin-bottom: 0.3rem;
-        }
-
-        .conv .mid {
-          flex-direction: row;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-
-        .conv .mid h4 {
-          display: none;
-        }
-
-        .codek {
-          grid-template-columns: 1fr;
-          gap: 1.6rem;
-        }
-
-        .pad-row {
-          grid-template-columns: 1fr;
-          gap: 0.4rem;
-        }
-
-        .cells span {
-          width: 1.9rem;
-          height: 1.9rem;
-          font-size: 0.85rem;
-        }
-
-        .play,
-        .qa .two {
-          grid-template-columns: 1fr;
-        }
-
-        #slide-edges .problem {
-          flex-direction: column;
-        }
-
-        .worked .op {
-          display: none;
-        }
       }
     </style>
   </head>
@@ -598,7 +557,7 @@
     </section>
 
     <!-- ================================================================ what is convolution -->
-    <section class="slide">
+    <section class="slide" id="slide-conv">
       <h2>What is convolution?</h2>
       <p class="lead"><strong>Convolution</strong> slides a kernel over an image and computes a weighted sum at every position.</p>
       <ol>
@@ -663,6 +622,7 @@
         <div>
           <h4>Output, 5×5</h4>
           <div class="grid out"></div>
+          <p class="muted note">No padding here, so a 7×7 image gives a 5×5 output. Shades are the stored 8-bit values: sums below 0 or above 255 are clipped.</p>
         </div>
       </div>
       <div class="chips" data-interactive>
@@ -673,7 +633,6 @@
         <button class="chip ghost" data-act="step">Step</button>
         <button class="chip ghost" data-act="restart">Restart</button>
       </div>
-      <p class="muted center">No padding here, so a 7×7 image gives a 5×5 output. Shades are the stored 8-bit values: sums below 0 or above 255 are clipped.</p>
     </section>
 
     <!-- ================================================================ edge handling -->
@@ -690,7 +649,7 @@
             <rect x="6" y="6" width="26" height="26" rx="3" /><rect x="34" y="6" width="26" height="26" rx="3" /><rect x="62" y="6" width="26" height="26" rx="3" />
             <rect x="6" y="34" width="26" height="26" rx="3" /><rect x="6" y="62" width="26" height="26" rx="3" />
           </g>
-          <g fill="#f87171" font-family="JetBrains Mono, monospace" font-size="14" text-anchor="middle">
+          <g fill="#f87171" font-family="JetBrains Mono, monospace" font-size="18" text-anchor="middle">
             <text x="19" y="24">?</text><text x="47" y="24">?</text><text x="75" y="24">?</text><text x="19" y="52">?</text><text x="19" y="80">?</text>
           </g>
           <rect x="4" y="4" width="86" height="86" rx="6" fill="none" stroke="#22d3ee" stroke-width="3" />
@@ -715,7 +674,7 @@
           <div class="cells"><span class="pad vd">d</span><span class="pad ve">e</span><i class="bar"></i><span class="va">a</span><span class="vb">b</span><span class="vc">c</span><span class="vd">d</span><span class="ve">e</span><i class="bar"></i><span class="pad va">a</span><span class="pad vb">b</span></div>
         </div>
       </div>
-      <p class="step center">OpenCV's default is reflection: <code>cv2.BORDER_REFLECT_101</code> mirrors the pixels without repeating the edge one.</p>
+      <p class="step center">OpenCV's default is <code>cv2.BORDER_REFLECT_101</code>: it mirrors without repeating the edge pixel.</p>
     </section>
 
     <!-- ================================================================ code: identity -->
@@ -759,7 +718,7 @@
           # ans: averages 25 pixels, so more blur
         </code></pre>
         <div class="side">
-          <div class="kgrid small" data-k="1 1 1|1 1 1|1 1 1" data-div="9"></div>
+          <div class="kgrid" data-k="1 1 1|1 1 1|1 1 1" data-div="9"></div>
           <div class="kgrid tiny" data-k="1 1 1 1 1|1 1 1 1 1|1 1 1 1 1|1 1 1 1 1|1 1 1 1 1" data-div="25"></div>
         </div>
       </div>

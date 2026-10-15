@@ -25,7 +25,7 @@
 
       .itv .lbl {
         padding-top: 0.9rem;
-        font: 500 0.8rem var(--font-mono);
+        font: 500 1.1rem var(--font-mono);
         color: var(--faint);
       }
 
@@ -57,13 +57,13 @@
       .itv .cell {
         display: grid;
         place-items: center;
-        min-width: 3rem;
-        height: 3rem;
-        padding: 0 0.6rem;
+        min-width: 3.6rem;
+        height: 3.6rem;
+        padding: 0 0.7rem;
         border-radius: 10px;
         border: 1.5px solid rgba(167, 139, 250, 0.6);
         background: rgba(139, 92, 246, 0.14);
-        font: 600 1.15rem var(--font-mono);
+        font: 600 1.5rem var(--font-mono);
         color: var(--text);
         transition:
           opacity 0.35s,
@@ -93,8 +93,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 3rem;
-        font: 600 0.75rem var(--font-mono);
+        width: 3.6rem;
+        font: 600 1rem var(--font-mono);
         color: var(--cyan);
         white-space: nowrap;
         transition: opacity 0.3s;
@@ -122,13 +122,13 @@
         display: flex;
         flex-direction: column;
         gap: 0.2rem;
-        min-width: min(100%, 18rem);
+        min-width: min(100%, 24rem);
         min-height: 2.4rem;
         padding: 0.45rem 0.9rem;
         border-radius: 12px;
         border: 1px solid var(--border);
         background: rgba(0, 0, 0, 0.42);
-        font: 0.95rem/1.5 var(--font-mono);
+        font: 1.3rem/1.5 var(--font-mono);
         color: var(--muted);
       }
 
@@ -147,39 +147,13 @@
         pointer-events: none;
         padding: 0 0.5em;
         border-radius: 8px;
-        font: 600 1.05rem/1.7 var(--font-mono);
+        font: 600 1.4rem/1.7 var(--font-mono);
         color: #fff;
         background: rgba(34, 211, 238, 0.35);
         border: 1px solid var(--cyan);
         box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
       }
 
-      @container slide (max-width: 760px) {
-        .itv .cells {
-          gap: 0.25rem;
-        }
-
-        .itv .cell {
-          min-width: 1.9rem;
-          height: 2.3rem;
-          padding: 0 0.3rem;
-          font-size: 0.9rem;
-        }
-
-        .itv .src {
-          flex-direction: column;
-          align-items: center;
-          gap: 0.2rem;
-        }
-
-        .itv .lbl {
-          padding-top: 0;
-        }
-
-        .itv .outs {
-          font-size: 0.8rem;
-        }
-      }
 
       .itv-cols .line.answer.shown {
         transition-delay: var(--ans-delay, 0s);
@@ -190,7 +164,7 @@
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 2rem;
         align-items: center;
-        width: min(100%, 64rem);
+        width: min(100%, 70rem);
       }
 
       .itv-cols.stack {
@@ -200,25 +174,29 @@
       }
 
       .itv-cols.stack pre {
-        width: min(100%, 44rem);
+        width: min(100%, 58rem);
       }
 
       .itv-cols pre {
         width: 100%;
       }
 
-      @container slide (max-width: 760px) {
-        .itv-cols {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-      }
       .slide > pre {
-        width: min(100%, 46rem);
+        width: min(100%, 60rem);
+        font-size: 1.75rem;
+      }
+
+      #sorted > pre {
+        width: min(100%, 66rem);
+        font-size: 1.3rem;
+      }
+
+      .itv-cols.stack pre {
+        font-size: 1.4rem;
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.35rem;
         color: var(--faint);
         text-align: center;
       }
@@ -228,8 +206,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1.2rem;
-        font: 500 clamp(1rem, 2.6cqw, 1.7rem) var(--font-mono);
+        gap: 1.8rem;
+        font: 500 2.2rem var(--font-mono);
         font-variant-ligatures: none;
         color: var(--text);
       }
@@ -240,8 +218,8 @@
 
       .same .tag {
         display: inline-block;
-        width: 6.5rem;
-        font: 500 0.8rem var(--font-mono);
+        width: 7rem;
+        font: 500 1.1rem var(--font-mono);
         color: var(--faint);
         text-align: right;
       }
@@ -260,8 +238,9 @@
 
       .same .notes {
         display: grid;
-        gap: 0.4rem;
-        font: 1rem var(--font);
+        gap: 0.7rem;
+        margin-top: 1rem;
+        font: 1.3rem var(--font);
         color: var(--muted);
       }
 
@@ -290,7 +269,7 @@
         border-radius: 12px;
         border: 1.5px solid rgba(167, 139, 250, 0.6);
         background: rgba(139, 92, 246, 0.14);
-        font: 600 1.05rem var(--font-mono);
+        font: 600 1.4rem var(--font-mono);
         color: var(--text);
         white-space: nowrap;
       }
@@ -301,14 +280,14 @@
         border-radius: 999px;
         border: 1px solid var(--amber);
         background: rgba(251, 191, 36, 0.12);
-        font: 500 0.95rem var(--font-mono);
+        font: 500 1.25rem var(--font-mono);
         color: #fde68a;
         opacity: 0;
       }
 
       .sorter .note {
         min-height: 1.6rem;
-        font: 0.95rem var(--font-mono);
+        font: 1.2rem var(--font-mono);
         color: var(--green);
       }
 
@@ -316,8 +295,8 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 0.45rem;
-        font-size: 0.85rem;
+        gap: 0.6rem;
+        font-size: 1.15rem;
         color: var(--faint);
         align-items: center;
       }
@@ -328,7 +307,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.85rem var(--font-mono);
+        font: 500 1.15rem var(--font-mono);
         cursor: pointer;
       }
 
@@ -343,20 +322,6 @@
         pointer-events: none;
       }
 
-      @container slide (max-width: 760px) {
-        .sorter .trow {
-          gap: 0.4rem;
-        }
-
-        .tup .box {
-          padding: 0.35rem 0.45rem;
-          font-size: 0.8rem;
-        }
-
-        .same .tag {
-          display: none;
-        }
-      }
     </style>
   </head>
   <body>

@@ -274,22 +274,6 @@
         text-align: center;
       }
 
-      @container slide (max-width: 760px) {
-        .tracer {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
-
-        .tracer pre {
-          min-width: 0;
-        }
-
-        .mem {
-          padding: 0.7rem 0.8rem;
-          gap: 0.5rem;
-          font-size: 0.85rem;
-        }
-      }
 
       /* ---------- Wrapper diagram: a decorator wraps a function in a new one; a call travels in and back out ---------- */
       .wv {
@@ -438,42 +422,19 @@
         white-space: nowrap;
       }
 
-      @container slide (max-width: 760px) {
-        .wv {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
-
-        .wv .layer {
-          padding: 0.5rem 0.6rem 0.7rem;
-        }
-
-        .wv .lhead,
-        .wv .lfoot,
-        .wv .core .cbody {
-          font-size: 0.75rem;
-        }
-
-        .wv-console {
-          min-height: 3rem;
-        }
-      }
 
       .slide pre {
         width: auto;
-        min-width: min(100%, 24rem);
-      }
-
-      .tracer pre {
-        font-size: 0.92rem;
+        min-width: min(100%, 36rem);
+        font-size: 1.35rem;
       }
 
       .stacked {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
         align-items: center;
-        gap: 1.5rem;
-        width: min(100%, 72rem);
+        gap: 2.5rem;
+        width: 100%;
       }
 
       .stacked .wv {
@@ -481,22 +442,22 @@
         gap: 1rem;
       }
 
-      @container slide (max-width: 900px) {
-        .stacked {
-          grid-template-columns: minmax(0, 1fr);
-        }
-      }
 
-      .stacked pre {
-        font-size: 0.88rem;
+      .slide .stacked pre {
+        min-width: 0;
+        font-size: 1.25rem;
       }
 
       .eq {
         display: grid;
         grid-template-columns: 1fr auto 1fr;
         align-items: center;
-        gap: 1.2rem;
-        width: min(100%, 56rem);
+        gap: 1.5rem;
+        width: 100%;
+      }
+      .slide .eq pre {
+        min-width: 0;
+        font-size: 1.25rem;
       }
 
       .eq .is {
@@ -504,10 +465,186 @@
         color: var(--faint);
       }
 
-      @container slide (max-width: 760px) {
-        .eq {
-          grid-template-columns: 1fr;
-        }
+      /* ---------- 1600x900 canvas sizing ---------- */
+      .tracer {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) 20rem;
+        gap: 2rem;
+      }
+      .tracer pre {
+        width: 100%;
+        min-width: 0;
+        font-size: 1.25rem;
+      }
+      .slide.ex .tracer pre {
+        font-size: 1.4rem;
+      }
+      /* many variables / frames: smaller type so the panel fits */
+      .slide .tracer.dense pre {
+        font-size: 1.2rem;
+      }
+      .tracer.dense .mem {
+        font-size: 1rem;
+        gap: 0.7rem;
+      }
+      /* long code lines: memory panel goes under the code, sections side by side */
+      .tracer.wide {
+        grid-template-columns: minmax(0, 1fr);
+        width: min(100%, 54rem);
+        gap: 1.2rem;
+      }
+      .tracer.wide .mem {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+      .tracer.wide .mem > div {
+        flex: 1;
+      }
+      .mem {
+        font-size: 1.2rem;
+        gap: 1rem;
+        padding: 1.2rem 1.4rem;
+      }
+      .mem h4 {
+        font-size: 0.8rem;
+      }
+      .mem .slot {
+        flex-wrap: wrap;
+        gap: 0.2rem 0.6rem;
+      }
+      .mem .slot b {
+        min-width: 3rem;
+      }
+      .mem .slot span {
+        flex: 1 1 7rem;
+        font-size: 0.88em;
+        overflow-wrap: normal;
+      }
+      .replay {
+        font-size: 0.9rem;
+        padding: 0.3rem 1rem;
+      }
+      .hint {
+        font-size: 1.2rem;
+      }
+      .try,
+      .chip {
+        font-size: 1.15rem;
+      }
+      /* the wrapper picture, sized for the canvas */
+      .wv {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+        gap: 2.5rem;
+      }
+      .wv .lhead,
+      .wv .lfoot {
+        font-size: 1.15rem;
+      }
+      .wv .lhead small,
+      .wv .core small {
+        font-size: 0.85rem;
+      }
+      .wv .core .cbody {
+        font-size: 1.35rem;
+      }
+      .wv .tag {
+        font-size: 1rem;
+      }
+      .wv .layer {
+        padding: 0.9rem 1.3rem 1.2rem;
+        gap: 0.6rem;
+      }
+      .wv .core {
+        padding: 1rem 1.4rem;
+      }
+      .wv-side h4 {
+        font-size: 0.8rem;
+      }
+      .wv-call {
+        font-size: 1.4rem;
+      }
+      .wv-console {
+        font-size: 1.2rem;
+      }
+      .wv-token {
+        font-size: 0.95rem;
+      }
+      .stacked .wv-side {
+        width: 100%;
+      }
+      #wrap-basic .wv .lhead,
+      #wrap-basic .wv .lfoot {
+        font-size: 1.5rem;
+      }
+      #wrap-basic .wv .core .cbody {
+        font-size: 1.8rem;
+      }
+      #wrap-basic .wv .tag {
+        font-size: 1.2rem;
+      }
+      #wrap-basic .wv .layer {
+        padding: 1.2rem 1.8rem 1.6rem;
+        gap: 0.9rem;
+      }
+      #wrap-basic .wv .core {
+        padding: 1.3rem 1.8rem;
+      }
+      #wrap-basic .wv-call {
+        font-size: 1.7rem;
+      }
+      #wrap-basic .wv-console {
+        font-size: 1.5rem;
+      }
+      #wrap-basic ol {
+        font-size: 1.3rem;
+      }
+      .tracer.dense .mem {
+        font-size: 1.05rem;
+      }
+      #args .hint {
+        font-size: 1.05rem;
+      }
+      #args .tracer pre {
+        font-size: 1.15rem;
+      }
+      #ex3 .stacked pre {
+        font-size: 0.95rem;
+        line-height: 1.45;
+      }
+      #ex3 .stacked .wv {
+        grid-template-columns: auto minmax(9rem, 1fr);
+        gap: 1.5rem;
+      }
+      #ex3 .stacked {
+        gap: 1.5rem;
+      }
+      #ex3 .wv .lhead,
+      #ex3 .wv .lfoot,
+      #ex3 .wv-call,
+      #ex3 .wv-console {
+        font-size: 1rem;
+      }
+      #ex3 .wv .lhead small {
+        font-size: 0.8rem;
+      }
+      #ex3 .wv .core .cbody {
+        font-size: 1.1rem;
+      }
+      #ex3 .wv .layer {
+        padding: 0.7rem 0.9rem 0.9rem;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 100%);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
       }
     </style>
   </head>
@@ -556,7 +693,7 @@
     <!-- ================================================================ args -->
     <section class="slide" id="args">
       <h2>Decorator with arguments</h2>
-      <div class="tracer">
+      <div class="tracer dense">
         <pre class="trace"><code class="language-python">
           # decorator for functions with args
           def my_decorator(func):
@@ -605,7 +742,7 @@
     <!-- ================================================================ wraps -->
     <section class="slide">
       <h2>Preserving metadata</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.2rem"><code class="language-python">
         from functools import wraps
         # preserve function info
         def my_decorator(func):
@@ -645,7 +782,7 @@
       </code></pre>
     </section>
 
-    <section class="slide" id="ex2">
+    <section class="slide ex" id="ex2">
       <h2>Exercise 2</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -662,7 +799,7 @@
       </div>
     </section>
 
-    <section class="slide" id="ex3">
+    <section class="slide ex" id="ex3">
       <h2>Exercise 3</h2>
       <div class="stacked">
         <pre><code class="language-python">
@@ -682,7 +819,8 @@
           def func():
               pass
           func()
-          # ans: 1, 2 (applied bottom to top: dec1's wrapper runs first)
+          # ans: 1, 2
+          # ans: (applied bottom up; dec1's wrapper runs first)
         </code></pre>
         <div class="wv"></div>
       </div>
@@ -720,7 +858,7 @@
       <p class="hint step">Functions are objects, so the wrapper can carry attributes: <code>func.original</code> is the undecorated function.</p>
     </section>
 
-    <section class="slide" id="ex6">
+    <section class="slide ex" id="ex6">
       <h2>Exercise 6</h2>
       <div class="stacked">
         <pre><code class="language-python">
@@ -741,7 +879,7 @@
       <span class="step wrap-step" data-anim="none"></span>
     </section>
 
-    <section class="slide" id="ex7">
+    <section class="slide ex" id="ex7">
       <h2>Exercise 7</h2>
       <div class="stacked">
         <pre><code class="language-python">
@@ -794,7 +932,7 @@
       </code></pre>
     </section>
 
-    <section class="slide" id="ex10">
+    <section class="slide ex" id="ex10">
       <h2>Exercise 10</h2>
       <div class="stacked">
         <pre><code class="language-python">
@@ -818,7 +956,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 64rem)">
+      <div class="cards">
         <div class="card step"><h3><code>@d</code> means <code>f = d(f)</code></h3><p>It runs once, when the function is defined.</p></div>
         <div class="card step"><h3>The wrapper replaces the name</h3><p>Calls go to the wrapper, which decides when (and whether) to call the original.</p></div>
         <div class="card step"><h3>Pass things through</h3><p>Use <code>*args, **kwargs</code> and <code>return</code> the result, or the caller gets <code>None</code>.</p></div>
@@ -1117,13 +1255,15 @@
           home.prepend(tag);
           if (animate) {
             const r1 = tag.getBoundingClientRect();
-            gsap.from(tag, { x: r0.left - r1.left, y: r0.top - r1.top, duration: 0.8, ease: "power2.inOut" });
+            const k = wv.getBoundingClientRect().width / wv.offsetWidth || 1; // the canvas is scaled to the window
+            gsap.from(tag, { x: (r0.left - r1.left) / k, y: (r0.top - r1.top) / k, duration: 0.8, ease: "power2.inOut" });
           }
         }
         const at = (el) => {
           const w = wv.getBoundingClientRect();
           const r = el.getBoundingClientRect();
-          return { x: r.right - w.left + 8, y: r.top - w.top + r.height / 2 - token.offsetHeight / 2 };
+          const k = w.width / wv.offsetWidth || 1; // the canvas is scaled to the window
+          return { x: (r.right - w.left) / k + 8, y: (r.top - w.top + r.height / 2) / k - token.offsetHeight / 2 };
         };
         function playCall() {
           tl = gsap.timeline();

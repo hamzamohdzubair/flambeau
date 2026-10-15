@@ -61,6 +61,78 @@
         opacity: 0.45;
       }
 
+      /* Fixed 16:9 canvas: big tiles, centred row by row */
+      .hub h1 {
+        font-size: 4.2rem;
+      }
+
+      .hub > p.muted {
+        font-size: 1.3rem;
+      }
+
+      .hub-cover .contents {
+        gap: 0.8rem;
+      }
+
+      .hub-cover .contents .pill {
+        font-size: 1.15rem;
+      }
+
+      .hub .group {
+        width: 100%;
+        justify-items: center;
+      }
+
+      .hub .group h3 {
+        font-size: 1.3rem;
+      }
+
+      .hub .tiles {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.2rem;
+        width: 100%;
+      }
+
+      .hub .tile,
+      .slide.hub-group .tile {
+        flex: 0 0 12.8rem;
+        min-height: 9rem;
+        font-size: 1.2rem;
+      }
+
+      .hub .tile small {
+        font-size: 0.85rem;
+      }
+
+      .hub .tiles.big .tile {
+        flex-basis: 18rem;
+        min-height: 11rem;
+        font-size: 1.6rem;
+      }
+
+      .hub .tiles.big:has(> :nth-child(4)) .tile {
+        flex-basis: 12.8rem;
+        min-height: 9rem;
+        font-size: 1.4rem;
+      }
+
+      .slide.hub-group .tiles:has(> :nth-child(9)) .tile {
+        flex-basis: 10.2rem;
+        min-height: 7.5rem;
+        font-size: 1.05rem;
+      }
+
+      .slide.hub-group .tiles:not(:has(> :nth-child(5))) .tile {
+        min-height: 11.5rem;
+      }
+
+      .slide.hub-group .tiles:not(:has(> :nth-child(3))) .tile {
+        flex-basis: 18rem;
+        font-size: 1.5rem;
+      }
+
       #chart figure img {
         max-height: 68cqh;
       }
@@ -75,7 +147,7 @@
     </style>
   </head>
   <body>
-    <section class="slide top hub" id="hub">
+    <section class="slide hub" id="hub">
       <span class="kicker">Probability &amp; statistics</span>
       <h1>Distribution Theory</h1>
 
@@ -89,7 +161,7 @@
 
     <section class="slide" id="chart">
       <h2>Distributions</h2>
-      <figure><img src="/assets/2025-09-30-23-20-50.png" alt="A chart of common probability distributions and the relationships between them" /></figure>
+      <figure><img style="max-height: 74cqh" src="/assets/2025-09-30-23-20-50.png" alt="A chart of common probability distributions and the relationships between them" /></figure>
     </section>
 
     <section class="slide" id="demo">

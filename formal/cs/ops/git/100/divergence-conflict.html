@@ -8,10 +8,32 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       .graph {
-        width: min(100%, 60rem);
-        height: auto;
-        max-height: 58cqh;
+        width: 100%;
         overflow: visible;
+      }
+
+      #diverge .graph {
+        height: 23.2rem;
+      }
+
+      #reconcile .graph {
+        height: 19rem;
+      }
+
+      .beats {
+        position: absolute;
+      }
+
+      .ctl {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.6rem;
+      }
+
+      #conflict pre {
+        width: 46rem;
+        font-size: 1.35rem;
       }
 
       .graph .panel {
@@ -28,13 +50,13 @@
 
       .graph .pl {
         fill: var(--muted);
-        font: 600 17px var(--font-display);
+        font: 600 21px var(--font-display);
         text-anchor: middle;
       }
 
       .graph .br {
         fill: var(--faint);
-        font: 14px var(--font-mono);
+        font: 18px var(--font-mono);
         text-anchor: middle;
       }
 
@@ -62,14 +84,14 @@
 
       .graph .commit text {
         fill: #fff;
-        font: 700 16px var(--font-mono);
+        font: 700 19px var(--font-mono);
         text-anchor: middle;
         dominant-baseline: central;
       }
 
       .graph .commit text.msg {
         fill: var(--muted);
-        font: 400 14px var(--font-mono);
+        font: 400 18px var(--font-mono);
         text-anchor: start;
       }
 
@@ -90,7 +112,7 @@
 
       .graph .badge text {
         fill: var(--red);
-        font: 600 14px var(--font);
+        font: 600 18px var(--font);
         text-anchor: middle;
         dominant-baseline: central;
       }
@@ -102,7 +124,7 @@
       }
 
       .term {
-        width: min(100%, 46rem);
+        width: 30rem;
         padding: 0.7rem 1.1rem;
         border-radius: 12px;
         border: 1px solid var(--border);
@@ -129,7 +151,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.9rem var(--font-mono);
+        font: 500 1rem var(--font-mono);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -149,11 +171,6 @@
         max-height: 46cqh;
       }
 
-      @container slide (max-width: 760px) {
-        .term {
-          font-size: 0.75rem;
-        }
-      }
     </style>
   </head>
   <body>
@@ -177,9 +194,11 @@
         <g class="layer"></g>
       </svg>
       <p class="say"></p>
-      <span class="step" data-anim="none"></span>
-      <span class="step" data-anim="none"></span>
-      <span class="step" data-anim="none"></span>
+      <div class="beats">
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+      </div>
     </section>
 
     <section class="slide">
@@ -206,19 +225,23 @@
     <section class="slide" id="reconcile">
       <h2>Three ways to reconcile</h2>
       <svg class="graph" viewBox="0 0 900 330" aria-label="Your commit B and the fetched commit C both follow A. Merge adds a commit M joining them; rebase replays B on top of C as B prime; fast-forward only refuses."></svg>
-      <div class="modes step" data-step="1" data-interactive>
-        <button class="chip" data-mode="merge">merge</button>
-        <button class="chip" data-mode="rebase">rebase</button>
-        <button class="chip" data-mode="ff">fast-forward only</button>
+      <div class="ctl">
+        <div class="modes step" data-step="1" data-interactive>
+          <button class="chip" data-mode="merge">merge</button>
+          <button class="chip" data-mode="rebase">rebase</button>
+          <button class="chip" data-mode="ff">fast-forward only</button>
+        </div>
+        <div class="term"></div>
       </div>
-      <div class="term"></div>
       <p class="say"></p>
-      <span class="step" data-anim="none" data-step="2"></span>
-      <span class="step" data-anim="none" data-step="3"></span>
+      <div class="beats">
+        <span class="step" data-anim="none" data-step="2"></span>
+        <span class="step" data-anim="none" data-step="3"></span>
+      </div>
     </section>
 
     <!-- ================================================================ conflicts -->
-    <section class="slide">
+    <section class="slide" id="conflict">
       <h2>When it becomes a conflict</h2>
       <p class="center">If B and C changed the <strong>same lines</strong>, Git cannot combine them by itself. The merge (or rebase) stops and marks the file:</p>
       <pre class="steps"><code class="language-diff">
@@ -246,9 +269,9 @@
       };
       const commit = (parent, x, y, label, cls = "", msg) => {
         const g = el("g", { class: "commit " + cls, transform: `translate(${x} ${y})` }, parent);
-        el("circle", { r: 20 }, g);
+        el("circle", { r: 22 }, g);
         el("text", {}, g).textContent = label;
-        if (msg) el("text", { class: "msg", x: 32, y: 5 }, g).textContent = msg;
+        if (msg) el("text", { class: "msg", x: 34, y: 2 }, g).textContent = msg;
         return g;
       };
 
@@ -283,7 +306,7 @@
           if (n >= 3) {
             add(commit(layer, Y, base.p - 90, "B", "mine", "Add cute dog…"), true);
             const b = el("g", { class: "badge", transform: "translate(780 200)" }, layer);
-            el("rect", { x: -60, y: -16, width: 120, height: 32, rx: 16 }, b);
+            el("rect", { x: -70, y: -19, width: 140, height: 38, rx: 19 }, b);
             el("text", {}, b).textContent = "diverged!";
             add(b, true);
           }
@@ -341,11 +364,11 @@
           }
           if (m === "ff") {
             const g = el("g", { class: "badge", transform: `translate(${NEXT[0] + 60} 165)` }, svg);
-            el("rect", { x: -150, y: -18, width: 300, height: 36, rx: 18 }, g);
+            el("rect", { x: -175, y: -21, width: 350, height: 42, rx: 21 }, g);
             el("text", {}, g).textContent = "fatal: Not possible to fast-forward";
             fresh.push(g);
           }
-          lab(A[0], A[1] + 46, "common ancestor");
+          lab(A[0] - 20, A[1] + 58, "common ancestor");
           const [cmd, text] = MODES[m || "none"];
           term.innerHTML = `<span>$</span> ${cmd}`;
           say.textContent = text;

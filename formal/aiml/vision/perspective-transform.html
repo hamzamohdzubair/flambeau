@@ -16,12 +16,12 @@
       }
 
       .chip {
-        padding: 0.35rem 0.9rem;
+        padding: 0.45rem 1.1rem;
         border-radius: 999px;
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.85rem var(--font);
+        font: 500 1rem var(--font);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -47,8 +47,8 @@
         flex-wrap: wrap;
         justify-content: center;
         align-items: center;
-        gap: 0.6rem 1.4rem;
-        font-size: 0.85rem;
+        gap: 0.6rem 2rem;
+        font-size: 1.05rem;
         color: var(--muted);
       }
 
@@ -66,7 +66,8 @@
       }
 
       input[type="range"] {
-        width: 8rem;
+        width: 12rem;
+        height: 1.4rem;
         accent-color: var(--violet);
       }
 
@@ -93,7 +94,7 @@
 
       .readout {
         font-family: var(--font-mono);
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: var(--muted);
         text-align: center;
       }
@@ -107,9 +108,9 @@
       .codek {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
-        gap: 2.4rem;
+        gap: 1.6rem;
         align-items: center;
-        width: min(100%, 68rem);
+        width: 100%;
       }
 
       .codek pre {
@@ -121,7 +122,7 @@
         flex-direction: column;
         align-items: center;
         gap: 1rem;
-        max-width: 22rem;
+        width: 19rem;
       }
 
       .codek .side p {
@@ -158,8 +159,8 @@
       /* Exercises */
       .qa {
         display: grid;
-        gap: 1.1rem;
-        width: min(100%, 60rem);
+        gap: 1.3rem;
+        width: min(100%, 64rem);
         counter-reset: q;
       }
 
@@ -170,7 +171,7 @@
 
       .qa .q > p:first-child {
         color: var(--text);
-        font-size: 1.1rem;
+        font-size: 1.3rem;
       }
 
       .qa .q > p:first-child::before {
@@ -192,9 +193,10 @@
         font-size: 0.92rem;
       }
 
+      .slide > pre,
       pre.ex {
-        width: min(100%, 64rem);
-        font-size: 0.95rem;
+        width: min(100%, 66rem);
+        font-size: 1.15rem;
       }
 
       .tag {
@@ -212,13 +214,13 @@
       }
 
       .card p {
-        font-size: 0.95rem;
+        font-size: 1.05rem;
         color: var(--muted);
         margin: 0;
       }
 
       .card ul {
-        font-size: 0.95rem;
+        font-size: 1.1rem;
       }
 
       .card.good {
@@ -231,27 +233,6 @@
 
       .x:not(.shown) {
         pointer-events: none;
-      }
-
-      @container slide (max-width: 760px) {
-        .play {
-          grid-template-columns: 1fr;
-          gap: 0.8rem;
-        }
-
-        .codek {
-          grid-template-columns: 1fr;
-          gap: 1.4rem;
-        }
-
-        input[type="range"] {
-          width: 6.5rem;
-        }
-
-        pre.ex,
-        .qa pre {
-          font-size: 0.78rem;
-        }
       }
 
       #title svg {
@@ -284,8 +265,8 @@
       .pipe {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 0.8rem;
-        width: min(100%, 60rem);
+        gap: 1rem;
+        width: min(100%, 64rem);
         counter-reset: s;
       }
 
@@ -294,7 +275,7 @@
       }
 
       .pipe .card h3 {
-        font-size: 1rem;
+        font-size: 1.15rem;
       }
 
       .pipe .card h3::before {
@@ -306,13 +287,13 @@
 
       /* diagrams beside code */
       .side svg {
-        width: min(20rem, 80cqw);
+        width: 100%;
         height: auto;
         overflow: visible;
       }
 
       .side svg text {
-        font: 13px var(--font-mono);
+        font: 18px var(--font-mono);
         fill: var(--text);
       }
 
@@ -340,9 +321,9 @@
       .lab {
         display: grid;
         grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-        gap: 1.4rem;
+        gap: 0.9rem 2rem;
         align-items: center;
-        width: min(100%, 66rem);
+        width: 100%;
       }
 
       .lab .srcwrap {
@@ -396,7 +377,7 @@
 
       .lab .right canvas {
         max-width: 100%;
-        max-height: 46cqh;
+        max-height: 38cqh;
         border-radius: 10px;
         box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.8);
       }
@@ -405,21 +386,47 @@
         grid-template-columns: repeat(3, auto);
       }
 
+      .lab .mrow {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .lab .note {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+
+      .lab .right:has(~ .note) {
+        grid-row: span 2;
+      }
+
+      #scan .note {
+        grid-column: 1;
+        text-align: center;
+      }
+
+      #road .lab {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      }
+
+      #road .right canvas {
+        max-height: 36cqh;
+      }
+
+      #road .note {
+        grid-column: 1;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        text-align: left;
+      }
+
       .lab .mat > span {
-        min-width: 4.6rem;
-        height: 1.8rem;
-        font-size: 0.75rem;
+        min-width: 5.2rem;
+        height: 2rem;
+        font-size: 0.9rem;
       }
 
-      @container slide (max-width: 760px) {
-        .pipe {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .lab {
-          grid-template-columns: 1fr;
-        }
-      }
     </style>
   </head>
   <body>
@@ -438,7 +445,7 @@
     <!-- ================================================================ document scanning -->
     <section class="slide">
       <h2>Document scanning</h2>
-      <div class="cols" style="width: min(100%, 60rem)">
+      <div class="cols" style="width: min(100%, 64rem)">
         <figure><img src="/assets/2025-10-22-18-33-22.png" alt="A loan application form photographed at an angle" /></figure>
         <div>
           <p><strong>Problem:</strong> a photo of a document taken from an angle.</p>
@@ -549,18 +556,18 @@
         <div class="right">
           <canvas class="out"></canvas>
           <p class="readout"></p>
-          <div class="mat"></div>
+          <div class="mrow"><span class="readout">M =</span><div class="mat"></div></div>
           <div class="chips" data-interactive><button class="chip ghost" data-act="shuffle">Shuffle the corner order</button><button class="chip ghost" data-act="reset">Reset</button></div>
         </div>
+        <p class="muted note">Drag the pink corners. Labels come from <code>order_points</code>, so the order you pick them in does not matter.</p>
       </div>
-      <p class="muted center" style="font-size: 0.85rem">Drag the pink corners. Labels come from <code>order_points</code>, so the order you pick them in does not matter.</p>
     </section>
 
     <!-- ================================================================ bird's eye -->
     <section class="slide">
       <h2>Bird's eye view</h2>
       <p class="lead"><strong>Purpose:</strong> a top-down view of a scene.</p>
-      <div class="cols top" style="width: min(100%, 56rem)">
+      <div class="cols top" style="width: min(100%, 62rem)">
         <div class="card"><h3>Use cases</h3><ul><li class="step">Lane detection</li><li class="step">Parking assistance</li><li class="step">Sports analysis</li></ul></div>
         <div class="card"><h3>Method: the same as a document scan</h3><ol><li class="step">Define a region of interest: a trapezoid on the road</li><li class="step">Map it to a rectangle: the top-down view</li></ol></div>
       </div>
@@ -596,8 +603,8 @@
           <p class="readout"></p>
           <div class="chips" data-interactive><button class="chip" data-act="inv">Map it back (inverse)</button><button class="chip ghost" data-act="fit">Fitted trapezoid</button><button class="chip ghost" data-act="code">The code's trapezoid</button></div>
         </div>
+        <p class="muted note">The points keep the code's order, src[0] to src[3]. The fitted trapezoid's sides point at the vanishing point, so the lane lines come out parallel; the code's own trapezoid sits almost on this photo's horizon, so it magnifies a tiny patch. Drag a corner to see what a bad trapezoid does. (<code>order_points</code> would mislabel this wide trapezoid: its bottom-left corner has the smallest x + y.)</p>
       </div>
-      <p class="muted center" style="font-size: 0.85rem">The points keep the code's order, src[0] to src[3]. The fitted trapezoid's sides point at the vanishing point, so the lane lines come out parallel; the code's own trapezoid sits almost on this photo's horizon, so it magnifies a tiny patch. Drag a corner to see what a bad trapezoid does. (<code>order_points</code> would mislabel this wide trapezoid: its bottom-left corner has the smallest x + y.)</p>
     </section>
 
     <!-- ================================================================ inverse -->
@@ -859,7 +866,7 @@
         const NAMES = ["TL", "TR", "BR", "BL"];
         const labels = shuffled.map(([x, y]) => {
           el("circle", { class: "pt", cx: x, cy: y, r: 6 }, svg);
-          return el("text", { x: x + (x < 150 ? -58 : 10), y: y + (y < 100 ? -12 : 22) }, svg);
+          return el("text", { x: x + (x < 150 ? -12 : 12), y: y + (y < 100 ? -12 : 28), "text-anchor": x < 150 ? "end" : "start" }, svg);
         });
         const read = sl.querySelector(".readout");
         function stage(n) {
@@ -916,7 +923,7 @@
         let pts = start.map((p) => [...p]);
         const poly = el("polygon", { class: "quadline" }, svg);
         const handles = pts.map(() => el("circle", { class: "handle", r: Math.round(W / 70) }, svg));
-        const labels = pts.map(() => el("text", { class: "lbl", style: `font-size:${Math.round(W / 40)}px` }, svg));
+        const labels = pts.map(() => el("text", { class: "lbl", style: `font-size:${Math.max(20, Math.round(W / 30))}px` }, svg));
         let raf = 0;
         function render() {
           raf = 0;
@@ -991,7 +998,7 @@
             show(out, warpPerspective(src, M, ow, oh));
             const Mfull = getPerspectiveTransform([tl, tr, br, bl], [[0, 0], [mw - 1, 0], [mw - 1, mh - 1], [0, mh - 1]]);
             mat.innerHTML = Mfull.map((v) => `<span>${f2(v)}</span>`).join("");
-            read.innerHTML = `maxWidth=<b>${mw}</b>, maxHeight=<b>${mh}</b> · M = getPerspectiveTransform(src, dst):`;
+            read.innerHTML = `maxWidth=<b>${mw}</b> · maxHeight=<b>${mh}</b>`;
           },
         });
         sl.querySelector("[data-act=shuffle]").addEventListener("click", lab.shuffle);

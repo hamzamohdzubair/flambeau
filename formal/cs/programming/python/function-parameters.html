@@ -8,23 +8,69 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       /* ---------- Binder: arguments flowing into parameter slots ---------- */
+      /* code on the left, the binding animation on the right */
       .bind-wrap {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
         align-items: center;
-        gap: 1.3rem;
-        width: min(100%, 60rem);
+        gap: 2rem;
+        width: 100%;
       }
 
       .bind-wrap pre {
-        width: min(100%, 44rem);
+        width: 100%;
+        font-size: 1.3rem;
+      }
+
+      /* long def line: the code takes the width it needs */
+      #multi .bind-wrap {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 1.5rem;
+      }
+
+      #multi .bind-wrap pre {
+        width: auto;
+        font-size: 1.15rem;
+      }
+
+      #multi .slot .pn {
+        font-size: 1.1rem;
+      }
+
+      #multi .bslots {
+        flex-wrap: nowrap;
+        gap: 0.6rem;
+      }
+
+      #multi .slot .box {
+        min-width: 5rem;
+        padding: 0.2rem 0.7rem;
+      }
+
+      #multi .bout {
+        font-size: 1.3rem;
+        white-space: nowrap;
+      }
+
+      #kw .bind-wrap,
+      #kwargs .bind-wrap {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      }
+
+      #kw .bind-wrap pre,
+      #kwargs .bind-wrap pre {
+        font-size: 1.2rem;
+      }
+
+      [id^="e"] .bind-wrap pre {
+        font-size: 1.5rem;
       }
 
       .binder {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.9rem;
+        gap: 1.4rem;
         width: 100%;
       }
 
@@ -33,8 +79,8 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 0.35rem;
-        font: 500 1.15rem var(--font-mono);
+        gap: 0.3rem;
+        font: 500 1.6rem var(--font-mono);
         color: var(--text);
       }
 
@@ -44,11 +90,11 @@
 
       .arg {
         display: inline-block;
-        padding: 0.1em 0.6em;
+        padding: 0.1em 0.45em;
         border-radius: 999px;
         border: 1px solid rgba(34, 211, 238, 0.55);
         background: rgba(34, 211, 238, 0.12);
-        font: 500 1rem/1.6 var(--font-mono);
+        font: 500 1.35rem/1.6 var(--font-mono);
         color: #cffafe;
         transition: opacity 0.3s;
       }
@@ -71,7 +117,7 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 0.8rem;
+        gap: 1.1rem;
       }
 
       .slot {
@@ -82,7 +128,7 @@
       }
 
       .slot .pn {
-        font: 600 0.9rem var(--font-mono);
+        font: 600 1.25rem var(--font-mono);
         color: var(--violet-soft);
       }
 
@@ -96,12 +142,12 @@
         display: grid;
         place-items: center;
         min-width: 6.5rem;
-        min-height: 2.6rem;
-        padding: 0.2rem 0.8rem;
+        min-height: 3.2rem;
+        padding: 0.2rem 1rem;
         border-radius: 12px;
         border: 1.5px dashed rgba(167, 139, 250, 0.45);
         background: rgba(15, 18, 35, 0.7);
-        font: 500 1rem var(--font-mono);
+        font: 500 1.3rem var(--font-mono);
         color: var(--text);
         transition:
           border-color 0.3s,
@@ -127,22 +173,22 @@
       }
 
       .slot .tag {
-        font: 0.7rem var(--font);
+        font: 1rem var(--font);
         color: var(--faint);
         min-height: 1em;
       }
 
       .bout {
-        min-height: 1.8rem;
-        font: 500 1.05rem var(--font-mono);
+        min-height: 2.2rem;
+        font: 500 1.5rem var(--font-mono);
         color: var(--green);
       }
 
       .bout .lbl {
         color: var(--faint);
         font-family: var(--font);
-        font-size: 0.85rem;
-        margin-right: 0.5rem;
+        font-size: 1.1rem;
+        margin-right: 0.6rem;
       }
 
       .bpick {
@@ -150,18 +196,22 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 0.45rem;
-        font-size: 0.85rem;
+        gap: 0.55rem;
+        font-size: 1.05rem;
         color: var(--faint);
       }
 
+      .bind-wrap > .bpick {
+        grid-column: 1 / -1;
+      }
+
       .bpick button {
-        padding: 0.25rem 0.75rem;
+        padding: 0.3rem 0.85rem;
         border-radius: 999px;
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.85rem var(--font-mono);
+        font: 500 1.05rem var(--font-mono);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -187,36 +237,22 @@
         pointer-events: none;
         padding: 0 0.55em;
         border-radius: 999px;
-        font: 600 1rem/1.6 var(--font-mono);
+        font: 600 1.35rem/1.6 var(--font-mono);
         color: #fff;
         background: rgba(34, 211, 238, 0.35);
         border: 1px solid var(--cyan);
         box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
       }
 
-      @container slide (max-width: 760px) {
-        .bcall {
-          font-size: 0.9rem;
-        }
-
-        .arg,
-        .slot .box {
-          font-size: 0.85rem;
-        }
-
-        .slot .box {
-          min-width: 4.5rem;
-        }
-      }
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.3rem;
         color: var(--faint);
         text-align: center;
       }
 
       /* ---------- Exercise 10: one default list shared by every call ---------- */
       .shared {
-        width: min(100%, 40rem);
+        width: 100%;
         height: auto;
         overflow: visible;
       }
@@ -243,7 +279,7 @@
       .shared text {
         fill: var(--text);
         font-family: var(--font-mono);
-        font-size: 17px;
+        font-size: 22px;
         text-anchor: middle;
         dominant-baseline: central;
       }
@@ -251,7 +287,7 @@
       .shared text.lbl {
         fill: var(--muted);
         font-family: var(--font);
-        font-size: 13px;
+        font-size: 18px;
       }
 
       #e10 .line.answer.shown {
@@ -276,7 +312,7 @@
 
     <section class="slide" id="howto">
       <h2>Arguments meet parameters</h2>
-      <div class="cards" style="width: min(100%, 60rem)">
+      <div class="cards" style="width: min(100%, 66rem); font-size: 1.25rem">
         <div class="card step"><h3>Parameters</h3><p>The names in the <code>def</code> line: empty slots waiting for values.</p></div>
         <div class="card step"><h3>Arguments</h3><p>The values in a call. Positional ones fill slots left to right; <code>name=value</code> goes to the slot with that name.</p></div>
         <div class="card step"><h3>Leftovers</h3><p>Unfilled slots take their default. Extra values go to <code>*args</code> or <code>**kwargs</code>, if the function has them.</p></div>
@@ -409,7 +445,7 @@
 
     <section class="slide">
       <h2>Exercise 3</h2>
-      <pre style="width: min(100%, 40rem)"><code class="language-python">
+      <pre style="width: min(100%, 58rem); font-size: 1.75rem"><code class="language-python">
         # can you do this?
         def func(a=5, b):
             return a + b
@@ -511,8 +547,8 @@
 
     <section class="slide" id="e10">
       <h2>Exercise 10</h2>
-      <div class="cols" style="width: min(100%, 64rem)">
-        <pre><code class="language-python">
+      <div class="cols" style="width: 100%">
+        <pre style="font-size: 1.3rem"><code class="language-python">
           # mutable default parameter?
           def func(x=[]):
               x.append(1)
@@ -528,14 +564,15 @@
               <path d="M0 0 L10 5 L0 10 z" fill="#22d3ee" />
             </marker>
           </defs>
-          <text class="lbl" x="300" y="40">default, made once when def runs</text>
+          <text class="lbl" x="300" y="58">default, made once</text>
+          <text class="lbl" x="300" y="82">when def runs</text>
           <g class="obj"><rect x="215" y="105" width="170" height="54" rx="12" /><text class="val" x="300" y="132">[]</text></g>
-          <g class="call" data-c="1"><rect x="20" y="40" width="130" height="50" rx="12" /><text x="85" y="65">1st func()</text></g>
-          <g class="call" data-c="2"><rect x="20" y="170" width="130" height="50" rx="12" /><text x="85" y="195">2nd func()</text></g>
-          <path class="wire" data-c="1" d="M150 65 C 185 65, 185 120, 213 124" />
-          <path class="wire" data-c="2" d="M150 195 C 185 195, 185 145, 213 141" />
-          <text class="lbl" x="178" y="96">x</text>
-          <text class="lbl" x="178" y="168">x</text>
+          <g class="call" data-c="1"><rect x="5" y="40" width="160" height="50" rx="12" /><text x="85" y="65">1st func()</text></g>
+          <g class="call" data-c="2"><rect x="5" y="170" width="160" height="50" rx="12" /><text x="85" y="195">2nd func()</text></g>
+          <path class="wire" data-c="1" d="M165 65 C 195 65, 190 120, 213 124" />
+          <path class="wire" data-c="2" d="M165 195 C 195 195, 190 145, 213 141" />
+          <text class="lbl" x="192" y="98">x</text>
+          <text class="lbl" x="192" y="166">x</text>
         </svg>
       </div>
       <p class="hint">Fix: use <code>x=None</code> and create the list inside, with <code>if x is None: x = []</code>.</p>
@@ -601,6 +638,9 @@
         const calls = cfg.calls.map(parseArgs);
         const auto = cfg.auto ?? 1;
         root.innerHTML = `<div class="bcall"></div><div class="bslots"></div><div class="bout"></div>` + (calls.length > auto ? `<div class="bpick" data-interactive>Try: ${cfg.calls.map((c, i) => `<button data-i="${i}">${escB(cfg.fn)}(${escB(c)})</button>`).join("")}</div>` : "");
+        // the Try row spans the whole slide under the code and the slots
+        const pickEl = root.querySelector(".bpick");
+        if (pickEl) root.parentElement.appendChild(pickEl);
         const callEl = root.querySelector(".bcall"), slotsEl = root.querySelector(".bslots"), outEl = root.querySelector(".bout");
         slotsEl.innerHTML = cfg.params
           .map((p) => `<div class="slot"><span class="pn">${p.s === 1 ? "*" : p.s === 2 ? "**" : ""}${escB(p.n)}${p.d !== undefined ? `<i>=${escB(p.d)}</i>` : ""}</span><span class="box"></span><span class="tag"></span></div>`)
@@ -616,7 +656,7 @@
 
         function drawCall(ci) {
           callEl.innerHTML = `<span class="fnm">${escB(cfg.fn)}</span>(` + calls[ci].map((a) => `<span class="arg${a.k ? " kw" : ""}">${a.k ? `<span class="kn">${escB(a.k)}=</span>` : ""}${escB(a.v)}</span>`).join(", ") + ")";
-          root.querySelectorAll(".bpick button").forEach((b) => b.classList.toggle("on", +b.dataset.i === ci));
+          slide.querySelectorAll(".bpick button").forEach((b) => b.classList.toggle("on", +b.dataset.i === ci));
         }
 
         function setSlot(j, s, upto) {
@@ -711,7 +751,7 @@
           requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
         };
 
-        root.querySelector(".bpick")?.addEventListener("click", (e) => {
+        pickEl?.addEventListener("click", (e) => {
           const b = e.target.closest("button");
           if (b) bind(+b.dataset.i, true);
         });

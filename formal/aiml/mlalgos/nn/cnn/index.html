@@ -7,8 +7,22 @@
     <link rel="stylesheet" href="/deck/deck.css" />
     <script src="/deck/deck.js" defer></script>
     <style>
+      #atwork img {
+        height: 68cqh;
+        max-height: 68cqh;
+      }
+
+      #pipe > span.step {
+        position: absolute;
+      }
+
+      #pipe .caption {
+        font-size: 1.35rem;
+      }
+
       #pipe svg {
-        width: min(100%, 64rem);
+        width: 100%;
+        max-height: 66cqh;
         height: auto;
         overflow: visible;
       }
@@ -20,14 +34,14 @@
 
       #pipe text {
         font-family: var(--font);
-        font-size: 15px;
+        font-size: 18px;
         fill: var(--muted);
         text-anchor: middle;
       }
 
       #pipe text.big {
         font-family: var(--font-display);
-        font-size: 17px;
+        font-size: 21px;
         fill: var(--text);
       }
 
@@ -50,6 +64,11 @@
         fill: rgba(34, 211, 238, 0.5);
       }
 
+      #contents p {
+        font-size: 1.6rem;
+        max-width: 50rem;
+      }
+
       #contents .muted a {
         font-weight: 600;
       }
@@ -62,14 +81,14 @@
       <p>Convolutional neural networks: networks that look at images through small sliding windows.</p>
     </section>
 
-    <section class="slide">
+    <section class="slide" id="atwork">
       <h2>A CNN at work</h2>
       <figure><img src="/assets/2025-10-04-12-02-13.png" alt="3-D visualisation of a CNN classifying a handwritten digit: input pixels, feature maps, then output classes" /></figure>
     </section>
 
     <section class="slide" id="pipe">
       <h2>From pixels to a label</h2>
-      <svg viewBox="0 0 980 360" aria-label="Image, convolution, pooling, convolution, pooling, dense layer, class scores"></svg>
+      <svg viewBox="0 0 980 372" aria-label="Image, convolution, pooling, convolution, pooling, dense layer, class scores"></svg>
       <p class="center caption">Press → to move through the network.</p>
       <span class="step" data-anim="none"></span>
       <span class="step" data-anim="none"></span>
@@ -113,8 +132,8 @@
       const add = (label, sub, draw) => {
         const g = el("g", { class: "stage" }, svg);
         const x = draw(g);
-        el("text", { class: "big", x, y: 318 }, g, label);
-        el("text", { x, y: 340 }, g, sub);
+        el("text", { class: "big", x, y: 322 }, g, label);
+        el("text", { x, y: 352 }, g, sub);
         stages.push(g);
         return g;
       };
@@ -143,7 +162,7 @@
         const og = el("g", { class: "out" }, g);
         for (let k = 0; k < 10; k++) {
           el("rect", { class: k === 7 ? "top" : "", x: 800, y: 70 + k * 21, width: 26, height: 16, rx: 3 }, og);
-          el("text", { x: 845, y: 83 + k * 21, style: "font-size:12px;text-anchor:start" }, og, k);
+          el("text", { x: 840, y: 84 + k * 21, style: "font-size:18px;text-anchor:start" }, og, String(k));
         }
         return 820;
       });

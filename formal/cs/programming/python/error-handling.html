@@ -16,17 +16,17 @@
 
       .tracer {
         display: grid;
-        grid-template-columns: minmax(0, auto) minmax(14rem, 22rem);
-        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1fr) 21rem;
+        gap: 2rem;
         align-items: start;
         justify-content: center;
-        width: min(100%, 64rem);
+        width: 100%;
       }
 
       .tracer pre {
-        width: auto;
-        min-width: min(100%, 26rem);
-        max-width: 100%;
+        width: 100%;
+        min-width: 0;
+        font-size: 1.5rem;
       }
 
       pre.trace .line {
@@ -104,12 +104,12 @@
         border-radius: var(--radius);
         background: var(--glass);
         border: 1px solid var(--border);
-        font-size: 0.95rem;
+        font-size: 1.15rem;
       }
 
       .mem h4 {
         margin: 0 0 0.35rem;
-        font: 600 0.72rem var(--font);
+        font: 600 0.8rem var(--font);
         letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--faint);
@@ -221,7 +221,7 @@
         border: 1px solid var(--border);
         background: transparent;
         color: var(--muted);
-        font: 500 0.8rem var(--font);
+        font: 500 0.95rem var(--font);
         cursor: pointer;
       }
 
@@ -236,8 +236,8 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        font-size: 0.95rem;
+        gap: 0.7rem;
+        font-size: 1.2rem;
         color: var(--muted);
       }
 
@@ -252,7 +252,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.95rem var(--font-mono);
+        font: 500 1.25rem var(--font-mono);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -269,37 +269,56 @@
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.25rem;
         color: var(--faint);
         text-align: center;
       }
 
-      @container slide (max-width: 760px) {
-        .tracer {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
-
-        .tracer pre {
-          min-width: 0;
-        }
-
-        .mem {
-          padding: 0.7rem 0.8rem;
-          gap: 0.5rem;
-          font-size: 0.85rem;
-        }
-      }
 
       .slide pre {
         width: auto;
-        min-width: min(100%, 26rem);
-        font-size: 0.92rem;
+        min-width: min(100%, 44rem);
+        max-width: 100%;
+      }
+
+      #multi .tracer pre {
+        font-size: 1.2rem;
+      }
+
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: min(100%, 70rem) !important;
+      }
+
+      #recap .card p {
+        font-size: 1.3rem;
       }
 
       /* ---------- try / except / else / finally flowchart ---------- */
+      #full {
+        gap: 0.8rem;
+      }
+
       #full .tracer {
-        grid-template-columns: minmax(0, auto) minmax(15rem, 22rem);
+        grid-template-columns: minmax(0, 1fr) 24rem;
+      }
+
+      #full .tracer pre {
+        font-size: 1.2rem;
+      }
+
+      #full .flow {
+        max-height: 30cqh;
+      }
+
+      #obj .tracer pre {
+        font-size: 1.4rem;
+      }
+
+      #full .mem {
+        min-height: 13rem;
+        font-size: 1rem;
+        gap: 0.6rem;
       }
 
       .side {
@@ -360,7 +379,7 @@
       .flow text {
         fill: var(--text);
         font-family: var(--font-mono);
-        font-size: 17px;
+        font-size: 24px;
         text-anchor: middle;
         dominant-baseline: central;
       }
@@ -368,7 +387,7 @@
       .flow text.lbl {
         fill: var(--muted);
         font-family: var(--font);
-        font-size: 13px;
+        font-size: 25px;
       }
 
       .flow .token {
@@ -376,15 +395,6 @@
         filter: drop-shadow(0 0 8px #ec4899);
       }
 
-      @container slide (max-width: 760px) {
-        #full .tracer {
-          grid-template-columns: minmax(0, 1fr);
-        }
-
-        .flow {
-          max-height: 26cqh;
-        }
-      }
     </style>
   </head>
   <body>
@@ -398,7 +408,7 @@
     <!-- ================================================================ basics -->
     <section class="slide">
       <h2>Try-except basics</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.45rem"><code class="language-python">
         # basic try-except
         try:
             result = 10 / 0
@@ -446,12 +456,12 @@
         <div class="mem"></div>
       </div>
       <div class="try" data-interactive><code>user types</code></div>
-      <p class="hint">The except clauses are checked top to bottom; the first one that matches handles the exception.</p>
+      <p class="hint">The except clauses are checked top to bottom; the first match handles it.</p>
     </section>
 
     <section class="slide">
       <h2>Catching several types</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.25rem"><code class="language-python">
         # catch multiple exceptions
         try:
             # some operation
@@ -471,8 +481,8 @@
 
     <!-- ================================================================ else / finally -->
     <section class="slide">
-      <h2>else and finally</h2>
-      <pre class="steps"><code class="language-python">
+      <h2>else: only when nothing failed</h2>
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
         # else - runs if no exception
         try:
             result = 10 / 2
@@ -480,6 +490,12 @@
             print("Error")
         else:
             print(f"Success! Result: {result}")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>finally: always runs</h2>
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
         # finally - always runs
         try:
             file = open("data.txt", "r")
@@ -521,15 +537,15 @@
             <path class="edge" data-e="try-else" d="M210 62 L265 138" />
             <path class="edge" data-e="except-finally" d="M95 182 L150 258" />
             <path class="edge" data-e="else-finally" d="M265 182 L210 258" />
-            <text class="lbl" x="92" y="92">error</text>
-            <text class="lbl" x="272" y="92">no error</text>
+            <text class="lbl" x="80" y="92">error</text>
+            <text class="lbl" x="298" y="92">no error</text>
             <rect class="node" data-n="try" x="120" y="18" width="120" height="44" rx="12" />
             <text x="180" y="40">try</text>
             <rect class="node" data-n="except" x="25" y="138" width="140" height="44" rx="12" />
             <text x="95" y="160">except</text>
             <rect class="node" data-n="else" x="195" y="138" width="140" height="44" rx="12" />
             <text x="265" y="160">else</text>
-            <rect class="node" data-n="finally" x="110" y="260" width="140" height="44" rx="12" />
+            <rect class="node" data-n="finally" x="95" y="260" width="170" height="44" rx="12" />
             <text x="180" y="282">finally</text>
             <circle class="token" r="8" cx="180" cy="18" opacity="0" />
           </svg>
@@ -542,7 +558,7 @@
     <!-- ================================================================ common -->
     <section class="slide">
       <h2>Common exceptions (1)</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
         # ValueError - invalid value
         try:
             int("abc")
@@ -553,24 +569,30 @@
             "2" + 2
         except TypeError:
             print("Type mismatch")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Common exceptions (2)</h2>
+      <pre class="steps" style="font-size: 1.45rem"><code class="language-python">
         # KeyError - missing dictionary key
         try:
             d = {"a": 1}
             value = d["b"]
         except KeyError:
             print("Key not found")
-      </code></pre>
-    </section>
-
-    <section class="slide">
-      <h2>Common exceptions (2)</h2>
-      <pre class="steps"><code class="language-python">
         # IndexError - invalid index
         try:
             lst = [1, 2, 3]
             value = lst[10]
         except IndexError:
             print("Index out of range")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Common exceptions (3)</h2>
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
         # AttributeError - missing attribute
         try:
             x = 5
@@ -583,7 +605,7 @@
     <!-- ================================================================ file errors -->
     <section class="slide">
       <h2>File and I/O exceptions (1)</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.45rem"><code class="language-python">
         # FileNotFoundError
         try:
             with open("missing.txt", "r") as file:
@@ -601,7 +623,7 @@
 
     <section class="slide">
       <h2>File and I/O exceptions (2)</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.40rem"><code class="language-python">
         # IsADirectoryError
         try:
             with open("folder", "r") as file:
@@ -620,7 +642,7 @@
     <!-- ================================================================ raising -->
     <section class="slide">
       <h2>Raising exceptions</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.60rem"><code class="language-python">
         # raise exception
         def divide(a, b):
             if b == 0:
@@ -637,7 +659,7 @@
 
     <section class="slide">
       <h2>Re-raising and translating</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.60rem"><code class="language-python">
         # re-raise exception
         try:
             result = 10 / 0
@@ -655,7 +677,7 @@
     <!-- ================================================================ custom -->
     <section class="slide">
       <h2>Custom exceptions</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
         # simple custom exception
         class CustomError(Exception):
             pass
@@ -671,7 +693,7 @@
 
     <section class="slide">
       <h2>Using custom exceptions</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.25rem"><code class="language-python">
         try:
             raise ValidationError("email", "Invalid format")
         except ValidationError as e:
@@ -691,7 +713,7 @@
     <!-- ================================================================ chaining -->
     <section class="slide">
       <h2>Exception chaining</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
         # implicit chaining (Python 3)
         try:
             try:
@@ -700,6 +722,13 @@
                 raise ValueError("Invalid operation")
         except ValueError as e:
             print(e.__context__)  # original exception
+      </code></pre>
+      <p class="hint step">Raising inside an <code>except</code> chains implicitly: the new exception's <code>__context__</code> holds the original.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Explicit and suppressed chaining</h2>
+      <pre class="steps" style="font-size: 1.55rem"><code class="language-python">
         # explicit chaining
         try:
             result = 10 / 0
@@ -711,13 +740,13 @@
         except ZeroDivisionError:
             raise ValueError("Invalid operation") from None
       </code></pre>
-      <p class="hint step">Implicit chaining fills <code>__context__</code>; <code>raise ... from e</code> also sets <code>__cause__</code>; <code>from None</code> hides the original in the traceback.</p>
+      <p class="hint step"><code>raise ... from e</code> also sets <code>__cause__</code>; <code>from None</code> hides the original in the traceback.</p>
     </section>
 
     <!-- ================================================================ assert -->
     <section class="slide">
       <h2>Assertions</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.10rem"><code class="language-python">
         # basic assertion
         x = 5
         assert x &gt; 0
@@ -733,13 +762,13 @@
             assert isinstance(value, int), "Value must be integer"
             return value * 2
       </code></pre>
-      <p class="hint step">A failed assert raises <code>AssertionError</code>. Because <code>-O</code> removes them, use asserts for catching bugs, not for checking user input.</p>
+      <p class="hint step">Failing raises <code>AssertionError</code>. <code>-O</code> strips asserts: never use them to validate input.</p>
     </section>
 
     <!-- ================================================================ context managers -->
     <section class="slide">
       <h2>Context managers for error handling</h2>
-      <pre class="steps" style="font-size: 0.85rem"><code class="language-python">
+      <pre class="steps" style="font-size: 1.10rem"><code class="language-python">
         # custom context manager
         class FileHandler:
             def __init__(self, filename):
@@ -761,7 +790,7 @@
 
     <section class="slide">
       <h2>contextlib</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.25rem"><code class="language-python">
         # contextlib
         from contextlib import contextmanager
         @contextmanager
@@ -780,7 +809,7 @@
     <!-- ================================================================ best practices -->
     <section class="slide">
       <h2>Best practices (1)</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.70rem"><code class="language-python">
         # specific exceptions first
         try:
             # code
@@ -791,6 +820,12 @@
         except Exception:
             # handle all other exceptions
             pass
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Best practices (2)</h2>
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
         # don't catch everything silently
         try:
             # code
@@ -801,8 +836,8 @@
     </section>
 
     <section class="slide">
-      <h2>Best practices (2)</h2>
-      <pre class="steps"><code class="language-python">
+      <h2>Best practices (3)</h2>
+      <pre class="steps" style="font-size: 1.35rem"><code class="language-python">
         # use finally for cleanup
         file = None
         try:
@@ -822,7 +857,7 @@
     <!-- ================================================================ warnings -->
     <section class="slide">
       <h2>Warnings</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.70rem"><code class="language-python">
         import warnings
         # issue warning
         warnings.warn("This is deprecated", DeprecationWarning)
@@ -830,6 +865,14 @@
         warnings.filterwarnings("ignore")
         warnings.filterwarnings("error")  # treat as errors
         warnings.filterwarnings("default")
+      </code></pre>
+      <p class="hint step">A warning prints a message but lets the program carry on, unlike an exception.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Custom warnings and catch_warnings</h2>
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
+        import warnings
         # custom warning
         class CustomWarning(UserWarning):
             pass
@@ -840,7 +883,6 @@
             # warnings suppressed in this block
             pass
       </code></pre>
-      <p class="hint step">A warning prints a message but lets the program carry on, unlike an exception.</p>
     </section>
 
     <!-- ================================================================ recap -->
@@ -1104,10 +1146,10 @@
               { l: 2, n: "try" },
               { l: 3, o: `Enter a number: ${v}` },
             ];
-            if (v === "abc") return [...head, { l: 3, x: "ValueError: invalid literal for int() with base 10: 'abc'" }, { l: 5, k: true, n: "matches ValueError" }, { l: 6, o: "Invalid number" }];
+            if (v === "abc") return [...head, { l: 3, x: "ValueError: invalid literal for int() with base 10: 'abc'" }, { l: 5, k: true, n: "matches" }, { l: 6, o: "Invalid number" }];
             if (v === "0")
-              return [...head, { l: 3, v: { value: "0" } }, { l: 4, x: "ZeroDivisionError: division by zero" }, { l: 5, c: false, n: "ValueError?" }, { l: 7, k: true, n: "matches ZeroDivisionError" }, { l: 8, o: "Cannot divide by zero" }];
-            return [...head, { l: 3, v: { value: "5" } }, { l: 4, v: { result: "2.0" } }, { l: 5, n: "no exception: both excepts skipped" }];
+              return [...head, { l: 3, v: { value: "0" } }, { l: 4, x: "ZeroDivisionError: division by zero" }, { l: 5, c: false, n: "ValueError?" }, { l: 7, k: true, n: "matches" }, { l: 8, o: "Cannot divide by zero" }];
+            return [...head, { l: 3, v: { value: "5" } }, { l: 4, v: { result: "2.0" } }, { l: 5, n: "no exception" }];
           },
         },
       });
@@ -1142,6 +1184,7 @@
         }
         tracer(slide, [], {
           step: 0.6,
+          sections: ["out"],
           onFrame: paint,
           onReset: () => {
             gsap.killTweensOf(token);

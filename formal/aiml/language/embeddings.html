@@ -14,6 +14,8 @@
       #space canvas {
         position: absolute;
         inset: 0;
+        width: 100%;
+        height: 100%;
         z-index: -1;
         cursor: grab;
       }
@@ -26,7 +28,8 @@
         border: 1px solid var(--border);
         text-align: center;
         min-height: 3.2em;
-        max-width: 46rem;
+        max-width: 60rem;
+        font-size: 1.35rem;
       }
 
       #space .note b {
@@ -35,7 +38,7 @@
       }
 
       #space .legend {
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         margin-bottom: 0;
       }
 
@@ -44,7 +47,16 @@
       }
 
       #paper figure.frame iframe {
-        height: 64cqh;
+        height: 70cqh;
+      }
+
+      .code pre {
+        width: min(100%, 62rem);
+        font-size: 1.3rem;
+      }
+
+      .code p {
+        font-size: 1.2rem;
       }
     </style>
   </head>
@@ -73,7 +85,7 @@
       </figure>
     </section>
 
-    <section class="slide">
+    <section class="slide code">
       <h2>Reading embeddings</h2>
       <pre class="steps"><code class="language-python">
         import numpy as np
@@ -87,6 +99,12 @@
         model['india']
         # ans: an array of 50 numbers
         model['king']
+      </code></pre>
+    </section>
+
+    <section class="slide code">
+      <h2>Reading embeddings: arithmetic on meaning</h2>
+      <pre class="steps"><code class="language-python">
         # meaningful relationships
         vector1 = model['man'] + model['queen'] - model['king']
         model.most_similar(vector1, topn=1)
@@ -115,13 +133,13 @@
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-      camera.position.set(6.6, 3.4, 10.8);
+      camera.position.set(6.2, 3.0, 10.2);
       const controls = new OrbitControls(camera, canvas);
       controls.enableZoom = false;
       controls.enableDamping = true;
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.6;
-      controls.target.set(0, 0.8, 0);
+      controls.target.set(0.3, 0.6, 0);
 
       // Illustrative 3-D positions: "royal" and "capital" offsets are shared directions
       const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -152,7 +170,7 @@
         g.fillStyle = colour;
         g.fillText(text, 128, 32);
         const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
-        s.scale.set(2, 0.5, 1);
+        s.scale.set(2.3, 0.575, 1);
         return s;
       }
       const group = new THREE.Group();
@@ -163,7 +181,7 @@
         m.position.copy(p);
         group.add(m);
         const l = label(name, colour);
-        l.position.copy(p).add(V(0, 0.42, 0));
+        l.position.copy(p).add(V(0, 0.5, 0));
         group.add(l);
         return m;
       };

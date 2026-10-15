@@ -17,7 +17,7 @@
 
       .plot .axis text {
         fill: var(--muted);
-        font: 13px var(--font-mono);
+        font: 18px var(--font-mono);
       }
 
       .plot .axis path,
@@ -50,7 +50,7 @@
       }
 
       .plot .marker text {
-        font: 600 13px var(--font);
+        font: 600 18px var(--font);
         text-anchor: middle;
       }
 
@@ -72,12 +72,12 @@
 
       .plot .label {
         fill: var(--text);
-        font: 600 20px var(--font-display);
+        font: 600 26px var(--font-display);
       }
 
       .plot .xl {
         fill: var(--muted);
-        font: italic 15px var(--font);
+        font: italic 20px var(--font);
         text-anchor: middle;
       }
 
@@ -88,7 +88,7 @@
         align-items: center;
         justify-content: center;
         gap: 0.6rem 1.4rem;
-        font-size: 0.95rem;
+        font-size: 1.05rem;
         color: var(--muted);
       }
 
@@ -105,7 +105,7 @@
       }
 
       input[type="range"] {
-        width: min(14rem, 36cqw);
+        width: 14rem;
         accent-color: var(--violet);
       }
 
@@ -115,7 +115,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.9rem var(--font-mono);
+        font: 500 1rem var(--font-mono);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -132,7 +132,7 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 0.4rem 1.6rem;
-        font: 0.95rem var(--font-mono);
+        font: 1.05rem var(--font-mono);
         color: var(--muted);
       }
 
@@ -170,15 +170,15 @@
       }
 
       #priors .cols {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.85fr);
         align-items: center;
-        width: min(100%, 64rem);
+        width: 100%;
       }
 
       #priors .legend {
         display: grid;
-        gap: 0.8rem;
-        font-size: 1.15rem;
+        gap: 1.4rem;
+        font-size: 1.35rem;
       }
 
       .sw {
@@ -196,9 +196,9 @@
       }
 
       #lambda .cols {
-        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
         align-items: center;
-        width: min(100%, 70rem);
+        width: 100%;
       }
 
       .grid-fig img {
@@ -215,20 +215,62 @@
         grid-template-columns: 1fr;
       }
 
-      @container slide (max-width: 760px) {
-        #priors .cols,
-        #lambda .cols,
-        #gridfig .fam {
-          grid-template-columns: 1fr;
-        }
+      /* Shape explorer: formula and readout share the top row so the plot can be big */
+      #shape .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        width: 100%;
+      }
 
-        .plot {
-          max-height: 40cqh;
-        }
+      #shape .head .katex-display {
+        margin: 0;
+      }
 
-        #stats table {
-          font-size: 0.8rem;
-        }
+      #shape .readout {
+        display: grid;
+        gap: 0;
+        justify-items: start;
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+
+      #shape .plot {
+        width: 100%;
+        height: 18.8rem;
+        max-height: none;
+      }
+
+      #shape .controls {
+        font-size: 1.1rem;
+      }
+
+      #priors .plot {
+        width: 100%;
+        max-height: 64cqh;
+      }
+
+      #lambda .plot {
+        width: 100%;
+        max-height: 60cqh;
+      }
+
+      #lambda .controls {
+        margin-top: 0.8rem;
+      }
+
+      #lambda ul {
+        font-size: 1.35rem;
+      }
+
+      #lambda .cols > div > p {
+        font-size: 1.35rem;
+      }
+
+      #stats td {
+        padding-top: 0.35em;
+        padding-bottom: 0.35em;
       }
     </style>
   </head>
@@ -258,17 +300,19 @@
     <!-- ================================================================ shape explorer -->
     <section class="slide" id="shape">
       <h2>What does a beta look like?</h2>
-      <p class="center muted">$$f(\theta) = \frac{\theta^{\alpha-1}(1-\theta)^{\beta-1}}{B(\alpha,\beta)}, \quad 0 \le \theta \le 1$$</p>
+      <div class="head">
+        <p class="muted">$$f(\theta) = \frac{\theta^{\alpha-1}(1-\theta)^{\beta-1}}{B(\alpha,\beta)}, \quad 0 \le \theta \le 1$$</p>
+        <div class="readout">
+          <span class="m1">mean <b class="vmean"></b></span>
+          <span class="m2">mode <b class="vmode"></b></span>
+          <span>variance <b class="vvar"></b></span>
+        </div>
+      </div>
       <svg class="plot" viewBox="0 0 760 330" aria-label="Density of a Beta distribution, changing with alpha and beta"></svg>
       <div class="controls" data-interactive>
         <label>α <input type="range" name="a" min="0.5" max="10" step="0.1" value="2" /><output>2.0</output></label>
         <label>β <input type="range" name="b" min="0.5" max="10" step="0.1" value="2" /><output>2.0</output></label>
         <button class="chip tour">▶ tour the shapes</button>
-      </div>
-      <div class="readout">
-        <span class="m1">mean <b class="vmean"></b></span>
-        <span class="m2">mode <b class="vmode"></b></span>
-        <span>variance <b class="vvar"></b></span>
       </div>
     </section>
 
@@ -381,7 +425,7 @@
 
       // ---------- a reusable plot ----------
       function makePlot(svgEl, { curves = 1, markers = false } = {}) {
-        const W = 760, H = 330, m = { l: 48, r: 16, t: 14, b: 42 };
+        const W = 760, H = 330, m = { l: 52, r: 16, t: 16, b: 52 };
         const svg = d3.select(svgEl);
         const x = d3.scaleLinear().domain([0, 1]).range([m.l, W - m.r]);
         const y = d3.scaleLinear().domain([0, 3]).range([H - m.b, m.t]);
@@ -399,12 +443,12 @@
         if (markers) {
           mk = ["mean", "mode"].map((k) => {
             const g = svg.append("g").attr("class", "marker " + k);
-            g.append("line").attr("y1", m.t + 30).attr("y2", H - m.b);
-            g.append("text").attr("y", k === "mean" ? m.t + 4 : m.t + 22).text(k);
+            g.append("line").attr("y1", m.t + 34).attr("y2", H - m.b);
+            g.append("text").attr("y", k === "mean" ? m.t + 4 : m.t + 26).text(k);
             return g;
           });
         }
-        const label = svg.append("text").attr("class", "label").attr("x", W - m.r - 8).attr("y", m.t + 22).attr("text-anchor", "end");
+        const label = svg.append("text").attr("class", "label").attr("x", W - m.r - 8).attr("y", m.t + 26).attr("text-anchor", "end");
         let ymax = 3;
         function setY(top) {
           ymax = top;

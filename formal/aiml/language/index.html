@@ -31,7 +31,7 @@
       #index .group {
         display: grid;
         gap: 0.7rem;
-        width: min(100%, 64rem);
+        width: 100%;
       }
 
       #index .group h3 {
@@ -39,13 +39,31 @@
         color: var(--text);
       }
 
+      #index .tiles {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 19rem);
+        justify-content: center;
+        gap: 1.4rem;
+        width: 100%;
+      }
+
       #index .tile {
-        min-height: 6.4rem;
+        min-height: 11rem;
+        font-size: 1.45rem;
+      }
+
+      #index .tile small {
+        font-size: 0.85rem;
+      }
+
+      #index .intro {
+        font-size: 1.3rem;
       }
     </style>
   </head>
   <body>
-    <section class="slide top" id="index">
+    <section class="slide" id="index">
       <span class="kicker">AI/ML · Tasks</span>
       <h1>Language</h1>
       <p class="intro">Teaching machines to read and write: from word vectors to large language models.</p>

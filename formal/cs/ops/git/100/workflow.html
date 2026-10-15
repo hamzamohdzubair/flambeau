@@ -8,10 +8,21 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #flow svg {
-        width: min(100%, 64rem);
-        height: auto;
-        max-height: 54cqh;
+        width: 100%;
+        height: 23.2rem;
         overflow: visible;
+      }
+
+      #flow .beats {
+        position: absolute;
+      }
+
+      #flow .run {
+        display: flex;
+        align-items: center;
+        gap: 1.6rem;
+        width: 46rem;
+        min-height: 3.6rem;
       }
 
       #flow .box {
@@ -32,14 +43,14 @@
 
       #flow .zl {
         fill: var(--faint);
-        font: 600 13px var(--font-mono);
+        font: 600 18px var(--font-mono);
         letter-spacing: 0.15em;
         text-anchor: middle;
       }
 
       #flow .bl {
         fill: var(--text);
-        font: 600 17px var(--font-display);
+        font: 600 24px var(--font-display);
         text-anchor: middle;
       }
 
@@ -61,7 +72,7 @@
 
       #flow .al {
         fill: var(--muted);
-        font: 600 15px var(--font-mono);
+        font: 600 20px var(--font-mono);
         text-anchor: middle;
         transition: fill 0.4s;
       }
@@ -86,7 +97,7 @@
 
       #flow .tok text {
         fill: #fff;
-        font: 600 12px var(--font-mono);
+        font: 600 18px var(--font-mono);
         text-anchor: middle;
         dominant-baseline: central;
       }
@@ -97,7 +108,7 @@
       }
 
       #flow .term {
-        width: min(100%, 44rem);
+        flex: 0 0 16rem;
         margin: 0;
         padding: 0.7rem 1.1rem;
         border-radius: 12px;
@@ -113,8 +124,8 @@
       }
 
       #flow .say {
-        min-height: 3em;
-        text-align: center;
+        flex: 1;
+        text-align: left;
         color: var(--muted);
       }
 
@@ -125,23 +136,10 @@
       }
 
       .cmds {
-        width: min(100%, 52rem);
+        width: min(100%, 60rem);
+        font-size: 1.2rem;
       }
 
-      @container slide (max-width: 760px) {
-        #flow .term,
-      #flow .say {
-        flex-shrink: 0;
-      }
-
-      #flow .term {
-          font-size: 0.8rem;
-        }
-
-        .cmds {
-          font-size: 0.85rem;
-        }
-      }
     </style>
   </head>
   <body>
@@ -155,52 +153,56 @@
     <!-- ================================================================ animated flow -->
     <section class="slide" id="flow">
       <h2>Four places a change can be</h2>
-      <svg viewBox="0 0 900 490" aria-label="Working directory, staging area and local repository on your computer; remote repository in the cloud. Arrows: add, commit, push go right; fetch, merge and pull come back.">
+      <svg viewBox="0 0 1000 510" aria-label="Working directory, staging area and local repository on your computer; remote repository in the cloud. Arrows: add, commit, push go right; fetch, merge and pull come back.">
         <defs>
           <marker id="wfTip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
             <path d="M0 0 L10 5 L0 10 z" fill="context-stroke" />
           </marker>
         </defs>
-        <rect class="zone" x="20" y="18" width="660" height="462" rx="18" />
-        <text class="zl" x="350" y="44">LOCAL · your computer</text>
-        <rect class="zone" x="700" y="18" width="180" height="462" rx="18" />
-        <text class="zl" x="790" y="44">REMOTE</text>
+        <rect class="zone" x="20" y="10" width="740" height="490" rx="18" />
+        <text class="zl" x="390" y="44">LOCAL · your computer</text>
+        <rect class="zone" x="775" y="10" width="210" height="490" rx="18" />
+        <text class="zl" x="880" y="44">REMOTE</text>
 
-        <rect class="box" x="40" y="165" width="160" height="140" rx="14" />
-        <text class="bl" x="120" y="196">Working</text><text class="bl" x="120" y="218">directory</text>
-        <rect class="box" x="260" y="165" width="160" height="140" rx="14" />
-        <text class="bl" x="340" y="196">Staging</text><text class="bl" x="340" y="218">area</text>
-        <rect class="box" x="480" y="165" width="160" height="140" rx="14" />
-        <text class="bl" x="560" y="196">Local</text><text class="bl" x="560" y="218">repository</text>
-        <rect class="box remote" x="710" y="165" width="160" height="140" rx="14" />
-        <text class="bl" x="790" y="196">Remote</text><text class="bl" x="790" y="218">repository</text>
+        <rect class="box" x="45" y="150" width="180" height="170" rx="14" />
+        <text class="bl" x="135" y="190">Working</text><text class="bl" x="135" y="217">directory</text>
+        <rect class="box" x="305" y="150" width="180" height="170" rx="14" />
+        <text class="bl" x="395" y="190">Staging</text><text class="bl" x="395" y="217">area</text>
+        <rect class="box" x="565" y="150" width="180" height="170" rx="14" />
+        <text class="bl" x="655" y="190">Local</text><text class="bl" x="655" y="217">repository</text>
+        <rect class="box remote" x="790" y="150" width="180" height="170" rx="14" />
+        <text class="bl" x="880" y="190">Remote</text><text class="bl" x="880" y="217">repository</text>
 
-        <path class="arrow" id="a1" d="M150 161 Q230 85 310 161" /><text class="al" data-a="1" x="230" y="103">add</text>
-        <path class="arrow" id="a2" d="M370 161 Q450 85 530 161" /><text class="al" data-a="2" x="450" y="103">commit</text>
-        <path class="arrow" id="a3" d="M590 161 Q675 85 760 161" /><text class="al" data-a="3" x="675" y="103">push</text>
-        <path class="arrow" id="a4" d="M760 309 Q675 375 590 309" /><text class="al" data-a="4" x="675" y="371">fetch</text>
-        <path class="arrow" id="a5" d="M545 309 Q340 415 135 309" /><text class="al" data-a="5" x="340" y="389">merge</text>
-        <path class="arrow" id="a6" d="M800 309 Q470 545 105 309" /><text class="al" data-a="6" x="470" y="457">pull = fetch + merge</text>
+        <path class="arrow" id="a1" d="M175 146 Q265 66 355 146" /><text class="al" data-a="1" x="265" y="92">add</text>
+        <path class="arrow" id="a2" d="M435 146 Q525 66 615 146" /><text class="al" data-a="2" x="525" y="92">commit</text>
+        <path class="arrow" id="a3" d="M695 146 Q767 66 840 146" /><text class="al" data-a="3" x="767" y="92">push</text>
+        <path class="arrow" id="a4" d="M840 324 Q767 410 695 324" /><text class="al" data-a="4" x="767" y="347">fetch</text>
+        <path class="arrow" id="a5" d="M610 324 Q372 460 135 324" /><text class="al" data-a="5" x="372" y="372">merge</text>
+        <path class="arrow" id="a6" d="M920 324 Q512 600 105 324" /><text class="al" data-a="6" x="512" y="490">pull = fetch + merge</text>
 
-        <g class="tok mine" data-t="0"><rect x="-38" y="-14" width="76" height="28" rx="7" /><text>hello.py</text></g>
-        <g class="tok theirs" data-t="1"><rect x="-38" y="-14" width="76" height="28" rx="7" /><text>john #1</text></g>
-        <g class="tok theirs" data-t="2"><rect x="-38" y="-14" width="76" height="28" rx="7" /><text>john #2</text></g>
+        <g class="tok mine" data-t="0"><rect x="-55" y="-17" width="110" height="34" rx="8" /><text>hello.py</text></g>
+        <g class="tok theirs" data-t="1"><rect x="-55" y="-17" width="110" height="34" rx="8" /><text>john #1</text></g>
+        <g class="tok theirs" data-t="2"><rect x="-55" y="-17" width="110" height="34" rx="8" /><text>john #2</text></g>
       </svg>
-      <div class="term"></div>
-      <p class="say"></p>
-      <span class="step" data-anim="none"></span>
-      <span class="step" data-anim="none"></span>
-      <span class="step" data-anim="none"></span>
-      <span class="step" data-anim="none"></span>
-      <span class="step" data-anim="none"></span>
-      <span class="step" data-anim="none"></span>
+      <div class="run">
+        <div class="term"></div>
+        <p class="say"></p>
+      </div>
+      <div class="beats">
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+      </div>
     </section>
 
     <!-- ================================================================ figure -->
     <section class="slide">
       <h2>The workflow at a glance</h2>
       <figure class="zoom-on-reveal">
-        <img src="/assets/2025-09-29-12-53-51.png" alt="Git workflow: add moves changes from the working directory to the staging area, commit to the local repository, push to the remote; fetch brings remote commits to the local repository, merge into the working directory, and pull does both" style="max-height: 64cqh" />
+        <img src="/assets/2025-09-29-12-53-51.png" alt="Git workflow: add moves changes from the working directory to the staging area, commit to the local repository, push to the remote; fetch brings remote commits to the local repository, merge into the working directory, and pull does both" style="max-height: 74cqh" />
         <figcaption>Source: CloudStudio.com.au</figcaption>
       </figure>
     </section>
@@ -230,7 +232,7 @@
       const say = slide.querySelector(".say");
 
       // Resting spots inside each box; a second token in the same box sits lower
-      const SPOT = { WD: [120, 252], ST: [340, 252], LR: [560, 252], RR: [790, 252], HID: [790, 140] };
+      const SPOT = { WD: [135, 254], ST: [395, 254], LR: [655, 254], RR: [880, 254], HID: [880, 130] };
       // Where each token is after step n (index = step)
       const AT = [
         ["WD", "HID", "HID"],
@@ -255,7 +257,7 @@
       const place = (k, spot) => {
         const [x, y] = SPOT[spot];
         const low = spot !== "HID" && (k === 2 || (k === 1 && spot === "RR"));
-        return { x, y: y + (low ? 34 : 0) };
+        return { x, y: y + (low ? 42 : 0) };
       };
 
       let tl = null;

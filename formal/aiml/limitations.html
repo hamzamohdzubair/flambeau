@@ -8,29 +8,38 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #contents ol {
-        font-size: 1.6rem;
+        font-size: 3rem;
         font-family: var(--font-display);
         color: var(--text);
       }
 
       /* ---------- How bias gets in ---------- */
+      #bias img {
+        height: 68cqh;
+        max-height: 68cqh;
+      }
+
       #howbias svg {
-        width: min(100%, 60rem);
+        width: 100%;
         height: auto;
-        max-height: 58cqh;
+        max-height: 56cqh;
       }
 
       #howbias text {
         font-family: var(--font);
-        font-size: 16px;
+        font-size: 20px;
         fill: var(--muted);
         text-anchor: middle;
       }
 
       #howbias .head {
         font-family: var(--font-display);
-        font-size: 19px;
+        font-size: 22px;
         fill: var(--text);
+      }
+
+      #howbias .mtext {
+        font-size: 18px;
       }
 
       #howbias .panel {
@@ -58,7 +67,7 @@
         display: flex;
         gap: 1.4rem;
         justify-content: center;
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
 
       #howbias .legend i {
@@ -85,7 +94,7 @@
       </ol>
     </section>
 
-    <section class="slide">
+    <section class="slide" id="bias">
       <h2>Bias</h2>
       <figure class="step">
         <img src="/assets/2025-10-22-17-48-07.png" alt="BBC: Amazon scrapped 'sexist AI' tool" />
@@ -99,11 +108,11 @@
         <rect class="panel" x="10" y="40" width="270" height="290" rx="16" />
         <text class="head" x="145" y="72">Past hires (training data)</text>
         <g class="past"></g>
-        <rect class="model" x="370" y="135" width="160" height="100" rx="18" />
+        <rect class="model" x="358" y="135" width="184" height="100" rx="18" />
         <text class="head" x="450" y="180">Model</text>
         <text x="450" y="206" class="mtext">learns the pattern</text>
-        <line class="flow" x1="285" y1="185" x2="365" y2="185" />
-        <line class="flow" x1="535" y1="185" x2="615" y2="185" />
+        <line class="flow" x1="285" y1="185" x2="353" y2="185" />
+        <line class="flow" x1="547" y1="185" x2="615" y2="185" />
         <rect class="panel" x="620" y="40" width="270" height="290" rx="16" />
         <text class="head" x="755" y="72">New applicants: score</text>
         <g class="new"></g>

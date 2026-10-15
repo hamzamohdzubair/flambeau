@@ -9,24 +9,26 @@
     <style>
       /* ---------- What is AI? ---------- */
       #what-ai .big {
-        font-size: clamp(2.4rem, 7cqw, 4.6rem);
+        font-size: 5.4rem;
+        line-height: 1.1;
         text-align: center;
       }
 
       /* ---------- Definitions ---------- */
       .defs {
         display: grid;
-        gap: 1rem;
-        width: min(100%, 60rem);
+        gap: 1.4rem;
+        width: min(100%, 66rem);
       }
 
       .defs blockquote {
         margin: 0;
+        font-size: 1.4rem;
       }
 
       /* ---------- Flow diagram: programming vs ML vs GenAI ---------- */
       .flow {
-        width: min(100%, 56rem);
+        width: 100%;
         height: auto;
         overflow: visible;
       }
@@ -72,17 +74,40 @@
 
       .mode-note {
         min-height: 1.6em;
+        font-size: 1.35rem;
         text-align: center;
       }
 
+      #genai .flow {
+        width: 52rem;
+      }
+
       #genai .figs img {
-        max-height: 9cqh;
+        max-height: 15cqh;
         background: #fff;
+      }
+
+      .slide > span.step:empty {
+        position: absolute;
+      }
+
+      .figs.tall figure img {
+        max-height: 64cqh;
+      }
+
+      .figs.mid figure img {
+        max-height: 54cqh;
+      }
+
+      figure.xl img {
+        width: auto;
+        height: 66cqh;
+        max-height: 66cqh;
       }
 
       /* ---------- Nested rings ---------- */
       #rings svg {
-        width: min(100%, 40rem, 62cqh);
+        width: min(100%, 76cqh);
         height: auto;
       }
 
@@ -92,7 +117,7 @@
 
       #rings text {
         font-family: var(--font-display);
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 600;
         text-anchor: middle;
         fill: var(--text);
@@ -116,14 +141,14 @@
     </section>
     <section class="slide">
       <h2>What is intelligence?</h2>
-      <div class="figs contain">
+      <div class="figs contain tall">
         <figure class="step"><img src="/assets/2025-10-08-16-14-52.png" alt="Definitions of intelligence by Binet, Wechsler, Wagnon and Sternberg" /></figure>
         <figure class="step"><img src="/assets/2025-10-08-16-15-51.png" alt="Intelligence as an emergent system's ability to respond to its environment, from Future Minds by Richard Yonck" /></figure>
       </div>
     </section>
     <section class="slide">
       <h2>What is intelligence?</h2>
-      <figure class="step">
+      <figure class="step xl">
         <img src="/assets/2025-10-08-15-05-35.png" alt="How psychologists define intelligence: the ability to learn, to recognise problems and to solve problems" />
         <figcaption>Source: <a href="https://www.verywellmind.com">verywellmind.com</a></figcaption>
       </figure>
@@ -134,11 +159,11 @@
     </section>
     <section class="slide">
       <h2>Level of mimicry</h2>
-      <figure class="step"><img src="/assets/2025-10-03-14-20-49.png" alt="Artificial narrow intelligence, then general intelligence, then super intelligence" /><figcaption><a href="https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg">Source</a></figcaption></figure>
+      <figure class="step xl"><img src="/assets/2025-10-03-14-20-49.png" alt="Artificial narrow intelligence, then general intelligence, then super intelligence" /><figcaption><a href="https://opentext.csu.edu.au/app/uploads/sites/6/2023/03/what_is_AI.jpg">Source</a></figcaption></figure>
     </section>
     <section class="slide">
       <h2>Have we made ASI?</h2>
-      <div class="figs contain">
+      <div class="figs contain tall">
         <figure class="step"><img src="/assets/2025-10-08-16-25-07.png" alt="ChatGPT 4o says there are two Rs in strawberry" /><figcaption><a href="https://prompt.16x.engineer/_next/static/media/wrong-answer.4536ac48.png">Source</a></figcaption></figure>
         <figure class="step"><img src="/assets/2025-10-08-16-27-19.png" alt="ChatGPT 5 thinks for 11 seconds and says the letter R has 3 strawberries" /><figcaption><a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt0bmq5zyfHGIwL2zW5-idCtKCIFx_Hj9iJg&amp;s">Source</a></figcaption></figure>
       </div>
@@ -172,11 +197,11 @@
       <h2>How are these terms related?</h2>
       <svg viewBox="0 0 600 600" aria-label="Nested circles: AI contains ML, which contains neural networks, deep learning and generative AI">
         <g class="ring" data-r="0"><circle cx="300" cy="300" r="290" fill="rgba(139,92,246,0.10)" stroke="#8b5cf6" /><text x="300" y="52">Artificial Intelligence</text></g>
-        <g class="sym" data-r="0"><circle cx="98" cy="205" r="50" fill="rgba(240,171,252,0.16)" stroke="#f0abfc" /><text x="98" y="200" style="font-size: 17px">Symbolic</text><text x="98" y="222" style="font-size: 17px">AI</text></g>
+        <g class="sym" data-r="0"><circle cx="92" cy="200" r="56" fill="rgba(240,171,252,0.16)" stroke="#f0abfc" /><text x="92" y="196" style="font-size: 21px">Symbolic</text><text x="92" y="221" style="font-size: 21px">AI</text></g>
         <g class="ring" data-r="1"><circle cx="340" cy="345" r="225" fill="rgba(34,211,238,0.09)" stroke="#22d3ee" /><text x="340" y="160">Machine Learning</text></g>
         <g class="ring" data-r="2"><circle cx="365" cy="390" r="160" fill="rgba(236,72,153,0.10)" stroke="#ec4899" /><text x="365" y="272">Neural Networks</text></g>
         <g class="ring" data-r="3"><circle cx="380" cy="428" r="105" fill="rgba(251,191,36,0.10)" stroke="#fbbf24" /><text x="380" y="372">Deep Learning</text></g>
-        <g class="ring" data-r="4"><circle cx="388" cy="460" r="52" fill="rgba(134,239,172,0.18)" stroke="#86efac" /><text x="388" y="456" style="font-size: 17px">Generative</text><text x="388" y="477" style="font-size: 17px">AI</text></g>
+        <g class="ring" data-r="4"><circle cx="388" cy="462" r="58" fill="rgba(134,239,172,0.18)" stroke="#86efac" /><text x="388" y="458" style="font-size: 21px">Generative</text><text x="388" y="482" style="font-size: 21px">AI</text></g>
       </svg>
       <span class="step" data-anim="none"></span>
       <span class="step" data-anim="none"></span>
@@ -185,14 +210,14 @@
     </section>
     <section class="slide">
       <h2>The same picture, from two sources</h2>
-      <div class="figs contain">
+      <div class="figs contain tall">
         <figure class="step"><img src="/assets/2025-10-07-22-42-13.png" alt="The AI Universe: nested circles from artificial intelligence down to generative AI" /><figcaption><a href="https://aiotplaybook.org/index.php?title=Artificial_Intelligence_101">Source</a></figcaption></figure>
         <figure class="step"><img src="/assets/2025-10-07-22-57-05.png" alt="Artificial intelligence containing machine learning, deep learning and symbolic AI" /><figcaption><a href="https://community.aws/raw-post-images/posts/introduction-to-artificial-intelligence-and-machine-learning/images/fig_1.png?imgSize=1216x1174">Source</a></figcaption></figure>
       </div>
     </section>
     <section class="slide">
       <h2>What about data science?</h2>
-      <div class="figs contain">
+      <div class="figs contain mid">
         <figure class="step"><img src="/assets/2025-10-08-12-44-46.png" alt="Venn diagram: data science overlapping AI, ML and deep learning" /></figure>
         <figure class="step"><img src="/assets/2025-10-08-12-45-11.png" alt="Nested ovals: data science containing AI, ML and deep learning" /></figure>
         <figure class="step"><img src="/assets/2025-10-08-12-46-10.png" alt="Data science where AI meets maths, statistics, visualisation and EDA" /></figure>
@@ -201,7 +226,7 @@
     </section>
     <section class="slide">
       <h2>ML foundations and pillars</h2>
-      <figure class="step">
+      <figure class="step xl">
         <img src="/assets/2025-10-08-13-03-46.png" alt="Machine learning as a temple: regression, dimensionality reduction, density estimation and classification on foundations of linear algebra, probability, optimisation and more" />
         <figcaption>Source: Deisenroth, M. P., Faisal, A. A., &amp; Ong, C. S. (2020). <em>Mathematics for Machine Learning</em>. Cambridge University Press.</figcaption>
       </figure>
@@ -295,8 +320,12 @@
         });
       };
       Deck.scene("#rings", {
-        enter: () => showRings(Deck.step, true),
-        step: (s, n, els, d) => showRings(n, d.dir > 0),
+        enter: () => showRings(Deck.step, false),
+        // Several steps can arrive in one tick (↓ or a deep link): animate only a single forward step
+        step: (s, n, els, d) => {
+          const prev = Deck.step;
+          queueMicrotask(() => showRings(Deck.step, d.dir > 0 && Deck.step - prev === 1));
+        },
         unstep: (s, n) => showRings(n - 1, false),
       });
     </script>

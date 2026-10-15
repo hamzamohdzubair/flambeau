@@ -21,7 +21,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.85rem var(--font);
+        font: 500 0.95rem var(--font);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -47,8 +47,8 @@
         flex-wrap: wrap;
         justify-content: center;
         align-items: center;
-        gap: 0.6rem 1.4rem;
-        font-size: 0.85rem;
+        gap: 0.6rem 2rem;
+        font-size: 1.05rem;
         color: var(--muted);
       }
 
@@ -66,7 +66,7 @@
       }
 
       input[type="range"] {
-        width: 8rem;
+        width: 10rem;
         accent-color: var(--violet);
       }
 
@@ -93,7 +93,7 @@
 
       .readout {
         font-family: var(--font-mono);
-        font-size: 0.85rem;
+        font-size: 1.05rem;
         color: var(--muted);
         text-align: center;
       }
@@ -192,9 +192,24 @@
         font-size: 0.92rem;
       }
 
-      pre.ex {
-        width: min(100%, 64rem);
-        font-size: 0.95rem;
+      /* Code-only slides */
+      .slide > pre {
+        width: min(100%, 62rem);
+        font-size: 1.1rem;
+      }
+
+      .slide > pre.ex {
+        width: min(100%, 62rem);
+        font-size: 1.1rem;
+      }
+
+      /* Bigger maths and text on the theory slides */
+      .slide .katex-display {
+        font-size: 1.45em;
+      }
+
+      .theory ul {
+        font-size: 1.3rem;
       }
 
       .tag {
@@ -233,26 +248,6 @@
         pointer-events: none;
       }
 
-      @container slide (max-width: 760px) {
-        .play {
-          grid-template-columns: 1fr;
-          gap: 0.8rem;
-        }
-
-        .codek {
-          grid-template-columns: 1fr;
-          gap: 1.4rem;
-        }
-
-        input[type="range"] {
-          width: 6.5rem;
-        }
-
-        pre.ex,
-        .qa pre {
-          font-size: 0.78rem;
-        }
-      }
 
       /* ---------- Cover ---------- */
       #title .stage {
@@ -278,7 +273,7 @@
         bottom: -2.1rem;
         transform: translateX(-50%);
         font-family: var(--font-mono);
-        font-size: 0.85rem;
+        font-size: 1rem;
         color: var(--cyan);
         white-space: nowrap;
       }
@@ -286,25 +281,30 @@
       /* ---------- Transform types (F glyph cards) ---------- */
       #types .cards {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        width: min(100%, 58rem);
+        gap: 1.2rem;
+        width: 100%;
       }
 
       #types .card {
         display: grid;
-        grid-template-columns: 5.2rem 1fr;
-        gap: 0.9rem;
+        grid-template-columns: 6.2rem 1fr;
+        gap: 1.2rem;
         align-items: center;
-        padding: 0.9rem 1rem;
+        padding: 1.1rem 1.3rem;
       }
 
       #types .card h3 {
-        margin: 0 0 0.2rem;
-        font-size: 1.05rem;
+        margin: 0 0 0.3rem;
+        font-size: 1.35rem;
+      }
+
+      #types .card p {
+        font-size: 1.1rem;
       }
 
       #types svg {
-        width: 5.2rem;
-        height: 5.2rem;
+        width: 6.2rem;
+        height: 6.2rem;
         border-radius: 10px;
         background: rgba(255, 255, 255, 0.03);
       }
@@ -323,19 +323,38 @@
 
       /* ---------- Lab ---------- */
       #lab .play {
-        width: min(100%, 60rem);
+        width: min(100%, 46rem);
+        gap: 1.6rem;
+      }
+
+      #lab figcaption {
+        font-size: 1rem;
       }
 
       #lab .under {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: auto auto;
+        justify-content: center;
         gap: 1rem 2rem;
         align-items: center;
-        width: min(100%, 60rem);
+        width: 100%;
       }
 
       #lab .ctl {
-        justify-content: flex-start;
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        justify-content: start;
+        gap: 0.7rem 2rem;
+      }
+
+      #lab .ctl label {
+        justify-content: space-between;
+      }
+
+      #lab .right {
+        display: grid;
+        gap: 0.7rem;
+        justify-items: center;
       }
 
       #lab .chips {
@@ -354,21 +373,61 @@
       }
 
       #lab .mat > span {
-        min-width: 4.4rem;
-        height: 2rem;
-        font-size: 0.8rem;
+        min-width: 5.4rem;
+        height: 2.2rem;
+        font-size: 1rem;
       }
 
       #lab pre {
-        width: min(100%, 60rem);
-        font-size: 0.8rem;
+        width: max-content;
+        font-size: 0.85rem;
         padding: 0.6rem 1rem;
       }
 
-      /* ---------- Interpolation ---------- */
-      #interp .figs {
+      #lab .chips {
+        gap: 0.4rem;
+      }
+
+      #lab .chip {
+        padding: 0.3rem 0.75rem;
+      }
+
+      #lab input[type="range"] {
+        width: 8.5rem;
+      }
+
+      .interp-cards {
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        width: min(100%, 64rem);
+        width: 100%;
+      }
+
+      .interp-cards h3 {
+        font-size: 1.35rem;
+      }
+
+      .interp-cards p {
+        font-size: 1.15rem;
+        margin-top: 0.4rem;
+      }
+
+      /* ---------- Interpolation ---------- */
+      #interp .iwrap {
+        display: grid;
+        grid-template-columns: 20rem minmax(0, 1fr);
+        gap: 2.4rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      #interp .figs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem 1.6rem;
+        width: min(100%, 44rem);
+        justify-self: center;
+      }
+
+      #interp figcaption {
+        font-size: 1.05rem;
       }
 
       #interp canvas {
@@ -381,26 +440,34 @@
         display: block;
         color: var(--text);
         font-family: var(--font-mono);
-        font-size: 0.75rem;
+        font-size: 0.9rem;
         font-weight: 400;
       }
 
       #interp .src {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 1rem;
-        font-size: 0.9rem;
+        text-align: center;
+        gap: 1.2rem;
+        font-size: 1.15rem;
         color: var(--muted);
       }
 
       #interp .src canvas {
-        width: 12rem;
+        width: 20rem;
+        cursor: crosshair;
       }
 
       /* ---------- Flip ---------- */
       #flip .cols {
-        width: min(100%, 62rem);
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
+        gap: 3rem;
+      }
+
+      #flip ul {
+        font-size: 1.25rem;
       }
 
       #flip .flipbox {
@@ -413,14 +480,14 @@
 
       #flip .code-now {
         font-family: var(--font-mono);
-        font-size: 0.95rem;
+        font-size: 1.15rem;
         color: var(--cyan);
         text-align: center;
       }
 
       /* ---------- Transpose ---------- */
       #transpose .panels {
-        --c: min(2.6rem, 8cqw, 6cqh);
+        --c: 3.5rem;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
@@ -456,20 +523,36 @@
       }
 
       #transpose .panel p {
-        font-size: 0.85rem;
+        font-size: 1.05rem;
         color: var(--muted);
         margin: 0;
         text-align: center;
       }
 
       #transpose .panel p code {
-        font-size: 0.75rem;
+        font-size: 0.9rem;
       }
 
       /* ---------- Crop ---------- */
       #crop .cols {
-        width: min(100%, 62rem);
-        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        width: 100%;
+        grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+        gap: 2.4rem;
+      }
+
+      #crop figcaption {
+        font-size: 1.05rem;
+      }
+
+      #crop canvas.out {
+        height: 17rem;
+        object-fit: contain;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      #crop .readout {
+        margin-top: 0.6rem;
       }
 
       #crop canvas.img {
@@ -477,34 +560,6 @@
         touch-action: none;
       }
 
-      @container slide (max-width: 760px) {
-        #types .cards {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        #types .card {
-          grid-template-columns: 1fr;
-          justify-items: center;
-          text-align: center;
-        }
-
-        #types .card p {
-          display: none;
-        }
-
-        #lab .under {
-          grid-template-columns: 1fr;
-        }
-
-        #interp .figs {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        #flip .cols,
-        #crop .cols {
-          grid-template-columns: 1fr;
-        }
-      }
     </style>
   </head>
   <body>
@@ -538,7 +593,7 @@
     <section class="slide">
       <h2>Translation</h2>
       <p class="lead"><strong>Translation</strong> shifts the image by \((t_x, t_y)\) pixels.</p>
-      <div class="cols" style="width: min(100%, 56rem)">
+      <div class="cols theory" style="width: min(100%, 60rem)">
         <div class="center">
           <p class="muted">Transformation matrix</p>
           $$M = \begin{bmatrix} 1 & 0 & t_x \\ 0 & 1 & t_y \end{bmatrix}$$
@@ -576,7 +631,7 @@
       <div class="center">
         $$M = \begin{bmatrix} \alpha & \beta & (1-\alpha)\,c_x - \beta\,c_y \\ -\beta & \alpha & \beta\,c_x + (1-\alpha)\,c_y \end{bmatrix} \qquad \alpha = s\cos\theta,\ \ \beta = s\sin\theta$$
       </div>
-      <ul>
+      <ul class="theory-list" style="font-size: 1.3rem; width: min(100%, 60rem)">
         <li class="step">The third column moves the centre back where it was, so the image turns <em>about</em> \((c_x, c_y)\) instead of the top-left corner.</li>
         <li class="step"><strong>OpenCV builds it for you:</strong> <code>cv2.getRotationMatrix2D(center, angle, scale)</code>. A positive angle turns the picture anticlockwise.</li>
       </ul>
@@ -623,16 +678,18 @@
             <button class="chip ghost" data-demo="reset">Reset</button>
           </div>
         </div>
-        <div class="mx"><span class="muted" style="font-size: 0.8rem">M (2×3)</span><div class="mat"></div></div>
+        <div class="right">
+          <div class="mx"><span class="muted" style="font-size: 0.95rem">M (2×3)</span><div class="mat"></div></div>
+          <pre><code class="language-python code-live"></code></pre>
+        </div>
       </div>
-      <pre><code class="language-python code-live"></code></pre>
     </section>
 
     <!-- ================================================================ scaling -->
     <section class="slide">
       <h2>Scaling (resizing)</h2>
       <p class="lead"><strong>Scaling</strong> changes the image size. New pixels fall <em>between</em> old ones, so their values must be interpolated.</p>
-      <div class="cards" style="width: min(100%, 60rem)">
+      <div class="cards interp-cards">
         <div class="card step"><h3>Nearest neighbour</h3><p>Fast, blocky.</p><p><code>INTER_NEAREST</code></p></div>
         <div class="card step"><h3>Bilinear</h3><p>Smooth, fast. The default.</p><p><code>INTER_LINEAR</code></p></div>
         <div class="card step"><h3>Bicubic</h3><p>Smoother, slower.</p><p><code>INTER_CUBIC</code></p></div>
@@ -642,6 +699,7 @@
 
     <section class="slide" id="interp">
       <h2>The same pixels, four ways</h2>
+      <div class="iwrap">
       <div class="src">
         <canvas class="img thumb" width="620" height="349"></canvas>
         <span>A 40×24 crop from inside the lens, enlarged 8× with each flag.<br />Click the photo to pick another spot.</span>
@@ -651,6 +709,7 @@
         <figure class="step" data-anim="zoom"><canvas data-m="linear" width="320" height="192"></canvas><figcaption>Bilinear<b>INTER_LINEAR</b></figcaption></figure>
         <figure class="step" data-anim="zoom"><canvas data-m="cubic" width="320" height="192"></canvas><figcaption>Bicubic<b>INTER_CUBIC</b></figcaption></figure>
         <figure class="step" data-anim="zoom"><canvas data-m="lanczos" width="320" height="192"></canvas><figcaption>Lanczos<b>INTER_LANCZOS4</b></figcaption></figure>
+      </div>
       </div>
     </section>
 
@@ -887,6 +946,12 @@
         translated = cv2.warpAffine(img, M, (w, h),  # ans:
                                     borderMode=cv2.BORDER_CONSTANT,  # ans:
                                     borderValue=(0, 0, 0))  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 9 · advanced</h2>
+      <pre class="ex"><code class="language-python">
         # rotate and expand canvas
         angle = 45
         h, w = img.shape[:2]

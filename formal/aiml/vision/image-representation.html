@@ -8,10 +8,10 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       /* ---------- shared bits ---------- */
-      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
       .chip {
-        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
-        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+        padding: 0.4rem 1rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.95rem var(--font); cursor: pointer; transition: all 0.25s;
       }
       .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
       .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
@@ -19,85 +19,97 @@
         display: block; width: 100%; height: auto; border-radius: 12px;
         background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
       }
-      .codeside { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2.4rem; align-items: center; width: min(100%, 66rem); }
-      .codeside pre { width: 100%; }
+      .slide > pre.big { width: min(100%, 64rem); font-size: 1.25rem; }
+      .codeside { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3rem; align-items: center; width: 100%; }
+      .codeside pre { width: 100%; font-size: 1.1rem; }
       .codeside .side { display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; }
-      .codeside .side p { font-size: 0.9rem; }
 
       /* ---------- cover mosaic ---------- */
-      #title canvas { width: min(26rem, 80cqw); height: auto; border-radius: 14px; image-rendering: pixelated; box-shadow: 0 30px 70px -20px rgba(139, 92, 246, 0.6); }
-      #title .lbl { font-family: var(--font-mono); font-size: 0.85rem; color: var(--cyan); min-height: 1.3em; }
+      #title canvas { width: 27rem; height: auto; border-radius: 14px; image-rendering: pixelated; box-shadow: 0 30px 70px -20px rgba(139, 92, 246, 0.6); }
+      #title .lbl { font-family: var(--font-mono); font-size: 0.9rem; color: var(--cyan); min-height: 1.3em; }
 
       /* ---------- array cards ---------- */
-      .shape { font-family: var(--font-mono); font-size: 1.05rem; color: var(--cyan); }
-      .planes { position: relative; width: 8.5rem; height: 6.2rem; margin: 0.4rem auto 0.8rem; }
-      .planes i { position: absolute; width: 6.2rem; height: 4.2rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.25); }
+      #slide-what .card { padding: 1.6rem 1.8rem; }
+      #slide-what .card h3 { font-size: 1.6rem; }
+      #slide-what .card p { font-size: 1.15rem; }
+      .shape { font-family: var(--font-mono); font-size: 1.3rem !important; color: var(--cyan); }
+      .planes { position: relative; width: 11rem; height: 8rem; margin: 0.4rem auto 1rem; }
+      .planes i { position: absolute; width: 8rem; height: 5.4rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.25); }
       .planes i:nth-child(1) { left: 0; top: 0; background: rgba(59, 130, 246, 0.55); }
-      .planes i:nth-child(2) { left: 1rem; top: 0.9rem; background: rgba(34, 197, 94, 0.55); }
-      .planes i:nth-child(3) { left: 2rem; top: 1.8rem; background: rgba(239, 68, 68, 0.6); }
+      .planes i:nth-child(2) { left: 1.4rem; top: 1.2rem; background: rgba(34, 197, 94, 0.55); }
+      .planes i:nth-child(3) { left: 2.8rem; top: 2.4rem; background: rgba(239, 68, 68, 0.6); }
       .planes.one i:nth-child(n + 2) { display: none; }
-      .planes.one i:nth-child(1) { left: 1rem; top: 0.9rem; background: linear-gradient(90deg, #111, #eee); }
-      .planes.bytes { display: flex; gap: 3px; align-items: center; justify-content: center; height: 6.2rem; }
-      .planes.bytes b { width: 0.8rem; height: 2.4rem; border-radius: 3px; background: var(--violet); }
+      .planes.one i:nth-child(1) { left: 1.4rem; top: 1.2rem; background: linear-gradient(90deg, #111, #eee); }
+      .planes.bytes { display: flex; gap: 4px; align-items: center; justify-content: center; }
+      .planes.bytes b { width: 1rem; height: 3rem; border-radius: 3px; background: var(--violet); }
       .planes.bytes b:nth-child(odd) { background: rgba(139, 92, 246, 0.35); }
 
       /* ---------- pixel inspector ---------- */
-      .inspect { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1.8rem; align-items: center; width: min(100%, 68rem); }
+      .inspect { display: grid; grid-template-columns: 35rem 14rem; gap: 2.4rem; align-items: center; justify-content: center; width: 100%; }
       .inspect .stage { position: relative; touch-action: none; cursor: crosshair; }
       .inspect .cross { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 2px solid var(--cyan); border-radius: 4px; box-shadow: 0 0 14px rgba(34, 211, 238, 0.9); pointer-events: none; }
       .inspect .cross::before, .inspect .cross::after { content: ""; position: absolute; background: rgba(34, 211, 238, 0.6); }
       .inspect .cross::before { left: -400%; right: -400%; top: 50%; height: 1px; }
       .inspect .cross::after { top: -400%; bottom: -400%; left: 50%; width: 1px; }
-      .inspect .stage .axis { position: absolute; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text); background: rgba(5, 6, 15, 0.7); padding: 0.1rem 0.4rem; border-radius: 4px; }
-      .mag { display: grid; grid-template-columns: repeat(11, 1fr); gap: 1px; width: min(15rem, 60cqw); margin: 0 auto; padding: 4px; border-radius: 10px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); }
+      .inspect .stage .axis { position: absolute; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text); background: rgba(5, 6, 15, 0.75); padding: 0.1rem 0.5rem; border-radius: 4px; }
+      .mag { display: grid; grid-template-columns: repeat(11, 1fr); gap: 1px; width: 11rem; margin: 0 auto; padding: 4px; border-radius: 10px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); }
       .mag span { aspect-ratio: 1; border-radius: 2px; }
       .mag span.mid { outline: 2px solid var(--cyan); outline-offset: -1px; }
-      .readout { margin-top: 1rem; font-family: var(--font-mono); font-size: 1rem; text-align: center; line-height: 1.9; }
+      .readout { margin-top: 1rem; font-family: var(--font-mono); font-size: 1.15rem; text-align: center; line-height: 1.8; }
       .readout .b { color: #60a5fa; } .readout .g { color: #4ade80; } .readout .r { color: #f87171; }
-      .inspect ul { font-size: 0.95rem; }
+      .readout .gl { font-size: 0.95rem; }
+      .hint { font-size: 0.9rem; text-align: center; margin-top: 0.8rem; }
+      .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; width: 100%; }
+      .facts p { margin: 0; padding: 0.5rem 0 0.5rem 1rem; border-left: 3px solid var(--violet); font-size: 1.1rem; }
 
       /* ---------- intensity / colour mixer ---------- */
-      .ramp { position: relative; width: min(100%, 44rem); height: 2.6rem; border-radius: 10px; background: linear-gradient(90deg, #000, #fff); border: 1px solid var(--border); }
-      .ramp b { position: absolute; top: 100%; transform: translateX(-50%); padding-top: 0.35rem; font: 500 0.85rem var(--font-mono); color: var(--muted); white-space: nowrap; }
+      .ramp { position: relative; width: min(100%, 56rem); height: 3rem; border-radius: 10px; background: linear-gradient(90deg, #000, #fff); border: 1px solid var(--border); }
+      .ramp b { position: absolute; top: 100%; transform: translateX(-50%); padding-top: 0.4rem; font: 500 1rem var(--font-mono); color: var(--muted); white-space: nowrap; }
       .ramp b::before { content: ""; position: absolute; left: 50%; top: -0.45rem; width: 2px; height: 0.7rem; background: var(--cyan); }
       .ramp b:first-child::before { left: 0; } .ramp b:last-child::before { left: auto; right: 0; }
-      .mixer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 44rem); margin-top: 1.4rem; }
-      .swatch { width: 8.5rem; aspect-ratio: 1; border-radius: 18px; border: 1px solid var(--border); box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.8); transition: background 0.15s; }
-      .sliders { display: grid; gap: 0.6rem; }
-      .sl { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) 2.6rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); }
+      .mixer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.6rem; align-items: center; width: min(100%, 56rem); margin-top: 1rem; }
+      .swatch { width: 10rem; aspect-ratio: 1; border-radius: 18px; border: 1px solid var(--border); box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.8); transition: background 0.15s; }
+      .sliders { display: grid; gap: 0.7rem; }
+      .sl { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr) 3.2rem; gap: 1rem; align-items: center; font-family: var(--font-mono); font-size: 1.05rem; }
       .sl input { width: 100%; }
       .sl.b input { accent-color: #3b82f6; } .sl.g input { accent-color: #22c55e; } .sl.r input { accent-color: #ef4444; }
-      .bgr { font-family: var(--font-mono); font-size: 1.1rem; text-align: center; margin-top: 0.4rem; }
+      .bgr { font-family: var(--font-mono); font-size: 1.25rem; text-align: center; margin-top: 0.6rem; }
 
       /* ---------- numbers to pixels ---------- */
-      .n2p { display: grid; grid-template-columns: repeat(3, 4.2rem); gap: 6px; padding: 8px; border-radius: 14px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); }
-      .n2p span { display: grid; place-items: center; height: 4.2rem; border-radius: 8px; font: 500 1.05rem var(--font-mono); color: var(--text); background: rgba(255, 255, 255, 0.05); }
-      .idx { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
+      .n2p { display: grid; grid-template-columns: repeat(3, 5.4rem); gap: 8px; padding: 10px; border-radius: 14px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); }
+      .n2p span { display: grid; place-items: center; height: 5.4rem; border-radius: 8px; font: 500 1.3rem var(--font-mono); color: var(--text); background: rgba(255, 255, 255, 0.05); }
+      .idx { font-family: var(--font-mono); font-size: 1rem; color: var(--muted); }
+      #slide-np .side p.muted { font-size: 1rem; max-width: 18rem; }
+
+      /* ---------- row / column diagram ---------- */
+      #slide-access svg { width: 22rem; overflow: visible; }
+      #slide-access svg text { font-family: var(--font-mono); font-size: 18px; }
+      #slide-access .side p { font-size: 1.1rem; }
+
+      /* ---------- blank images ---------- */
+      #slide-blank .side { gap: 1.2rem; }
+      #slide-blank .sw { display: grid; grid-template-columns: 6rem auto; gap: 1rem; align-items: center; font: 500 1rem var(--font-mono); color: var(--muted); text-align: left; }
+      #slide-blank .sw .swatch { width: 6rem; border-radius: 12px; }
 
       /* ---------- memory ---------- */
-      .mem { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.4rem; align-items: center; width: min(100%, 60rem); }
-      .mem svg { width: min(20rem, 70cqw); overflow: visible; }
-      .mem svg text { font-family: var(--font-mono); fill: var(--muted); font-size: 13px; }
-      .mem .formula { font-family: var(--font-mono); font-size: 1.15rem; }
-      .mem .formula .big { font-size: 2.3rem; display: block; margin-top: 0.4rem; }
+      .mem { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3rem; align-items: center; width: 100%; }
+      .mem svg { width: 21rem; overflow: visible; }
+      .mem svg text { font-family: var(--font-mono); fill: var(--muted); font-size: 18px; }
+      .mem .formula { font-family: var(--font-mono); font-size: 1.25rem; }
+      .mem .formula .big { font-size: 2.6rem; display: block; margin-top: 0.4rem; }
+      #slide-mem .cards { width: 100%; margin-top: 1rem; }
+      #slide-mem .card p { font-size: 1.1rem; }
 
-      /* ---------- exercises ---------- */
-      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
-      .qa .q { display: grid; gap: 0.5rem; }
-      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
-      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
-      .qa pre { width: 100%; font-size: 0.92rem; }
-      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
-
-      @container slide (max-width: 760px) {
-        .codeside, .inspect, .mem { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
-        .mixer { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 1rem; }
-        .sliders { width: 100%; }
-        .swatch { width: 6rem; }
-        .n2p { grid-template-columns: repeat(3, 3.2rem); }
-        .n2p span { height: 3.2rem; font-size: 0.9rem; }
-        .inspect ul { display: none; }
-      }
+      /* ---------- exercises: question on the left, code / answer on the right ---------- */
+      .qa { display: grid; gap: 0.8rem; width: 100%; counter-reset: q; flex-shrink: 0; }
+      .qa .q { display: grid; grid-template-columns: 19rem minmax(0, 1fr); gap: 0.5rem 1.8rem; align-items: center; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+      .qa .q:first-child { border-top: 0; padding-top: 0; }
+      .qa .q > p:first-child { grid-column: 1; color: var(--text); font-size: 1.15rem; margin: 0; }
+      .qa .q:has(> :nth-child(3)) > p:first-child { grid-row: span 2; }
+      .qa .q > :not(:first-child) { grid-column: 2; }
+      .qa .q > p:first-child::before { content: "Q" counter(q); counter-increment: q; display: block; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); margin-bottom: 0.2rem; }
+      .qa pre { width: 100%; font-size: 1rem; line-height: 1.5; padding: 0.6rem 1.1rem; }
+      .qa p.answer { padding: 0.3rem 0.7rem; width: max-content; max-width: 100%; margin: 0; font-size: 1.15rem; }
     </style>
   </head>
   <body>
@@ -111,10 +123,10 @@
     </section>
 
     <!-- ================================================================ what is a digital image -->
-    <section class="slide">
+    <section class="slide" id="slide-what">
       <h2>What is a digital image?</h2>
       <p class="lead">A digital image is a 2-D array (a matrix) of <strong>pixels</strong>.</p>
-      <div class="cards" style="width: min(100%, 60rem)">
+      <div class="cards">
         <div class="card step center">
           <div class="planes one"><i></i></div>
           <h3>Grayscale</h3>
@@ -143,23 +155,23 @@
         <div class="stage" data-interactive>
           <canvas class="photo" width="620" height="349"></canvas>
           <div class="cross"></div>
-          <span class="axis" style="left: 0.4rem; top: 0.4rem">(0, 0)</span>
+          <span class="axis" style="left: 0.5rem; top: 0.5rem">(0, 0)</span>
         </div>
         <div>
           <div class="mag"></div>
           <div class="readout">
             <div>img[<span class="yv">0</span>, <span class="xv">0</span>]</div>
             <div>→ [<span class="b">0</span>, <span class="g">0</span>, <span class="r">0</span>]</div>
-            <div class="muted" style="font-size: 0.85rem">gray = <span class="gv">0</span></div>
+            <div class="muted gl">gray = <span class="gv">0</span></div>
           </div>
-          <ul>
-            <li class="step">The origin (0, 0) is the <strong>top-left</strong> corner.</li>
-            <li class="step">First index = <strong>row</strong> (y), second = <strong>column</strong> (x).</li>
-            <li class="step">Write it as <code>image[row, col]</code> or <code>image[y, x]</code>.</li>
-          </ul>
+          <p class="muted hint">Move over the photo to read any pixel, in B, G, R order.</p>
         </div>
       </div>
-      <p class="muted center" style="font-size: 0.85rem">Move over the photo to read any pixel. OpenCV gives the channels in B, G, R order.</p>
+      <div class="facts">
+        <p class="step">The origin (0, 0) is the <strong>top-left</strong> corner.</p>
+        <p class="step">First index = <strong>row</strong> (y), second = <strong>column</strong> (x).</p>
+        <p class="step">Write it as <code>image[row, col]</code> or <code>image[y, x]</code>.</p>
+      </div>
     </section>
 
     <!-- ================================================================ intensity values -->
@@ -168,10 +180,10 @@
       <p class="lead center">Grayscale: one number per pixel.</p>
       <div class="ramp">
         <b style="left: 0%; transform: none">0 black</b>
-        <b style="left: 50.2%">128 mid gray</b>
+        <b style="left: 50.2%">128 middle gray</b>
         <b style="left: 100%; transform: translateX(-100%)">255 white</b>
       </div>
-      <p class="lead center step" style="margin-top: 2.2rem">Colour (BGR in OpenCV): three numbers per pixel.</p>
+      <p class="lead center step" style="margin-top: 2.6rem">Colour (BGR in OpenCV): three numbers per pixel.</p>
       <div class="mixer step" data-interactive>
         <div class="swatch"></div>
         <div>
@@ -224,7 +236,7 @@
     <!-- ================================================================ loading -->
     <section class="slide">
       <h2>Loading images</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps big"><code class="language-python">
         # load a colour image
         img = cv2.imread('image.jpg')
         # ans: loads in BGR order (not RGB!)
@@ -243,7 +255,7 @@
     </section>
 
     <!-- ================================================================ accessing -->
-    <section class="slide">
+    <section class="slide" id="slide-access">
       <h2>Accessing pixels</h2>
       <div class="codeside">
         <pre class="steps"><code class="language-python">
@@ -259,14 +271,15 @@
           # ans: sets the pixel to blue (BGR order)
         </code></pre>
         <div class="side">
-          <svg viewBox="0 0 170 150" width="190" aria-label="Row 100 counts down, column 50 counts across">
-            <defs><pattern id="gp" width="17" height="15" patternUnits="userSpaceOnUse"><path d="M17 0H0V15" fill="none" stroke="rgba(255,255,255,0.12)" /></pattern></defs>
-            <rect x="0" y="0" width="170" height="150" rx="8" fill="url(#gp)" stroke="rgba(255,255,255,0.2)" />
-            <line x1="0" y1="97" x2="68" y2="97" stroke="#22d3ee" stroke-dasharray="3 3" />
-            <line x1="76" y1="0" x2="76" y2="90" stroke="#ec4899" stroke-dasharray="3 3" />
-            <rect x="68" y="90" width="17" height="15" fill="#3b82f6" stroke="#fff" stroke-width="1.5" />
-            <text x="30" y="118" fill="#67e8f9" font-family="JetBrains Mono" font-size="11">col 50 →</text>
-            <text x="90" y="40" fill="#f9a8d4" font-family="JetBrains Mono" font-size="11">row 100 ↓</text>
+          <svg viewBox="0 0 360 300" aria-label="Row 100 counts down, then column 50 counts across">
+            <defs><pattern id="gp" width="18" height="15" patternUnits="userSpaceOnUse"><path d="M18 0H0V15" fill="none" stroke="rgba(255,255,255,0.12)" /></pattern></defs>
+            <rect x="0" y="0" width="360" height="300" rx="8" fill="url(#gp)" stroke="rgba(255,255,255,0.25)" />
+            <text x="0" y="-10" fill="#e2e8f0">(0, 0)</text>
+            <line class="ln-row" x1="9" y1="0" x2="9" y2="202" stroke="#f472b6" stroke-width="3" stroke-dasharray="6 5" />
+            <line class="ln-col" x1="9" y1="202" x2="180" y2="202" stroke="#22d3ee" stroke-width="3" stroke-dasharray="6 5" />
+            <text class="lb-row" x="24" y="110" fill="#f9a8d4">row 100 ↓</text>
+            <text class="lb-col" x="40" y="190" fill="#67e8f9">col 50 →</text>
+            <rect class="px" x="180" y="195" width="18" height="15" fill="#3b82f6" stroke="#fff" stroke-width="2" />
           </svg>
           <p>Row first, then column:<br /><code>img[y, x]</code></p>
         </div>
@@ -274,7 +287,7 @@
     </section>
 
     <!-- ================================================================ blank images -->
-    <section class="slide">
+    <section class="slide" id="slide-blank">
       <h2>Creating blank images</h2>
       <div class="codeside">
         <pre class="steps"><code class="language-python">
@@ -292,9 +305,9 @@
           # ans: red image (3rd channel = red in BGR)
         </code></pre>
         <div class="side">
-          <div class="swatch" style="width: 5rem; background: #000"></div>
-          <div class="swatch" style="width: 5rem; background: #fff"></div>
-          <div class="swatch" style="width: 5rem; background: #f00"></div>
+          <div class="sw" data-match="480x640 black"><div class="swatch" style="background: #000"></div>black</div>
+          <div class="sw" data-match="480x640 white"><div class="swatch" style="background: #fff"></div>white</div>
+          <div class="sw" data-match="red image (3rd"><div class="swatch" style="background: #f00"></div>red</div>
         </div>
       </div>
     </section>
@@ -303,12 +316,12 @@
     <section class="slide" id="slide-mem">
       <h2>Image memory size</h2>
       <div class="mem">
-        <svg viewBox="-10 -10 300 230" aria-label="Three 1920 by 1080 planes of one byte each">
-          <g class="pl" transform="translate(0,0)"><rect width="200" height="115" rx="8" fill="rgba(59,130,246,0.45)" stroke="rgba(255,255,255,0.3)" /><text x="8" y="18">B</text></g>
-          <g class="pl" transform="translate(30,35)"><rect width="200" height="115" rx="8" fill="rgba(34,197,94,0.45)" stroke="rgba(255,255,255,0.3)" /><text x="8" y="18">G</text></g>
-          <g class="pl" transform="translate(60,70)"><rect width="200" height="115" rx="8" fill="rgba(239,68,68,0.5)" stroke="rgba(255,255,255,0.3)" /><text x="8" y="18">R</text></g>
-          <text x="140" y="203" text-anchor="middle">1920 wide</text>
-          <text x="274" y="132" transform="rotate(90 274 132)" text-anchor="middle">1080 high</text>
+        <svg viewBox="-10 -10 320 240" aria-label="Three 1920 by 1080 planes of one byte each">
+          <g class="pl" transform="translate(0,0)"><rect width="200" height="115" rx="8" fill="rgba(59,130,246,0.45)" stroke="rgba(255,255,255,0.3)" /><text x="10" y="24">B</text></g>
+          <g class="pl" transform="translate(30,35)"><rect width="200" height="115" rx="8" fill="rgba(34,197,94,0.45)" stroke="rgba(255,255,255,0.3)" /><text x="10" y="24">G</text></g>
+          <g class="pl" transform="translate(60,70)"><rect width="200" height="115" rx="8" fill="rgba(239,68,68,0.5)" stroke="rgba(255,255,255,0.3)" /><text x="10" y="24">R</text></g>
+          <text x="160" y="212" text-anchor="middle">1920 wide</text>
+          <text x="282" y="128" transform="rotate(90 282 128)" text-anchor="middle">1080 high</text>
         </svg>
         <div>
           <p class="formula">height × width × channels × bytes per value</p>
@@ -316,7 +329,7 @@
           <p class="step muted">≈ 6.2 MB for one uncompressed Full-HD frame.</p>
         </div>
       </div>
-      <div class="cards step" style="width: min(100%, 60rem); margin-top: 1.4rem">
+      <div class="cards step">
         <div class="card"><h3>Saves memory</h3><p>1 byte per value instead of 4 for <code>int32</code>.</p></div>
         <div class="card"><h3>Enough levels</h3><p>The eye can't tell apart more than about 256 intensity levels.</p></div>
         <div class="card"><h3>Standard</h3><p>It is what most image formats (JPEG, PNG) store.</p></div>
@@ -388,7 +401,8 @@
         <div class="q">
           <p>Access the pixel at row 10, column 20.</p>
           <pre><code class="language-python">
-            img = np.random.randint(0, 256, (50, 50, 3), dtype=np.uint8)
+            img = np.random.randint(0, 256, (50, 50, 3),
+                                    dtype=np.uint8)
             pixel = img[10, 20]  # ans:
             # ans: an array of 3 BGR values
           </code></pre>
@@ -419,9 +433,9 @@
           <p>Create a solid cyan image (blue + green).</p>
           <pre><code class="language-python">
             cyan = np.zeros((100, 100, 3), dtype=np.uint8)
-            cyan[:, :, 0] = 255  # blue  # ans:
-            cyan[:, :, 1] = 255  # green  # ans:
-            # ans: a cyan image, every pixel [255, 255, 0]
+            cyan[:, :, 0] = 255  # ans:
+            cyan[:, :, 1] = 255  # ans:
+            # ans: blue + green: every pixel is [255, 255, 0]
           </code></pre>
         </div>
       </div>
@@ -511,9 +525,9 @@
         if (!pix) return;
         x = Math.max(0, Math.min(619, Math.round(x)));
         y = Math.max(0, Math.min(348, Math.round(y)));
-        const r = icv.getBoundingClientRect();
-        cross.style.left = (x / 620) * r.width + "px";
-        cross.style.top = (y / 349) * r.height + "px";
+        // percentages of the stage, so the marker stays put whatever the canvas scale
+        cross.style.left = (x / 620) * 100 + "%";
+        cross.style.top = (y / 349) * 100 + "%";
         const at = (xx, yy) => {
           xx = Math.max(0, Math.min(619, xx)); yy = Math.max(0, Math.min(348, yy));
           const o = (yy * 620 + xx) * 4;
@@ -580,6 +594,30 @@
         step(slide, n, els, detail) { if (els.some((e) => e.dataset.anim === "none")) asPixels(true, !(detail && detail.dir < 0)); },
         unstep(slide, n, els) { if (els.some((e) => e.dataset.anim === "none")) asPixels(false, false); },
       });
+
+      // ------------------------------------------------------------ row first, then column
+      let accTl = null;
+      Deck.scene("#slide-access", {
+        enter(slide) {
+          const q = (c) => slide.querySelector(c);
+          accTl?.kill();
+          accTl = gsap.timeline({ delay: 0.4 })
+            .fromTo(q(".ln-row"), { attr: { y2: 0 } }, { attr: { y2: 202 }, duration: 1.1, ease: "power1.inOut" })
+            .fromTo(q(".lb-row"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.3)
+            .fromTo(q(".ln-col"), { attr: { x2: 9 } }, { attr: { x2: 180 }, duration: 0.9, ease: "power1.inOut" })
+            .fromTo(q(".lb-col"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, "<0.2")
+            .fromTo(q(".px"), { opacity: 0, scale: 0.2, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(3)" });
+        },
+        leave() { accTl?.progress(1).kill(); },
+      });
+
+      // ------------------------------------------------------------ blank images appear with their answer lines
+      const blank = document.querySelector("#slide-blank");
+      function syncBlank() {
+        const shown = [...blank.querySelectorAll("pre .line.answer.shown")].map((l) => l.textContent).join("\n");
+        blank.querySelectorAll(".sw").forEach((sw) => gsap.to(sw, { opacity: shown.includes(sw.dataset.match) ? 1 : 0.12, duration: 0.35 }));
+      }
+      Deck.scene("#slide-blank", { enter: syncBlank, step: syncBlank, unstep: syncBlank });
 
       // ------------------------------------------------------------ memory planes
       Deck.scene("#slide-mem", {

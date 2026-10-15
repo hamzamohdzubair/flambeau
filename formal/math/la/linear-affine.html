@@ -25,7 +25,7 @@
       #reach .cols {
         grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
         align-items: center;
-        width: min(100%, 68rem);
+        width: 100%;
       }
 
       .plane {
@@ -104,12 +104,12 @@
 
       .kind b {
         font-family: var(--font-display);
-        font-size: 1.1rem;
+        font-size: 1.35rem;
         color: var(--text);
       }
 
       .kind small {
-        font-size: 0.85rem;
+        font-size: 1.05rem;
       }
 
       .kind.on {
@@ -122,7 +122,9 @@
       }
 
       .coef {
-        font: 0.95rem var(--font-mono);
+        font: 1.15rem var(--font-mono);
+        margin-top: 0.4rem;
+        white-space: pre;
         color: var(--muted);
         text-align: center;
         min-height: 1.5em;
@@ -132,12 +134,17 @@
       #maps .cols {
         grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
         align-items: center;
-        width: min(100%, 66rem);
+        width: 100%;
+      }
+
+      #maps .cols > div {
+        display: grid;
+        gap: 1.4rem;
       }
 
       #maps svg {
         width: 100%;
-        max-height: 62cqh;
+        max-height: 72cqh;
         overflow: hidden;
       }
 
@@ -168,33 +175,6 @@
         text-align: center;
       }
 
-      @container slide (max-width: 760px) {
-        #reach .cols,
-        #maps .cols {
-          grid-template-columns: 1fr;
-          gap: 0.8rem;
-        }
-
-        .plane {
-          max-height: 38cqh;
-        }
-
-        #maps svg {
-          max-height: 40cqh;
-        }
-
-        .kinds {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .kind small {
-          display: none;
-        }
-
-        #table table {
-          font-size: 0.75rem;
-        }
-      }
     </style>
   </head>
   <body>
@@ -261,7 +241,7 @@
     <section class="slide">
       <h2>The same four pictures, by hand</h2>
       <figure class="zoom-on-reveal">
-        <img src="/assets/2025-10-23-20-53-44.png" alt="Hand-drawn sketches: (a) linear combinations fill the plane, (b) affine combinations form the line through u and v, (c) conic combinations fill the wedge between u and v, (d) convex combinations form the segment from u to v" style="max-height: 62cqh" />
+        <img src="/assets/2025-10-23-20-53-44.png" alt="Hand-drawn sketches: (a) linear combinations fill the plane, (b) affine combinations form the line through u and v, (c) conic combinations fill the wedge between u and v, (d) convex combinations form the segment from u to v" style="max-height: 70cqh" />
         <figcaption><a href="https://www.cnblogs.com/rhyswang/p/14696146.html" target="_blank" rel="noopener">source</a></figcaption>
       </figure>
     </section>

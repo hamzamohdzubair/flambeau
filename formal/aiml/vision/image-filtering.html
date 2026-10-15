@@ -7,75 +7,76 @@
     <link rel="stylesheet" href="/deck/deck.css" />
     <script src="/deck/deck.js" defer></script>
     <style>
-      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
       .chip {
-        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
-        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+        padding: 0.4rem 1.05rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 1rem var(--font); cursor: pointer; transition: all 0.25s;
       }
       .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
       .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
       .chip.ghost { border-style: dashed; }
       canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
-      .codeside { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2.4rem; align-items: center; width: min(100%, 66rem); }
-      .codeside pre { width: 100%; }
-      .codeside .side { display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; }
-      .codeside .side p { font-size: 0.9rem; }
+      figure figcaption { font-family: var(--font-mono); font-size: 0.95rem; }
+
+      /* code slides: a big block that uses the stage */
+      .slide > pre { width: min(100%, 56rem); font-size: 1.25rem; }
 
       /* kernel matrices (built by script from data-k) */
-      .kgrid { --kc: 2.4rem; position: relative; display: inline-grid; gap: 4px; padding: 6px; border-radius: 12px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); font-family: var(--font-mono); }
-      .kgrid b { display: grid; place-items: center; width: var(--kc); height: var(--kc); border-radius: 6px; font-size: calc(var(--kc) * 0.36); font-weight: 500; color: var(--text); }
-      .kgrid .div { position: absolute; right: -0.2rem; bottom: -1.5rem; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
-      .kside { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.6rem; align-items: center; width: min(100%, 60rem); }
-      .kside .kgrid { margin-bottom: 1.4rem; }
+      .kgrid { --kc: 3.4rem; position: relative; display: inline-grid; gap: 5px; padding: 8px; border-radius: 14px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); font-family: var(--font-mono); }
+      .kgrid b { display: grid; place-items: center; width: var(--kc); height: var(--kc); border-radius: 8px; font-size: calc(var(--kc) * 0.36); font-weight: 500; color: var(--text); }
+      .kgrid .div { position: absolute; right: 0; bottom: -2rem; font-size: 1.1rem; color: var(--muted); white-space: nowrap; }
+      .kside { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3rem; align-items: center; width: 100%; }
+      .kside .kgrid { margin-bottom: 2rem; }
+      .kside ul, .kside p { font-size: 1.25rem; }
 
       /* cover */
-      #title canvas { width: min(30rem, 84cqw); }
+      #title canvas { width: 31rem; }
       #title .split { position: relative; }
-      #title .split span { position: absolute; bottom: 0.5rem; font: 500 0.75rem var(--font-mono); color: #fff; background: rgba(5, 6, 15, 0.7); padding: 0.1rem 0.45rem; border-radius: 4px; }
+      #title .split span { position: absolute; bottom: 0.5rem; font: 500 0.8rem var(--font-mono); color: #fff; background: rgba(5, 6, 15, 0.7); padding: 0.1rem 0.45rem; border-radius: 4px; }
+
+      /* what is filtering: four purposes in one row */
+      .cards.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+      /* box blur strengths */
+      .boxrow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; width: 100%; }
 
       /* gaussian profile */
-      .prof { width: min(100%, 26rem); }
-      .prof svg { width: 100%; overflow: visible; }
-      .prof text { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); }
-      .sl { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr) 3rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.9rem; margin: 0.4rem 0; }
+      .gwrap { display: grid; grid-template-columns: 25rem minmax(0, 1fr); gap: 2.6rem; align-items: center; width: 100%; }
+      .gwrap .left { display: grid; justify-items: start; gap: 0.5rem; }
+      .gwrap .left .kgrid { --kc: 3rem; margin-bottom: 2.2rem; }
+      .gwrap ul, .gwrap p { font-size: 1.2rem; }
+      .prof svg { width: 100%; display: block; overflow: visible; }
+      .prof text { font-family: var(--font-mono); font-size: 20px; fill: var(--muted); }
+      .sl { display: grid; grid-template-columns: 6rem minmax(0, 1fr) 3.5rem; gap: 0.9rem; align-items: center; font-family: var(--font-mono); font-size: 1.05rem; margin: 0.5rem auto 0; }
       .sl input { width: 100%; accent-color: var(--violet); }
       .sl output { color: var(--cyan); text-align: right; }
 
       /* median sort */
-      #slide-median .stage { position: relative; width: min(100%, 40rem); height: 17.5rem; margin: 0 auto; }
+      .medwrap { display: grid; grid-template-columns: 34rem minmax(0, 1fr); gap: 2.4rem; align-items: center; width: 100%; }
+      #slide-median .stage { position: relative; width: 100%; height: 18rem; flex-shrink: 0; }
       #slide-median .cell, #slide-median .lab { left: 0; top: 0; }
-      #slide-median .cell { position: absolute; display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 8px; font: 500 0.95rem var(--font-mono); border: 1px solid rgba(255, 255, 255, 0.15); }
-      #slide-median .lab { position: absolute; font: 500 0.8rem var(--font-mono); color: var(--muted); }
-      #slide-median ol { font-size: 1rem; }
+      #slide-median .cell { position: absolute; display: grid; place-items: center; width: 3.4rem; height: 3.4rem; border-radius: 10px; font: 500 1.15rem var(--font-mono); border: 1px solid rgba(255, 255, 255, 0.15); }
+      #slide-median .lab { position: absolute; font: 500 0.95rem var(--font-mono); color: var(--muted); }
+      #slide-median ol { font-size: 1.25rem; }
+      #slide-median .pros { font-size: 1.15rem; margin-top: 1rem; }
+      #slide-median .pros p { margin: 0.5rem 0; }
 
       /* bilateral weights */
-      .bw { display: grid; grid-template-columns: repeat(4, auto); gap: 0.6rem 1rem; align-items: center; justify-content: center; }
-      .bw figure { margin: 0; }
-      .bw canvas { width: min(9rem, 20cqw); aspect-ratio: 1; image-rendering: pixelated; border-radius: 8px; border: 1px solid var(--border); }
-      .bw .op { font-size: 1.4rem; color: var(--faint); }
+      .bw { display: grid; grid-template-columns: repeat(4, auto); gap: 0.6rem 1.8rem; align-items: center; justify-content: center; }
+      .bw figure { margin: 0; display: grid; gap: 0.5rem; }
+      .bw canvas { width: 11.5rem; aspect-ratio: 1; image-rendering: pixelated; border-radius: 10px; border: 1px solid var(--border); }
 
       /* playground */
-      .play { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; width: min(100%, 62rem); }
-      .under { display: grid; gap: 0.6rem; justify-items: center; width: min(100%, 62rem); }
-      .under .sl { width: min(100%, 26rem); }
+      .play { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; width: 100%; }
+      .under { display: grid; gap: 0.6rem; justify-items: center; width: 100%; }
+      .under .sl { width: 30rem; }
 
       /* exercises */
-      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
+      .qa { display: grid; gap: 1.05rem; width: min(100%, 52rem); counter-reset: q; }
       .qa .q { display: grid; gap: 0.5rem; }
-      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.3rem; }
       .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
-      .qa pre { width: 100%; font-size: 0.92rem; }
-      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
-
-      @container slide (max-width: 760px) {
-        .codeside, .kside { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; justify-items: center; }
-        .bw { grid-template-columns: repeat(2, auto); }
-        .bw .op { display: none; }
-        .bw canvas { width: min(8rem, 36cqw); }
-        .play { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
-        #slide-median .stage { height: 14rem; }
-        #slide-median .cell { width: 2.1rem; height: 2.1rem; font-size: 0.75rem; }
-      }
+      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; font-size: 1.15rem; }
     </style>
   </head>
   <body>
@@ -94,7 +95,7 @@
     <section class="slide">
       <h2>What is image filtering?</h2>
       <p class="lead"><strong>Image filtering</strong> applies a mathematical operation to each pixel based on its <strong>neighbourhood</strong>.</p>
-      <div class="cards" style="width: min(100%, 64rem)">
+      <div class="cards four">
         <div class="card step"><h3>Noise reduction</h3><p>Smoothing.</p></div>
         <div class="card step"><h3>Edge enhancement</h3><p>Sharpening.</p></div>
         <div class="card step"><h3>Feature detection</h3><p>Gradients, edges.</p></div>
@@ -106,7 +107,7 @@
     <!-- ================================================================ types -->
     <section class="slide">
       <h2>Types of filters</h2>
-      <div class="cards" style="width: min(100%, 64rem)">
+      <div class="cards">
         <div class="card step">
           <h3>Smoothing (low-pass)</h3>
           <ul>
@@ -144,6 +145,11 @@
           <li class="step"><strong>Trade-off:</strong> a larger kernel means more smoothing, and more blur.</li>
         </ul>
       </div>
+      <div class="boxrow step" id="boxrow">
+        <figure><canvas class="photo" width="400" height="225"></canvas><figcaption>cv2.blur(img, (3, 3))</figcaption></figure>
+        <figure><canvas class="photo" width="400" height="225"></canvas><figcaption>cv2.blur(img, (9, 9))</figcaption></figure>
+        <figure><canvas class="photo" width="400" height="225"></canvas><figcaption>cv2.blur(img, (21, 21))</figcaption></figure>
+      </div>
     </section>
 
     <!-- ================================================================ blur code -->
@@ -168,9 +174,9 @@
     <!-- ================================================================ gaussian -->
     <section class="slide" id="slide-gauss">
       <h2>Gaussian blur</h2>
-      <div class="kside">
-        <div class="kgrid" data-k="1 2 1|2 4 2|1 2 1" data-div="16"></div>
-        <div>
+      <div class="gwrap">
+        <div class="left">
+          <div class="kgrid" data-k="1 2 1|2 4 2|1 2 1" data-div="16"></div>
           <p><strong>Gaussian kernel:</strong> weights the centre pixel more than the edges.</p>
           <p class="step"><strong>Advantages over the box filter:</strong></p>
           <ul>
@@ -179,10 +185,10 @@
             <li class="step">Fewer ringing artefacts</li>
           </ul>
         </div>
-      </div>
-      <div class="prof step" data-interactive>
-        <svg viewBox="0 0 360 150" aria-label="Weights of a 1-D Gaussian kernel compared with a box kernel"></svg>
-        <label class="sl">sigma <input type="range" min="0.4" max="4" step="0.1" value="1" /><output>1.0</output></label>
+        <div class="prof" data-interactive>
+          <svg viewBox="0 0 720 440" aria-label="Weights of a 1-D Gaussian kernel compared with a box kernel"></svg>
+          <label class="sl" style="width: 32rem">sigma <input type="range" min="0.6" max="4" step="0.1" value="1" /><output>1.0</output></label>
+        </div>
       </div>
     </section>
 
@@ -209,13 +215,20 @@
     <section class="slide" id="slide-median">
       <h2>Median filter</h2>
       <p class="lead center">Replace each pixel with the <strong>median</strong> of its neighbourhood.</p>
-      <div class="stage" aria-label="Nine neighbourhood values sorted into a row; the middle one replaces the noisy centre pixel"></div>
-      <ol>
-        <li class="step" data-anim="fade">Sort all the pixels in the neighbourhood</li>
-        <li class="step" data-anim="fade">Pick the middle value (the median)</li>
-        <li class="step" data-anim="fade">Replace the centre pixel with it</li>
-      </ol>
-      <p class="step center"><strong>Advantage:</strong> excellent for salt-and-pepper noise: it ignores outliers. <strong>Disadvantage:</strong> slower than linear filters.</p>
+      <div class="medwrap">
+        <div class="stage" aria-label="Nine neighbourhood values sorted into a row; the middle one replaces the noisy centre pixel"></div>
+        <div>
+          <ol>
+            <li class="step" data-anim="fade">Sort all the pixels in the neighbourhood</li>
+            <li class="step" data-anim="fade">Pick the middle value (the median)</li>
+            <li class="step" data-anim="fade">Replace the centre pixel with it</li>
+          </ol>
+          <div class="pros step">
+            <p><strong>Advantage:</strong> excellent for salt-and-pepper noise: it ignores outliers.</p>
+            <p><strong>Disadvantage:</strong> slower than linear filters.</p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ================================================================ median code -->
@@ -246,7 +259,7 @@
         <figure><canvas class="w0" width="9" height="9"></canvas><figcaption>patch on an edge</figcaption></figure>
         <figure><canvas class="w1" width="9" height="9"></canvas><figcaption>spatial weight</figcaption></figure>
         <figure><canvas class="w2" width="9" height="9"></canvas><figcaption>intensity weight</figcaption></figure>
-        <figure><canvas class="w3" width="9" height="9"></canvas><figcaption>weight = spatial × intensity</figcaption></figure>
+        <figure><canvas class="w3" width="9" height="9"></canvas><figcaption>spatial × intensity</figcaption></figure>
       </div>
       <p class="step center"><strong>Use case:</strong> noise reduction that keeps sharp edges, e.g. portrait smoothing.</p>
     </section>
@@ -505,6 +518,12 @@
       }
       const PHOTO = loadPixels("/assets/2025-10-09-22-21-33.png", 400);
 
+      // ------------------------------------------------------------ box blur at three kernel sizes
+      PHOTO.then((img) => {
+        const cvs = document.querySelectorAll("#boxrow canvas");
+        [3, 9, 21].forEach((k, i) => draw(cvs[i], separable(img, Array(k).fill(1 / k))));
+      });
+
       // ------------------------------------------------------------ cover: noisy photo cleaned by a median, wiping across
       const cover = document.querySelector("#title canvas");
       let coverImgs = null, coverTl = null;
@@ -536,24 +555,26 @@
       const gs = document.querySelector("#slide-gauss");
       const svg = gs.querySelector("svg");
       const N = 9;
+      const BX = (i) => 66 + i * 74; // centre of bar i (offset -4..4)
       svg.innerHTML =
-        `<line x1="10" y1="120" x2="350" y2="120" stroke="rgba(255,255,255,0.25)"/>` +
-        Array.from({ length: N }, (_, i) => `<rect class="gb" x="${22 + i * 37}" width="26" rx="3" fill="#8b5cf6"/><rect class="bb" x="${22 + i * 37}" width="26" height="2" fill="#22d3ee"/><text x="${35 + i * 37}" y="138" text-anchor="middle">${i - 4}</text>`).join("") +
-        `<path class="curve" fill="none" stroke="#f0abfc" stroke-width="2"/><text x="350" y="14" text-anchor="end" fill="#67e8f9">— box (1/9 each)</text><text x="350" y="30" text-anchor="end" fill="#c4b5fd">■ gaussian</text>`;
+        `<line x1="20" y1="390" x2="700" y2="390" stroke="rgba(255,255,255,0.25)"/>` +
+        Array.from({ length: N }, (_, i) => `<rect class="gb" x="${BX(i) - 26}" width="52" rx="4" fill="#8b5cf6"/><rect class="bb" x="${BX(i) - 26}" width="52" height="4" fill="#22d3ee"/><text x="${BX(i)}" y="420" text-anchor="middle">${i - 4}</text>`).join("") +
+        `<path class="curve" fill="none" stroke="#f0abfc" stroke-width="3"/><text x="710" y="24" text-anchor="end" fill="#67e8f9">▬ box (1/9 each)</text><text x="710" y="52" text-anchor="end" fill="#c4b5fd">■ gaussian</text>`;
       const gIn = gs.querySelector("input");
       const gb = [...svg.querySelectorAll(".gb")], bb = [...svg.querySelectorAll(".bb")];
-      const yOf = (w) => 120 - w * 360;
+      const yOf = (w) => 390 - w * 560;
       function paintProfile(sigma, animate) {
         const k = gaussK(N, sigma);
         k.forEach((w, i) => {
-          const at = { y: yOf(w), height: 120 - yOf(w) };
+          const at = { y: yOf(w), height: 390 - yOf(w) };
           animate ? gsap.to(gb[i], { attr: at, duration: 0.35 }) : gsap.set(gb[i], { attr: at });
-          gsap.set(bb[i], { attr: { y: yOf(1 / N) - 1 } });
+          gsap.set(bb[i], { attr: { y: yOf(1 / N) - 2 } });
         });
+        const norm = k.reduce((a, b, i) => a + Math.exp(-((i - 4) ** 2) / (2 * sigma * sigma)), 0);
         let d = "";
-        for (let x = -4.5; x <= 4.5; x += 0.1) {
-          const w = Math.exp(-(x * x) / (2 * sigma * sigma)) / k.reduce((a, b, i) => a + Math.exp(-((i - 4) ** 2) / (2 * sigma * sigma)), 0);
-          d += (d ? "L" : "M") + (35 + (x + 4) * 37).toFixed(1) + "," + yOf(w).toFixed(1);
+        for (let x = -4.5; x <= 4.501; x += 0.05) {
+          const w = Math.exp(-(x * x) / (2 * sigma * sigma)) / norm;
+          d += (d ? "L" : "M") + (66 + (x + 4) * 74).toFixed(1) + "," + yOf(w).toFixed(1);
         }
         svg.querySelector(".curve").setAttribute("d", d);
         gs.querySelector("output").textContent = (+sigma).toFixed(1);
@@ -580,16 +601,16 @@
       stage.insertAdjacentHTML("beforeend", `<span class="lab l-in">neighbourhood</span><span class="lab l-sort">sorted</span><span class="lab l-out">output pixel</span>`);
       const order = VALS.map((v, i) => i).sort((a, b) => VALS[a] - VALS[b]);
       function layout() {
-        const cw = cells[0].offsetWidth, g = cw + 4, W = stage.clientWidth;
-        const x0 = (W - 6 * g) / 2;
+        const cw = cells[0].offsetWidth, g = cw + 5, W = stage.clientWidth;
+        const x0 = (W - 6 * g) / 2, rx = (W - 9 * g) / 2;
         return {
           cw, g,
-          grid: (r, c) => ({ x: x0 + c * g, y: 24 + r * g }),
-          row: (k) => ({ x: (W - 9 * g) / 2 + k * g, y: 24 + 3 * g + 34 }),
-          out: { x: x0 + 5 * g, y: 24 + g },
+          grid: (r, c) => ({ x: x0 + c * g, y: 34 + r * g }),
+          row: (k) => ({ x: rx + k * g, y: 34 + 3 * g + 56 }),
+          out: { x: x0 + 5 * g, y: 34 + g },
           labIn: { x: x0, y: 0 },
-          labOut: { x: x0 + 4.5 * g, y: 0 },
-          labSort: { x: (W - 9 * g) / 2, y: 24 + 3 * g + 10 },
+          labOut: { x: x0 + 4.4 * g, y: 0 },
+          labSort: { x: rx, y: 34 + 3 * g + 22 },
         };
       }
       let mState = -1;

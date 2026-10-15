@@ -21,7 +21,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.85rem var(--font);
+        font: 500 0.95rem var(--font);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -47,8 +47,8 @@
         flex-wrap: wrap;
         justify-content: center;
         align-items: center;
-        gap: 0.6rem 1.4rem;
-        font-size: 0.85rem;
+        gap: 0.6rem 2rem;
+        font-size: 1.05rem;
         color: var(--muted);
       }
 
@@ -66,7 +66,7 @@
       }
 
       input[type="range"] {
-        width: 8rem;
+        width: 12rem;
         accent-color: var(--violet);
       }
 
@@ -192,9 +192,9 @@
         font-size: 0.92rem;
       }
 
-      pre.ex {
-        width: min(100%, 64rem);
-        font-size: 0.95rem;
+      .slide > pre.ex {
+        width: min(100%, 60rem);
+        font-size: 1.1rem;
       }
 
       .tag {
@@ -233,30 +233,10 @@
         pointer-events: none;
       }
 
-      @container slide (max-width: 760px) {
-        .play {
-          grid-template-columns: 1fr;
-          gap: 0.8rem;
-        }
-
-        .codek {
-          grid-template-columns: 1fr;
-          gap: 1.4rem;
-        }
-
-        input[type="range"] {
-          width: 6.5rem;
-        }
-
-        pre.ex,
-        .qa pre {
-          font-size: 0.78rem;
-        }
-      }
 
       /* ---------- Cover ---------- */
       #title canvas {
-        width: min(26rem, 80cqw);
+        width: 20rem;
         border-radius: 12px;
         image-rendering: pixelated;
       }
@@ -333,11 +313,19 @@
         opacity: 0;
       }
 
+      .gd-ctl {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.2rem 2.4rem;
+        width: 100%;
+      }
+
       .rule {
         font-family: var(--font-mono);
-        font-size: 1rem;
+        font-size: 1.1rem;
+        min-width: 18em;
         text-align: center;
-        min-height: 2.6em;
       }
 
       .rule b {
@@ -354,7 +342,8 @@
 
       .strip.two {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        width: min(100%, 50rem);
+        gap: 2rem;
+        width: min(100%, 56rem);
       }
 
       .strip canvas {
@@ -363,27 +352,64 @@
         background: #000;
       }
 
-      .strip figcaption code {
-        font-size: 0.8em;
+      .strip figcaption {
+        font-size: 1.05rem;
       }
 
-      .opcols .strip.two {
-        grid-template-columns: 1fr;
-        width: min(100%, 24rem);
-        justify-self: center;
+      .strip figcaption code {
+        font-size: 0.9em;
       }
 
       .opcols {
         display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-        gap: 2rem;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
         align-items: center;
-        width: min(100%, 66rem);
+        width: 100%;
       }
 
       .opcols pre {
         width: 100%;
-        font-size: 0.9rem;
+        font-size: 1rem;
+      }
+
+      /* Code on top, before/after pictures underneath */
+      .opstack {
+        display: grid;
+        justify-items: center;
+        gap: 1.2rem;
+        width: 100%;
+      }
+
+      .opstack pre {
+        width: min(100%, 56rem);
+        font-size: 1.05rem;
+      }
+
+      .opstack .strip.two {
+        width: min(100%, 46rem);
+      }
+
+      /* Code-only slides */
+      .slide > pre {
+        width: min(100%, 60rem);
+        font-size: 1.15rem;
+      }
+
+      /* ---------- What slide ---------- */
+      .what-cols {
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+        width: min(100%, 64rem);
+      }
+
+      .what-cols .card p,
+      .what-cols .card ul {
+        font-size: 1.1rem;
+      }
+
+      .what-cols .se-mini {
+        margin-top: 1rem;
+        justify-content: flex-start;
       }
 
       /* ---------- Structuring elements ---------- */
@@ -406,12 +432,32 @@
       .se b {
         display: grid;
         place-items: center;
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 1.3rem;
+        height: 1.3rem;
         border-radius: 4px;
         background: rgba(255, 255, 255, 0.05);
-        font: 400 0.7rem var(--font-mono);
+        font: 400 0.75rem var(--font-mono);
         color: var(--faint);
+      }
+
+      .se-big {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0.6rem;
+      }
+
+      .se-mini {
+        flex-wrap: nowrap;
+      }
+
+      .se-big .se b {
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+
+      .se-mini .se b {
+        width: 1.15rem;
+        height: 1.15rem;
       }
 
       .se b.on {
@@ -421,7 +467,16 @@
 
       /* ---------- Playground ---------- */
       #play .play {
-        width: min(100%, 60rem);
+        width: 100%;
+        gap: 2rem;
+      }
+
+      #play figcaption {
+        font-size: 1.05rem;
+      }
+
+      #play .chip {
+        font-size: 1.05rem;
       }
 
       #play canvas.img {
@@ -434,19 +489,6 @@
         justify-items: center;
       }
 
-      @container slide (max-width: 760px) {
-        #grid-demo {
-          --cell: min(1.5rem, 6.8cqw);
-        }
-
-        .strip {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .opcols {
-          grid-template-columns: 1fr;
-        }
-      }
     </style>
   </head>
   <body>
@@ -462,11 +504,11 @@
     <section class="slide">
       <h2>What are morphological operations?</h2>
       <p class="lead"><strong>Morphological operations</strong> process images based on <em>shapes</em>. They work on binary (black/white) or grayscale images.</p>
-      <div class="cols top" style="width: min(100%, 58rem)">
+      <div class="cols top what-cols">
         <div class="card">
           <h3>Structuring element</h3>
           <p>A small kernel that defines the neighbourhood shape: rectangle, ellipse, cross or custom.</p>
-          <div class="ses se-mini" style="margin-top: 0.8rem; justify-content: flex-start"></div>
+          <div class="ses se-mini"></div>
         </div>
         <div class="card">
           <h3>Applications</h3>
@@ -487,6 +529,7 @@
         <div><h4>Input</h4><div class="bin in"><div class="win"></div></div></div>
         <div><h4 class="oname">Erosion: min</h4><div class="bin out"></div></div>
       </div>
+      <div class="gd-ctl">
       <p class="rule"></p>
       <div class="chips" data-interactive>
         <button class="chip on" data-op="erode">Erosion</button>
@@ -495,7 +538,8 @@
         <button class="chip ghost" data-act="step">Step</button>
         <button class="chip ghost" data-act="finish">Finish</button>
       </div>
-      <div class="cards" style="width: min(100%, 56rem)">
+      </div>
+      <div class="cards" style="width: min(100%, 64rem)">
         <div class="card"><h3>Erosion: <code>min(neighbourhood)</code></h3><p>Shrinks bright regions, removes small white noise, disconnects objects.</p></div>
         <div class="card"><h3>Dilation: <code>max(neighbourhood)</code></h3><p>Expands bright regions, fills small holes, connects nearby objects.</p></div>
       </div>
@@ -504,8 +548,16 @@
     <!-- ================================================================ erosion code -->
     <section class="slide">
       <h2>Erosion</h2>
-      <div class="opcols">
-        <pre class="steps"><code class="language-python">
+      <p class="lead">Each pixel takes the <strong>minimum</strong> of its neighbourhood: white regions shrink and small white noise disappears.</p>
+      <div class="strip two" data-op="erode">
+        <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption><code>cv2.erode</code>, 5×5</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Erosion in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
           import cv2
           import numpy as np
           # binary image
@@ -519,17 +571,20 @@
           # effect: shrinks white regions, removes small noise
           # ans: larger kernel or more iterations = more erosion
         </code></pre>
-        <div class="strip two" data-op="erode">
-          <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
-          <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption><code>cv2.erode</code>, 5×5</figcaption></figure>
-        </div>
-      </div>
     </section>
 
     <section class="slide">
       <h2>Dilation</h2>
-      <div class="opcols">
-        <pre class="steps"><code class="language-python">
+      <p class="lead">Each pixel takes the <strong>maximum</strong> of its neighbourhood: white regions grow and small black holes fill in.</p>
+      <div class="strip two" data-op="dilate">
+        <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption><code>cv2.dilate</code>, 5×5</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Dilation in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
           # dilation
           dilated = cv2.dilate(binary, kernel, iterations=1)  # ans:
           # effect: expands white regions, fills small holes
@@ -538,11 +593,6 @@
           dilated = cv2.dilate(binary, kernel, iterations=3)
           # ans: equivalent to applying it 3 times
         </code></pre>
-        <div class="strip two" data-op="dilate">
-          <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
-          <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption><code>cv2.dilate</code>, 5×5</figcaption></figure>
-        </div>
-      </div>
     </section>
 
     <!-- ================================================================ opening -->
@@ -604,8 +654,15 @@
     <section class="slide">
       <h2>Morphological gradient</h2>
       <p class="lead"><strong>Gradient</strong> = dilation − erosion. It outlines the edges of objects.</p>
-      <div class="opcols">
-        <pre class="steps"><code class="language-python">
+      <div class="strip two" data-op="gradient">
+        <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption>gradient</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Gradient in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
           # morphological gradient
           gradient = cv2.morphologyEx(binary, cv2.MORPH_GRADIENT, kernel)  # ans:
           # equivalent to:
@@ -614,18 +671,13 @@
           gradient = dilated - eroded  # ans:
           # highlights object boundaries
         </code></pre>
-        <div class="strip two" data-op="gradient">
-          <figure><canvas data-src></canvas><figcaption>binary</figcaption></figure>
-          <figure class="step" data-anim="zoom"><canvas data-res></canvas><figcaption>gradient</figcaption></figure>
-        </div>
-      </div>
     </section>
 
     <!-- ================================================================ top hat -->
     <section class="slide">
       <h2>Top hat</h2>
       <p class="lead"><strong>Top hat</strong> = image − opening(image). It extracts small <em>bright</em> features.</p>
-      <div class="opcols">
+      <div class="opstack">
         <pre class="steps"><code class="language-python">
           # top hat
           tophat = cv2.morphologyEx(gray, cv2.MORPH_TOPHAT, kernel)  # ans:
@@ -643,7 +695,7 @@
     <section class="slide">
       <h2>Black hat</h2>
       <p class="lead"><strong>Black hat</strong> = closing(image) − image. It extracts small <em>dark</em> features.</p>
-      <div class="opcols">
+      <div class="opstack">
         <pre class="steps"><code class="language-python">
           # black hat
           blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)  # ans:

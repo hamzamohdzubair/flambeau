@@ -10,8 +10,8 @@
       /* ---------- Quotes on a timeline ---------- */
       #quotes .tl {
         display: grid;
-        gap: 0.7rem;
-        width: min(100%, 60rem);
+        gap: 0.55rem;
+        width: min(100%, 66rem);
       }
 
       #quotes .q {
@@ -23,21 +23,28 @@
 
       #quotes .yr {
         font-family: var(--font-mono);
-        font-size: 1.05rem;
+        font-size: 1.2rem;
         color: var(--cyan);
-        padding-top: 0.75rem;
+        padding-top: 0.6rem;
         text-align: right;
       }
 
       #quotes blockquote {
         margin: 0;
-        font-size: 1.02rem;
+        padding: 0.55rem 1.2rem;
+        font-size: 1.12rem;
+      }
+
+      #quotes blockquote cite {
+        display: inline;
+        margin-left: 0.6em;
+        white-space: nowrap;
       }
 
       #quotes .bar {
         position: relative;
         height: 4px;
-        width: min(100%, 60rem);
+        width: min(100%, 66rem);
         border-radius: 4px;
         background: rgba(255, 255, 255, 0.08);
       }
@@ -54,7 +61,7 @@
         position: absolute;
         top: 0.5rem;
         right: 0;
-        font: 0.75rem var(--font-mono);
+        font: 0.85rem var(--font-mono);
         color: var(--faint);
       }
 
@@ -62,21 +69,11 @@
         margin-top: 0.6rem;
       }
 
-      @container slide (max-width: 700px) {
-        #cycle text {
-          font-size: 20px;
-        }
-
-        #cycle .ev text.t {
-          font-size: 20px;
-        }
-      }
-
       /* ---------- Hype curve ---------- */
       #cycle svg {
-        width: min(100%, 64rem);
+        width: 100%;
         height: auto;
-        max-height: 62cqh;
+        max-height: 74cqh;
         overflow: visible;
       }
 
@@ -97,13 +94,13 @@
 
       #cycle text {
         font-family: var(--font);
-        font-size: 14px;
+        font-size: 20px;
         fill: var(--muted);
       }
 
       #cycle .ev text.t {
         font-family: var(--font-display);
-        font-size: 15px;
+        font-size: 22px;
         fill: var(--text);
       }
 
@@ -115,7 +112,7 @@
 
       #cycle .axis text {
         font-family: var(--font-mono);
-        font-size: 13px;
+        font-size: 18px;
         fill: var(--faint);
         text-anchor: middle;
       }
@@ -126,6 +123,28 @@
 
       .figs.paper img {
         background: #fff;
+      }
+
+      #winter .cols {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: 2rem;
+      }
+
+      #winter .cols > figure img {
+        max-height: 62cqh;
+      }
+
+      #winter .figs {
+        grid-template-columns: 1fr;
+      }
+
+      #winter .figs img {
+        aspect-ratio: auto;
+        max-height: 30cqh;
+      }
+
+      #original img {
+        max-height: 72cqh;
       }
     </style>
   </head>
@@ -148,18 +167,20 @@
       </div>
     </section>
 
-    <section class="slide">
+    <section class="slide" id="winter">
       <h2>AI winter</h2>
-      <figure class="step"><img src="/assets/2025-11-01-16-21-36.png" alt="1973: the Lighthill report, Artificial Intelligence: A General Survey; 2024: Goldman Sachs, Gen AI: too much spend, too little benefit?" style="max-height: 34cqh" /><figcaption>The same doubts, 51 years apart: the Lighthill report (1973) and Goldman Sachs (2024)</figcaption></figure>
+      <div class="cols">
+      <figure class="step"><img src="/assets/2025-11-01-16-21-36.png" alt="1973: the Lighthill report, Artificial Intelligence: A General Survey; 2024: Goldman Sachs, Gen AI: too much spend, too little benefit?" /><figcaption>The same doubts, 51 years apart: the Lighthill report (1973) and Goldman Sachs (2024)</figcaption></figure>
       <div class="figs contain paper">
         <figure class="step landscape"><img src="/assets/2025-11-01-16-24-10.png" alt="MIT report: 95% of generative AI pilots at companies are failing" /></figure>
         <figure class="step landscape"><img src="/assets/2025-11-01-16-30-58.png" alt="Paper: The Illusion of Thinking, on the limits of reasoning models" /></figure>
+      </div>
       </div>
     </section>
 
     <section class="slide" id="cycle">
       <h2>The third hype cycle</h2>
-      <svg viewBox="0 0 900 400" aria-label="Investment and research in AI from 1950 to 2025: rises, two winters, then explosive growth">
+      <svg viewBox="0 -20 900 470" aria-label="Investment and research in AI from 1950 to 2025: rises, two winters, then explosive growth">
         <defs>
           <linearGradient id="hypeGrad" x1="0" x2="1">
             <stop offset="0" stop-color="#8b5cf6" />
@@ -175,7 +196,7 @@
       </svg>
     </section>
 
-    <section class="slide">
+    <section class="slide" id="original">
       <h2>The third hype cycle: the original chart</h2>
       <figure class="step"><img src="/assets/2025-11-01-16-26-07.png" alt="Chart of AI investment and research over time: Dartmouth 1956, inflated hype in the 1970s, AI winter 1974 to 1980, new hopes in the 1980s, AI winter 1987 to 1993, data explosion 2007, concerns 2020, explosive growth" /></figure>
     </section>
@@ -229,9 +250,9 @@
       const winters = slide.querySelector(".winters");
       const wGroups = [[1974, 1980, "AI Winter I"], [1987, 1993, "AI Winter II"]].map(([a, b, name]) => {
         const g = el("g", { class: "winter" }, winters);
-        el("rect", { x: X(a), y: 40, width: X(b) - X(a), height: 310, rx: 6 }, g);
-        el("text", { x: (X(a) + X(b)) / 2, y: 372, "text-anchor": "middle" }, g, `${a}–${b}`);
-        el("text", { x: (X(a) + X(b)) / 2, y: 60, "text-anchor": "middle" }, g, name);
+        el("rect", { x: X(a), y: 40, width: X(b) - X(a), height: 338, rx: 6 }, g);
+        el("text", { x: (X(a) + X(b)) / 2, y: 404, "text-anchor": "middle" }, g, `${a}–${b}`);
+        el("text", { x: (X(a) + X(b)) / 2, y: 66, "text-anchor": "middle" }, g, name);
         return { g, yr: a };
       });
 
@@ -248,15 +269,15 @@
         el("circle", { cx: X(yr), cy: Y(v), r: 6 }, g);
         const anchor = yr > 2015 ? "end" : yr < 1960 ? "start" : "middle";
         const dx = yr > 2015 ? -16 : yr < 1960 ? 10 : 0;
-        const y0 = side < 0 ? Y(v) - 40 : Y(v) + 26;
-        el("text", { x: X(yr) + dx, y: y0, "text-anchor": anchor, style: "fill:#67e8f9;font-family:var(--font-mono);font-size:13px" }, g, a);
-        el("text", { class: "t", x: X(yr) + dx, y: y0 + 17, "text-anchor": anchor }, g, b);
+        const y0 = side < 0 ? Y(v) - (yr === 2020 ? 32 : 52) : Y(v) + 30; // 2020 sits lower to clear the 'now' label
+        el("text", { x: X(yr) + dx, y: y0, "text-anchor": anchor, style: "fill:#67e8f9;font-family:var(--font-mono);font-size:18px" }, g, a);
+        el("text", { class: "t", x: X(yr) + dx, y: y0 + 25, "text-anchor": anchor }, g, b);
         return { g, yr };
       });
 
       const axis = slide.querySelector(".axis");
-      el("line", { x1: X(1950), x2: X(2025), y1: 352, y2: 352 }, axis);
-      for (let yr = 1950; yr <= 2020; yr += 10) el("text", { x: X(yr), y: 392 }, axis, yr);
+      el("line", { x1: X(1950), x2: X(2025), y1: 380, y2: 380 }, axis);
+      for (let yr = 1950; yr <= 2020; yr += 10) el("text", { x: X(yr), y: 436 }, axis, yr);
 
       // Fraction of the curve's length reached at a given year
       const lenAt = (yr) => {

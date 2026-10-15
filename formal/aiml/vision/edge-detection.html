@@ -7,72 +7,71 @@
     <link rel="stylesheet" href="/deck/deck.css" />
     <script src="/deck/deck.js" defer></script>
     <style>
-      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
       .chip {
-        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
-        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+        padding: 0.4rem 1.1rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 1rem var(--font); cursor: pointer; transition: all 0.25s;
       }
       .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
       .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
       .chip.ghost { border-style: dashed; }
       canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
-      figure figcaption { font-family: var(--font-mono); }
-      .sl { display: grid; grid-template-columns: 7rem minmax(0, 1fr) 3rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.9rem; margin: 0.3rem 0; }
+      figure figcaption { font-family: var(--font-mono); font-size: 0.95rem; }
+      .sl { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 3.5rem; gap: 0.9rem; align-items: center; font-family: var(--font-mono); font-size: 1.05rem; margin: 0.35rem 0; }
       .sl input { width: 100%; accent-color: var(--violet); }
       .sl output { color: var(--cyan); text-align: right; }
 
-      .kgrid { --kc: 2.4rem; position: relative; display: inline-grid; gap: 4px; padding: 6px; border-radius: 12px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); font-family: var(--font-mono); }
-      .kgrid b { display: grid; place-items: center; width: var(--kc); height: var(--kc); border-radius: 6px; font-size: calc(var(--kc) * 0.36); font-weight: 500; color: var(--text); }
-      .kpair { display: flex; gap: 2.4rem; justify-content: center; flex-wrap: wrap; text-align: center; }
-      .kpair figure { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+      /* code slides: a big block that uses the stage */
+      .slide > pre { width: min(100%, 56rem); font-size: 1.25rem; }
+      .slide > pre.tall { font-size: 1.15rem; }
+
+      .kgrid { --kc: 3.6rem; position: relative; display: inline-grid; gap: 5px; padding: 8px; border-radius: 14px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); font-family: var(--font-mono); }
+      .kgrid b { display: grid; place-items: center; width: var(--kc); height: var(--kc); border-radius: 8px; font-size: calc(var(--kc) * 0.36); font-weight: 500; color: var(--text); }
+      .kpair { display: flex; gap: 4rem; justify-content: center; text-align: center; }
+      .kpair figure { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
+      .kpair figcaption { font-size: 1.1rem; }
+      #slide-sobel .kgrid { --kc: 3rem; }
 
       /* edge-type profiles */
       .etype svg { width: 100%; height: auto; overflow: visible; }
-      .etype .strip { height: 1.6rem; border-radius: 6px; margin-bottom: 0.7rem; border: 1px solid var(--border); }
+      .etype .strip { height: 1.8rem; border-radius: 6px; margin-bottom: 0.7rem; border: 1px solid var(--border); }
       .etype path { fill: none; stroke: var(--cyan); stroke-width: 3; stroke-linecap: round; }
 
       /* gradient formula */
-      .gradwrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 64rem); }
-      .gradwrap svg { width: 100%; max-width: 22rem; margin: 0 auto; display: block; }
-      .gradwrap svg text { font-family: var(--font-mono); font-size: 12px; fill: var(--muted); }
+      .gradwrap { display: grid; grid-template-columns: minmax(0, 1fr) 27rem; gap: 3rem; align-items: center; width: 100%; }
+      .gradwrap ul { font-size: 1.3rem; }
+      .gradwrap > div > p { font-size: 1.3rem; }
+      .gradwrap svg { width: 100%; display: block; }
+      .gradwrap svg text { font-family: var(--font-mono); font-size: 22px; font-weight: 600; }
 
       /* 1-D derivatives */
-      .deriv { width: min(100%, 34rem); margin: 1.6rem 0 0.6rem; }
-      .deriv svg { width: 100%; overflow: visible; }
-      .deriv text { font-family: var(--font-mono); font-size: 11px; }
-      .lapl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.4rem; align-items: center; width: min(100%, 64rem); }
+      .lapl { display: grid; grid-template-columns: 20rem minmax(0, 1fr); gap: 2.4rem; align-items: center; width: 100%; }
+      .lapl .left { display: grid; justify-items: center; gap: 1rem; text-align: center; }
+      .lapl .left .kgrid { --kc: 3.2rem; }
+      .deriv svg { width: 100%; display: block; overflow: visible; }
+      .deriv text { font-family: var(--font-mono); font-size: 20px; }
 
       /* labs */
-      .lab { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; width: min(100%, 62rem); }
-      .canny { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 70rem); }
+      .lab { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; width: 100%; }
+      #slide-lab .chip { font-size: 0.95rem; padding: 0.4rem 0.85rem; }
+      #slide-lab .note { font-size: 1.05rem; min-height: 2.6em; max-width: 52rem; }
+      .canny { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 2.4rem; align-items: center; width: 100%; }
       .canny ol li { transition: color 0.3s; }
       .canny ol li.now { color: var(--cyan); }
-      .ctl { width: min(100%, 30rem); }
+      .ctl { width: 100%; margin-top: 0.6rem; }
 
-      .codeside { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2.4rem; align-items: center; width: min(100%, 66rem); }
-      .codeside pre { width: 100%; }
-      .codeside .side { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; text-align: center; }
-
-      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
+      .qa { display: grid; gap: 1.2rem; width: min(100%, 52rem); counter-reset: q; }
       .qa .q { display: grid; gap: 0.4rem; }
-      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.3rem; }
       .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
-      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
-
-      @container slide (max-width: 760px) {
-        .gradwrap, .lapl, .canny, .codeside { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
-        .lab { gap: 0.6rem; }
-        .kgrid { --kc: 1.9rem; }
-        .kpair { gap: 1rem; }
-        .sl { grid-template-columns: 5rem minmax(0, 1fr) 2.6rem; }
-      }
+      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; font-size: 1.15rem; }
     </style>
   </head>
   <body>
     <!-- ================================================================ cover -->
     <section class="slide cover" id="title">
       <span class="kicker">Computer vision</span>
-      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84cqw)" aria-label="A photo dissolving into its Canny edge map"></canvas>
+      <canvas class="photo" width="400" height="225" style="width: 31rem" aria-label="A photo dissolving into its Canny edge map"></canvas>
       <h1>Edge Detection</h1>
       <p>Find where intensity changes sharply: the outlines of everything in the picture.</p>
     </section>
@@ -115,31 +114,34 @@
           </ul>
           <p class="step lead"><strong class="grad">Large gradient = edge!</strong></p>
         </div>
-        <svg class="gvec" viewBox="0 0 220 220" aria-label="The gradient vector at an edge is the sum of its x and y parts and points across the edge">
+        <svg class="gvec" viewBox="0 0 440 440" aria-label="The gradient vector at an edge is the sum of its x and y parts and points across the edge">
           <defs>
             <linearGradient id="eg" x1="0" y1="1" x2="1" y2="0"><stop offset="0.48" stop-color="#1e2236" /><stop offset="0.52" stop-color="#cbd5e1" /></linearGradient>
-            <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke" /></marker>
+            <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke" /></marker>
           </defs>
-          <rect width="220" height="220" rx="14" fill="url(#eg)" />
-          <line class="gx" x1="110" y1="110" x2="170" y2="110" stroke="#ec4899" stroke-width="4" marker-end="url(#ah)" />
-          <line class="gy" x1="170" y1="110" x2="170" y2="50" stroke="#22d3ee" stroke-width="4" marker-end="url(#ah)" />
-          <line class="gm" x1="110" y1="110" x2="170" y2="50" stroke="#a78bfa" stroke-width="5" marker-end="url(#ah)" />
-          <text x="132" y="128" fill="#f9a8d4">Gx</text>
-          <text x="176" y="84" fill="#67e8f9">Gy</text>
-          <text x="104" y="74" fill="#c4b5fd">G, θ</text>
+          <rect width="440" height="440" rx="24" fill="url(#eg)" />
+          <line class="gx" x1="220" y1="220" x2="340" y2="220" stroke="#ec4899" stroke-width="7" marker-end="url(#ah)" />
+          <line class="gy" x1="340" y1="220" x2="340" y2="100" stroke="#22d3ee" stroke-width="7" marker-end="url(#ah)" />
+          <line class="gm" x1="220" y1="220" x2="340" y2="100" stroke="#8b5cf6" stroke-width="9" marker-end="url(#ah)" />
+          <circle cx="220" cy="220" r="7" fill="#f1f5f9" stroke="#05060f" stroke-width="3" />
+          <g paint-order="stroke" stroke="#05060f" stroke-width="5" stroke-linejoin="round">
+            <text class="tgx" x="250" y="258" fill="#f9a8d4">Gx</text>
+            <text class="tgy" x="352" y="172" fill="#67e8f9">Gy</text>
+            <text class="tgm" x="196" y="140" fill="#c4b5fd">G, θ</text>
+          </g>
         </svg>
       </div>
     </section>
 
     <!-- ================================================================ sobel -->
-    <section class="slide">
+    <section class="slide" id="slide-sobel">
       <h2>Sobel edge detection</h2>
       <p class="lead center">Sobel kernels approximate the gradient <em>with</em> smoothing.</p>
       <div class="kpair">
         <figure><div class="kgrid" data-k="-1 0 1|-2 0 2|-1 0 1"></div><figcaption>Sobel X</figcaption></figure>
         <figure><div class="kgrid" data-k="-1 -2 -1|0 0 0|1 2 1"></div><figcaption>Sobel Y</figcaption></figure>
       </div>
-      <div class="cards" style="width: min(100%, 52rem)">
+      <div class="cards">
         <div class="card step"><h3>Gradient + smoothing</h3><p>The 1-2-1 weights average across the edge direction.</p></div>
         <div class="card step"><h3>3×3 kernels</h3><p>Small and fast.</p></div>
         <div class="card step"><h3>Noise-resistant</h3><p>Good noise resistance thanks to the smoothing.</p></div>
@@ -149,7 +151,7 @@
     <!-- ================================================================ sobel code -->
     <section class="slide">
       <h2>Sobel in OpenCV</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps tall"><code class="language-python">
         import cv2
         import numpy as np
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -197,7 +199,7 @@
         <button class="chip" data-v="lap">Laplacian</button>
         <button class="chip" data-v="log">blur + Laplacian</button>
       </div>
-      <p class="muted center note" style="font-size: 0.9rem"></p>
+      <p class="muted center note"></p>
     </section>
 
     <!-- ================================================================ scharr -->
@@ -232,19 +234,17 @@
     <section class="slide" id="slide-lap">
       <h2>Laplacian edge detection</h2>
       <div class="lapl">
-        <div style="display: grid; justify-items: center; gap: 0.8rem">
+        <div class="left">
           <div class="kgrid" data-k="0 1 0|1 -4 1|0 1 0"></div>
-          <p class="muted">\(\nabla^2 I = \dfrac{\partial^2 I}{\partial x^2} + \dfrac{\partial^2 I}{\partial y^2}\)</p>
+          <p>\(\nabla^2 I = \dfrac{\partial^2 I}{\partial x^2} + \dfrac{\partial^2 I}{\partial y^2}\)</p>
+          <p><strong>A second-derivative operator.</strong> Where the first derivative peaks, the second crosses zero.</p>
+          <div class="chips" data-interactive><button class="chip ghost" data-noise>Add noise</button></div>
         </div>
-        <div>
-          <p><strong>Laplacian:</strong> a second-derivative operator. Where the first derivative peaks, the second crosses zero.</p>
-          <div class="deriv" data-interactive>
-            <svg class="d1d" viewBox="0 0 340 240" aria-label="An edge profile, its first derivative and its second derivative"></svg>
-            <div class="chips" style="justify-content: flex-start"><button class="chip ghost" data-noise>Add noise</button></div>
-          </div>
-          <p class="step"><strong>Property:</strong> very sensitive to noise, so smooth first!</p>
+        <div class="deriv">
+          <svg class="d1d" viewBox="0 0 860 520" aria-label="An edge profile, its first derivative and its second derivative"></svg>
         </div>
       </div>
+      <p class="step center"><strong>Property:</strong> very sensitive to noise (press <em>Add noise</em>), so smooth first!</p>
     </section>
 
     <!-- ================================================================ laplacian code -->
@@ -591,11 +591,14 @@
           const svg = slide.querySelector("svg.gvec");
           const st = { a: -45 };
           const set = () => {
-            const r = (st.a * Math.PI) / 180, L = 70;
-            const ex = 110 + L * Math.cos(r), ey = 110 + L * Math.sin(r);
+            const r = (st.a * Math.PI) / 180, L = 170;
+            const ex = 220 + L * Math.cos(r), ey = 220 + L * Math.sin(r);
             svg.querySelector(".gm").setAttribute("x2", ex); svg.querySelector(".gm").setAttribute("y2", ey);
             svg.querySelector(".gx").setAttribute("x2", ex);
             const gy = svg.querySelector(".gy"); gy.setAttribute("x1", ex); gy.setAttribute("x2", ex); gy.setAttribute("y2", ey);
+            svg.querySelector(".tgx").setAttribute("x", 220 + (ex - 220) / 2 - 16);
+            svg.querySelector(".tgy").setAttribute("x", ex + 12); svg.querySelector(".tgy").setAttribute("y", (220 + ey) / 2 + 8);
+            svg.querySelector(".tgm").setAttribute("x", 220 + (ex - 220) / 2 - 78); svg.querySelector(".tgm").setAttribute("y", (220 + ey) / 2 - 10);
             svg.querySelector("linearGradient").setAttribute("gradientTransform", `rotate(${st.a + 45} 0.5 0.5)`);
           };
           gradTl?.kill();
@@ -666,18 +669,18 @@
       (function () {
         const ds = document.querySelector("#slide-lap");
         const svg = ds.querySelector("svg.d1d");
-        const N = 120, X = (i) => 20 + (i / (N - 1)) * 310;
+        const N = 120, X = (i) => 20 + (i / (N - 1)) * 820;
         const clean = Array.from({ length: N }, (_, i) => 1 / (1 + Math.exp(-(i - 60) / 4)));
         let r = 3;
         const rnd = () => ((r = (r * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff - 0.5);
         const noiseV = Array.from({ length: N }, () => rnd() * 0.06);
         const rows = [
-          { y: 50, s: 40, name: "I(x): intensity", col: "#e2e8f0" },
-          { y: 150, s: 400, name: "I′(x): 1st derivative: peak", col: "#a78bfa" },
-          { y: 205, s: 2000, name: "I″(x): 2nd derivative: zero-crossing", col: "#22d3ee" },
+          { y: 105, s: 100, name: "I(x): intensity", col: "#e2e8f0" },
+          { y: 300, s: 1000, name: "I′(x): 1st derivative peaks", col: "#a78bfa" },
+          { y: 440, s: 4400, name: "I″(x): 2nd derivative crosses zero", col: "#22d3ee" },
         ];
-        svg.innerHTML = rows.map((R, k) => `<line x1="20" x2="330" y1="${R.y}" y2="${R.y}" stroke="rgba(255,255,255,0.12)"/><text x="20" y="${R.y - (k ? 38 : 44)}" fill="${R.col}">${R.name}</text><path class="p${k}" fill="none" stroke="${R.col}" stroke-width="2"/>`).join("") +
-          `<line x1="${X(60)}" x2="${X(60)}" y1="14" y2="232" stroke="#ec4899" stroke-dasharray="3 4"/><text x="${X(60) + 4}" y="236" fill="#f9a8d4">edge</text>`;
+        svg.innerHTML = rows.map((R, k) => `<line x1="20" x2="840" y1="${R.y}" y2="${R.y}" stroke="rgba(255,255,255,0.12)"/><text x="20" y="${R.y - (k ? 84 : 76)}" fill="${R.col}">${R.name}</text><path class="p${k}" fill="none" stroke="${R.col}" stroke-width="4"/>`).join("") +
+          `<line x1="${X(60)}" x2="${X(60)}" y1="10" y2="500" stroke="#ec4899" stroke-width="2" stroke-dasharray="6 8"/><text x="${X(60) + 10}" y="30" fill="#f9a8d4">edge</text>`;
         const path = (arr, R, base) => arr.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + (R.y - (v - base) * R.s).toFixed(1)).join("");
         const st = { k: 0 };
         function paint() {

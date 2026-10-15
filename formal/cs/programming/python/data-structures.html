@@ -196,26 +196,6 @@
         max-width: 100%;
       }
 
-      @container slide (max-width: 760px) {
-        .duo {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
-
-        .mv {
-          padding: 0.7rem;
-          gap: 0.6rem;
-          font-size: 0.8rem;
-        }
-
-        .mv-name {
-          min-width: 0;
-        }
-
-        .mv-cell {
-          padding: 0.2rem 0.45rem;
-        }
-      }
 
       .slide pre {
         font-size: 0.95rem;
@@ -307,14 +287,170 @@
         gap: 0.5rem;
       }
 
-      @container slide (max-width: 760px) {
-        .venn {
-          width: min(100%, 17rem);
-        }
-
-        .slide pre {
-          font-size: 0.75rem;
-        }
+      /* ---------- 1600x900 canvas sizing (memory view) ---------- */
+      .mv {
+        font-size: 1.35rem;
+        gap: 1.1rem;
+        padding: 1.4rem 1.6rem;
+        min-width: min(100%, 26rem);
+      }
+      .mv-name {
+        min-width: 5.5rem;
+      }
+      .mv-items::before,
+      .mv-items::after {
+        font-size: 1.6rem;
+      }
+      .mv-cell {
+        padding: 0.35rem 0.8rem;
+      }
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1.3rem;
+      }
+      .mv-cell small {
+        bottom: -1.4rem;
+        font-size: 0.8rem;
+      }
+      .mv-cell small.nx {
+        bottom: -2.5rem;
+      }
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2.5rem;
+      }
+      .mv-empty {
+        font-size: 1rem;
+      }
+      .mv-note {
+        font-size: 1.2rem;
+      }
+      .duo {
+        width: 100%;
+        gap: 2.5rem;
+      }
+      .duo pre,
+      .stack pre {
+        min-width: 0;
+        flex-shrink: 0;
+      }
+      .stack {
+        width: 100%;
+      }
+      .slide pre {
+        flex-shrink: 0;
+      }
+      .hint {
+        font-size: 1.2rem;
+      }
+      /* dense slides: many variables beside the code */
+      .mv {
+        font-size: 1rem;
+        gap: 0.45rem;
+        padding: 0.9rem 1.2rem;
+      }
+      .mv-name {
+        min-width: 4.2rem;
+      }
+      .mv-var,
+      .mv-items {
+        flex-wrap: nowrap;
+      }
+      .mv-cell {
+        padding: 0.2rem 0.55rem;
+      }
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1.1rem;
+      }
+      .mv-cell small {
+        bottom: -1.2rem;
+        font-size: 0.75rem;
+      }
+      .mv-cell small.nx {
+        bottom: -2.1rem;
+      }
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2rem;
+      }
+      .duo pre,
+      .stack pre {
+        font-size: 1.05rem;
+      }
+      #l-mod .mv-items {
+        flex-wrap: wrap;
+      }
+      #d-access .stack pre {
+        font-size: 0.95rem;
+      }
+      #d-access .stack {
+        gap: 0.7rem;
+      }
+      pre.tall {
+        line-height: 1.45;
+      }
+      pre.tall .line {
+        min-height: 1.45em;
+      }
+      #t-basic .mv {
+        display: grid;
+        grid-template-columns: auto auto;
+        column-gap: 2.2rem;
+        align-items: center;
+      }
+      #t-basic .mv-note {
+        grid-column: 1 / -1;
+      }
+      #t-basic .mv {
+        column-gap: 1.4rem;
+      }
+      #t-basic .duo pre {
+        font-size: 1rem;
+      }
+      #l-ops .duo pre {
+        font-size: 0.98rem;
+      }
+      #l-sort .mv-var {
+        flex-wrap: wrap;
+      }
+      .mv-name {
+        white-space: nowrap;
+      }
+      #d-access .mv {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        column-gap: 2.5rem;
+      }
+      #d-access .mv-note {
+        flex-basis: 100%;
+      }
+      #d-access .mv {
+        padding: 0.6rem 1.2rem;
+        row-gap: 0.3rem;
+      }
+      /* set operations */
+      .venn {
+        width: min(100%, 34rem);
+      }
+      .venn-out {
+        font-size: 1.3rem;
+      }
+      #s-ops .chip {
+        font-size: 1.2rem;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 62rem);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
       }
     </style>
   </head>
@@ -350,7 +486,7 @@
     <!-- ================================================================ lists: modify -->
     <section class="slide" id="l-mod">
       <h2>Lists: modification</h2>
-      <div class="stack">
+      <div class="duo">
         <pre class="steps"><code class="language-python">
           # modifying elements
           fruits = ["apple", "banana", "cherry"]
@@ -540,7 +676,7 @@
 
     <section class="slide">
       <h2>Nested dictionaries</h2>
-      <pre class="steps" style="width: auto"><code class="language-python">
+      <pre class="steps" style="width: auto; font-size: 2.05rem"><code class="language-python">
         # nested dictionaries
         users = {
             "user1": {"name": "Alice", "age": 25},
@@ -623,7 +759,7 @@
 
     <section class="slide">
       <h2>Sets: comparing sets</h2>
-      <pre class="steps" style="width: auto"><code class="language-python">
+      <pre class="steps" style="width: auto; font-size: 1.4rem"><code class="language-python">
         # subset and superset
         {1, 2}.issubset({1, 2, 3})       # True
         {1, 2, 3}.issuperset({1, 2})     # True
@@ -640,7 +776,7 @@
     <!-- ================================================================ frozenset -->
     <section class="slide">
       <h2>Frozen sets</h2>
-      <pre class="steps" style="width: auto"><code class="language-python">
+      <pre class="steps" style="width: auto; font-size: 1.30rem"><code class="language-python">
         # immutable sets
         fs = frozenset([1, 2, 3])
         # can be used as dict keys
@@ -660,7 +796,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Which one to use?</h2>
-      <div class="cards" style="width: min(100%, 64rem)">
+      <div class="cards">
         <div class="card step"><h3>List <code>[ ]</code></h3><p>Ordered, changeable, duplicates allowed. Access by position.</p></div>
         <div class="card step"><h3>Tuple <code>( )</code></h3><p>Ordered but immutable. Good for fixed records like a point; unpacks neatly.</p></div>
         <div class="card step"><h3>Dictionary <code>{k: v}</code></h3><p>Look values up by key. Keys are unique; <code>in</code> checks keys.</p></div>
@@ -754,11 +890,12 @@
           box.innerHTML = html;
           if (!anim) return;
           const base = box.getBoundingClientRect();
+          const k = base.width / box.offsetWidth || 1; // the canvas is scaled to the window
           box.querySelectorAll("[data-id]").forEach((e) => {
             const r0 = oldRects.get(e.dataset.id);
             if (!r0) return gsap.from(e, { scale: 0.3, opacity: 0, duration: 0.45, ease: "back.out(2)" });
             const r1 = e.getBoundingClientRect();
-            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: r0.left - r1.left, y: r0.top - r1.top, duration: 0.6, ease: "power2.inOut" });
+            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: (r0.left - r1.left) / k, y: (r0.top - r1.top) / k, duration: 0.6, ease: "power2.inOut" });
             if (oldVals.get(e.dataset.id) !== e.querySelector(".v")?.textContent) gsap.fromTo(e, { backgroundColor: "rgba(236,72,153,0.5)" }, { backgroundColor: "rgba(139,92,246,0.13)", duration: 0.9, clearProps: "backgroundColor" });
           });
           for (const [id, node] of oldNodes) {
@@ -766,7 +903,7 @@
             const r = oldRects.get(id);
             node.classList.add("ghost");
             node.classList.remove("hl");
-            Object.assign(node.style, { left: r.left - base.left + "px", top: r.top - base.top + "px", width: r.width + "px" });
+            Object.assign(node.style, { left: (r.left - base.left) / k + "px", top: (r.top - base.top) / k + "px", width: r.width / k + "px" });
             box.appendChild(node);
             gsap.to(node, { opacity: 0, y: 28, scale: 0.7, duration: 0.55, ease: "power1.in", onComplete: () => node.remove() });
           }

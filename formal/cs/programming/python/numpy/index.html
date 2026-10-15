@@ -43,19 +43,49 @@
         color: var(--violet-soft);
       }
 
+      .numpy .tiles {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
       .numpy .tile {
-        min-height: 5.6rem;
+        min-height: 10rem;
+        font-size: 1.25rem;
+      }
+
+      .numpy .tile small {
+        font-size: 0.85rem;
+      }
+
+      .numpy .tiles.one {
+        grid-template-columns: minmax(0, 1fr);
+        width: min(100%, 34rem);
+      }
+
+      .numpy .tiles.one .tile {
+        min-height: 18rem;
+        font-size: 1.8rem;
       }
 
       .numpy .book {
         display: flex;
         align-items: center;
-        gap: 1.6rem;
+        gap: 3rem;
+        width: min(100%, 60rem);
+      }
+
+      .numpy .book figure {
+        flex: 0 0 15rem;
       }
 
       .numpy .book img {
-        width: 9rem;
+        width: 15rem;
+        height: auto;
         max-height: none;
+      }
+
+      .numpy .book p {
+        font-size: 1.5rem;
+        line-height: 1.5;
       }
     </style>
   </head>
@@ -89,7 +119,7 @@
     <section class="slide hub-group numpy">
       <span class="kicker">Practice</span>
       <h2>Exercises</h2>
-      <div class="tiles">
+      <div class="tiles one">
           <a class="tile" href="x/nps.html" style="--img: url('/assets/2025-10-19-01-09-27.png')"><span>Net Promoter Score</span></a>
         </div>
     </section>

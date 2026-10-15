@@ -196,26 +196,6 @@
         max-width: 100%;
       }
 
-      @container slide (max-width: 760px) {
-        .duo {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
-
-        .mv {
-          padding: 0.7rem;
-          gap: 0.6rem;
-          font-size: 0.8rem;
-        }
-
-        .mv-name {
-          min-width: 0;
-        }
-
-        .mv-cell {
-          padding: 0.2rem 0.45rem;
-        }
-      }
 
       .slide pre {
         width: auto;
@@ -279,6 +259,93 @@
         font-size: 0.95rem;
         color: var(--faint);
         text-align: center;
+      }
+      /* ---------- 1600x900 canvas sizing (memory view) ---------- */
+      .mv {
+        font-size: 1.35rem;
+        gap: 1.1rem;
+        padding: 1.4rem 1.6rem;
+        min-width: min(100%, 26rem);
+      }
+      .mv-name {
+        min-width: 5.5rem;
+      }
+      .mv-items::before,
+      .mv-items::after {
+        font-size: 1.6rem;
+      }
+      .mv-cell {
+        padding: 0.35rem 0.8rem;
+      }
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1.3rem;
+      }
+      .mv-cell small {
+        bottom: -1.4rem;
+        font-size: 0.8rem;
+      }
+      .mv-cell small.nx {
+        bottom: -2.5rem;
+      }
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2.5rem;
+      }
+      .mv-empty {
+        font-size: 1rem;
+      }
+      .mv-note {
+        font-size: 1.2rem;
+      }
+      .duo {
+        width: 100%;
+        gap: 2.5rem;
+      }
+      .duo pre,
+      .stack pre {
+        min-width: 0;
+        flex-shrink: 0;
+      }
+      .stack {
+        width: 100%;
+      }
+      .slide pre {
+        flex-shrink: 0;
+      }
+      .hint {
+        font-size: 1.2rem;
+      }
+      .duo pre,
+      .stack pre {
+        font-size: 1.35rem;
+      }
+      .ex7-cols {
+        width: 100%;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 2.5rem;
+      }
+      .ex7-cols .refs {
+        width: 100%;
+      }
+      .refs text {
+        font-size: 24px;
+      }
+      .refs .lbl {
+        font-size: 20px;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 62rem);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
       }
     </style>
   </head>
@@ -400,7 +467,7 @@
 
     <section class="slide">
       <h2>Exercise 1</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # update behavior?
         d = {"a": 1}
         d.update({"b": 2, "a": 10})
@@ -410,7 +477,7 @@
 
     <section class="slide">
       <h2>Exercise 2</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # pop with default?
         d = {"a": 1}
         d.pop("b", 0)
@@ -420,7 +487,7 @@
 
     <section class="slide">
       <h2>Exercise 3</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # pop without default?
         d = {"a": 1}
         d.pop("b")
@@ -430,7 +497,7 @@
 
     <section class="slide">
       <h2>Exercise 4</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # setdefault existing key?
         d = {"a": 1}
         d.setdefault("a", 10)
@@ -440,7 +507,7 @@
 
     <section class="slide">
       <h2>Exercise 5</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # popitem on empty?
         d = {}
         d.popitem()
@@ -450,7 +517,7 @@
 
     <section class="slide">
       <h2>Exercise 6</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # fromkeys default?
         keys = ["a", "b"]
         d = dict.fromkeys(keys)
@@ -458,58 +525,60 @@
       </code></pre>
     </section>
 
-    <section class="slide" id="ex7">
+    <section class="slide ex" id="ex7">
       <h2>Exercise 7</h2>
-      <pre><code class="language-python">
-        # copy is shallow?
-        d = {"a": [1, 2]}
-        d2 = d.copy()
-        d2["a"].append(3)
-        # ans: d is {"a": [1, 2, 3]}
-      </code></pre>
-      <svg class="refs" viewBox="0 0 700 270" aria-label="d and d2 are two different dictionaries, but both of their 'a' values point to the same list, so appending through d2 changes what d sees">
-        <defs>
-          <marker id="refhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0 0 L10 5 L0 10 z" fill="rgba(240,171,252,0.9)" />
-          </marker>
-        </defs>
-        <g class="g-d">
-          <text class="nm" x="60" y="60">d</text>
-          <path class="arrow" d="M70 60 L128 60" />
-          <rect class="obj" x="130" y="35" width="150" height="50" rx="10" />
-          <text x="148" y="60">{'a': </text>
-          <circle class="dot" cx="240" cy="60" r="6" />
-          <text x="256" y="60">}</text>
-        </g>
-        <g class="g-list">
-          <path class="arrow shared a1" d="M246 60 C 330 60, 360 135, 418 135" />
-          <rect class="obj" x="420" y="105" width="250" height="60" rx="10" />
-          <rect class="cell" x="436" y="115" width="60" height="40" rx="6" />
-          <text x="466" y="135" text-anchor="middle">1</text>
-          <rect class="cell" x="510" y="115" width="60" height="40" rx="6" />
-          <text x="540" y="135" text-anchor="middle">2</text>
-          <g class="c3">
-            <rect class="cell" x="584" y="115" width="60" height="40" rx="6" />
-            <text x="614" y="135" text-anchor="middle">3</text>
+      <div class="cols ex7-cols">
+        <pre style="font-size: 1.3rem"><code class="language-python">
+          # copy is shallow?
+          d = {"a": [1, 2]}
+          d2 = d.copy()
+          d2["a"].append(3)
+          # ans: d is {"a": [1, 2, 3]}
+        </code></pre>
+        <svg class="refs" viewBox="0 0 700 270" aria-label="d and d2 are two different dictionaries, but both of their 'a' values point to the same list, so appending through d2 changes what d sees">
+          <defs>
+            <marker id="refhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="rgba(240,171,252,0.9)" />
+            </marker>
+          </defs>
+          <g class="g-d">
+            <text class="nm" x="60" y="60">d</text>
+            <path class="arrow" d="M70 60 L128 60" />
+            <rect class="obj" x="130" y="35" width="150" height="50" rx="10" />
+            <text x="148" y="60">{'a': </text>
+            <circle class="dot" cx="240" cy="60" r="6" />
+            <text x="256" y="60">}</text>
           </g>
-          <text class="lbl" x="545" y="190" text-anchor="middle">one list object</text>
-        </g>
-        <g class="g-d2">
-          <text class="nm" x="60" y="210">d2</text>
-          <path class="arrow" d="M70 210 L128 210" />
-          <rect class="obj" x="130" y="185" width="150" height="50" rx="10" />
-          <text x="148" y="210">{'a': </text>
-          <circle class="dot" cx="240" cy="210" r="6" />
-          <text x="256" y="210">}</text>
-          <path class="arrow shared a2" d="M246 210 C 330 210, 360 135, 418 135" />
-          <text class="lbl" x="205" y="258" text-anchor="middle">a new dict, same value</text>
-        </g>
-      </svg>
+          <g class="g-list">
+            <path class="arrow shared a1" d="M246 60 C 330 60, 360 135, 418 135" />
+            <rect class="obj" x="420" y="105" width="250" height="60" rx="10" />
+            <rect class="cell" x="436" y="115" width="60" height="40" rx="6" />
+            <text x="466" y="135" text-anchor="middle">1</text>
+            <rect class="cell" x="510" y="115" width="60" height="40" rx="6" />
+            <text x="540" y="135" text-anchor="middle">2</text>
+            <g class="c3">
+              <rect class="cell" x="584" y="115" width="60" height="40" rx="6" />
+              <text x="614" y="135" text-anchor="middle">3</text>
+            </g>
+            <text class="lbl" x="545" y="190" text-anchor="middle">one list object</text>
+          </g>
+          <g class="g-d2">
+            <text class="nm" x="60" y="210">d2</text>
+            <path class="arrow" d="M70 210 L128 210" />
+            <rect class="obj" x="130" y="185" width="150" height="50" rx="10" />
+            <text x="148" y="210">{'a': </text>
+            <circle class="dot" cx="240" cy="210" r="6" />
+            <text x="256" y="210">}</text>
+            <path class="arrow shared a2" d="M246 210 C 330 210, 360 135, 418 135" />
+            <text class="lbl" x="205" y="258" text-anchor="middle">a new dict, same value</text>
+          </g>
+        </svg>
+      </div>
     </section>
 
     <section class="slide">
       <h2>Exercise 8</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # clear return?
         d = {"a": 1}
         result = d.clear()
@@ -520,7 +589,7 @@
 
     <section class="slide">
       <h2>Exercise 9</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # update from pairs?
         d = {"a": 1}
         d.update([("b", 2), ("c", 3)])
@@ -528,9 +597,9 @@
       </code></pre>
     </section>
 
-    <section class="slide" id="ex10">
+    <section class="slide ex" id="ex10">
       <h2>Exercise 10</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # multiple setdefault?
         d = {}
         d.setdefault("a", []).append(1)
@@ -543,7 +612,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 64rem)">
+      <div class="cards">
         <div class="card step"><h3><code>update</code></h3><p>Adds or overwrites many pairs, from a dict or a list of pairs.</p></div>
         <div class="card step"><h3><code>pop</code> / <code>popitem</code></h3><p>Remove and return; a missing key (or an empty dict) raises <code>KeyError</code> unless <code>pop</code> has a default.</p></div>
         <div class="card step"><h3><code>setdefault</code></h3><p>Returns the value if the key exists, otherwise stores and returns the default.</p></div>
@@ -637,11 +706,12 @@
           box.innerHTML = html;
           if (!anim) return;
           const base = box.getBoundingClientRect();
+          const k = base.width / box.offsetWidth || 1; // the canvas is scaled to the window
           box.querySelectorAll("[data-id]").forEach((e) => {
             const r0 = oldRects.get(e.dataset.id);
             if (!r0) return gsap.from(e, { scale: 0.3, opacity: 0, duration: 0.45, ease: "back.out(2)" });
             const r1 = e.getBoundingClientRect();
-            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: r0.left - r1.left, y: r0.top - r1.top, duration: 0.6, ease: "power2.inOut" });
+            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: (r0.left - r1.left) / k, y: (r0.top - r1.top) / k, duration: 0.6, ease: "power2.inOut" });
             if (oldVals.get(e.dataset.id) !== e.querySelector(".v")?.textContent) gsap.fromTo(e, { backgroundColor: "rgba(236,72,153,0.5)" }, { backgroundColor: "rgba(139,92,246,0.13)", duration: 0.9, clearProps: "backgroundColor" });
           });
           for (const [id, node] of oldNodes) {
@@ -649,7 +719,7 @@
             const r = oldRects.get(id);
             node.classList.add("ghost");
             node.classList.remove("hl");
-            Object.assign(node.style, { left: r.left - base.left + "px", top: r.top - base.top + "px", width: r.width + "px" });
+            Object.assign(node.style, { left: (r.left - base.left) / k + "px", top: (r.top - base.top) / k + "px", width: r.width / k + "px" });
             box.appendChild(node);
             gsap.to(node, { opacity: 0, y: 28, scale: 0.7, duration: 0.55, ease: "power1.in", onComplete: () => node.remove() });
           }

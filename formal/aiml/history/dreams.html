@@ -8,39 +8,52 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #automata .figs {
-        grid-template-columns: repeat(auto-fit, minmax(min(11rem, 40cqw), 1fr));
-        width: min(100%, 60rem);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        width: min(100%, 64rem);
       }
 
       #automata .figs img {
         aspect-ratio: 2 / 3;
-        max-height: 44cqh;
+        max-height: 50cqh;
       }
 
       #aristotle .cols {
         grid-template-columns: auto minmax(0, 1fr);
-        width: min(100%, 52rem);
+        gap: 4rem;
+        width: min(100%, 60rem);
       }
 
       #aristotle img {
-        max-height: 56cqh;
+        max-height: 66cqh;
       }
 
       #aristotle ul {
-        font-size: 1.5rem;
+        font-size: 1.9rem;
         display: grid;
-        gap: 0.8rem;
+        gap: 1.2rem;
+      }
+
+      #early .figs img {
+        max-height: 62cqh;
+      }
+
+      #early figcaption {
+        font-size: 1rem;
       }
 
       #dated svg {
-        width: min(100%, 64rem);
+        width: 100%;
         height: auto;
         overflow: visible;
       }
 
+      #dated p {
+        font-size: 1.3rem;
+      }
+
       #dated .rail {
         stroke: url(#railGrad);
-        stroke-width: 4;
+        stroke-width: 5;
         stroke-linecap: round;
       }
 
@@ -58,14 +71,14 @@
 
       #dated .yr {
         font-family: var(--font-mono);
-        font-size: 15px;
+        font-size: 22px;
         fill: var(--cyan);
         text-anchor: middle;
       }
 
       #dated .what {
         font-family: var(--font-display);
-        font-size: 17px;
+        font-size: 26px;
         fill: var(--text);
         text-anchor: middle;
       }
@@ -75,11 +88,6 @@
         text-decoration: underline;
       }
 
-      @container slide (max-width: 700px) {
-        #aristotle .cols {
-          grid-template-columns: 1fr;
-        }
-      }
     </style>
   </head>
   <body>
@@ -111,7 +119,7 @@
       </div>
     </section>
 
-    <section class="slide">
+    <section class="slide" id="early">
       <h2>Early attempts at automation and AI</h2>
       <div class="figs contain">
         <figure class="step"><img src="/assets/2025-10-18-06-55-32.png" alt="A copy of Ars Magna with its paper rotating wheels" /><figcaption><em>Ars Magna</em> (~1300 AD) by Ramon Llull</figcaption></figure>
@@ -121,14 +129,14 @@
 
     <section class="slide" id="dated">
       <h2>The dream, dated</h2>
-      <svg viewBox="0 0 960 260" aria-label="Timeline: Homer 800 to 600 BC, Aristotle about 320 BC, Ars Magna about 1300, da Vinci's knight 1495, AI named 1955">
+      <svg viewBox="0 0 1000 300" aria-label="Timeline: Homer 800 to 600 BC, Aristotle about 320 BC, Ars Magna about 1300, da Vinci's knight 1495, AI named 1955">
         <defs>
-          <linearGradient id="railGrad" gradientUnits="userSpaceOnUse" x1="40" y1="0" x2="920" y2="0">
+          <linearGradient id="railGrad" gradientUnits="userSpaceOnUse" x1="110" y1="0" x2="890" y2="0">
             <stop offset="0" stop-color="#8b5cf6" />
             <stop offset="1" stop-color="#22d3ee" />
           </linearGradient>
         </defs>
-        <line class="rail" x1="40" y1="130" x2="920" y2="130" />
+        <line class="rail" x1="110" y1="150" x2="890" y2="150" />
       </svg>
       <p class="center muted">Positions are to scale in time: most of the story is waiting.</p>
     </section>
@@ -152,7 +160,7 @@
 
       // Milestones placed to scale between 800 BC and 1960 AD
       const svg = document.querySelector("#dated svg");
-      const X = (yr) => 40 + ((yr + 800) / 2760) * 880;
+      const X = (yr) => 110 + ((yr + 800) / 2760) * 780;
       const marks = [
         [-700, "800–600 BC", "Homer's automata", -1],
         [-320, "~320 BC", "Aristotle", 1],
@@ -162,11 +170,11 @@
       ].map(([yr, label, what, side, href]) => {
         const parent = href ? el("a", { href }, svg) : svg;
         const g = el("g", {}, parent);
-        el("circle", { cx: X(yr), cy: 130, r: 9 }, g);
-        const y = side < 0 ? 72 : 180;
-        el("line", { class: "gap", x1: X(yr), x2: X(yr), y1: 130 + side * 12, y2: y + (side < 0 ? 12 : -22) }, g);
-        el("text", { class: "yr", x: X(yr), y: side < 0 ? y - 20 : y }, g, label);
-        el("text", { class: "what", x: X(yr), y: side < 0 ? y : y + 22 }, g, what);
+        el("circle", { cx: X(yr), cy: 150, r: 11 }, g);
+        const y = side < 0 ? 84 : 214;
+        el("line", { class: "gap", x1: X(yr), x2: X(yr), y1: 150 + side * 14, y2: y + (side < 0 ? 14 : -28) }, g);
+        el("text", { class: "yr", x: X(yr), y: side < 0 ? y - 32 : y }, g, label);
+        el("text", { class: "what", x: X(yr), y: side < 0 ? y : y + 32 }, g, what);
         return g;
       });
       const rail = svg.querySelector(".rail");
@@ -175,7 +183,7 @@
         enter() {
           tl?.kill();
           tl = gsap.timeline();
-          tl.fromTo(rail, { attr: { x2: 40 } }, { attr: { x2: 920 }, duration: 2.4, ease: "none" });
+          tl.fromTo(rail, { attr: { x2: 110 } }, { attr: { x2: 890 }, duration: 2.4, ease: "none" });
           marks.forEach((g, i) => tl.fromTo(g, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 }, [0.1, 0.5, 1.9, 2.05, 2.35][i]));
         },
         leave: () => tl?.progress(1),

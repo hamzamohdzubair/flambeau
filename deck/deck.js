@@ -210,7 +210,8 @@
           const plain = line.replace(/<[^>]+>/g, "");
           const isAnswer = /(#|\/\/)\s*ans:/.test(plain);
           if (isAnswer) {
-            if (/(#|\/\/)\s*ans:\s*$/.test(plain)) line = line.replace(/\s*(<span[^>]*>)?\s*(#|\/\/)\s*ans:\s*(<\/span>)?\s*$/, "");
+            // Remove only the marker text; any highlight span around it stays balanced
+            if (/(#|\/\/)\s*ans:\s*$/.test(plain)) line = line.replace(/\s*(#|\/\/)\s*ans:\s*(?=(<\/span>)*\s*$)/, "").replace(/<span[^>]*><\/span>/g, "");
             else line = line.replace(/(#|\/\/)\s*ans:\s?/, "$1 ");
           }
           const cls = ["line"];
@@ -612,7 +613,8 @@
       if (handlers.unstep) listeners.unstep.push((s, i, d) => match(s) && handlers.unstep(s, d.step, d.elements, d));
     },
     load,
-    go: (i, s = Infinity) => go(i, s),
+    // Before the deck has booted, a jump waits for it instead of failing
+    go: (i, s = Infinity) => (groups.length ? go(i, s) : ready.then(() => go(i, s))),
     next: () => next(),
     prev: () => prev(),
     get slides() {
@@ -623,6 +625,11 @@
     },
     get step() {
       return step;
+    },
+    // Screen pixels per canvas pixel: divide getBoundingClientRect() sizes
+    // and offsets by this to get canvas units (for FLIP-style animations)
+    get scale() {
+      return stage ? stage.getBoundingClientRect().width / W : 1;
     },
     // Slides the safety net had to shrink, as [slide number, zoom] pairs
     overflow: () => slides.map((sl, i) => [i + 1, fitted.get(sl)]).filter((x) => x[1]),

@@ -162,7 +162,7 @@ Deck.scene("#my-slide", {
 ```
 
 - Drive a script-only sequence with invisible steps: `<span class="step" data-anim="none"></span>`
-  per beat, then react in `step()` / `unstep()`.
+  per beat (an empty step span takes no space), then react in `step()` / `unstep()`.
 - Rendering loops (three.js, canvas) must stop in `leave()`; only one slide is visible at a time.
 - `step` can fire for several steps in one tick (↓/↑ and links into a deck show all steps at
   once). Make handlers idempotent and state-based; when `detail.dir < 0` (going back) or many steps
@@ -176,6 +176,10 @@ Deck.scene("#my-slide", {
   image-processing demos.
 - Pointer coordinates: the canvas is scaled, so map `clientX/clientY` through
   `getBoundingClientRect()` ratios (`(e.clientX - r.left) / r.width * width`), never `offsetX`.
+- `getBoundingClientRect()` returns screen pixels. To move or place something by a measured
+  amount (e.g. animating an element from one box to another), divide by `Deck.scale` (screen px
+  per canvas px), or the motion is wrong whenever the window isn't exactly 1600 wide. A slide that
+  the safety net shrank also has a CSS zoom on it.
 - Gotcha: gradient text (`background-clip: text`) disappears on children that get their own
   transform. Animate words inside a `grad-each` heading instead.
 - Inline SVG is the easiest canvas for diagrams: draw it in the HTML, give parts classes, and

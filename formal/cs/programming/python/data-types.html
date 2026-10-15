@@ -12,7 +12,25 @@
       }
 
       .slide pre {
-        width: min(100%, 40rem);
+        width: min(100%, 60rem);
+        font-size: 1.5rem;
+      }
+
+      .slide pre.big {
+        font-size: 1.75rem;
+        width: min(100%, 56rem);
+      }
+
+      #recap .card p {
+        font-size: 1.2rem;
+      }
+
+      .slide pre.long {
+        font-size: 1.32rem;
+      }
+
+      .slide .hint {
+        font-size: 1.3rem;
       }
 
       /* ---------- Type sorter: each value drops into the bin of its type ---------- */
@@ -21,8 +39,8 @@
         align-items: center;
         justify-content: center;
         gap: 1rem;
-        min-height: 3.4rem;
-        font: 500 1.35rem var(--font-mono);
+        min-height: 5rem;
+        font: 500 2.2rem var(--font-mono);
       }
 
       #sorter .chute .expr {
@@ -37,16 +55,16 @@
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 0.8rem;
-        width: min(100%, 64rem);
+        width: 100%;
       }
 
       .bin {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.4rem;
-        min-height: 13rem;
-        padding: 0.8rem 0.5rem;
+        gap: 0.6rem;
+        min-height: 16rem;
+        padding: 1rem 0.5rem;
         border-radius: 0 0 var(--radius) var(--radius);
         border: 2px solid rgba(167, 139, 250, 0.45);
         border-top: none;
@@ -55,7 +73,7 @@
 
       .bin h3 {
         margin: 0 0 0.3rem;
-        font: 600 1rem var(--font-mono);
+        font: 600 1.5rem var(--font-mono);
         color: var(--violet-soft);
       }
 
@@ -64,20 +82,22 @@
       }
 
       .vchip {
-        display: inline-block;
-        padding: 0.2rem 0.6rem;
-        border-radius: 10px;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1.15;
+        padding: 0.25rem 0.8rem;
+        border-radius: 12px;
         border: 1px solid rgba(240, 171, 252, 0.6);
         background: rgba(236, 72, 153, 0.16);
         color: #fbcfe8;
-        font: 500 0.95rem var(--font-mono);
+        font: 500 1.25rem var(--font-mono);
         white-space: nowrap;
       }
 
       .vchip small {
-        margin-left: 0.4rem;
         color: var(--faint);
-        font-size: 0.75em;
+        font-size: 0.8em;
       }
 
       .bin[data-t="int"] h3 {
@@ -106,7 +126,7 @@
         border: 1px solid var(--border);
         background: transparent;
         color: var(--muted);
-        font: 500 0.85rem var(--font);
+        font: 500 1rem var(--font);
         cursor: pointer;
       }
 
@@ -115,28 +135,6 @@
         border-color: var(--violet-soft);
       }
 
-      @container slide (max-width: 760px) {
-        .bins {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .bin {
-          min-height: 7rem;
-        }
-
-        .vchip {
-          font-size: 0.75rem;
-          padding: 0.15rem 0.4rem;
-        }
-
-        .vchip small {
-          display: none;
-        }
-
-        #sorter .chute {
-          font-size: 1rem;
-        }
-      }
     </style>
   </head>
   <body>
@@ -182,7 +180,7 @@
     <!-- ================================================================ str -->
     <section class="slide">
       <h2>String type</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps long"><code class="language-python">
         # string
         message = "Hello"
         type(message)
@@ -199,7 +197,7 @@
     <!-- ================================================================ bool -->
     <section class="slide">
       <h2>Boolean type</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps big"><code class="language-python">
         # boolean
         is_valid = True
         type(is_valid)
@@ -213,7 +211,7 @@
     <!-- ================================================================ None -->
     <section class="slide">
       <h2>NoneType</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps big"><code class="language-python">
         # None type
         x = None
         type(x)
@@ -227,7 +225,7 @@
     <!-- ================================================================ type() -->
     <section class="slide">
       <h2>Checking types</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps long"><code class="language-python">
         # type() function
         x = 5
         type(x)
@@ -264,7 +262,7 @@
 
     <section class="slide">
       <h2>Exercise 1</h2>
-      <pre><code class="language-python">
+      <pre class="long"><code class="language-python">
         # what type is this?
         x = 5.0
         # ans: &lt;class 'float'&gt;
@@ -282,7 +280,7 @@
 
     <section class="slide">
       <h2>Exercise 2</h2>
-      <pre><code class="language-python">
+      <pre class="long"><code class="language-python">
         # what type?
         a = 5
         b = 2
@@ -345,7 +343,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 60rem)">
+      <div class="cards" style="width: min(100%, 72rem)">
         <div class="card step"><h3><code>int</code> and <code>float</code></h3><p>Whole numbers and decimals. Mixing them, or dividing with <code>/</code>, gives a float.</p></div>
         <div class="card step"><h3><code>str</code></h3><p>Text in quotes. <code>"5" + "3"</code> joins text: <code>"53"</code>.</p></div>
         <div class="card step"><h3><code>bool</code></h3><p><code>True</code> and <code>False</code>; they behave like 1 and 0 in arithmetic.</p></div>
@@ -412,7 +410,9 @@
               const c = chip(v);
               bins[t].appendChild(c);
               const to = c.getBoundingClientRect();
-              gsap.from(c, { x: from.left - to.left, y: from.top - to.top, duration: 0.5, ease: "power2.in" });
+              // the canvas is scaled: convert screen px to canvas px
+              const k = slide.getBoundingClientRect().width / slide.offsetWidth || 1;
+              gsap.from(c, { x: (from.left - to.left) / k, y: (from.top - to.top) / k, duration: 0.5, ease: "power2.in" });
               gsap.fromTo(bins[t], { borderColor: "#22d3ee" }, { borderColor: "rgba(167,139,250,0.45)", duration: 0.9, delay: 0.55 });
             },
             null,

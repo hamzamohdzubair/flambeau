@@ -9,14 +9,24 @@
     <style>
       .mro-cols {
         display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-        gap: 2rem;
+        grid-template-columns: max-content minmax(0, 1fr);
+        gap: 2.5rem;
         align-items: center;
-        width: min(100%, 66rem);
+        width: 100%;
       }
 
       .mro-cols pre {
-        width: 100%;
+        width: auto;
+        min-width: 30rem;
+        font-size: 1.3rem;
+      }
+
+      .mro-cols pre {
+        line-height: 1.42;
+      }
+
+      .mro-cols pre .line {
+        min-height: 1.42em;
       }
 
       .mro-cols .line.answer.shown {
@@ -24,7 +34,7 @@
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         color: var(--faint);
         text-align: center;
       }
@@ -40,7 +50,7 @@
 
       .mro svg {
         width: 100%;
-        max-height: 56cqh;
+        max-height: 54cqh;
         overflow: visible;
       }
 
@@ -75,7 +85,7 @@
       .mro text {
         fill: var(--text);
         font-family: var(--font-mono);
-        font-size: 15px;
+        font-size: 22px;
         text-anchor: middle;
         dominant-baseline: central;
       }
@@ -90,7 +100,7 @@
       }
 
       .mro text.m {
-        font-size: 13px;
+        font-size: 20px;
         fill: var(--muted);
         transition: fill 0.3s;
       }
@@ -114,18 +124,18 @@
 
       .mro .ord {
         fill: var(--amber);
-        font-size: 13px;
+        font-size: 18px;
         font-weight: 600;
       }
 
       .mro .outs {
-        min-width: min(100%, 18rem);
-        min-height: 2.3rem;
-        padding: 0.4rem 0.9rem;
+        min-width: min(100%, 22rem);
+        min-height: 2.8rem;
+        padding: 0.45rem 1rem;
         border-radius: 12px;
         border: 1px solid var(--border);
         background: rgba(0, 0, 0, 0.42);
-        font: 0.92rem/1.5 var(--font-mono);
+        font: 1.1rem/1.45 var(--font-mono);
         color: var(--muted);
       }
 
@@ -142,16 +152,6 @@
         visibility: hidden;
       }
 
-      @container slide (max-width: 760px) {
-        .mro-cols {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-
-        .mro svg {
-          max-height: 40cqh;
-        }
-      }
     </style>
   </head>
   <body>
@@ -442,7 +442,7 @@
           # inherit from object?
           class MyClass:
               pass
-          # implicitly inherits from object
+          # ans: implicitly inherits from object
 
           isinstance(MyClass(), object)
           # ans: True
@@ -498,7 +498,8 @@
       // a step is a list of lookups { name, path: [node ids], found, out, err }
       function Mro(slide, cfg) {
         const root = slide.querySelector(".mro");
-        const W = 160, RH = 22, H0 = 36;
+        const K = 1.25, W = cfg.w || 250, RH = 22 * K, H0 = 36 * K;
+        if (!cfg.scaled) { cfg.nodes.forEach((n) => { n.x *= K; n.y *= K; }); cfg.scaled = true; }
         const hgt = (n) => H0 + Math.max(n.m.length, n.rows ?? 0) * RH + (n.m.length || n.rows ? 6 : 0);
         const nodes = Object.fromEntries(cfg.nodes.map((n) => [n.id, n]));
         const maxY = Math.max(...cfg.nodes.map((n) => n.y + hgt(n)));
@@ -509,9 +510,9 @@
           svg += `<path class="edge" style="marker-end:url(#inhArrow-${slide.id})" d="M${c.x} ${c.y} L${p.x + (c.x - p.x) * 0.12} ${p.y + hgt(p) + 2}" />`;
         }
         for (const n of cfg.nodes) {
-          svg += `<g class="node${n.inst ? " inst" : ""}" data-id="${n.id}"><rect x="${n.x - W / 2}" y="${n.y}" width="${W}" height="${hgt(n)}" rx="10" /><text class="cn" x="${n.x}" y="${n.y + 18}">${esc(n.label || n.id)}</text>`;
-          n.m.forEach((m, i) => (svg += `<text class="m" data-m="${esc(m)}" x="${n.x}" y="${n.y + H0 + 4 + i * RH}">${esc(m)}</text>`));
-          svg += `<text class="ord" x="${n.x + W / 2 - 12}" y="${n.y + 14}"></text></g>`;
+          svg += `<g class="node${n.inst ? " inst" : ""}" data-id="${n.id}"><rect x="${n.x - W / 2}" y="${n.y}" width="${W}" height="${hgt(n)}" rx="10" /><text class="cn" x="${n.x}" y="${n.y + 18 * K}">${esc(n.label || n.id)}</text>`;
+          n.m.forEach((m, i) => (svg += `<text class="m" data-m="${esc(m)}" x="${n.x}" y="${n.y + H0 + 4 * K + i * RH}">${esc(m)}</text>`));
+          svg += `<text class="ord" x="${n.x + W / 2 - 16}" y="${n.y + 18 * K}"></text></g>`;
         }
         svg += `<circle class="probe" r="9" opacity="0" /></svg><div class="outs"></div>`;
         root.innerHTML = svg;
@@ -530,7 +531,7 @@
           root.querySelectorAll(".node.inst text.m").forEach((t) => (t.textContent = t.dataset.m));
           outs.innerHTML = "";
         }
-        const at = (id) => ({ cx: nodes[id].x - W / 2, cy: nodes[id].y + 18 });
+        const at = (id) => ({ cx: nodes[id].x - W / 2, cy: nodes[id].y + 18 * K });
 
         // one lookup: returns its duration when animated
         function run(L, t, anim) {
@@ -615,14 +616,14 @@
         const edges = [];
         let prev = "object";
         for (const [id, m] of classes) {
-          y += 36 + (nodes[nodes.length - 1].m.length ? nodes[nodes.length - 1].m.length * 22 + 6 : 0) + 44;
+          y += 36 + (nodes[nodes.length - 1].m.length ? nodes[nodes.length - 1].m.length * 22 + 6 : 0) + 26;
           nodes.push({ id, x: 0, y, m });
           edges.push([id, prev]);
           prev = id;
         }
         if (inst) {
           const last = nodes[nodes.length - 1];
-          y += 36 + (last.m.length ? last.m.length * 22 + 6 : 0) + 44;
+          y += 36 + (last.m.length ? last.m.length * 22 + 6 : 0) + 26;
           nodes.push({ id: "inst", label: inst, x: 0, y, m: Array(rows || 0).fill(""), inst: true });
           edges.push(["inst", prev]);
         }
@@ -662,12 +663,13 @@
         steps: [[{ name: "other", path: ["inst", "Derived"], found: "Derived" }, { name: "method", path: ["Derived", "Base"], found: "Base", out: out("Derived().other()", "1") }]],
       });
       mro("e5", {
+        w: 170,
         nodes: [
           { id: "object", x: 0, y: 0, m: [] },
-          { id: "A", x: -100, y: 90, m: ["method"] },
-          { id: "B", x: 100, y: 90, m: ["method"] },
-          { id: "C", x: 0, y: 210, m: [] },
-          { id: "inst", label: "C()", x: 0, y: 300, m: [], inst: true },
+          { id: "A", x: -100, y: 76, m: ["method"] },
+          { id: "B", x: 100, y: 76, m: ["method"] },
+          { id: "C", x: 0, y: 180, m: [] },
+          { id: "inst", label: "C()", x: 0, y: 254, m: [], inst: true },
         ],
         edges: [["A", "object"], ["B", "object"], ["C", "A"], ["C", "B"], ["inst", "C"]],
         steps: [{ name: "method", path: ["inst", "C", "A"], found: "A", out: out("C().method()", '"A"') }],
@@ -685,15 +687,16 @@
         ...chain([["A", ["method"]], ["B", ["method"]], ["C", ["method"]]], "C()"),
         steps: [[{ name: "method", path: ["inst", "C"], found: "C" }, { name: "method", path: ["A"], found: "A", out: 'super(B, self).method() → <b>"A"</b>' }]],
       });
-      mro("e9", { ...chain([["MyClass", []]], "MyClass()"), steps: [{ path: ["inst", "MyClass", "object"], found: "object", out: out("isinstance(MyClass(), object)", "True") }] });
+      mro("e9", { ...chain([["MyClass", []]], "MyClass()"), steps: [[], { path: ["inst", "MyClass", "object"], found: "object", out: out("isinstance(MyClass(), object)", "True") }] });
       mro("e10", {
+        w: 170,
         nodes: [
           { id: "object", x: 0, y: 0, m: [] },
-          { id: "A", x: 0, y: 80, m: ["method"] },
-          { id: "B", x: -100, y: 200, m: [] },
-          { id: "C", x: 100, y: 200, m: [] },
-          { id: "D", x: 0, y: 300, m: [] },
-          { id: "inst", label: "D()", x: 0, y: 390, m: [], inst: true },
+          { id: "A", x: 0, y: 66, m: ["method"] },
+          { id: "B", x: -100, y: 168, m: [] },
+          { id: "C", x: 100, y: 168, m: [] },
+          { id: "D", x: 0, y: 252, m: [] },
+          { id: "inst", label: "D()", x: 0, y: 326, m: [], inst: true },
         ],
         edges: [["A", "object"], ["B", "A"], ["C", "A"], ["D", "B"], ["D", "C"], ["inst", "D"]],
         steps: [{ name: "method", path: ["inst", "D", "B", "C", "A"], found: "A", order: true, out: out("D().method()", '"A"') }],

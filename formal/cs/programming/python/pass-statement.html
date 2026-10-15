@@ -8,35 +8,110 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       /* ================= shared lesson widgets (tracer, strip, rewrite) ================= */
+      /* font shorthands reset ligatures, so force them off: == must stay two characters */
       pre code,
       .strip,
-      .rw {
-        font-variant-ligatures: none;
+      .strip *,
+      .rw,
+      .rw *,
+      .chip,
+      .state * {
+        font-variant-ligatures: none !important;
       }
 
       .slide pre {
         width: auto;
-        min-width: min(100%, 30rem);
+        min-width: min(100%, 24rem);
         max-width: 100%;
-        font-size: 1.3rem;
+        font-size: 1.5rem;
+        line-height: 1.45;
+        flex-shrink: 0;
       }
 
       .slide pre.small {
-        font-size: 1.15rem;
+        font-size: 1.3rem;
       }
 
       .slide pre.tiny {
-        font-size: 1rem;
+        font-size: 1.12rem;
+      }
+
+      /* the closing recap: big cards, two by two (three in a row when there are three) */
+      .cards.recap {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 76rem);
+      }
+
+      .cards.recap:has(> .card:nth-child(3):last-child) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .cards.recap .card {
+        padding: 1.5rem 1.9rem;
+      }
+
+      .cards.recap h3 {
+        font-size: 1.6rem;
+      }
+
+      .cards.recap p {
+        font-size: 1.3rem;
+        line-height: 1.5;
+      }
+
+      /* section dividers: the title and its line sit together in the middle */
+      .slide.section > h2:first-of-type {
+        margin-top: auto;
+      }
+
+      .slide.section > h2:first-of-type + * {
+        margin-top: 0;
+      }
+
+      .slide.section > p {
+        font-size: 1.4rem;
+      }
+
+      /* .pair (code, then a widget) put side by side when the code fits better that way */
+      .slide .pair.beside {
+        grid-template-columns: max-content minmax(0, 1fr);
+        align-items: center;
+        justify-content: center;
+        column-gap: 3rem;
+      }
+
+      .slide .pair.beside > pre {
+        min-width: 0;
+      }
+
+      .pair.beside .rw .ex {
+        font-size: 1.6rem;
+      }
+
+      .pair.beside > .pair-col {
+        display: grid;
+        justify-items: center;
+        gap: 1.2rem;
+        min-width: 0;
+      }
+
+      /* a comment is prose: when the code would otherwise shrink for it (.wrapc),
+         let it wrap under its own text */
+      .slide pre.lines.wrapc .line.cl {
+        white-space: pre-wrap;
+        padding-left: 3em;
+        text-indent: -3em;
       }
 
       /* ---------- Tracer: lines light up in the order Python runs them ---------- */
       .tracer {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: flex-start;
         justify-content: center;
-        gap: 1.2rem;
-        width: min(100%, 64rem);
+        gap: 1.6rem;
+        width: 100%;
       }
 
       .tracer > pre {
@@ -44,17 +119,17 @@
       }
 
       .state {
-        flex: 0 0 15rem;
+        flex: 0 0 19rem;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        gap: 0.8rem;
-        font-size: 1rem;
+        gap: 1rem;
+        font-size: 1.25rem;
       }
 
       .state .box {
         min-width: 0;
-        padding: 0.7rem 0.9rem;
-        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        border-radius: 14px;
         background: var(--glass);
         border: 1px solid var(--border);
       }
@@ -63,8 +138,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin: 0 0 0.4rem;
-        font-size: 0.72rem;
+        margin: 0 0 0.5rem;
+        font-size: 0.8rem;
         letter-spacing: 0.15em;
         text-transform: uppercase;
         color: var(--violet-soft);
@@ -83,6 +158,8 @@
       }
 
       .state .vars .v {
+        min-width: 0;
+        overflow-wrap: anywhere;
         color: var(--text);
         border-radius: 4px;
         padding: 0 0.3em;
@@ -109,7 +186,7 @@
       .state .empty {
         color: var(--faint);
         font-family: var(--font);
-        font-size: 0.85rem;
+        font-size: 1rem;
       }
 
       .replay {
@@ -117,8 +194,8 @@
         background: var(--glass-light);
         color: var(--muted);
         border-radius: 999px;
-        font: 500 0.7rem var(--font);
-        padding: 0.1rem 0.6rem;
+        font: 500 0.78rem var(--font);
+        padding: 0.15rem 0.7rem;
         cursor: pointer;
         letter-spacing: 0.05em;
         text-transform: none;
@@ -164,7 +241,7 @@
         padding: 0 0.6em;
         border-radius: 999px;
         font-family: var(--font);
-        font-size: 0.72em;
+        font-size: 0.8em;
         font-style: normal;
         line-height: 1.6;
         vertical-align: 0.1em;
@@ -195,9 +272,19 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        font-size: 0.95rem;
+        gap: 0.7rem;
+        font-size: 1.15rem;
         color: var(--muted);
+      }
+
+      .state > .try {
+        justify-content: flex-start;
+        gap: 0.5rem;
+      }
+
+      .state > .try .chip {
+        min-width: 0;
+        padding: 0.35rem 0.8rem;
       }
 
       .try:not(.shown) {
@@ -205,13 +292,13 @@
       }
 
       .chip {
-        min-width: 3rem;
-        padding: 0.3rem 0.85rem;
+        min-width: 3.6rem;
+        padding: 0.4rem 1.1rem;
         border-radius: 999px;
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.95rem var(--font-mono);
+        font: 500 1.2rem var(--font-mono);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -228,7 +315,7 @@
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.1rem;
         color: var(--faint);
         text-align: center;
       }
@@ -237,27 +324,27 @@
       .strip {
         display: grid;
         justify-items: center;
-        gap: 0.6rem;
-        width: min(100%, 60rem);
+        gap: 0.9rem;
+        width: 100%;
       }
 
       .strip .cells {
         display: flex;
         flex-wrap: nowrap;
         justify-content: center;
-        gap: 0.25rem;
+        gap: 0.4rem;
         max-width: 100%;
       }
 
       .strip .cell {
         display: grid;
         justify-items: center;
-        gap: 0.15rem;
+        gap: 0.2rem;
         font-family: var(--font-mono);
       }
 
       .strip .ix {
-        font-size: 0.7rem;
+        font-size: 0.95rem;
         color: var(--faint);
         transition: color 0.3s;
       }
@@ -265,12 +352,12 @@
       .strip .ch {
         display: grid;
         place-items: center;
-        width: var(--cw, 2.3rem);
-        height: 2.6rem;
-        border-radius: 8px;
+        width: var(--cw, 3.2rem);
+        height: 3.6rem;
+        border-radius: 10px;
         background: rgba(15, 18, 35, 0.85);
         border: 1px solid rgba(167, 139, 250, 0.35);
-        font-size: 1.2rem;
+        font-size: 1.75rem;
         white-space: pre;
         transition:
           background 0.35s,
@@ -296,35 +383,37 @@
       }
 
       .strip .ord {
-        font-size: 0.65rem;
+        font-size: 0.95rem;
         color: var(--cyan);
-        height: 0.9rem;
+        height: 1.2rem;
       }
 
       .strip .res {
-        min-height: 2.2rem;
-        font: 500 1.25rem var(--font-mono);
+        min-height: 3rem;
+        font: 500 1.8rem var(--font-mono);
+        max-width: 100%;
+        text-align: center;
         color: var(--green);
       }
 
       .strip .res .lbl {
         color: var(--faint);
-        font-size: 0.85rem;
-        margin-right: 0.6rem;
+        font-size: 1rem;
+        margin-right: 0.8rem;
       }
 
       /* ---------- Rewrite: an expression turning into what Python actually runs ---------- */
       .rw {
         display: grid;
         justify-items: center;
-        width: min(100%, 56rem);
+        width: 100%;
       }
 
       .rw > .rs {
         grid-area: 1 / 1;
         display: grid;
         justify-items: center;
-        gap: 0.4rem;
+        gap: 0.7rem;
         opacity: 0;
         transform: translateY(0.8rem);
         transition:
@@ -350,9 +439,9 @@
       }
 
       .rw .ex {
-        font: 500 1.35rem var(--font-mono);
-        padding: 0.55rem 1.1rem;
-        border-radius: 12px;
+        font: 500 1.85rem var(--font-mono);
+        padding: 0.8rem 1.6rem;
+        border-radius: 16px;
         background: rgba(10, 12, 26, 0.78);
         border: 1px solid var(--border);
         white-space: pre;
@@ -368,19 +457,19 @@
 
       .rw small {
         color: var(--muted);
-        font-size: 0.9rem;
+        font-size: 1.15rem;
       }
 
       .rw-dots {
         display: flex;
-        gap: 0.35rem;
+        gap: 0.5rem;
         justify-content: center;
-        margin-top: 0.4rem;
+        margin-top: 0.6rem;
       }
 
       .rw-dots i {
-        width: 0.45rem;
-        height: 0.45rem;
+        width: 0.6rem;
+        height: 0.6rem;
         border-radius: 50%;
         background: var(--border);
         transition: background 0.3s;
@@ -389,49 +478,16 @@
       .rw-dots i.on {
         background: var(--cyan);
       }
-
-      @container slide (max-width: 760px) {
-        .slide pre,
-        .slide pre.small {
-          font-size: 0.85rem;
-          min-width: 0;
-        }
-
-        .slide pre.tiny {
-          font-size: 0.72rem;
-        }
-
-        .state {
-          flex: 1 1 100%;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          font-size: 0.85rem;
-        }
-
-        .strip .ch {
-          width: var(--cwm, min(1.9rem, 6.6cqw));
-          height: 2.1rem;
-          font-size: 0.95rem;
-        }
-
-        .strip .cells {
-          gap: 0.12rem;
-        }
-
-        .rw .ex {
-          font-size: 0.9rem;
-          white-space: pre-wrap;
-        }
-      }
       #why .blocks {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1.2rem;
-        width: min(100%, 56rem);
+        gap: 2.4rem;
+        width: 100%;
       }
 
       #why .blk {
         display: grid;
-        gap: 0.6rem;
+        gap: 1rem;
         justify-items: center;
       }
 
@@ -442,7 +498,14 @@
 
       #why .verdict {
         font-weight: 600;
-        font-size: 1.05rem;
+        font-size: 1.3rem;
+        text-align: center;
+      }
+
+      #why .lead {
+        font-size: 1.4rem;
+        max-width: 60rem;
+        text-align: center;
       }
 
       #why .bad {
@@ -459,11 +522,6 @@
         border-bottom: 2px dashed var(--red);
       }
 
-      @container slide (max-width: 760px) {
-        #why .blocks {
-          grid-template-columns: 1fr;
-        }
-      }
     </style>
   </head>
   <body>
@@ -673,7 +731,7 @@
 
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 56rem)">
+      <div class="cards recap">
         <div class="card step"><h3>A no-op</h3><p><code>pass</code> does nothing at all; execution continues with the next line.</p></div>
         <div class="card step"><h3>A placeholder</h3><p>Use it where a block is required but empty: <code>if</code>, loops, functions, classes, <code>except</code>.</p></div>
         <div class="card step"><h3>Not <code>continue</code></h3><p><code>pass</code> skips nothing; <code>continue</code> skips the rest of the loop body.</p></div>
@@ -715,6 +773,9 @@
         st.innerHTML = `<div class="box"><h4>Variables <button class="replay" title="Run the trace again">replay</button></h4><div class="vars"></div></div><div class="box"><h4>Output</h4><div class="out"></div></div>`;
         st.setAttribute("data-interactive", "");
         wrap.appendChild(st);
+        // chips that rerun this code sit in the panel, beside the code
+        const chips = wrap.closest(".slide")?.querySelector(":scope > .try");
+        if (chips) st.appendChild(chips);
         pre._panel = st;
         st.querySelector(".replay").addEventListener("click", () => trace(pre, false));
         clearPanel(pre);
@@ -1028,6 +1089,148 @@
           gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
         },
       });
+      // ------------------------------------------------------------ code sizing
+      // Each slide is a fixed 1600x900 canvas. Scale the slide's code blocks to the
+      // largest size (up to 2.5rem) that fits, both across (no scrollbars, room for the
+      // tracer's widest badges) and down the slide; shrink no further than 1.1rem.
+      const REM = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      function fitCode(slide) {
+        const pres = [...slide.querySelectorAll("pre")].filter((p) => !p.closest(".deck-zoom"));
+        if (!pres.length || slide.hasAttribute("data-fixed-code")) return;
+        pres.forEach((p) => (p.style.fontSize = ""));
+        const base = pres.map((p) => parseFloat(getComputedStyle(p).fontSize));
+        // worst case for width: every traced line carries its longest badge, and the panel is full
+        const temp = [];
+        for (const pre of pres.filter((p) => p.matches(".trace[data-trace]") && !p.matches(".tracing, .traced"))) {
+          trace(pre, true);
+          const lines = [...pre.querySelectorAll(".line")];
+          const longest = new Map();
+          for (const s of parseTrace(pre.dataset.trace)) {
+            if (!s.kind) continue;
+            const t = s.note ?? (s.kind === "T" ? "True" : s.kind === "F" ? "False" : "");
+            if ((longest.get(s.line) || "").length < t.length) longest.set(s.line, t);
+          }
+          for (const [ln, t] of longest) {
+            const el = lines[ln - 1];
+            if (!el) continue;
+            el.querySelectorAll(".tb").forEach((o) => o.remove());
+            const b = document.createElement("span");
+            b.className = "tb";
+            b.textContent = t;
+            el.appendChild(b);
+          }
+          temp.push(pre);
+        }
+        // a wrapped comment may take two lines, not more
+        const wrapsOk = (p) => {
+          if (!p.classList.contains("wrapc")) return true;
+          const lh = parseFloat(getComputedStyle(p).lineHeight) * 0.9; // code is 0.9em of the pre
+          return [...p.querySelectorAll(".line.cl")].every((l) => l.offsetHeight <= 2.2 * lh);
+        };
+        // a centred grid that is too wide spills out on both sides, which scrollWidth misses
+        const inside = (w) => {
+          const r = w.getBoundingClientRect();
+          return [...w.children].every((c) => {
+            const q = c.getBoundingClientRect();
+            return !q.width || (q.left >= r.left - 1 && q.right <= r.right + 1);
+          });
+        };
+        const zoom = slide.style.zoom;
+        slide.style.zoom = "";
+        const fits = () =>
+          slide.scrollHeight <= slide.clientHeight + 1 && slide.scrollWidth <= slide.clientWidth + 1 && pres.every((p) => p.scrollWidth <= p.clientWidth + 1 && p.scrollHeight <= p.clientHeight + 1 && wrapsOk(p)) &&
+          [...slide.querySelectorAll(".strip, .rw, .pair, .pair-col, .duo, .code2")].every((w) => w.scrollWidth <= w.clientWidth + 1 && inside(w));
+        const set = (k) => pres.forEach((p, i) => (p.style.fontSize = Math.max(Math.min(base[i] * k, 2.5 * REM), Math.min(base[i], 1.1 * REM)) + "px"));
+        const over = () =>
+          Math.max(
+            slide.scrollHeight / slide.clientHeight,
+            slide.scrollWidth / slide.clientWidth,
+            ...[...pres, ...slide.querySelectorAll(".strip, .rw, .pair, .pair-col, .duo, .code2")].map((w) => w.scrollWidth / (w.clientWidth || 1)),
+            ...pres.map((p) => p.scrollHeight / (p.clientHeight || 1)),
+          );
+        const best = (top = 1.7) => {
+          const tried = [];
+          for (let k = top; k > 0.7; k -= 0.05) {
+            set(k);
+            if (fits()) return k;
+            tried.push([k, over()]);
+          }
+          // Nothing fits: shrink the code only as far as that actually helps
+          const least = Math.min(...tried.map((x) => x[1]));
+          const k = tried.find((x) => x[1] <= least + 0.01)[0];
+          set(k);
+          return k;
+        };
+        let k1 = best();
+        // Rather than shrink the code for a long comment, let comment lines wrap
+        if (k1 < 0.999) {
+          pres.forEach((p) => {
+            p.querySelectorAll(".line").forEach((l) => l.classList.toggle("cl", /^\s*#/.test(l.textContent) || l.classList.contains("answer")));
+            p.classList.add("wrapc");
+          });
+          const kw = best(1.3);
+          if (kw > k1 + 0.04) k1 = kw;
+          else {
+            pres.forEach((p) => p.classList.remove("wrapc"));
+            set(k1);
+          }
+        }
+        // Code with a widget stacked under it (a one-column .pair): try the widget
+        // beside the code instead
+        const pair = slide.querySelector(".pair");
+        if (k1 < 1.2 && pair && !pair.matches(".side, .beside") && getComputedStyle(pair).gridTemplateColumns.split(" ").length < 2 && pair.children.length > 1 && pair.firstElementChild.matches("pre, .tracer")) {
+          const fit1 = fits();
+          const col = document.createElement("div");
+          col.className = "pair-col";
+          col.append(...[...pair.children].slice(1));
+          pair.append(col);
+          pair.classList.add("beside");
+          // beside a widget, the code shouldn't dwarf it; a wide widget may shrink a little
+          let k2 = best(1.15);
+          for (let z = 0.9; !fits() && z > 0.69; z -= 0.1) {
+            col.style.zoom = z;
+            k2 = best(1.15);
+          }
+          // keep it if stacking didn't fit, or if the code gets bigger (by any amount when
+          // stacking had squeezed it below its usual size)
+          if (!fits() || (fit1 && k2 < k1 + (k1 < 0.9 ? 0 : 0.1))) {
+            col.style.zoom = "";
+            pair.classList.remove("beside");
+            pair.append(...col.children);
+            col.remove();
+            set(k1);
+            fits();
+          } else {
+            // then grow the widget column into the room left beside the code
+            const z0 = col.style.zoom;
+            for (let z = 1.6; z > +(z0 || 1); z -= 0.1) {
+              col.style.zoom = z;
+              if (fits()) break;
+              col.style.zoom = z0;
+            }
+          }
+        }
+        // Still too big with the code at its floor: shrink the widgets a little
+        // instead of the whole slide
+        const widgets = [...slide.querySelectorAll(".strip, .rw, .try")];
+        if (!fits() && widgets.length) {
+          let z = 0.95;
+          for (; z > 0.79; z -= 0.05) {
+            widgets.forEach((w) => (w.style.zoom = z));
+            if (fits()) break;
+          }
+          if (z < 0.79) widgets.forEach((w) => (w.style.zoom = ""));
+        }
+        slide.style.zoom = zoom;
+        temp.forEach(reset);
+      }
+      document.fonts.ready.then(() =>
+        setTimeout(() => {
+          Deck.slides.forEach(fitCode);
+          Deck.fit();
+        }, 0),
+      );
+
       // ================= end shared widgets =================
     </script>
   </body>

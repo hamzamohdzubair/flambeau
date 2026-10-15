@@ -8,15 +8,15 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #chart .cols {
-        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
         align-items: center;
-        width: min(100%, 72rem);
+        width: 100%;
       }
 
       .trade {
         width: 100%;
         height: auto;
-        max-height: 64cqh;
+        max-height: 70cqh;
         overflow: visible;
       }
 
@@ -28,7 +28,7 @@
 
       .trade .al {
         fill: var(--muted);
-        font: 600 17px var(--font);
+        font: 600 23px var(--font);
       }
 
       .trade .curve {
@@ -59,7 +59,7 @@
       }
 
       .trade .note {
-        font: 14px var(--font);
+        font: 20px var(--font);
         fill: var(--muted);
       }
 
@@ -81,19 +81,6 @@
         vertical-align: middle;
       }
 
-      @container slide (max-width: 760px) {
-        #chart .cols {
-          grid-template-columns: 1fr;
-        }
-
-        .trade {
-          max-height: 40cqh;
-        }
-
-        .key p {
-          font-size: 0.9rem;
-        }
-      }
     </style>
   </head>
   <body>
@@ -114,18 +101,18 @@
           </defs>
           <line class="axis" x1="100" y1="440" x2="860" y2="440" />
           <line class="axis" x1="100" y1="440" x2="100" y2="40" />
-          <text class="al" x="860" y="474" text-anchor="end">Development time →</text>
+          <text class="al" x="860" y="482" text-anchor="end">Development time →</text>
           <text class="al" x="88" y="50" text-anchor="end" transform="rotate(-90 88 50)" dy="-6">CPU time →</text>
 
           <!-- guides -->
           <line class="guide hi g-first" x1="150" y1="90" x2="150" y2="440" />
           <line class="guide lo g-first" x1="330" y1="190" x2="330" y2="440" />
-          <text class="note g-first" x="150" y="462" text-anchor="middle">first runnable</text>
-          <text class="note g-first" x="330" y="462" text-anchor="middle">first runnable</text>
+          <text class="note g-first" x="150" y="466" text-anchor="middle">first runnable</text>
+          <text class="note g-first" x="330" y="466" text-anchor="middle">first runnable</text>
           <line class="guide hi g-best" x1="100" y1="332" x2="840" y2="332" />
           <line class="guide lo g-best" x1="100" y1="410" x2="840" y2="410" />
-          <text class="note g-best" x="160" y="324" text-anchor="start">best possible (high-level)</text>
-          <text class="note g-best" x="160" y="402" text-anchor="start">best possible (low-level)</text>
+          <text class="note g-best" x="840" y="356" text-anchor="end">best possible (high-level)</text>
+          <text class="note g-best" x="840" y="432" text-anchor="end">best possible (low-level)</text>
 
           <!-- curves -->
           <path class="curve hi" d="M150 90 C 250 240, 420 300, 840 332" />
@@ -144,7 +131,7 @@
     <section class="slide">
       <h2>The original figure</h2>
       <figure class="zoom-on-reveal">
-        <img src="/assets/2025-10-21-14-03-24.png" alt="Trade-off between low- and high-level languages: CPU time against development time" style="max-height: 60cqh" />
+        <img src="/assets/2025-10-21-14-03-24.png" alt="Trade-off between low- and high-level languages: CPU time against development time" style="max-height: 70cqh" />
         <figcaption>Source: Johansson, Robert. <em>Numerical Python</em>. New York, NY: Apress, 2019.</figcaption>
       </figure>
     </section>

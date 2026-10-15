@@ -7,12 +7,21 @@
     <link rel="stylesheet" href="/deck/deck.css" />
     <script src="/deck/deck.js" defer></script>
     <style>
+      /* codefit:start (Python decks: code outside the tracer starts large; the codefit script steps it down to fit) */
+      .slide > pre {
+        width: auto;
+        min-width: min(100%, 42rem);
+        max-width: 100%;
+        font-size: 1.8rem;
+      }
+      /* codefit:end */
+
       /* ---------- Traced code: lines light up in the order Python runs them ---------- */
       .slide pre.trace {
         width: auto;
-        min-width: min(100%, 30rem);
+        min-width: min(100%, 42rem);
         max-width: 100%;
-        font-size: 1.2rem;
+        font-size: 1.8rem;
       }
 
       /* Show >= as typed, not as the font's ligature */
@@ -22,7 +31,7 @@
       }
 
       .slide pre.trace[data-trace] {
-        font-size: 1.45rem;
+        font-size: 1.7rem;
       }
 
       pre.trace .line {
@@ -61,7 +70,7 @@
         padding: 0 0.6em;
         border-radius: 999px;
         font-family: var(--font);
-        font-size: 0.72em;
+        font-size: 0.8em;
         font-style: normal;
         line-height: 1.6;
         vertical-align: 0.1em;
@@ -85,8 +94,8 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        font-size: 0.95rem;
+        gap: 0.7rem;
+        font-size: 1.25rem;
         color: var(--muted);
       }
 
@@ -99,13 +108,13 @@
       }
 
       .chip {
-        min-width: 3rem;
-        padding: 0.3rem 0.85rem;
+        min-width: 4rem;
+        padding: 0.35rem 1.1rem;
         border-radius: 999px;
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.95rem var(--font-mono);
+        font: 500 1.3rem var(--font-mono);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -122,23 +131,24 @@
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.15rem;
         color: var(--faint);
         text-align: center;
       }
 
       /* ---------- The elif flowchart ---------- */
       #elif .cols {
-        grid-template-columns: auto minmax(0, 26rem);
+        grid-template-columns: auto minmax(0, 32rem);
         justify-content: center;
+        align-items: center;
         gap: 3rem;
-        width: min(100%, 62rem);
+        width: 100%;
       }
 
       .flow {
         width: 100%;
         height: auto;
-        max-height: 62cqh;
+        max-height: 56cqh;
         overflow: visible;
       }
 
@@ -169,14 +179,14 @@
       .flow text {
         fill: var(--text);
         font-family: var(--font-mono);
-        font-size: 15px;
+        font-size: 18px;
         text-anchor: middle;
         dominant-baseline: central;
       }
 
       .flow text.lbl {
         font-family: var(--font);
-        font-size: 12px;
+        font-size: 18px;
         fill: var(--muted);
       }
 
@@ -194,23 +204,6 @@
       /* ---------- Recap ---------- */
       #recap .card h3 code {
         font-size: 0.85em;
-      }
-
-      @container slide (max-width: 760px) {
-        .slide pre.trace,
-        .slide pre.trace[data-trace] {
-          font-size: 0.85rem;
-          min-width: 0;
-        }
-
-        #elif .cols {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-
-        .flow {
-          max-height: 46cqh;
-        }
       }
     </style>
   </head>
@@ -297,13 +290,13 @@
           <text x="150" y="225">score &gt;= 80</text>
           <polygon class="node" data-node="c3" points="150,285 245,325 150,365 55,325" />
           <text x="150" y="325">score &gt;= 70</text>
-          <rect class="node" data-node="oA" x="310" y="105" width="110" height="40" rx="8" />
-          <text x="365" y="125">print("A")</text>
-          <rect class="node" data-node="oB" x="310" y="205" width="110" height="40" rx="8" />
-          <text x="365" y="225">print("B")</text>
-          <rect class="node" data-node="oC" x="310" y="305" width="110" height="40" rx="8" />
-          <text x="365" y="325">print("C")</text>
-          <rect class="node" data-node="oF" x="95" y="400" width="110" height="40" rx="8" />
+          <rect class="node" data-node="oA" x="308" y="105" width="126" height="40" rx="8" />
+          <text x="371" y="125">print("A")</text>
+          <rect class="node" data-node="oB" x="308" y="205" width="126" height="40" rx="8" />
+          <text x="371" y="225">print("B")</text>
+          <rect class="node" data-node="oC" x="308" y="305" width="126" height="40" rx="8" />
+          <text x="371" y="325">print("C")</text>
+          <rect class="node" data-node="oF" x="87" y="400" width="126" height="40" rx="8" />
           <text x="150" y="420">print("F")</text>
           <circle class="token" r="9" cx="150" cy="38" opacity="0" />
         </svg>
@@ -706,6 +699,32 @@
           gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
         },
       });
+
+      /* codefit:start (Python decks: shrink a slide's code blocks together until the slide fits) */
+      const fitCode = () => {
+        const groups = new Map();
+        for (const pre of document.querySelectorAll(".slide pre")) {
+          if (pre.closest(".viz")) continue;
+          const slide = pre.closest(".slide");
+          if (!groups.has(slide)) groups.set(slide, []);
+          groups.get(slide).push(pre);
+        }
+        for (const [slide, pres] of groups) {
+          slide.style.zoom = "";
+          pres.forEach((p) => (p.style.fontSize = ""));
+          const base = pres.map((p) => parseFloat(getComputedStyle(p).fontSize));
+          const over = () =>
+            slide.scrollHeight > slide.clientHeight + 1 ||
+            slide.scrollWidth > slide.clientWidth + 1 ||
+            pres.some((p) => p.scrollWidth > p.clientWidth + 1 || p.scrollHeight > p.clientHeight + 1);
+          for (let k = 0.96; over() && Math.min(...base) * k >= 20; k -= 0.04) pres.forEach((p, i) => (p.style.fontSize = base[i] * k + "px"));
+        }
+        Deck.fit();
+      };
+      await Deck.ready;
+      fitCode();
+      document.fonts?.ready.then(fitCode);
+      /* codefit:end */
     </script>
   </body>
 </html>

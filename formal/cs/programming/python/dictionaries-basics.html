@@ -196,26 +196,6 @@
         max-width: 100%;
       }
 
-      @container slide (max-width: 760px) {
-        .duo {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
-
-        .mv {
-          padding: 0.7rem;
-          gap: 0.6rem;
-          font-size: 0.8rem;
-        }
-
-        .mv-name {
-          min-width: 0;
-        }
-
-        .mv-cell {
-          padding: 0.2rem 0.45rem;
-        }
-      }
 
       .slide pre {
         width: auto;
@@ -327,23 +307,122 @@
         text-align: center;
       }
 
-      @container slide (max-width: 760px) {
-        .buckets {
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-
-        #hash .stmt {
-          font-size: 1rem;
-        }
-
-        .hv-pipe {
-          font-size: 0.85rem;
-          gap: 0.5rem;
-        }
-
-        .bucket {
-          min-height: 4.6rem;
-        }
+      /* ---------- 1600x900 canvas sizing (memory view) ---------- */
+      .mv {
+        font-size: 1.35rem;
+        gap: 1.1rem;
+        padding: 1.4rem 1.6rem;
+        min-width: min(100%, 26rem);
+      }
+      .mv-name {
+        min-width: 5.5rem;
+      }
+      .mv-items::before,
+      .mv-items::after {
+        font-size: 1.6rem;
+      }
+      .mv-cell {
+        padding: 0.35rem 0.8rem;
+      }
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1.3rem;
+      }
+      .mv-cell small {
+        bottom: -1.4rem;
+        font-size: 0.8rem;
+      }
+      .mv-cell small.nx {
+        bottom: -2.5rem;
+      }
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2.5rem;
+      }
+      .mv-empty {
+        font-size: 1rem;
+      }
+      .mv-note {
+        font-size: 1.2rem;
+      }
+      .duo {
+        width: 100%;
+        gap: 2.5rem;
+      }
+      .duo pre,
+      .stack pre {
+        min-width: 0;
+        flex-shrink: 0;
+      }
+      .stack {
+        width: 100%;
+      }
+      .slide pre {
+        flex-shrink: 0;
+      }
+      .hint {
+        font-size: 1.2rem;
+      }
+      .duo pre {
+        font-size: 1.4rem;
+      }
+      #create .duo pre {
+        font-size: 1.2rem;
+      }
+      #create .mv-var,
+      #create .mv-items {
+        flex-wrap: nowrap;
+      }
+      #create .duo {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        gap: 1.4rem;
+      }
+      #create .duo pre {
+        font-size: 1.25rem;
+      }
+      #create .mv {
+        font-size: 1.2rem;
+        gap: 0.6rem;
+        padding: 1rem 1.4rem;
+      }
+      .stack pre {
+        font-size: 1.25rem;
+      }
+      /* hash table */
+      #hash .stmt {
+        font-size: 1.7rem;
+      }
+      .hv-pipe {
+        font-size: 1.4rem;
+        gap: 1.4rem;
+      }
+      .buckets {
+        width: 100%;
+        gap: 0.7rem;
+      }
+      .bucket {
+        min-height: 8rem;
+        padding: 0.7rem 0.4rem;
+        font-size: 1.2rem;
+      }
+      .bucket .keychip {
+        font-size: 1rem;
+      }
+      .hv-note {
+        font-size: 1.3rem;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 62rem);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
       }
     </style>
   </head>
@@ -475,7 +554,7 @@
 
     <section class="slide">
       <h2>Exercise 1</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # what is the value?
         d = {"a": 1, "b": 2}
         d["a"]
@@ -485,7 +564,7 @@
 
     <section class="slide">
       <h2>Exercise 2</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # key not found?
         d = {"a": 1}
         d["b"]
@@ -495,7 +574,7 @@
 
     <section class="slide">
       <h2>Exercise 3</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # get vs brackets?
         d = {"a": 1}
         d.get("b")
@@ -507,7 +586,7 @@
 
     <section class="slide">
       <h2>Exercise 4</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # adding new key?
         d = {"a": 1}
         d["b"] = 2
@@ -517,7 +596,7 @@
 
     <section class="slide">
       <h2>Exercise 5</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # updating value?
         d = {"a": 1}
         d["a"] = 10
@@ -527,7 +606,7 @@
 
     <section class="slide">
       <h2>Exercise 6</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.55rem"><code class="language-python">
         # membership test?
         d = {"a": 1, "b": 2}
         "a" in d
@@ -539,7 +618,7 @@
 
     <section class="slide">
       <h2>Exercise 7</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # dict length?
         d = {"a": 1, "b": 2, "c": 3}
         len(d)
@@ -549,7 +628,7 @@
 
     <section class="slide">
       <h2>Exercise 8</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # empty dict check?
         d = {}
         bool(d)
@@ -559,7 +638,7 @@
 
     <section class="slide">
       <h2>Exercise 9</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.05rem"><code class="language-python">
         # nested dict?
         d = {"user": {"name": "Alice", "age": 25}}
         d["user"]["name"]
@@ -569,7 +648,7 @@
 
     <section class="slide">
       <h2>Exercise 10</h2>
-      <pre><code class="language-python">
+      <pre style="font-size: 2.60rem"><code class="language-python">
         # dict from pairs?
         pairs = [("a", 1), ("b", 2)]
         d = dict(pairs)
@@ -580,7 +659,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 60rem)">
+      <div class="cards">
         <div class="card step"><h3><code>d[key]</code></h3><p>Reads a value; a missing key raises <code>KeyError</code>.</p></div>
         <div class="card step"><h3><code>d.get(key, default)</code></h3><p>Never raises: returns the default, or <code>None</code>.</p></div>
         <div class="card step"><h3><code>d[key] = value</code></h3><p>Adds a new key or replaces an existing value. <code>del d[key]</code> removes it.</p></div>
@@ -674,11 +753,12 @@
           box.innerHTML = html;
           if (!anim) return;
           const base = box.getBoundingClientRect();
+          const k = base.width / box.offsetWidth || 1; // the canvas is scaled to the window
           box.querySelectorAll("[data-id]").forEach((e) => {
             const r0 = oldRects.get(e.dataset.id);
             if (!r0) return gsap.from(e, { scale: 0.3, opacity: 0, duration: 0.45, ease: "back.out(2)" });
             const r1 = e.getBoundingClientRect();
-            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: r0.left - r1.left, y: r0.top - r1.top, duration: 0.6, ease: "power2.inOut" });
+            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: (r0.left - r1.left) / k, y: (r0.top - r1.top) / k, duration: 0.6, ease: "power2.inOut" });
             if (oldVals.get(e.dataset.id) !== e.querySelector(".v")?.textContent) gsap.fromTo(e, { backgroundColor: "rgba(236,72,153,0.5)" }, { backgroundColor: "rgba(139,92,246,0.13)", duration: 0.9, clearProps: "backgroundColor" });
           });
           for (const [id, node] of oldNodes) {
@@ -686,7 +766,7 @@
             const r = oldRects.get(id);
             node.classList.add("ghost");
             node.classList.remove("hl");
-            Object.assign(node.style, { left: r.left - base.left + "px", top: r.top - base.top + "px", width: r.width + "px" });
+            Object.assign(node.style, { left: (r.left - base.left) / k + "px", top: (r.top - base.top) / k + "px", width: r.width / k + "px" });
             box.appendChild(node);
             gsap.to(node, { opacity: 0, y: 28, scale: 0.7, duration: 0.55, ease: "power1.in", onComplete: () => node.remove() });
           }
@@ -798,7 +878,8 @@
             const placed = target.querySelector(".keychip:last-child");
             const a = src.getBoundingClientRect();
             const b = placed.getBoundingClientRect();
-            tl.from(placed, { x: a.left - b.left, y: a.top - b.top, duration: 0.7, ease: "power2.inOut" });
+            const k = slide.getBoundingClientRect().width / slide.offsetWidth || 1; // the canvas is scaled to the window
+            tl.from(placed, { x: (a.left - b.left) / k, y: (a.top - b.top) / k, duration: 0.7, ease: "power2.inOut" });
           } else {
             tl.from(target, { scale: 1.12, duration: 0.4, ease: "back.out(3)" });
           }

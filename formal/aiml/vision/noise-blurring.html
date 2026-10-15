@@ -48,7 +48,7 @@
         justify-content: center;
         align-items: center;
         gap: 0.6rem 1.4rem;
-        font-size: 0.85rem;
+        font-size: 1rem;
         color: var(--muted);
       }
 
@@ -66,7 +66,7 @@
       }
 
       input[type="range"] {
-        width: 8rem;
+        width: 12rem;
         accent-color: var(--violet);
       }
 
@@ -93,7 +93,7 @@
 
       .readout {
         font-family: var(--font-mono);
-        font-size: 0.85rem;
+        font-size: 1rem;
         color: var(--muted);
         text-align: center;
       }
@@ -189,12 +189,12 @@
 
       .qa pre {
         width: 100%;
-        font-size: 0.92rem;
+        font-size: 1rem;
       }
 
       pre.ex {
         width: min(100%, 64rem);
-        font-size: 0.95rem;
+        font-size: 1rem;
       }
 
       .tag {
@@ -233,26 +233,6 @@
         pointer-events: none;
       }
 
-      @container slide (max-width: 760px) {
-        .play {
-          grid-template-columns: 1fr;
-          gap: 0.8rem;
-        }
-
-        .codek {
-          grid-template-columns: 1fr;
-          gap: 1.4rem;
-        }
-
-        input[type="range"] {
-          width: 6.5rem;
-        }
-
-        pre.ex,
-        .qa pre {
-          font-size: 0.78rem;
-        }
-      }
 
       #title canvas {
         width: min(26rem, 80cqw);
@@ -276,30 +256,32 @@
 
       #nlab svg {
         width: min(100%, 60rem);
-        height: 7rem;
+        height: 6rem;
+      }
+
+      #nlab .plabel {
+        margin: 0 0 -0.6rem;
+        font-size: 0.85rem;
       }
 
       #nlab .clean {
         fill: none;
         stroke: #a78bfa;
-        stroke-width: 2;
+        stroke-width: 2.5;
+        vector-effect: non-scaling-stroke;
       }
 
       #nlab .noisy {
         fill: none;
         stroke: #22d3ee;
-        stroke-width: 1;
+        stroke-width: 1.5;
+        vector-effect: non-scaling-stroke;
         opacity: 0.85;
-      }
-
-      #nlab svg text {
-        fill: var(--muted);
-        font: 12px var(--font);
       }
 
       /* ---------- Median animation ---------- */
       #median .stage {
-        --c: min(3.2rem, 11cqw, 7cqh);
+        --c: 3.6rem;
         position: relative;
         display: grid;
         grid-template-columns: auto auto;
@@ -345,7 +327,7 @@
         display: grid;
         gap: 0.5rem;
         font-family: var(--font-mono);
-        font-size: 1rem;
+        font-size: 1.2rem;
       }
 
       .vs b {
@@ -370,7 +352,7 @@
       }
 
       .bw canvas {
-        width: min(6.4rem, 19cqw);
+        width: 7.2rem;
         image-rendering: pixelated;
         border-radius: 8px;
       }
@@ -382,7 +364,7 @@
 
       #bilateral .cols {
         width: min(100%, 64rem);
-        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
       }
 
       /* ---------- NLM ---------- */
@@ -390,8 +372,19 @@
         width: min(100%, 64rem);
       }
 
+      #nlm .cols {
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+      }
+
       #nlm canvas.img {
+        width: 28rem;
         cursor: crosshair;
+      }
+
+      #nlm .hint {
+        margin-top: 1.2rem;
+        font-size: 0.95rem;
       }
 
       /* ---------- Denoise lab ---------- */
@@ -419,20 +412,6 @@
         margin: 0;
       }
 
-      @container slide (max-width: 760px) {
-        #median .stage {
-          grid-template-columns: 1fr;
-          justify-items: center;
-        }
-
-        #bilateral .cols {
-          grid-template-columns: 1fr;
-        }
-
-        #compare .cards {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
     </style>
   </head>
   <body>
@@ -489,9 +468,9 @@
         <button class="chip" data-n="poisson">Poisson</button>
       </div>
       <div class="ctl" data-interactive><label class="lname">sigma <input type="range" min="0" max="60" value="25" /><output></output></label></div>
+      <p class="muted plabel">One row of pixels (dashed line): <span style="color: #a78bfa">clean</span> vs <span style="color: #22d3ee">noisy</span></p>
       <svg viewBox="0 0 600 110" preserveAspectRatio="none" aria-label="One row of pixel intensities, clean and noisy">
         <polyline class="noisy" points="" /><polyline class="clean" points="" />
-        <text x="4" y="12">one row of pixels: clean (violet) vs noisy (cyan)</text>
       </svg>
     </section>
 
@@ -627,7 +606,7 @@
             <figure><canvas class="wb" width="15" height="15"></canvas><figcaption>bilateral</figcaption></figure>
           </div>
           <div class="ctl" data-interactive><label>centre pixel <input type="range" min="2" max="12" value="6" /><output></output></label></div>
-          <p class="muted center" style="font-size: 0.85rem">Bright = high weight. The weights stop at the edge, so the two sides are never averaged together.</p>
+          <p class="muted center" style="font-size: 0.95rem">Bright = high weight. The weights stop at the edge, so the two sides are never averaged together.</p>
         </div>
       </div>
     </section>
@@ -655,7 +634,6 @@
       <div class="cols">
         <figure>
           <canvas class="img" width="240" height="240"></canvas>
-          <figcaption>Click a pixel. Cyan: its 7×7 patch. Brightness: how similar each patch in the 21×21 search window is, which is its weight.</figcaption>
         </figure>
         <div>
           <p><strong>NLM</strong> compares <em>patches</em>, not just neighbourhoods.</p>
@@ -664,6 +642,7 @@
             <li class="step" style="color: var(--green)"><strong>Advantage:</strong> better noise reduction, preserves texture.</li>
             <li class="step" style="color: var(--red)"><strong>Disadvantage:</strong> computationally expensive.</li>
           </ul>
+          <p class="muted hint">← Click a pixel. Cyan: its 7×7 patch. Yellow brightness: how similar each patch in the 21×21 search window is, which is its weight.</p>
         </div>
       </div>
     </section>
@@ -1149,7 +1128,8 @@
           order.forEach(([v, i], k) => {
             tl.call(() => {
               const a = src[i].getBoundingClientRect(), b = targets[k].getBoundingClientRect();
-              gsap.fromTo(targets[k], { x: a.left - b.left, y: a.top - b.top, opacity: 1 }, { x: 0, y: 0, duration: 0.7, ease: "power2.inOut" });
+              const z = b.width / targets[k].offsetWidth || 1; // screen px per canvas px
+              gsap.fromTo(targets[k], { x: (a.left - b.left) / z, y: (a.top - b.top) / z, opacity: 1 }, { x: 0, y: 0, duration: 0.7, ease: "power2.inOut" });
             }, null, k * 0.22);
           });
           tl.call(() => {

@@ -24,8 +24,8 @@
       }
 
       .itv .lbl {
-        padding-top: 0.9rem;
-        font: 500 0.8rem var(--font-mono);
+        padding-top: 1.1rem;
+        font: 500 1.1rem var(--font-mono);
         color: var(--faint);
       }
 
@@ -44,10 +44,10 @@
       }
 
       .itv.small .cell {
-        min-width: 2.3rem;
-        height: 2.5rem;
-        padding: 0 0.35rem;
-        font-size: 0.95rem;
+        min-width: 3rem;
+        height: 3.2rem;
+        padding: 0 0.4rem;
+        font-size: 1.25rem;
       }
 
       .itv .outs .build b {
@@ -57,13 +57,13 @@
       .itv .cell {
         display: grid;
         place-items: center;
-        min-width: 3rem;
-        height: 3rem;
-        padding: 0 0.6rem;
-        border-radius: 10px;
-        border: 1.5px solid rgba(167, 139, 250, 0.6);
+        min-width: 3.6rem;
+        height: 3.6rem;
+        padding: 0 0.7rem;
+        border-radius: 12px;
+        border: 2px solid rgba(167, 139, 250, 0.6);
         background: rgba(139, 92, 246, 0.14);
-        font: 600 1.15rem var(--font-mono);
+        font: 600 1.5rem var(--font-mono);
         color: var(--text);
         transition:
           opacity 0.35s,
@@ -93,8 +93,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 3rem;
-        font: 600 0.75rem var(--font-mono);
+        width: 3.6rem;
+        font: 600 1rem var(--font-mono);
         color: var(--cyan);
         white-space: nowrap;
         transition: opacity 0.3s;
@@ -122,13 +122,13 @@
         display: flex;
         flex-direction: column;
         gap: 0.2rem;
-        min-width: min(100%, 18rem);
-        min-height: 2.4rem;
-        padding: 0.45rem 0.9rem;
+        min-width: min(100%, 24rem);
+        min-height: 3.2rem;
+        padding: 0.6rem 1.2rem;
         border-radius: 12px;
         border: 1px solid var(--border);
         background: rgba(0, 0, 0, 0.42);
-        font: 0.95rem/1.5 var(--font-mono);
+        font: 1.2rem/1.5 var(--font-mono);
         color: var(--muted);
       }
 
@@ -147,39 +147,13 @@
         pointer-events: none;
         padding: 0 0.5em;
         border-radius: 8px;
-        font: 600 1.05rem/1.7 var(--font-mono);
+        font: 600 1.4rem/1.7 var(--font-mono);
         color: #fff;
         background: rgba(34, 211, 238, 0.35);
         border: 1px solid var(--cyan);
         box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
       }
 
-      @container slide (max-width: 760px) {
-        .itv .cells {
-          gap: 0.25rem;
-        }
-
-        .itv .cell {
-          min-width: 1.9rem;
-          height: 2.3rem;
-          padding: 0 0.3rem;
-          font-size: 0.9rem;
-        }
-
-        .itv .src {
-          flex-direction: column;
-          align-items: center;
-          gap: 0.2rem;
-        }
-
-        .itv .lbl {
-          padding-top: 0;
-        }
-
-        .itv .outs {
-          font-size: 0.8rem;
-        }
-      }
 
       .itv-cols .line.answer.shown {
         transition-delay: var(--ans-delay, 0s);
@@ -188,9 +162,9 @@
       .itv-cols {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 2rem;
+        gap: 2.5rem;
         align-items: center;
-        width: min(100%, 64rem);
+        width: min(100%, 80rem);
       }
 
       .itv-cols.stack {
@@ -199,26 +173,27 @@
         gap: 1.2rem;
       }
 
-      .itv-cols.stack pre {
-        width: min(100%, 44rem);
+      .itv-cols.stack > pre {
+        width: min(100%, 64rem);
+        font-size: 1.45rem;
       }
 
       .itv-cols pre {
         width: 100%;
+        font-size: 1.3rem;
       }
 
-      @container slide (max-width: 760px) {
-        .itv-cols {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-      }
       .slide > pre {
-        width: min(100%, 44rem);
+        width: min(100%, 66rem);
+        font-size: 1.45rem;
+      }
+
+      .slide > pre.xl {
+        font-size: 1.85rem;
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         color: var(--faint);
         text-align: center;
       }
@@ -228,12 +203,12 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1.6rem;
-        width: min(100%, 60rem);
+        gap: 2rem;
+        width: min(100%, 80rem);
       }
 
       .anat .expr {
-        font: 500 clamp(1.1rem, 3.2cqw, 2.1rem) var(--font-mono);
+        font: 500 2.5rem var(--font-mono);
         color: var(--text);
         white-space: nowrap;
         font-variant-ligatures: none;
@@ -254,12 +229,66 @@
       .anat .part.lit.p3 { background: rgba(251, 191, 36, 0.16); box-shadow: 0 0 0 1px var(--amber); }
 
       .anat .cards .card h3 {
-        font-size: 1rem;
+        font-size: 1.5rem;
+      }
+
+      .anat .cards .card p {
+        font-size: 1.25rem;
+        line-height: 1.5;
+      }
+
+      #multi .itv .src,
+      #e6 .itv .src {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      #multi .itv .lbl,
+      #e6 .itv .lbl {
+        padding-top: 0;
+      }
+
+      #multi .itv .cells,
+      #e6 .itv .cells {
+        gap: 2.6rem 0.25rem;
+      }
+
+      #multi .itv.small .cell,
+      #e6 .itv.small .cell {
+        min-width: 2.5rem;
+        padding: 0 0.2rem;
+      }
+
+      #e7 .cols {
+        width: min(100%, 72rem);
+      }
+
+      #e7 pre {
+        font-size: 1.45rem;
       }
 
       .anat .c1 h3 { color: #f0abfc; }
       .anat .c2 h3 { color: #67e8f9; }
       .anat .c3 h3 { color: #fde68a; }
+
+      /* ---------- recap / overview cards, scaled for the 1600x900 canvas ---------- */
+      .big-cards {
+        width: min(100%, 80rem);
+      }
+
+      .big-cards .card {
+        padding: 1.6rem 1.8rem;
+      }
+
+      .big-cards h3 {
+        font-size: 1.6rem;
+      }
+
+      .big-cards p {
+        font-size: 1.3rem;
+        line-height: 1.5;
+      }
     </style>
   </head>
   <body>
@@ -286,7 +315,7 @@
     <!-- ================================================================ basic -->
     <section class="slide" id="basic">
       <h2>Basic list comprehension</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           # basic comprehension
           squares = [x**2 for x in range(5)]
@@ -298,7 +327,7 @@
 
     <section class="slide" id="upper">
       <h2>With a transformation</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           # transform items
           words = ["hello", "world"]
@@ -338,7 +367,7 @@
 
     <section class="slide" id="ifelse">
       <h2>If-else expression</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           # if-else (not filter)
           result = ["even" if x % 2 == 0 else "odd"
@@ -386,7 +415,7 @@
 
     <section class="slide">
       <h2>Exercise 1</h2>
-      <pre><code class="language-python">
+      <pre class="xl"><code class="language-python">
         # basic comprehension?
         [x*2 for x in range(3)]
         # ans: [0, 2, 4]
@@ -395,7 +424,7 @@
 
     <section class="slide">
       <h2>Exercise 2</h2>
-      <pre><code class="language-python">
+      <pre class="xl"><code class="language-python">
         # with filter?
         [x for x in range(10) if x &gt; 5]
         # ans: [6, 7, 8, 9]
@@ -404,7 +433,7 @@
 
     <section class="slide" id="e3">
       <h2>Exercise 3</h2>
-      <div class="itv-cols">
+      <div class="itv-cols stack">
         <pre><code class="language-python">
           # if-else position?
           [x if x &gt; 0 else 0 for x in [-1, 1, -2, 2]]
@@ -416,7 +445,7 @@
 
     <section class="slide">
       <h2>Exercise 4</h2>
-      <pre><code class="language-python">
+      <pre class="xl"><code class="language-python">
         # nested comprehension?
         [[i*j for j in range(3)] for i in range(2)]
         # ans: [[0, 0, 0], [0, 1, 2]]
@@ -426,7 +455,7 @@
 
     <section class="slide">
       <h2>Exercise 5</h2>
-      <pre><code class="language-python">
+      <pre class="xl"><code class="language-python">
         # string comprehension?
         [c.upper() for c in "abc"]
         # ans: ['A', 'B', 'C']
@@ -445,10 +474,10 @@
       </div>
     </section>
 
-    <section class="slide">
+    <section class="slide" id="e7">
       <h2>Exercise 7</h2>
       <p class="lead">Comprehension vs loop?</p>
-      <div class="cols" style="width: min(100%, 52rem)">
+      <div class="cols">
         <pre class="answer"><code class="language-python">
           [x**2 for x in range(3)]
         </code></pre>
@@ -463,7 +492,7 @@
 
     <section class="slide">
       <h2>Exercise 8</h2>
-      <pre><code class="language-python">
+      <pre class="xl"><code class="language-python">
         # empty comprehension?
         [x for x in range(0)]
         # ans: []
@@ -472,7 +501,7 @@
 
     <section class="slide">
       <h2>Exercise 9</h2>
-      <pre><code class="language-python">
+      <pre class="xl"><code class="language-python">
         # tuple in comprehension?
         [(x, x**2) for x in range(3)]
         # ans: [(0, 0), (1, 1), (2, 4)]
@@ -496,7 +525,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 62rem)">
+      <div class="cards big-cards">
         <div class="card step"><h3>Shape</h3><p><code>[expression for item in iterable if condition]</code></p></div>
         <div class="card step"><h3>Filter vs choose</h3><p><code>if</code> after <code>for</code> drops items; <code>a if c else b</code> before <code>for</code> picks a value.</p></div>
         <div class="card step"><h3>Loops nest left to right</h3><p>The first <code>for</code> is the outer loop, as in the equivalent nested loops.</p></div>
@@ -692,6 +721,13 @@
           step: (s, n, els, d) => schedule(d.dir),
           unstep: (s, n, els, d) => schedule(d.dir),
         });
+        // reserve the tallest output so the slide never grows mid-animation
+        let tallest = 0;
+        for (let k = 0; k <= cfg.steps.length; k++) {
+          render(k, false);
+          tallest = Math.max(tallest, outs.offsetHeight);
+        }
+        outs.style.minHeight = tallest + "px";
         render(0, false);
       }
       const itv = (id, cfg) => Itv(document.getElementById(id), cfg);

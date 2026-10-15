@@ -55,6 +55,18 @@
         stroke-width: 2.5;
       }
 
+      #steps ul {
+        font-size: 1.6rem;
+      }
+
+      #maths .lead {
+        font-size: 2.4rem;
+      }
+
+      #maths p.step {
+        font-size: 1.5rem;
+      }
+
       #counter .big {
         font-size: 7rem;
       }
@@ -69,7 +81,7 @@
     </section>
 
     <!-- 2. Steps with different reveal animations -->
-    <section class="slide">
+    <section class="slide" id="steps">
       <h2>Steps reveal one at a time</h2>
       <ul>
         <li class="step">The default: fades up out of a blur</li>
@@ -131,7 +143,7 @@
     </section>
 
     <!-- 7. Maths with KaTeX -->
-    <section class="slide">
+    <section class="slide" id="maths">
       <h2>Maths renders itself</h2>
       <p class="lead">$$P(y \mid \mathbf{x}) = \frac{P(\mathbf{x} \mid y)\,P(y)}{P(\mathbf{x})}$$</p>
       <p class="step center">Naive Bayes assumes \(P(\mathbf{x} \mid y) = \prod_i P(x_i \mid y)\).</p>

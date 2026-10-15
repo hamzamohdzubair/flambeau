@@ -8,11 +8,30 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       .slide > pre {
-        width: min(100%, 40rem);
+        width: auto;
+        min-width: 44rem;
+        font-size: 1.6rem;
+      }
+
+      #seaborn > pre {
+        font-size: 2rem;
+      }
+
+      .slide > pre,
+      .slide > .cards {
+        flex-shrink: 0;
+      }
+
+      #sklearn > pre {
+        font-size: 1.35rem;
+      }
+
+      .loaders li {
+        margin: 0.15rem 0;
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         color: var(--faint);
         text-align: center;
       }
@@ -21,21 +40,21 @@
       .srcs {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
-        gap: 0.9rem 1.2rem;
+        gap: 1.3rem 1.6rem;
         align-items: center;
-        width: min(100%, 52rem);
+        width: min(100%, 64rem);
       }
 
       .srcs .nm {
-        font: 600 1.05rem var(--font-mono);
+        font: 600 1.6rem var(--font-mono);
         color: var(--text);
         text-align: right;
       }
 
       .srcs .track {
         position: relative;
-        height: 2.4rem;
-        border-radius: 10px;
+        height: 3.6rem;
+        border-radius: 12px;
         background: rgba(255, 255, 255, 0.04);
       }
 
@@ -52,8 +71,8 @@
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        left: 0.8rem;
-        font: 600 1rem var(--font-mono);
+        left: 1rem;
+        font: 600 1.5rem var(--font-mono);
         color: #fff;
         white-space: nowrap;
       }
@@ -61,8 +80,8 @@
       .axis {
         grid-column: 2;
         position: relative;
-        height: 1.4rem;
-        font: 0.75rem var(--font-mono);
+        height: 1.8rem;
+        font: 1.1rem var(--font-mono);
         color: var(--faint);
       }
 
@@ -72,16 +91,16 @@
       }
 
       .loaders {
-        width: min(100%, 52rem);
+        width: min(100%, 64rem);
       }
 
       .loaders ul {
         font-family: var(--font-mono);
-        font-size: 1rem;
+        font-size: 1.1rem;
       }
 
       .loaders h3 {
-        font-size: 1.05rem;
+        font-size: 1.3rem;
       }
 
       .loaders .card p {
@@ -145,7 +164,7 @@
     </section>
 
     <!-- ================================================================ seaborn -->
-    <section class="slide">
+    <section class="slide" id="seaborn">
       <h2>seaborn (22)</h2>
       <pre class="steps"><code class="language-python">
         import seaborn

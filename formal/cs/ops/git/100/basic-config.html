@@ -45,7 +45,7 @@
 
       .layer code {
         grid-column: 2;
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
 
       .layer.wins {
@@ -80,18 +80,16 @@
       .result p {
         margin-top: 0.8rem;
         font-family: var(--font);
-        font-size: 0.95rem;
+        font-size: 1.1rem;
       }
 
-      @container slide (max-width: 760px) {
-        #levels .cols {
-          grid-template-columns: 1fr;
-        }
+      .slide > pre {
+        width: 54rem;
+        font-size: 1.4rem;
+      }
 
-        .layer {
-          grid-template-columns: 5rem 1fr;
-          font-size: 0.85rem;
-        }
+      #levels .cols {
+        width: 100%;
       }
     </style>
   </head>

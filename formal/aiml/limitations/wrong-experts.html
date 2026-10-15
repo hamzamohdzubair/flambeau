@@ -8,42 +8,43 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #minsky .cols {
-        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-        width: min(100%, 60rem);
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+        gap: 3rem;
+        width: 100%;
       }
 
       #minsky .tag {
         font-family: var(--font-display);
-        font-size: 2.2rem;
+        font-size: 2.6rem;
       }
 
       #minsky blockquote {
         margin: 0;
-        font-size: 1.02rem;
+        font-size: 1.35rem;
       }
 
       #minsky .quotes {
         display: grid;
-        gap: 0.9rem;
+        gap: 1.3rem;
       }
 
       #minsky img {
-        max-height: 58cqh;
+        max-height: 64cqh;
       }
 
       /* ---------- Deadline bar ---------- */
       #deadline .track {
         position: relative;
-        width: min(100%, 58rem);
-        height: 9rem;
+        width: calc(100% - 8rem);
+        height: 12rem;
       }
 
       #deadline .rail {
         position: absolute;
         left: 0;
         right: 0;
-        top: 4.2rem;
-        height: 6px;
+        top: 6.4rem;
+        height: 8px;
         border-radius: 6px;
         background: rgba(255, 255, 255, 0.08);
       }
@@ -51,8 +52,8 @@
       #deadline .promise,
       #deadline .overdue {
         position: absolute;
-        top: 4.2rem;
-        height: 6px;
+        top: 6.4rem;
+        height: 8px;
         border-radius: 6px;
       }
 
@@ -79,16 +80,17 @@
 
       #deadline .mark b {
         font-family: var(--font-mono);
-        font-size: 1.1rem;
+        font-size: 2rem;
       }
 
       #deadline .mark small {
+        font-size: 1.1rem;
         color: var(--muted);
       }
 
       #deadline .mark i {
         width: 3px;
-        height: 1.4rem;
+        height: 1.8rem;
         margin-top: 0.3rem;
         background: var(--muted);
       }
@@ -97,10 +99,8 @@
         font-family: var(--font-mono);
       }
 
-      @container slide (max-width: 700px) {
-        #minsky .cols {
-          grid-template-columns: 1fr;
-        }
+      #deadline p {
+        font-size: 1.35rem;
       }
     </style>
   </head>

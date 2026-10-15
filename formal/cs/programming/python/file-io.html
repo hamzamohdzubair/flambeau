@@ -19,7 +19,7 @@
         flex-direction: column;
         gap: 0.7rem;
         min-width: min(100%, 20rem);
-        padding: 1rem 1.1rem;
+        padding: 1.1rem 1.3rem;
         border-radius: var(--radius);
         background: var(--glass);
         border: 1px solid var(--border);
@@ -31,7 +31,7 @@
         align-items: center;
         gap: 0.6rem;
         flex-wrap: wrap;
-        font-size: 0.9rem;
+        font-size: 1.2rem;
       }
 
       .fv-head .fname {
@@ -41,7 +41,7 @@
       .fv-badge {
         padding: 0.05rem 0.55rem;
         border-radius: 999px;
-        font: 500 0.75rem var(--font);
+        font: 500 0.95rem var(--font);
         border: 1px solid var(--border);
         color: var(--muted);
       }
@@ -73,16 +73,16 @@
         padding: 0.6rem 0.8rem;
         border-radius: 10px;
         background: rgba(0, 0, 0, 0.35);
-        font-size: 1rem;
-        line-height: 1.55;
-        white-space: pre;
-        overflow-x: auto;
+        font-size: 1.3rem;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
       }
 
       .fv-text.missing {
         color: var(--faint);
         font-family: var(--font);
-        font-size: 0.9rem;
+        font-size: 1.15rem;
         white-space: normal;
       }
 
@@ -126,8 +126,8 @@
       .fv-vars {
         display: flex;
         flex-direction: column;
-        gap: 0.3rem;
-        font-size: 0.9rem;
+        gap: 0.45rem;
+        font-size: 1.15rem;
       }
 
       .fv-vars div {
@@ -137,6 +137,7 @@
       }
 
       .fv-vars b {
+        flex-shrink: 0;
         min-width: 3.5rem;
         font-weight: 500;
         text-align: right;
@@ -157,14 +158,14 @@
         border-radius: 8px;
         background: rgba(0, 0, 0, 0.35);
         color: var(--green);
-        font-size: 0.88rem;
+        font-size: 1.15rem;
         white-space: pre-wrap;
       }
 
       .fv-out::before {
         content: "output";
         display: block;
-        font: 600 0.65rem var(--font);
+        font: 600 0.8rem var(--font);
         letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--faint);
@@ -174,7 +175,7 @@
         min-height: 1.3em;
         margin: 0;
         font-family: var(--font);
-        font-size: 0.92rem;
+        font-size: 1.15rem;
         color: var(--cyan);
       }
 
@@ -184,36 +185,55 @@
 
       .fduo {
         display: grid;
-        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-        gap: 1.5rem;
+        grid-template-columns: auto minmax(22rem, 1fr);
+        gap: 1.6rem;
         align-items: center;
-        width: min(100%, 70rem);
+        width: 100%;
       }
 
-      .fduo pre {
+      .slide .fduo pre {
         width: auto;
+        flex-shrink: 0;
+        font-size: 1.3rem;
       }
 
-      @container slide (max-width: 760px) {
-        .fduo {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
+      /* code size per slide: widest line decides (the file panel needs ~22rem beside it) */
+      #read1 .fduo pre { font-size: 1.15rem; }
+      #read2 .fduo pre { font-size: 1.22rem; }
+      #methods1 .fduo pre { font-size: 0.98rem; }
+      #methods2 .fduo pre { font-size: 1.07rem; }
+      #write1 .fduo pre { font-size: 1.15rem; }
+      #write2 .fduo pre { font-size: 1.2rem; }
+      #modes.slide { padding-left: 2.5rem; padding-right: 2.5rem; }
+      #modes .fduo { grid-template-columns: auto auto; justify-content: center; gap: 1.2rem; }
+      #modes .fduo pre { font-size: 1rem; flex-shrink: 0; min-width: max-content; }
+      #modes .modes td { white-space: nowrap; }
+      #pos .fduo pre { font-size: 1rem; }
+      #pos .fduo pre { line-height: 1.45; }
+      #pos .fduo pre .line { min-height: 1.45em; }
+      #bin .fduo pre { font-size: 1.2rem; }
 
-        .fv {
-          padding: 0.7rem;
-          gap: 0.5rem;
-        }
-
-        .fv-text {
-          font-size: 0.8rem;
-          min-height: 3.5em;
-        }
-
-        .fv-vars {
-          font-size: 0.78rem;
-        }
+      /* tall file panels: the file text and the printed output side by side */
+      #read2 .fv {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        column-gap: 1rem;
       }
+
+      #read2 .fv > * {
+        grid-column: 1 / -1;
+      }
+
+      #read2 .fv > .fv-text {
+        grid-column: 1;
+      }
+
+      #read2 .fv > .fv-out {
+        grid-column: 2;
+        grid-row: 2;
+      }
+
 
       .slide pre {
         min-width: min(100%, 24rem);
@@ -225,19 +245,19 @@
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.1rem;
         color: var(--faint);
         text-align: center;
       }
 
       /* ---------- File modes table: the row for the newest line lights up ---------- */
       .modes {
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
 
       .modes td,
       .modes th {
-        padding: 0.35rem 0.7rem;
+        padding: 0.3rem 0.55rem;
         text-align: center;
         transition:
           background 0.3s,
@@ -265,15 +285,23 @@
         background: rgba(34, 211, 238, 0.2);
       }
 
-      @container slide (max-width: 760px) {
-        .modes {
-          font-size: 0.7rem;
-        }
+      /* recap: 2x2 cards sized for the room */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+      }
 
-        .modes td,
-        .modes th {
-          padding: 0.2rem 0.3rem;
-        }
+      #recap .card {
+        padding: 1.6rem 1.9rem;
+      }
+
+      #recap .card h3 {
+        font-size: 1.75rem;
+      }
+
+      #recap .card p {
+        font-size: 1.3rem;
+        line-height: 1.4;
       }
     </style>
   </head>
@@ -408,7 +436,7 @@
           open("file.txt", "x")      # create (fails if exists)
         </code></pre>
         <table class="modes">
-          <tr><th>mode</th><th>read</th><th>write</th><th>existing file</th><th>missing file</th></tr>
+          <tr><th>mode</th><th>read</th><th>write</th><th>existing<br />file</th><th>missing<br />file</th></tr>
           <tr data-m="r"><td>r</td><td class="yes">yes</td><td class="no">no</td><td>kept</td><td class="bad">error</td></tr>
           <tr data-m="rb"><td>rb</td><td class="yes">bytes</td><td class="no">no</td><td>kept</td><td class="bad">error</td></tr>
           <tr data-m="w"><td>w</td><td class="no">no</td><td class="yes">yes</td><td class="bad">emptied</td><td>created</td></tr>
@@ -469,7 +497,7 @@
 
     <section class="slide">
       <h2>Copying and chunking binary files</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.30rem"><code class="language-python">
         # copy binary file
         with open("image.png", "rb") as src:
             with open("copy.png", "wb") as dst:
@@ -488,7 +516,7 @@
     <!-- ================================================================ os.path -->
     <section class="slide">
       <h2>Working with paths: checks and info</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.65rem"><code class="language-python">
         import os
         # check if file exists
         os.path.exists("file.txt")
@@ -503,7 +531,7 @@
 
     <section class="slide">
       <h2>Working with paths: building and splitting</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.70rem"><code class="language-python">
         # path operations
         os.path.join("folder", "file.txt")
         os.path.dirname("/path/to/file.txt")
@@ -519,7 +547,7 @@
     <!-- ================================================================ pathlib -->
     <section class="slide">
       <h2>pathlib: creating and checking</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
         from pathlib import Path
         # create path object
         path = Path("data.txt")
@@ -533,7 +561,7 @@
 
     <section class="slide">
       <h2>pathlib: reading, writing and parts</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.30rem"><code class="language-python">
         # read and write
         text = path.read_text()
         path.write_text("Hello, World!")
@@ -552,7 +580,7 @@
     <!-- ================================================================ directories -->
     <section class="slide">
       <h2>Directory operations: list, create, remove</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.30rem"><code class="language-python">
         import os
         # list directory
         files = os.listdir(".")
@@ -570,7 +598,7 @@
 
     <section class="slide">
       <h2>Directory operations: move and delete files</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
         # rename/move
         os.rename("old.txt", "new.txt")
         shutil.move("file.txt", "folder/")
@@ -583,7 +611,7 @@
     <!-- ================================================================ csv -->
     <section class="slide">
       <h2>Working with CSV: reading</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.55rem"><code class="language-python">
         import csv
         # read CSV
         with open("data.csv", "r") as file:
@@ -600,7 +628,7 @@
 
     <section class="slide">
       <h2>Working with CSV: writing</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.45rem"><code class="language-python">
         # write CSV
         data = [["Name", "Age"], ["Alice", 25], ["Bob", 30]]
         with open("output.csv", "w", newline="") as file:
@@ -618,7 +646,7 @@
     <!-- ================================================================ json -->
     <section class="slide">
       <h2>Working with JSON</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.1rem"><code class="language-python">
         import json
         # write JSON
         data = {"name": "Alice", "age": 25, "city": "NYC"}
@@ -638,7 +666,7 @@
 
     <section class="slide">
       <h2>JSON: custom encoding</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
         # custom encoding
         import datetime
         class DateEncoder(json.JSONEncoder):
@@ -653,7 +681,7 @@
     <!-- ================================================================ temp -->
     <section class="slide">
       <h2>Temporary files</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.30rem"><code class="language-python">
         import tempfile
         # temporary file
         with tempfile.TemporaryFile(mode="w+") as temp:
@@ -671,7 +699,7 @@
 
     <section class="slide">
       <h2>Temporary directories</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
         # temporary directory
         with tempfile.TemporaryDirectory() as temp_dir:
             file_path = os.path.join(temp_dir, "file.txt")
@@ -683,7 +711,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 64rem)">
+      <div class="cards" style="width: min(100%, 72rem)">
         <div class="card step"><h3>Always <code>with</code></h3><p>The file is closed for you, even after an error.</p></div>
         <div class="card step"><h3>Choose the mode</h3><p><code>r</code> reads, <code>w</code> empties then writes, <code>a</code> adds at the end, <code>x</code> refuses to overwrite; add <code>b</code> for bytes.</p></div>
         <div class="card step"><h3>One cursor</h3><p>Reads and writes move it; <code>tell()</code> reports it and <code>seek()</code> moves it.</p></div>

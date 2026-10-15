@@ -16,17 +16,17 @@
 
       .tracer {
         display: grid;
-        grid-template-columns: minmax(0, auto) minmax(14rem, 22rem);
-        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1fr) 24rem;
+        gap: 2rem;
         align-items: start;
         justify-content: center;
-        width: min(100%, 64rem);
+        width: 100%;
       }
 
       .tracer pre {
-        width: auto;
-        min-width: min(100%, 26rem);
-        max-width: 100%;
+        width: 100%;
+        min-width: 0;
+        font-size: 1.45rem;
       }
 
       pre.trace .line {
@@ -104,12 +104,12 @@
         border-radius: var(--radius);
         background: var(--glass);
         border: 1px solid var(--border);
-        font-size: 0.95rem;
+        font-size: 1.15rem;
       }
 
       .mem h4 {
         margin: 0 0 0.35rem;
-        font: 600 0.72rem var(--font);
+        font: 600 0.8rem var(--font);
         letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--faint);
@@ -221,7 +221,7 @@
         border: 1px solid var(--border);
         background: transparent;
         color: var(--muted);
-        font: 500 0.8rem var(--font);
+        font: 500 0.95rem var(--font);
         cursor: pointer;
       }
 
@@ -236,8 +236,8 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        font-size: 0.95rem;
+        gap: 0.6rem;
+        font-size: 1.15rem;
         color: var(--muted);
       }
 
@@ -252,7 +252,7 @@
         border: 1px solid var(--border);
         background: var(--glass);
         color: var(--muted);
-        font: 500 0.95rem var(--font-mono);
+        font: 500 1.05rem var(--font-mono);
         cursor: pointer;
         transition: all 0.25s;
       }
@@ -269,38 +269,76 @@
       }
 
       .hint {
-        font-size: 0.95rem;
+        font-size: 1.25rem;
         color: var(--faint);
         text-align: center;
       }
 
-      @container slide (max-width: 760px) {
-        .tracer {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
-
-        .tracer pre {
-          min-width: 0;
-        }
-
-        .mem {
-          padding: 0.7rem 0.8rem;
-          gap: 0.5rem;
-          font-size: 0.85rem;
-        }
-      }
 
       .slide pre {
-        width: auto;
-        min-width: min(100%, 24rem);
+        width: min(100%, 62rem);
+      }
+
+      .slide pre.ex {
+        font-size: 2.1rem;
+      }
+
+      .slide pre.big {
+        font-size: 1.75rem;
+      }
+
+      .slide pre.mid {
+        font-size: 1.5rem;
+      }
+
+      #using .tracer {
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        gap: 1.2rem;
+      }
+
+      #using .tracer pre {
+        font-size: 1.5rem;
+      }
+
+      #using .mem {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1.5rem;
+        min-height: 8rem;
+      }
+
+      #using .mem > div {
+        flex: 1;
+      }
+
+      #using .mem .sec-vars {
+        flex: 1.5;
+      }
+
+      #using .mem .exc {
+        flex: 0 1 16rem;
+        align-self: center;
+      }
+
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: min(100%, 70rem) !important;
+      }
+
+      #recap .card p {
+        font-size: 1.3rem;
       }
 
       /* ---------- Class hierarchy: does this except clause catch that exception? ---------- */
       .hier {
-        width: min(100%, 50rem);
+        width: 100%;
         height: auto;
         overflow: visible;
+      }
+
+      #catch {
+        gap: 1rem;
       }
 
       .hier .edge {
@@ -350,7 +388,7 @@
       .hier text {
         fill: var(--text);
         font-family: var(--font-mono);
-        font-size: 15px;
+        font-size: 20px;
         text-anchor: middle;
         dominant-baseline: central;
       }
@@ -359,8 +397,8 @@
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
         gap: 1.5rem;
-        align-items: center;
-        width: min(100%, 64rem);
+        align-items: start;
+        width: 100%;
       }
 
       .mini {
@@ -368,7 +406,7 @@
         border-radius: var(--radius);
         background: rgba(10, 12, 26, 0.78);
         border: 1px solid var(--border);
-        font: 0.95rem / 1.6 var(--font-mono);
+        font: 1.15rem / 1.6 var(--font-mono);
         white-space: pre;
       }
 
@@ -391,7 +429,7 @@
       .pick {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.6rem;
       }
 
       .pick .try {
@@ -399,12 +437,14 @@
       }
 
       .pick .try code {
-        min-width: 4.2rem;
+        min-width: 4.6rem;
       }
 
       .verdict {
         min-height: 1.5em;
-        text-align: center;
+        margin: 0.2rem 0 0;
+        font-size: 1.2rem;
+        text-align: left;
         font-weight: 500;
         color: var(--muted);
       }
@@ -417,18 +457,6 @@
         color: var(--red);
       }
 
-      @container slide (max-width: 760px) {
-        .catch-row {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.6rem;
-        }
-
-        .chip {
-          min-width: 0;
-          padding: 0.2rem 0.5rem;
-          font-size: 0.75rem;
-        }
-      }
     </style>
   </head>
   <body>
@@ -442,7 +470,7 @@
     <!-- ================================================================ simple -->
     <section class="slide">
       <h2>A simple custom exception</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="big steps"><code class="language-python">
         # define custom exception
         class CustomError(Exception):
             pass
@@ -455,7 +483,7 @@
     <!-- ================================================================ attributes -->
     <section class="slide">
       <h2>Exception with attributes</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="big steps"><code class="language-python">
         # exception with data
         class ValidationError(Exception):
             def __init__(self, field, message):
@@ -486,7 +514,7 @@
     <!-- ================================================================ hierarchy -->
     <section class="slide">
       <h2>Exception hierarchy</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="big steps"><code class="language-python">
         # base exception
         class DatabaseError(Exception):
             pass
@@ -501,16 +529,16 @@
 
     <section class="slide" id="catch">
       <h2>Which except catches it?</h2>
+      <svg class="hier" viewBox="0 0 1300 258" aria-label="Class tree: BaseException above Exception and KeyboardInterrupt; Exception above ValueError, CustomError, ValidationError and DatabaseError; DatabaseError above ConnectionError and QueryError"></svg>
       <div class="catch-row">
         <div class="mini"></div>
         <div class="pick" data-interactive>
           <div class="try raise-row"><code>raise</code></div>
           <div class="try except-row"><code>except</code></div>
+          <p class="verdict"></p>
         </div>
       </div>
-      <svg class="hier" viewBox="0 0 780 300" aria-label="Class tree: BaseException above Exception and KeyboardInterrupt; Exception above ValueError, CustomError, ValidationError and DatabaseError; DatabaseError above ConnectionError and QueryError"></svg>
-      <p class="verdict"></p>
-      <p class="hint">An <code>except</code> clause matches its own class and every class below it: Python walks up from the raised class looking for it.</p>
+      <p class="hint">An <code>except</code> matches its own class and every class below it.</p>
     </section>
 
     <!-- ================================================================ exercises -->
@@ -521,7 +549,7 @@
 
     <section class="slide">
       <h2>Exercise 1</h2>
-      <pre><code class="language-python">
+      <pre class="ex"><code class="language-python">
         # inherit from what?
         class MyError(Exception):
             pass
@@ -531,7 +559,7 @@
 
     <section class="slide">
       <h2>Exercise 2</h2>
-      <pre><code class="language-python">
+      <pre class="ex"><code class="language-python">
         # can inherit from BaseException?
         class MyError(BaseException):
             pass
@@ -542,7 +570,7 @@
 
     <section class="slide">
       <h2>Exercise 3</h2>
-      <pre><code class="language-python">
+      <pre class="ex"><code class="language-python">
         # custom message?
         class MyError(Exception):
             pass
@@ -553,7 +581,7 @@
 
     <section class="slide">
       <h2>Exercise 4</h2>
-      <pre><code class="language-python">
+      <pre class="big"><code class="language-python">
         # catch custom exception?
         try:
             raise CustomError()
@@ -565,7 +593,7 @@
 
     <section class="slide">
       <h2>Exercise 5</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="ex steps"><code class="language-python">
         # exception with default message?
         class MyError(Exception):
             def __init__(self):
@@ -576,7 +604,7 @@
 
     <section class="slide">
       <h2>Exercise 6</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="big steps"><code class="language-python">
         # multiple custom exceptions?
         class Error1(Exception):
             pass
@@ -592,7 +620,7 @@
 
     <section class="slide">
       <h2>Exercise 7</h2>
-      <pre><code class="language-python">
+      <pre class="mid"><code class="language-python">
         # exception hierarchy catch?
         class Base(Exception):
             pass
@@ -609,7 +637,7 @@
 
     <section class="slide">
       <h2>Exercise 8</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="ex steps"><code class="language-python">
         # custom exception attributes?
         class MyError(Exception):
             def __init__(self, code):
@@ -620,7 +648,7 @@
 
     <section class="slide">
       <h2>Exercise 9</h2>
-      <pre class="steps"><code class="language-python">
+      <pre class="ex steps"><code class="language-python">
         # exception with __str__?
         class MyError(Exception):
             def __str__(self):
@@ -631,7 +659,7 @@
 
     <section class="slide">
       <h2>Exercise 10</h2>
-      <pre><code class="language-python">
+      <pre class="ex"><code class="language-python">
         # empty custom exception?
         class MyError(Exception):
             pass
@@ -897,24 +925,24 @@
         const slide = document.querySelector("#catch");
         const svg = slide.querySelector(".hier");
         const T = {
-          BaseException: [390, 30, null],
-          Exception: [290, 105, "BaseException"],
-          KeyboardInterrupt: [600, 105, "BaseException"],
-          ValueError: [90, 185, "Exception"],
-          CustomError: [255, 185, "Exception"],
-          ValidationError: [425, 185, "Exception"],
-          DatabaseError: [610, 185, "Exception"],
-          ConnectionError: [530, 265, "DatabaseError"],
-          QueryError: [700, 265, "DatabaseError"],
+          BaseException: [800, 22, null],
+          Exception: [560, 92, "BaseException"],
+          KeyboardInterrupt: [1060, 92, "BaseException"],
+          ValueError: [130, 162, "Exception"],
+          CustomError: [410, 162, "Exception"],
+          ValidationError: [700, 162, "Exception"],
+          DatabaseError: [1000, 162, "Exception"],
+          ConnectionError: [860, 234, "DatabaseError"],
+          QueryError: [1150, 234, "DatabaseError"],
         };
         const CUSTOM = ["CustomError", "ValidationError", "DatabaseError", "ConnectionError", "QueryError"];
         svg.innerHTML =
           Object.entries(T)
             .filter(([, v]) => v[2])
-            .map(([k, [x, y, p]]) => `<line class="edge" data-c="${k}" x1="${T[p][0]}" y1="${T[p][1] + 17}" x2="${x}" y2="${y - 17}"/>`)
+            .map(([k, [x, y, p]]) => `<line class="edge" data-c="${k}" x1="${T[p][0]}" y1="${T[p][1] + 20}" x2="${x}" y2="${y - 20}"/>`)
             .join("") +
           Object.entries(T)
-            .map(([k, [x, y]]) => `<g class="node${CUSTOM.includes(k) ? " custom" : ""}" data-c="${k}"><rect x="${x - Math.max(80, k.length * 4.7 + 8)}" y="${y - 17}" width="${2 * Math.max(80, k.length * 4.7 + 8)}" height="34" rx="9"/><text x="${x}" y="${y}">${k}</text></g>`)
+            .map(([k, [x, y]]) => `<g class="node${CUSTOM.includes(k) ? " custom" : ""}" data-c="${k}"><rect x="${x - Math.max(90, k.length * 6.2 + 18)}" y="${y - 20}" width="${2 * Math.max(90, k.length * 6.2 + 18)}" height="40" rx="10"/><text x="${x}" y="${y}">${k}</text></g>`)
             .join("");
         const RAISE = ["ConnectionError", "QueryError", "DatabaseError", "ValidationError", "ValueError"];
         const EXCEPT = ["DatabaseError", "ConnectionError", "Exception", "ValueError", "BaseException"];
@@ -953,7 +981,7 @@
               verdict.textContent = hit === 0 ? `Caught: the same class` : `Caught: ${raised} is a kind of ${handler}`;
             } else {
               verdict.classList.add("no");
-              verdict.textContent = `Not caught: ${handler} is not above ${raised}, so the exception keeps travelling`;
+              verdict.textContent = `Not caught: ${raised} is not a kind of ${handler}`;
             }
           };
           if (!animate) {

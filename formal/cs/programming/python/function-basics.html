@@ -274,22 +274,6 @@
         text-align: center;
       }
 
-      @container slide (max-width: 760px) {
-        .tracer {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0.8rem;
-        }
-
-        .tracer pre {
-          min-width: 0;
-        }
-
-        .mem {
-          padding: 0.7rem 0.8rem;
-          gap: 0.5rem;
-          font-size: 0.85rem;
-        }
-      }
 
       /* ---------- The function machine: arguments in, return value out ---------- */
       .machine {
@@ -385,16 +369,128 @@
         font-size: 1.6rem;
       }
 
-      @container slide (max-width: 760px) {
-        .machine {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-          justify-items: center;
-        }
-
-        .machine .args {
-          flex-direction: row;
-        }
+      /* ---------- 1600x900 canvas sizing ---------- */
+      .tracer {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) 20rem;
+        gap: 2rem;
+      }
+      .tracer pre {
+        width: 100%;
+        min-width: 0;
+        font-size: 1.25rem;
+      }
+      .slide.ex .tracer pre {
+        font-size: 1.4rem;
+      }
+      /* many variables / frames: smaller type so the panel fits */
+      .slide .tracer.dense pre {
+        font-size: 1.2rem;
+      }
+      .tracer.dense .mem {
+        font-size: 1rem;
+        gap: 0.7rem;
+      }
+      /* long code lines: memory panel goes under the code, sections side by side */
+      .tracer.wide {
+        grid-template-columns: minmax(0, 1fr);
+        width: min(100%, 54rem);
+        gap: 1.2rem;
+      }
+      .tracer.wide .mem {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+      .tracer.wide .mem > div {
+        flex: 1;
+      }
+      .mem {
+        font-size: 1.2rem;
+        gap: 1rem;
+        padding: 1.2rem 1.4rem;
+      }
+      .mem h4 {
+        font-size: 0.8rem;
+      }
+      .mem .slot {
+        flex-wrap: wrap;
+        gap: 0.2rem 0.6rem;
+      }
+      .mem .slot b {
+        min-width: 3rem;
+      }
+      .mem .slot span {
+        flex: 1 1 7rem;
+        font-size: 0.88em;
+        overflow-wrap: normal;
+      }
+      .replay {
+        font-size: 0.9rem;
+        padding: 0.3rem 1rem;
+      }
+      .hint {
+        font-size: 1.2rem;
+      }
+      .try,
+      .chip {
+        font-size: 1.15rem;
+      }
+      #ex3 .tracer pre,
+      #ex10 .tracer pre {
+        font-size: 1.3rem;
+      }
+      /* the function machine, sized for the canvas */
+      .machine {
+        gap: 4rem;
+      }
+      .machine .args,
+      .machine .result {
+        font-size: 1.3rem;
+        gap: 0.9rem;
+      }
+      .machine .call {
+        font-size: 2rem;
+      }
+      .machine .val {
+        min-width: 3.4rem;
+        padding: 0.3rem 0.9rem;
+        font-size: 1.6rem;
+      }
+      .machine .box {
+        padding: 1.8rem 2.4rem;
+        gap: 1.2rem;
+      }
+      .machine .sig {
+        font-size: 1.8rem;
+      }
+      .machine .params {
+        font-size: 1.5rem;
+        gap: 1.5rem;
+        align-items: center;
+      }
+      .machine .body {
+        font-size: 1.7rem;
+      }
+      #machine .try code {
+        font-size: 1.1rem;
+      }
+      #machine .chip {
+        font-size: 1.4rem;
+      }
+      #machine ol {
+        font-size: 1.3rem;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 62rem);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
       }
     </style>
   </head>
@@ -491,7 +587,7 @@
     <!-- ================================================================ no return -->
     <section class="slide" id="noret">
       <h2>Function without return</h2>
-      <div class="tracer">
+      <div class="tracer dense">
         <pre class="trace"><code class="language-python">
           # no return (returns None)
           def print_message(msg):
@@ -511,7 +607,7 @@
       <p class="center">Predict the answer, then press → to trace the code and check.</p>
     </section>
 
-    <section class="slide" id="ex1">
+    <section class="slide ex" id="ex1">
       <h2>Exercise 1</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -525,7 +621,7 @@
       </div>
     </section>
 
-    <section class="slide" id="ex2">
+    <section class="slide ex" id="ex2">
       <h2>Exercise 2</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -539,7 +635,7 @@
       </div>
     </section>
 
-    <section class="slide" id="ex3">
+    <section class="slide ex" id="ex3">
       <h2>Exercise 3</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -553,7 +649,7 @@
       </div>
     </section>
 
-    <section class="slide" id="ex4">
+    <section class="slide ex" id="ex4">
       <h2>Exercise 4</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -567,7 +663,7 @@
       </div>
     </section>
 
-    <section class="slide" id="ex5">
+    <section class="slide ex" id="ex5">
       <h2>Exercise 5</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -581,9 +677,9 @@
       </div>
     </section>
 
-    <section class="slide" id="ex6">
+    <section class="slide ex" id="ex6">
       <h2>Exercise 6</h2>
-      <div class="tracer">
+      <div class="tracer dense">
         <pre class="trace"><code class="language-python">
           # function with print vs return?
           def func1():
@@ -599,7 +695,7 @@
       </div>
     </section>
 
-    <section class="slide" id="ex7">
+    <section class="slide ex" id="ex7">
       <h2>Exercise 7</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -613,7 +709,7 @@
       </div>
     </section>
 
-    <section class="slide" id="ex8">
+    <section class="slide ex" id="ex8">
       <h2>Exercise 8</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -622,14 +718,15 @@
               return 5
               print("After return")
           test()
-          # ans: 5 (return exits the function; the print never runs)
+          # ans: 5 (return exits the function,
+          # ans: so the print never runs)
         </code></pre>
         <div class="mem"></div>
       </div>
       <p class="hint">At the interactive prompt the returned 5 is echoed; nothing is printed by the function itself.</p>
     </section>
 
-    <section class="slide" id="ex9">
+    <section class="slide ex" id="ex9">
       <h2>Exercise 9</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -643,7 +740,7 @@
       </div>
     </section>
 
-    <section class="slide" id="ex10">
+    <section class="slide ex" id="ex10">
       <h2>Exercise 10</h2>
       <div class="tracer">
         <pre class="trace"><code class="language-python">
@@ -662,7 +759,7 @@
     <!-- ================================================================ recap -->
     <section class="slide" id="recap">
       <h2>Remember</h2>
-      <div class="cards" style="width: min(100%, 60rem)">
+      <div class="cards">
         <div class="card step"><h3>Define, then call</h3><p><code>def</code> stores the function under its name; <code>name()</code> runs it. Calling before the <code>def</code> line is a <code>NameError</code>.</p></div>
         <div class="card step"><h3>Each call gets a frame</h3><p>Parameters are local names in that frame, filled from the arguments.</p></div>
         <div class="card step"><h3><code>return</code> ends the call</h3><p>It hands one value back; code after it never runs. No <code>return</code> means <code>None</code>.</p></div>
@@ -1021,11 +1118,12 @@
           const m = mach.getBoundingClientRect();
           const a = from.getBoundingClientRect();
           const b = to.getBoundingClientRect();
+          const k = m.width / mach.offsetWidth || 1; // the canvas is scaled to the window
           const g = from.cloneNode(true);
           g.classList.add("ghost");
           g.classList.remove("empty");
           mach.appendChild(g);
-          t.fromTo(g, { x: a.left - m.left, y: a.top - m.top, opacity: 1 }, { x: b.left - m.left, y: b.top - m.top, duration: 0.7, ease: "power2.inOut", onComplete: () => g.remove() }, at);
+          t.fromTo(g, { x: (a.left - m.left) / k, y: (a.top - m.top) / k, opacity: 1 }, { x: (b.left - m.left) / k, y: (b.top - m.top) / k, duration: 0.7, ease: "power2.inOut", onComplete: () => g.remove() }, at);
         }
 
         function render(n, animate) {
@@ -1059,12 +1157,13 @@
             const m = mach.getBoundingClientRect();
             const s = box.querySelector(".body").getBoundingClientRect();
             const d = out.getBoundingClientRect();
+            const k = m.width / mach.offsetWidth || 1;
             const g = out.cloneNode(true);
             g.classList.add("ghost");
             g.classList.remove("empty");
             mach.appendChild(g);
-            tl.fromTo(g, { x: s.left - m.left + 60, y: s.top - m.top, scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 });
-            tl.to(g, { x: d.left - m.left, y: d.top - m.top, duration: 0.7, ease: "power2.inOut", onComplete: () => g.remove() });
+            tl.fromTo(g, { x: (s.left - m.left) / k + 60, y: (s.top - m.top) / k, scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 });
+            tl.to(g, { x: (d.left - m.left) / k, y: (d.top - m.top) / k, duration: 0.7, ease: "power2.inOut", onComplete: () => g.remove() });
             tl.call(() => set(3));
           } else set(n);
         }

@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -255,13 +255,13 @@
       }
 
       #title canvas {
-        width: min(28rem, 80vw);
+        width: min(28rem, 80cqw);
         border-radius: 12px;
       }
 
       /* ---------- connectivity grids ---------- */
       #conn {
-        --cell: min(1.9rem, 4.2vw, 4.4vh);
+        --cell: min(1.9rem, 4.2cqw, 4.4cqh);
       }
 
       .cgrids {
@@ -383,7 +383,7 @@
         border-radius: 12px;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .props {
           grid-template-columns: 1fr 1fr;
         }
@@ -393,7 +393,7 @@
         }
 
         #conn {
-          --cell: min(1.5rem, 8vw);
+          --cell: min(1.5rem, 8cqw);
         }
       }
     </style>

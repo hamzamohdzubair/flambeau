@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="/deck/deck.css" />
     <script src="/deck/deck.js" defer></script>
     <style>
-      #index {
+      .index {
         gap: 1.6rem;
       }
 
-      #index .kicker {
+      .index .kicker {
         font-family: var(--font-mono);
         font-size: 0.8rem;
         letter-spacing: 0.2em;
@@ -19,39 +19,49 @@
         color: var(--cyan);
       }
 
-      #index h1 {
+      .index h1 {
         text-align: center;
       }
 
-      #index .intro {
+      .index .intro {
         max-width: 40rem;
         text-align: center;
       }
 
-      #index .group {
+      .index .group {
         display: grid;
         gap: 0.7rem;
         width: min(100%, 64rem);
       }
 
-      #index .group h3 {
+      .index .group h3 {
         font-size: 1.15rem;
         color: var(--text);
       }
 
-      #index .tile {
+      .index .tile {
         min-height: 6.4rem;
       }
     </style>
   </head>
   <body>
-    <section class="slide top" id="index">
+    <section class="slide hub-cover index" id="index">
       <span class="kicker">AI/ML</span>
       <h1>ML Algorithms</h1>
       <p class="intro">The algorithms behind machine learning, from linear regression to neural networks.</p>
-      <div class="group">
-        <h3>Supervised learning</h3>
-        <div class="tiles">
+      <nav class="contents">
+        <a class="pill" href="#2">Supervised learning</a>
+        <a class="pill" href="#3">Unsupervised learning</a>
+        <a class="pill" href="#4">Neural networks</a>
+        <a class="pill" href="#5">Convolutional networks</a>
+        <a class="pill" href="#6">Recurrent networks</a>
+        <a class="pill" href="#7">Probability &amp; statistics</a>
+      </nav>
+    </section>
+
+    <section class="slide hub-group index">
+      <h2>Supervised learning</h2>
+      <div class="tiles">
           <div class="tile" style="opacity: 0.45"><span>Linear Regression<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Logistic Regression<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Decision Trees<small>coming soon</small></span></div>
@@ -61,11 +71,11 @@
           <div class="tile" style="opacity: 0.45"><span>Naive Bayes<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Gradient Boosting<small>coming soon</small></span></div>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3>Unsupervised learning</h3>
-        <div class="tiles">
+    <section class="slide hub-group index">
+      <h2>Unsupervised learning</h2>
+      <div class="tiles">
           <div class="tile" style="opacity: 0.45"><span>K-Means Clustering<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Hierarchical Clustering<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>DBSCAN<small>coming soon</small></span></div>
@@ -73,11 +83,11 @@
           <div class="tile" style="opacity: 0.45"><span>t-SNE<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Autoencoders<small>coming soon</small></span></div>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3>Neural networks</h3>
-        <div class="tiles">
+    <section class="slide hub-group index">
+      <h2>Neural networks</h2>
+      <div class="tiles">
           <a class="tile" href="nn/index.html" style="--img: url('/assets/2025-10-04-11-51-47.png')"><span>Overview</span></a>
           <div class="tile" style="opacity: 0.45"><span>Perceptron<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Feedforward Networks<small>coming soon</small></span></div>
@@ -86,11 +96,11 @@
           <div class="tile" style="opacity: 0.45"><span>Optimization<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Regularization<small>coming soon</small></span></div>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3>Convolutional networks</h3>
-        <div class="tiles">
+    <section class="slide hub-group index">
+      <h2>Convolutional networks</h2>
+      <div class="tiles">
           <a class="tile" href="nn/cnn/index.html" style="--img: url('/assets/2025-10-04-12-02-13.png')"><span>CNN overview</span></a>
           <div class="tile" style="opacity: 0.45"><span>CNN Basics<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Convolution Layers<small>coming soon</small></span></div>
@@ -98,27 +108,26 @@
           <div class="tile" style="opacity: 0.45"><span>CNN Architectures<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Transfer Learning<small>coming soon</small></span></div>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3>Recurrent networks</h3>
-        <div class="tiles">
+    <section class="slide hub-group index">
+      <h2>Recurrent networks</h2>
+      <div class="tiles">
           <div class="tile" style="opacity: 0.45"><span>RNN Basics<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>LSTM<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>GRU<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Sequence Models<small>coming soon</small></span></div>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3>Probability &amp; statistics</h3>
-        <div class="tiles">
+    <section class="slide hub-group index">
+      <h2>Probability &amp; statistics</h2>
+      <div class="tiles">
           <a class="tile" href="prob.html" style="--img: url('/assets/2025-10-08-22-44-23.png')"><span>Probability Basics</span></a>
           <div class="tile" style="opacity: 0.45"><span>Distributions<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Bayes Theorem<small>coming soon</small></span></div>
           <div class="tile" style="opacity: 0.45"><span>Maximum Likelihood<small>coming soon</small></span></div>
         </div>
-      </div>
     </section>
   </body>
 </html>

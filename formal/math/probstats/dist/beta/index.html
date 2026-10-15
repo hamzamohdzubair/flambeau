@@ -11,7 +11,7 @@
       .plot {
         width: min(100%, 52rem);
         height: auto;
-        max-height: 58vh;
+        max-height: 58cqh;
         overflow: visible;
       }
 
@@ -105,7 +105,7 @@
       }
 
       input[type="range"] {
-        width: min(14rem, 36vw);
+        width: min(14rem, 36cqw);
         accent-color: var(--violet);
       }
 
@@ -165,7 +165,7 @@
       }
 
       #demo figure.frame iframe {
-        height: 64vh;
+        height: 64cqh;
         background: #fff;
       }
 
@@ -202,7 +202,7 @@
       }
 
       .grid-fig img {
-        max-height: 66vh;
+        max-height: 66cqh;
       }
 
       #gridfig .fam {
@@ -215,7 +215,7 @@
         grid-template-columns: 1fr;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #priors .cols,
         #lambda .cols,
         #gridfig .fam {
@@ -223,7 +223,7 @@
         }
 
         .plot {
-          max-height: 40vh;
+          max-height: 40cqh;
         }
 
         #stats table {
@@ -323,7 +323,7 @@
 
     <section class="slide" id="more">
       <h2>More beta priors</h2>
-      <figure class="step zoom-on-reveal"><img src="/assets/2025-09-30-08-41-14.png" alt="Bayes' prior Beta(1,1), Jeffreys' prior Beta(0.5,0.5), Haldane's prior Beta(0,0) and an empirical prior Beta(0.27,0.27)" style="max-height: 66vh" /></figure>
+      <figure class="step zoom-on-reveal"><img src="/assets/2025-09-30-08-41-14.png" alt="Bayes' prior Beta(1,1), Jeffreys' prior Beta(0.5,0.5), Haldane's prior Beta(0,0) and an empirical prior Beta(0.27,0.27)" style="max-height: 66cqh" /></figure>
     </section>
 
     <!-- ================================================================ lambda continuum -->
@@ -350,7 +350,7 @@
 
     <section class="slide">
       <h2>Lambda continuum, the original figure</h2>
-      <figure class="zoom-on-reveal"><img src="/assets/2025-09-30-08-42-14.png" alt="Six panels of symmetric Beta densities for lambda = 0.5, 1, 2, 4, 8, 16" style="max-height: 66vh" /></figure>
+      <figure class="zoom-on-reveal"><img src="/assets/2025-09-30-08-42-14.png" alt="Six panels of symmetric Beta densities for lambda = 0.5, 1, 2, 4, 8, 16" style="max-height: 66cqh" /></figure>
     </section>
 
     <script type="module">

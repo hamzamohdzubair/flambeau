@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -255,7 +255,7 @@
       }
 
       #title canvas {
-        width: min(26rem, 80vw);
+        width: min(26rem, 80cqw);
         border-radius: 12px;
       }
 
@@ -299,7 +299,7 @@
 
       /* ---------- Median animation ---------- */
       #median .stage {
-        --c: min(3.2rem, 11vw, 7vh);
+        --c: min(3.2rem, 11cqw, 7cqh);
         position: relative;
         display: grid;
         grid-template-columns: auto auto;
@@ -370,7 +370,7 @@
       }
 
       .bw canvas {
-        width: min(6.4rem, 19vw);
+        width: min(6.4rem, 19cqw);
         image-rendering: pixelated;
         border-radius: 8px;
       }
@@ -419,7 +419,7 @@
         margin: 0;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #median .stage {
           grid-template-columns: 1fr;
           justify-items: center;

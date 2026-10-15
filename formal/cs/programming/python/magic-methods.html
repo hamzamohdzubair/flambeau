@@ -390,7 +390,7 @@
         background: var(--cyan);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .slide pre,
         .slide pre.small {
           font-size: 0.85rem;
@@ -408,7 +408,7 @@
         }
 
         .strip .ch {
-          width: var(--cwm, min(1.9rem, 6.6vw));
+          width: var(--cwm, min(1.9rem, 6.6cqw));
           height: 2.1rem;
           font-size: 0.95rem;
         }
@@ -450,7 +450,7 @@
         color: #f0abfc;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #map .rows {
           font-size: 0.8rem;
           gap: 0.45rem 0.6rem;

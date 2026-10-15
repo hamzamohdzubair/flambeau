@@ -59,7 +59,7 @@
       .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
       .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .gradwrap, .lapl, .canny, .codeside { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
         .lab { gap: 0.6rem; }
         .kgrid { --kc: 1.9rem; }
@@ -72,7 +72,7 @@
     <!-- ================================================================ cover -->
     <section class="slide cover" id="title">
       <span class="kicker">Computer vision</span>
-      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84vw)" aria-label="A photo dissolving into its Canny edge map"></canvas>
+      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84cqw)" aria-label="A photo dissolving into its Canny edge map"></canvas>
       <h1>Edge Detection</h1>
       <p>Find where intensity changes sharply: the outlines of everything in the picture.</p>
     </section>

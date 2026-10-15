@@ -42,7 +42,7 @@
       .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
       .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .twocol, .examples, .ab { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
         .mat { font-size: 0.8rem; }
       }
@@ -52,7 +52,7 @@
     <!-- ================================================================ cover -->
     <section class="slide cover" id="title">
       <span class="kicker">Computer vision</span>
-      <canvas class="photo" width="620" height="349" style="width: min(30rem, 84vw); box-shadow: none; background: none" aria-label="A photo tilting in perspective"></canvas>
+      <canvas class="photo" width="620" height="349" style="width: min(30rem, 84cqw); box-shadow: none; background: none" aria-label="A photo tilting in perspective"></canvas>
       <h1>Geometric Transforms</h1>
       <p>Move every pixel somewhere else with one small matrix: shift, rotate, scale, shear, or change the point of view.</p>
     </section>

@@ -22,7 +22,7 @@
       .codeside .side p { font-size: 0.9rem; }
 
       /* ---------- cover ---------- */
-      #title .wheel { position: relative; width: min(12rem, 40vw, 24vh); aspect-ratio: 1; border-radius: 50%; background: conic-gradient(from 90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); box-shadow: 0 0 60px rgba(139, 92, 246, 0.5); }
+      #title .wheel { position: relative; width: min(12rem, 40cqw, 24cqh); aspect-ratio: 1; border-radius: 50%; background: conic-gradient(from 90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); box-shadow: 0 0 60px rgba(139, 92, 246, 0.5); }
       #title .wheel::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 62%); z-index: 1; }
 
       /* ---------- BGR vs RGB ---------- */
@@ -63,7 +63,7 @@
       .qa pre { width: 100%; font-size: 0.92rem; }
       .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .codeside, .hsv { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; justify-items: center; }
         .hsv > div { width: 100%; }
         .hsv .swatch { width: 5.5rem; }

@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -255,7 +255,7 @@
       }
 
       #title canvas {
-        width: min(24rem, 75vw);
+        width: min(24rem, 75cqw);
         border-radius: 12px;
       }
 
@@ -283,7 +283,7 @@
       }
 
       #overflow svg {
-        width: min(15rem, 60vw);
+        width: min(15rem, 60cqw);
         height: auto;
       }
 
@@ -373,7 +373,7 @@
         touch-action: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #what .cards {
           grid-template-columns: 1fr 1fr;
         }

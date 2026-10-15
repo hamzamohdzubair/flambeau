@@ -23,7 +23,7 @@
 
       .katex-display { font-size: 1.35em; }
       /* cover */
-      #title canvas { width: min(30rem, 84vw); }
+      #title canvas { width: min(30rem, 84cqw); }
 
       /* patch shift */
       .shift { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; width: min(100%, 56rem); }
@@ -38,7 +38,7 @@
 
       /* FAST circle */
       .fast { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.4rem; align-items: center; width: min(100%, 64rem); }
-      .fgrid { --fc: min(1.75rem, 6.4vw, 4vh); display: grid; grid-template-columns: repeat(7, var(--fc)); gap: 3px; padding: 6px; border-radius: 12px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.75); }
+      .fgrid { --fc: min(1.75rem, 6.4cqw, 4cqh); display: grid; grid-template-columns: repeat(7, var(--fc)); gap: 3px; padding: 6px; border-radius: 12px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.75); }
       .fgrid span { position: relative; display: grid; place-items: center; width: var(--fc); height: var(--fc); border-radius: 4px; font: 500 calc(var(--fc) * 0.36) var(--font-mono); color: transparent; }
       .fgrid span.ring { outline: 2px solid rgba(255, 255, 255, 0.25); outline-offset: -2px; color: rgba(255, 255, 255, 0.65); }
       .fgrid span.p { outline: 2px solid var(--pink); outline-offset: -2px; color: #fff; }
@@ -63,7 +63,7 @@
       .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
       .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .shift { gap: 0.6rem; }
         .lam, .fast, .lab, .blob { grid-template-columns: minmax(0, 1fr); gap: 1rem; justify-items: center; }
         .lab .ctl, .blob > div { width: 100%; }

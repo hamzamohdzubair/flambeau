@@ -8,13 +8,13 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #automata .figs {
-        grid-template-columns: repeat(auto-fit, minmax(min(11rem, 40vw), 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(11rem, 40cqw), 1fr));
         width: min(100%, 60rem);
       }
 
       #automata .figs img {
         aspect-ratio: 2 / 3;
-        max-height: 44vh;
+        max-height: 44cqh;
       }
 
       #aristotle .cols {
@@ -23,7 +23,7 @@
       }
 
       #aristotle img {
-        max-height: 56vh;
+        max-height: 56cqh;
       }
 
       #aristotle ul {
@@ -75,7 +75,7 @@
         text-decoration: underline;
       }
 
-      @media (max-width: 700px) {
+      @container slide (max-width: 700px) {
         #aristotle .cols {
           grid-template-columns: 1fr;
         }

@@ -9,7 +9,7 @@
     <style>
       /* ---------- Atom drawings ---------- */
       .atom {
-        width: min(100%, 26rem, 52vh);
+        width: min(100%, 26rem, 52cqh);
         height: auto;
         overflow: visible;
       }
@@ -209,7 +209,7 @@
         color: var(--green);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #what .cols,
         #builder .cols {
           grid-template-columns: 1fr;
@@ -217,7 +217,7 @@
         }
 
         .atom {
-          width: min(100%, 15rem, 30vh);
+          width: min(100%, 15rem, 30cqh);
         }
 
         .particles {

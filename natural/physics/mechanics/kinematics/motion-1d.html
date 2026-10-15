@@ -224,7 +224,7 @@
       }
 
       input[type="range"] {
-        width: min(10rem, 30vw);
+        width: min(10rem, 30cqw);
         accent-color: var(--violet);
       }
 
@@ -286,7 +286,7 @@
         color: var(--green);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #eqs .cols {
           grid-template-columns: 1fr;
         }

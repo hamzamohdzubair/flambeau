@@ -390,7 +390,7 @@
         background: var(--cyan);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .slide pre,
         .slide pre.small {
           font-size: 0.85rem;
@@ -408,7 +408,7 @@
         }
 
         .strip .ch {
-          width: var(--cwm, min(1.9rem, 6.6vw));
+          width: var(--cwm, min(1.9rem, 6.6cqw));
           height: 2.1rem;
           font-size: 0.95rem;
         }
@@ -490,7 +490,7 @@
         box-shadow: 0 0 18px rgba(236, 72, 153, 0.6);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #sorter .machine {
           padding-left: 4rem;
           gap: 0.5rem 0.8rem;

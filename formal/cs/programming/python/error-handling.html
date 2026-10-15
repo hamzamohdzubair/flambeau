@@ -274,7 +274,7 @@
         text-align: center;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .tracer {
           grid-template-columns: minmax(0, 1fr);
           gap: 0.8rem;
@@ -311,7 +311,7 @@
       .flow {
         width: 100%;
         height: auto;
-        max-height: 34vh;
+        max-height: 34cqh;
         overflow: visible;
       }
 
@@ -376,13 +376,13 @@
         filter: drop-shadow(0 0 8px #ec4899);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #full .tracer {
           grid-template-columns: minmax(0, 1fr);
         }
 
         .flow {
-          max-height: 26vh;
+          max-height: 26cqh;
         }
       }
     </style>

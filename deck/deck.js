@@ -1,7 +1,8 @@
 /* ==========================================================================
    Flambeau deck runtime. A deck is a plain HTML page whose <body> holds
    <section class="slide"> elements; this script turns them into a
-   presentation. See CLAUDE.md for the authoring guide.
+   presentation: each slide is a 1600x900 canvas scaled to fit the window.
+   See CLAUDE.md for the authoring guide.
 
    Public API (window.Deck):
      Deck.on(event, fn)        'enter' | 'leave' | 'step' | 'unstep'
@@ -320,6 +321,52 @@
 
   const zoomOpen = () => ui.zoom.classList.contains("open");
 
+  // ------------------------------------------------------------ the canvas
+
+  const W = 1600;
+  const H = 900;
+  let stage;
+
+  function buildStage() {
+    stage = el("div", { class: "deck-stage" });
+    slides[0].before(stage);
+    stage.append(...slides);
+    scaleStage();
+    window.addEventListener("resize", scaleStage);
+  }
+
+  let rotateHint;
+  function scaleStage() {
+    stage.style.setProperty("--scale", Math.min(window.innerWidth / W, window.innerHeight / H));
+    // Portrait phone: suggest landscape, briefly
+    if (window.innerHeight > window.innerWidth * 1.2 && window.innerWidth < 760) {
+      if (!rotateHint) {
+        rotateHint = el("div", { class: "deck-rotate" }, "Turn your phone sideways for bigger slides");
+        document.body.appendChild(rotateHint);
+        requestAnimationFrame(() => rotateHint.classList.add("show"));
+        setTimeout(() => rotateHint.classList.remove("show"), 4000);
+      }
+    } else rotateHint?.classList.remove("show");
+  }
+
+  // A slide whose content is taller or wider than the canvas is shrunk to fit
+  // (CSS zoom keeps the slide box at full size). Slides should be written to
+  // fit; this is the safety net, and Deck.overflow() lists the slides it caught.
+  const fitted = new Map();
+  function fit(slide) {
+    slide.style.zoom = "";
+    const over = Math.max(slide.scrollHeight / slide.clientHeight, slide.scrollWidth / slide.clientWidth);
+    if (over > 1.01) {
+      const z = Math.max(0.5, 1 / over);
+      slide.style.zoom = z;
+      fitted.set(slide, z);
+    } else fitted.delete(slide);
+  }
+
+  function fitAll() {
+    slides.forEach(fit);
+  }
+
   // ------------------------------------------------------------- the engine
 
   let slides = [];
@@ -396,7 +443,6 @@
       index = i;
       step = 0;
       groups[i].flat().forEach((e) => e.classList.remove("shown", "current"));
-      slides[i].scrollTop = 0;
       slides[i].dispatchEvent(new CustomEvent("slide:enter", { detail: { index: i, from: prevIndex, dir } }));
       emit("enter", slides[i], i, { from: prevIndex, dir });
     }
@@ -492,11 +538,14 @@
     }
   }
 
+  // The chrome shows while the pointer moves and fades while presenting
   let idleTimer;
   function wake() {
     document.body.classList.remove("idle");
     clearTimeout(idleTimer);
-    if (document.fullscreenElement) idleTimer = setTimeout(() => document.body.classList.add("idle"), 2500);
+    idleTimer = setTimeout(() => {
+      if (!document.querySelector(".deck-bar:hover, .deck-nav:hover")) document.body.classList.add("idle");
+    }, 2500);
   }
 
   // ------------------------------------------------------------------- boot
@@ -506,28 +555,35 @@
     if (!slides.length) return;
     analytics();
     favicon();
+    buildStage();
     ui = buildChrome();
     document.body.classList.toggle("single", slides.length === 1);
 
     // Run code and maths preparation before steps are collected
     await prepareCode();
     groups = slides.map(collectSteps);
-    prepareMath();
+    prepareMath().then(fitAll);
 
     document.addEventListener("keydown", onKey);
     document.addEventListener("click", onClick);
     document.addEventListener("touchstart", onTouchStart, { passive: true });
     document.addEventListener("touchend", onTouchEnd, { passive: true });
     document.addEventListener("mousemove", wake);
+    document.addEventListener("touchstart", wake, { passive: true });
     document.addEventListener("fullscreenchange", wake);
     window.addEventListener("hashchange", () => {
       const [i, s] = fromHash();
       if (i !== index) go(i, s);
     });
 
-    // The top bar gets a backdrop once a tall slide scrolls under it
-    for (const sl of slides) sl.addEventListener("scroll", () => document.body.classList.toggle("scrolled", sl.scrollTop > 8), { passive: true });
-    Deck.on("enter", (sl) => document.body.classList.toggle("scrolled", sl.scrollTop > 8));
+    // Fit slides once fonts, images and maths have settled, and again on entry
+    // in case a script changed the slide's content
+    fitAll();
+    document.fonts?.ready.then(fitAll);
+    window.addEventListener("load", fitAll);
+    for (const img of $$("img", stage)) if (!img.complete) img.addEventListener("load", () => fit(img.closest(".slide")), { once: true });
+    Deck.on("enter", (sl) => fit(sl));
+    wake();
 
     markReady();
     const [i, s] = fromHash();
@@ -568,6 +624,9 @@
     get step() {
       return step;
     },
+    // Slides the safety net had to shrink, as [slide number, zoom] pairs
+    overflow: () => slides.map((sl, i) => [i + 1, fitted.get(sl)]).filter((x) => x[1]),
+    fit: (slide) => (slide ? fit(slide) : fitAll()),
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

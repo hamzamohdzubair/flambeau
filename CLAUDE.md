@@ -68,13 +68,27 @@ Every folder must have an `index.html`, because the breadcrumb trail links to ea
 counter, fullscreen), prev/next buttons, the progress bar, keyboard/click/swipe navigation, image
 zoom, code highlighting, KaTeX maths, the favicon and analytics. Never add those by hand.
 
-## Slides
+## Slides are a fixed 16:9 canvas
 
-- `<section class="slide">`: a slide fills the viewport. Content is centred vertically under the
-  title, and a slide whose content is too tall scrolls.
+These are presentations, not web pages. Every slide is a **1600×900 canvas** that deck.js scales
+to fit the window (the aurora background fills any margin, so there are no black bars). Layouts
+never reflow and **never scroll**: design each slide to fit the canvas, like a Keynote slide.
+
+- Size things in `rem` (1rem = 24px of the 1600px canvas) or in `cqw`/`cqh` (percent of the
+  canvas). Never use `vw`/`vh` or `@media` width queries inside slides: the canvas is always
+  1600×900, whatever the screen. Phones see the same slide scaled down.
+- Fill the canvas: a diagram or code block should use most of the slide, with text big enough to
+  read from the back of a room. Body text is 1.15rem; don't go below 0.8rem anywhere.
+- If a slide has too much for 1600×900, split it into two slides. As a safety net deck.js shrinks
+  an overflowing slide to fit (down to 50%), and `Deck.overflow()` lists the slides it shrank; a
+  finished deck should have none, or only tiny ones (zoom above 0.9).
+- `<section class="slide">`: content is centred vertically under the title.
 - The first `<h2>` in a slide is its title: pinned to the top in gradient text.
 - Slide classes: `cover` (centred title slide with `<span class="kicker">`, `<h1>`, `<p>`),
   `section` (big centred divider), `top` (content starts under the title instead of centred).
+- Topic index pages are decks too: a `cover hub-cover` slide with the title and a
+  `<nav class="contents">` of `.pill` links to `#n`, then one `slide hub-group` per group
+  (`<span class="kicker">`, `<h2>`, `.tiles`), at most about 10 tiles per slide.
 - Give a slide an `id` when a script or a `<style>` needs to target it.
 
 ## Steps (fragments)
@@ -160,14 +174,17 @@ Deck.scene("#my-slide", {
   row of controls) do not advance the slide when clicked or swiped.
 - Same-origin `/assets` images can be drawn on a canvas and read with `getImageData`, for live
   image-processing demos.
-- On phones, size grids with `min(Xrem, Nvw, Nvh)`, keep code lines and comments short, and check
-  the slide at 390×844.
+- Pointer coordinates: the canvas is scaled, so map `clientX/clientY` through
+  `getBoundingClientRect()` ratios (`(e.clientX - r.left) / r.width * width`), never `offsetX`.
 - Gotcha: gradient text (`background-clip: text`) disappears on children that get their own
   transform. Animate words inside a `grad-each` heading instead.
 - Inline SVG is the easiest canvas for diagrams: draw it in the HTML, give parts classes, and
   animate them with GSAP in the slide's scene.
 
 ## Presenting
+
+The hzubair.com link, breadcrumbs, counter and buttons fade out after a few seconds without mouse
+movement, so they never sit on top of a slide while presenting.
 
 →, space, PageDown, click (right side): next step. ←, PageUp, click (left third): back.
 ↓/↑: next/previous slide with every step shown. Home/End. F: fullscreen. Swipe on phones.
@@ -185,5 +202,5 @@ The URL hash is `#slide` or `#slide.step`, so a link can open a deck mid-way.
 ## Testing a deck
 
 Open it through the local server and step through every slide (→ to the end), checking the browser
-console for errors. A headless check: load each page and confirm `Deck.slides.length` is non-zero
-and no `pageerror` fires.
+console for errors. A headless check at a 1600×900 window: load each page, confirm
+`Deck.slides.length` is non-zero, no `pageerror` fires, and `Deck.overflow()` is empty.

@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -256,14 +256,14 @@
 
       /* ---------- Cover ---------- */
       #title canvas {
-        width: min(26rem, 80vw);
+        width: min(26rem, 80cqw);
         border-radius: 12px;
         image-rendering: pixelated;
       }
 
       /* ---------- Grid demo ---------- */
       #grid-demo {
-        --cell: min(2.1rem, 6.6vw, 4.6vh);
+        --cell: min(2.1rem, 6.6cqw, 4.6cqh);
       }
 
       .mgr {
@@ -434,9 +434,9 @@
         justify-items: center;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #grid-demo {
-          --cell: min(1.5rem, 6.8vw);
+          --cell: min(1.5rem, 6.8cqw);
         }
 
         .strip {

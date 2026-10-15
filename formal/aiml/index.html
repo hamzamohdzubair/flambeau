@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="/deck/deck.css" />
     <script src="/deck/deck.js" defer></script>
     <style>
-      #hub {
+      .hub {
         gap: 1.6rem;
       }
 
-      #hub .kicker {
+      .hub .kicker {
         font-family: var(--font-mono);
         font-size: 0.8rem;
         letter-spacing: 0.2em;
@@ -19,27 +19,27 @@
         color: var(--cyan);
       }
 
-      #hub h1 {
+      .hub h1 {
         text-align: center;
       }
 
-      #hub .intro {
+      .hub .intro {
         max-width: 40rem;
         text-align: center;
       }
 
-      #hub .group {
+      .hub .group {
         display: grid;
         gap: 0.7rem;
         width: min(100%, 64rem);
       }
 
-      #hub .group h3 {
+      .hub .group h3 {
         font-size: 1.15rem;
         color: var(--text);
       }
 
-      #hub .group h3 span {
+      .hub .group h3 span {
         margin-right: 0.5rem;
         font-family: var(--font-mono);
         font-size: 0.75rem;
@@ -48,28 +48,28 @@
         color: var(--violet-soft);
       }
 
-      #hub .tile {
+      .hub .tile {
         min-height: 6.4rem;
       }
 
-      #hub .books {
+      .hub .books {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(9rem, 40vw), 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(9rem, 40cqw), 1fr));
         gap: 1.2rem;
         align-items: end;
       }
 
-      #hub .books img {
+      .hub .books img {
         width: 100%;
         max-height: 15rem;
         object-fit: contain;
       }
 
-      #hub .books figcaption a {
+      .hub .books figcaption a {
         font-weight: 600;
       }
 
-      #hub .extras {
+      .hub .extras {
         display: flex;
         gap: 1rem;
         font-size: 0.9rem;
@@ -77,24 +77,36 @@
     </style>
   </head>
   <body>
-    <section class="slide top" id="hub">
+    <section class="slide hub-cover hub" id="hub">
       <span class="kicker">Formal sciences</span>
       <h1>AI/ML</h1>
       <p class="intro">What artificial intelligence and machine learning are, the tasks they solve, the algorithms behind them, and their limits.</p>
+      <nav class="contents">
+        <a class="pill" href="#2">Introduction to AI/ML</a>
+        <a class="pill" href="#3">Major tasks</a>
+        <a class="pill" href="#4">Minor tasks</a>
+        <a class="pill" href="#5">Machine learning algorithms</a>
+        <a class="pill" href="#6">Extra topics</a>
+        <a class="pill" href="#7">Books (all free to read)</a>
+      </nav>
+      <p class="extras muted"><a href="/jokes/1.html">A joke</a> <a href="/feedback/1.html">Feedback</a></p>
+    </section>
 
-      <div class="group">
-        <h3><span>Start here</span>Introduction to AI/ML</h3>
-        <div class="tiles">
+    <section class="slide hub-group hub">
+      <span class="kicker">Start here</span>
+      <h2>Introduction to AI/ML</h2>
+      <div class="tiles">
           <a class="tile" href="intro-why.html" style="--img: url('/assets/2025-10-16-12-01-08.png')"><span>Why learn AI?</span></a>
           <a class="tile" href="intro-term.html" style="--img: url('/assets/2025-10-16-11-30-53.png')"><span>Terminology</span></a>
           <a class="tile" href="intro-learning.html" style="--img: url('/assets/2025-10-10-12-04-42.png')"><span>Learning Patterns</span></a>
           <a class="tile" href="intro-hype.html" style="--img: url('/assets/2025-11-01-07-20-37.png')"><span>Hype</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Tasks</span>Major tasks</h3>
-        <div class="tiles">
+    <section class="slide hub-group hub">
+      <span class="kicker">Tasks</span>
+      <h2>Major tasks</h2>
+      <div class="tiles">
           <div class="tile" style="--img: url('/assets/2025-10-16-19-03-03.png'); opacity: 0.45"><span>Regression<small>coming soon</small></span></div>
           <a class="tile" href="tasks/classification/index.html" style="--img: url('/assets/2025-10-04-08-15-36.png')"><span>Classification</span></a>
           <div class="tile" style="--img: url('/assets/2025-10-23-22-23-41.png'); opacity: 0.45"><span>Density Estimation<small>coming soon</small></span></div>
@@ -106,21 +118,23 @@
           <a class="tile" href="language/index.html" style="--img: url('/assets/2025-10-09-22-22-22.png')"><span>Language</span></a>
           <div class="tile" style="--img: url('/assets/2025-10-23-22-26-28.png'); opacity: 0.45"><span>Reasoning<small>coming soon</small></span></div>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Tasks</span>Minor tasks</h3>
-        <div class="tiles">
+    <section class="slide hub-group hub">
+      <span class="kicker">Tasks</span>
+      <h2>Minor tasks</h2>
+      <div class="tiles">
           <div class="tile" style="--img: url('/assets/2025-10-16-19-26-04.png'); opacity: 0.45"><span>Scaling<small>coming soon</small></span></div>
           <div class="tile" style="--img: url('/assets/2025-10-16-19-30-30.png'); opacity: 0.45"><span>Encoding<small>coming soon</small></span></div>
           <div class="tile" style="--img: url('/assets/2025-10-16-19-29-24.png'); opacity: 0.45"><span>Missing Values<small>coming soon</small></span></div>
           <a class="tile" href="tasks/imb.html" style="--img: url('/assets/2025-10-16-19-27-01.png')"><span>Class Imbalance</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Models</span>Machine learning algorithms</h3>
-        <div class="tiles">
+    <section class="slide hub-group hub">
+      <span class="kicker">Models</span>
+      <h2>Machine learning algorithms</h2>
+      <div class="tiles">
           <a class="tile" href="mlalgos/index.html" style="--img: url('/assets/2025-10-08-22-44-23.png')"><span>All ML Algorithms</span></a>
           <a class="tile" href="mlalgos/prob.html" style="--img: url('/assets/2025-10-08-22-44-23.png')"><span>Probabilistic</span></a>
           <a class="tile" href="mlalgos/glm/index.html" style="--img: url('/assets/2025-10-08-22-41-32.png')"><span>GLM</span></a>
@@ -130,29 +144,28 @@
           <div class="tile" style="--img: url('/assets/2025-10-08-22-34-05.png'); opacity: 0.45"><span>Ensembles<small>coming soon</small></span></div>
           <a class="tile" href="mlalgos/nn/index.html" style="--img: url('/assets/2025-10-04-11-51-47.png')"><span>Neural Networks</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Beyond</span>Extra topics</h3>
-        <div class="tiles">
+    <section class="slide hub-group hub">
+      <span class="kicker">Beyond</span>
+      <h2>Extra topics</h2>
+      <div class="tiles">
           <a class="tile" href="systems/index.html" style="--img: url('/assets/2025-10-27-18-57-51.png')"><span>Systems</span></a>
           <a class="tile" href="tasks/xai.html" style="--img: url('/assets/2025-10-18-09-32-58.png')"><span>XAI</span></a>
           <a class="tile" href="history/index.html" style="--img: url('/assets/2025-10-01-11-36-59.png')"><span>History</span></a>
           <a class="tile" href="limitations/index.html" style="--img: url('/assets/2025-10-10-12-13-11.png')"><span>Limitations</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Resources</span>Books (all free to read)</h3>
-        <div class="books">
+    <section class="slide hub-group hub">
+      <span class="kicker">Resources</span>
+      <h2>Books (all free to read)</h2>
+      <div class="books">
           <figure><img src="/assets/2025-10-05-09-49-36.png" alt="Cover of Mathematics for Machine Learning" /><figcaption><a href="https://mml-book.github.io/book/mml-book.pdf">Free access</a></figcaption></figure>
           <figure><img src="/assets/2025-10-16-19-06-32.png" alt="Cover of An Introduction to Statistical Learning" /><figcaption><a href="https://www.statlearning.com/">Free access</a></figcaption></figure>
           <figure><img src="/assets/2025-10-05-09-08-25.png" alt="Cover of Dive into Deep Learning" /><figcaption><a href="https://d2l.ai">Free access</a></figcaption></figure>
           <figure><img src="/assets/2025-11-07-11-35-17.png" alt="Cover of Machine Learning Systems" /><figcaption><a href="https://www.mlsysbook.ai/">Free access</a></figcaption></figure>
         </div>
-      </div>
-
-      <p class="extras muted"><a href="/jokes/1.html">A joke</a> <a href="/feedback/1.html">Feedback</a></p>
     </section>
   </body>
 </html>

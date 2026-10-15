@@ -24,13 +24,13 @@
       /* HOG cell */
       .hogcell svg { width: min(100%, 32rem); overflow: visible; }
       /* block sliding */
-      .blocks svg { width: min(11rem, 40vw); overflow: visible; }
+      .blocks svg { width: min(11rem, 40cqw); overflow: visible; }
       .blocks .calc { font-family: var(--font-mono); font-size: 1.05rem; }
       .blocks .calc .big { font-size: 2.2rem; }
 
       /* LBP */
       .lbp { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.2rem; align-items: center; width: min(100%, 66rem); }
-      .lgrid { --lc: min(3.6rem, 16vw, 8vh); display: grid; grid-template-columns: repeat(3, var(--lc)); gap: 5px; }
+      .lgrid { --lc: min(3.6rem, 16cqw, 8cqh); display: grid; grid-template-columns: repeat(3, var(--lc)); gap: 5px; }
       .lgrid span { position: relative; display: grid; place-items: center; height: var(--lc); border-radius: 8px; font: 500 calc(var(--lc) * 0.3) var(--font-mono); }
       .lgrid span i { position: absolute; right: 4px; bottom: 2px; font-style: normal; font-size: calc(var(--lc) * 0.26); color: var(--pink); font-weight: 700; opacity: 0; }
       .lgrid span.c { outline: 3px solid var(--cyan); outline-offset: -3px; }
@@ -60,7 +60,7 @@
       .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
       .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .codeside, .twocol, .lbp, .tm { grid-template-columns: minmax(0, 1fr); gap: 1rem; justify-items: center; }
         .codeside > *, .twocol > *, .tm > * { width: 100%; }
       }
@@ -70,7 +70,7 @@
     <!-- ================================================================ cover -->
     <section class="slide cover" id="title">
       <span class="kicker">Computer vision</span>
-      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84vw)" aria-label="A photo with its histogram-of-gradients glyphs fading in"></canvas>
+      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84cqw)" aria-label="A photo with its histogram-of-gradients glyphs fading in"></canvas>
       <h1>Feature Extraction</h1>
       <p>Turn raw pixels into a handful of meaningful measurements: gradients, textures, colours and patterns.</p>
     </section>

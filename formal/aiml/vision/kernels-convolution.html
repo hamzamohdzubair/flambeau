@@ -154,7 +154,7 @@
 
       /* ---------- Sliding-kernel demo ---------- */
       #slide-demo {
-        --cell: min(2.9rem, 10.2vw, 6.4vh);
+        --cell: min(2.9rem, 10.2cqw, 6.4cqh);
       }
 
       .conv {
@@ -503,14 +503,14 @@
         gap: 1.1rem;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .conv {
           grid-template-columns: auto;
           gap: 0.8rem;
         }
 
         #slide-demo {
-          --cell: min(2.15rem, 9vw);
+          --cell: min(2.15rem, 9cqw);
         }
 
         .conv > div {

@@ -93,7 +93,7 @@
       }
 
       .predict input {
-        width: min(16rem, 60vw);
+        width: min(16rem, 60cqw);
         accent-color: var(--pink);
       }
 
@@ -163,7 +163,7 @@
       #tasks svg {
         width: 100%;
         height: auto;
-        max-height: 62vh;
+        max-height: 62cqh;
         border-radius: 16px;
         border: 1px solid var(--border);
         background: rgba(10, 12, 26, 0.6);
@@ -216,7 +216,7 @@
         stroke-width: 2.5;
       }
 
-      @media (max-width: 700px) {
+      @container slide (max-width: 700px) {
         #glassdoor .cols,
         #tasks .stage {
           grid-template-columns: 1fr;

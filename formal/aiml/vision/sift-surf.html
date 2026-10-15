@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -255,7 +255,7 @@
       }
 
       #title canvas {
-        width: min(28rem, 80vw);
+        width: min(28rem, 80cqw);
         border-radius: 12px;
       }
 
@@ -314,7 +314,7 @@
 
       /* ---------- extrema cube ---------- */
       .cube {
-        --c: min(2.6rem, 9vw, 6vh);
+        --c: min(2.6rem, 9cqw, 6cqh);
         display: flex;
         gap: 1.4rem;
         justify-content: center;
@@ -375,7 +375,7 @@
       }
 
       .desc canvas.patchc {
-        width: min(20rem, 70vw, 44vh);
+        width: min(20rem, 70cqw, 44cqh);
         border-radius: 10px;
       }
 
@@ -388,7 +388,7 @@
 
       /* ---------- integral image ---------- */
       .ii {
-        --c: min(2.3rem, 8vw, 4.4vh);
+        --c: min(2.3rem, 8cqw, 4.4cqh);
         display: flex;
         gap: 2rem;
         flex-wrap: wrap;
@@ -473,7 +473,7 @@
         width: min(100%, 60rem);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .ss .row,
         .ss .row.dog {
           grid-template-columns: repeat(3, minmax(0, 1fr));

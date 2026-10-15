@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -257,7 +257,7 @@
       /* ---------- Cover ---------- */
       #title .stage {
         position: relative;
-        width: min(22rem, 70vw);
+        width: min(22rem, 70cqw);
         aspect-ratio: 620 / 349;
         border-radius: 14px;
         border: 1px dashed rgba(167, 139, 250, 0.45);
@@ -420,7 +420,7 @@
 
       /* ---------- Transpose ---------- */
       #transpose .panels {
-        --c: min(2.6rem, 8vw, 6vh);
+        --c: min(2.6rem, 8cqw, 6cqh);
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
@@ -477,7 +477,7 @@
         touch-action: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #types .cards {
           grid-template-columns: 1fr 1fr;
         }

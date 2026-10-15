@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="/deck/deck.css" />
     <script src="/deck/deck.js" defer></script>
     <style>
-      #python {
+      .python {
         gap: 1.6rem;
       }
 
-      #python .kicker {
+      .python .kicker {
         font-family: var(--font-mono);
         font-size: 0.8rem;
         letter-spacing: 0.2em;
@@ -19,22 +19,22 @@
         color: var(--cyan);
       }
 
-      #python h1 {
+      .python h1 {
         text-align: center;
       }
 
-      #python .group {
+      .python .group {
         display: grid;
         gap: 0.7rem;
         width: min(100%, 64rem);
       }
 
-      #python .group h3 {
+      .python .group h3 {
         font-size: 1.15rem;
         color: var(--text);
       }
 
-      #python .group h3 span {
+      .python .group h3 span {
         margin-right: 0.5rem;
         font-family: var(--font-mono);
         font-size: 0.75rem;
@@ -43,27 +43,45 @@
         color: var(--violet-soft);
       }
 
-      #python .tile {
+      .python .tile {
         min-height: 5.6rem;
       }
 
-      #python .libs .tile {
+      .python .libs .tile {
         min-height: 7rem;
       }
 
-      #python .video {
+      .python .video {
         max-width: 22rem;
       }
     </style>
   </head>
   <body>
-    <section class="slide top" id="python">
+    <section class="slide hub-cover python" id="python">
       <span class="kicker">CS · Programming</span>
       <h1>Python</h1>
+      <nav class="contents">
+        <a class="pill" href="#2">Scientific Python and deep learning</a>
+        <a class="pill" href="#3">Basics</a>
+        <a class="pill" href="#4">Control flow</a>
+        <a class="pill" href="#5">Functions</a>
+        <a class="pill" href="#6">Data structures</a>
+        <a class="pill" href="#7">Strings</a>
+        <a class="pill" href="#8">File I/O</a>
+        <a class="pill" href="#9">Error handling</a>
+        <a class="pill" href="#10">Comprehensions</a>
+        <a class="pill" href="#11">Object-oriented programming</a>
+        <a class="pill" href="#12">Decorators</a>
+        <a class="pill" href="#13">Iterators &amp; generators</a>
+        <a class="pill" href="#14">Practice</a>
+        <a class="pill" href="#15">Video</a>
+      </nav>
+    </section>
 
-      <div class="group libs">
-        <h3><span>Libraries</span>Scientific Python and deep learning</h3>
-        <div class="tiles">
+    <section class="slide hub-group libs python">
+      <span class="kicker">Libraries</span>
+      <h2>Scientific Python and deep learning</h2>
+      <div class="tiles">
           <a class="tile" href="numpy/index.html" style="--img: url('/assets/2025-10-19-00-46-48.png')" aria-label="NumPy"><span></span></a>
           <div class="tile" style="--img: url('/assets/2025-10-05-12-17-07.png'); opacity: 0.45"><span aria-label="Pandas"><small>coming soon</small></span></div>
           <div class="tile" style="--img: url('/assets/2025-10-05-12-16-08.png'); opacity: 0.45"><span aria-label="scikit-learn"><small>coming soon</small></span></div>
@@ -71,11 +89,12 @@
           <div class="tile" style="--img: url('/assets/2025-10-05-12-11-41.png'); opacity: 0.45"><span>TensorFlow<small>coming soon</small></span></div>
           <div class="tile" style="--img: url('/assets/2025-10-05-12-12-25.png'); opacity: 0.45"><span>PyTorch<small>coming soon</small></span></div>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Fundamentals</span>Basics</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Basics</h2>
+      <div class="tiles">
           <a class="tile" href="1-variables-assignment.html"><span>Variables &amp; Assignment</span></a>
           <a class="tile" href="1-data-types.html"><span>Data Types</span></a>
           <a class="tile" href="1-arithmetic-operations.html"><span>Arithmetic Operations</span></a>
@@ -85,11 +104,12 @@
           <a class="tile" href="1-input-output.html"><span>Input &amp; Output</span></a>
           <a class="tile" href="1-comments.html"><span>Comments</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Fundamentals</span>Control flow</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Control flow</h2>
+      <div class="tiles">
           <a class="tile" href="if-statements.html"><span>If Statements</span></a>
           <a class="tile" href="ternary-operator.html"><span>Ternary Operator</span></a>
           <a class="tile" href="for-loops.html"><span>For Loops</span></a>
@@ -99,22 +119,24 @@
           <a class="tile" href="match-statement.html"><span>Match Statement</span></a>
           <a class="tile" href="pass-statement.html"><span>Pass Statement</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Fundamentals</span>Functions</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Functions</h2>
+      <div class="tiles">
           <a class="tile" href="function-basics.html"><span>Function Basics</span></a>
           <a class="tile" href="function-parameters.html"><span>Parameters</span></a>
           <a class="tile" href="function-return.html"><span>Return Values</span></a>
           <a class="tile" href="lambda-functions.html"><span>Lambda Functions</span></a>
           <a class="tile" href="function-scope.html"><span>Scope</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Fundamentals</span>Data structures</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Data structures</h2>
+      <div class="tiles">
           <a class="tile" href="lists-basics.html"><span>Lists Basics</span></a>
           <a class="tile" href="lists-methods.html"><span>List Methods</span></a>
           <a class="tile" href="tuples.html"><span>Tuples</span></a>
@@ -122,86 +144,94 @@
           <a class="tile" href="dictionaries-methods.html"><span>Dictionary Methods</span></a>
           <a class="tile" href="sets.html"><span>Sets</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Fundamentals</span>Strings</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Strings</h2>
+      <div class="tiles">
           <a class="tile" href="strings-basics.html"><span>String Basics</span></a>
           <a class="tile" href="string-methods.html"><span>String Methods</span></a>
           <a class="tile" href="string-formatting.html"><span>String Formatting</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Intermediate</span>File I/O</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Intermediate</span>
+      <h2>File I/O</h2>
+      <div class="tiles">
           <a class="tile" href="file-reading.html"><span>File Reading</span></a>
           <a class="tile" href="file-writing.html"><span>File Writing</span></a>
           <a class="tile" href="file-paths.html"><span>File Paths</span></a>
           <a class="tile" href="csv-json.html"><span>CSV &amp; JSON</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Intermediate</span>Error handling</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Intermediate</span>
+      <h2>Error handling</h2>
+      <div class="tiles">
           <a class="tile" href="try-except.html"><span>Try Except</span></a>
           <a class="tile" href="exceptions.html"><span>Exceptions</span></a>
           <a class="tile" href="custom-exceptions.html"><span>Custom Exceptions</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Intermediate</span>Comprehensions</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Intermediate</span>
+      <h2>Comprehensions</h2>
+      <div class="tiles">
           <a class="tile" href="list-comprehensions.html"><span>List Comprehensions</span></a>
           <a class="tile" href="dict-set-comprehensions.html"><span>Dict &amp; Set Comprehensions</span></a>
           <a class="tile" href="generator-expressions.html"><span>Generator Expressions</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Advanced</span>Object-oriented programming</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Advanced</span>
+      <h2>Object-oriented programming</h2>
+      <div class="tiles">
           <a class="tile" href="classes-objects.html"><span>Classes &amp; Objects</span></a>
           <a class="tile" href="methods.html"><span>Methods</span></a>
           <a class="tile" href="inheritance.html"><span>Inheritance</span></a>
           <a class="tile" href="properties.html"><span>Properties</span></a>
           <a class="tile" href="magic-methods.html"><span>Magic Methods</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Advanced</span>Decorators</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Advanced</span>
+      <h2>Decorators</h2>
+      <div class="tiles">
           <a class="tile" href="decorators-basics.html"><span>Decorators Basics</span></a>
           <a class="tile" href="decorators-advanced.html"><span>Decorators Advanced</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Advanced</span>Iterators &amp; generators</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Advanced</span>
+      <h2>Iterators &amp; generators</h2>
+      <div class="tiles">
           <a class="tile" href="iterators.html"><span>Iterators</span></a>
           <a class="tile" href="generators.html"><span>Generators</span></a>
           <a class="tile" href="itertools.html"><span>Itertools</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Tasks</span>Practice</h3>
-        <div class="tiles">
+    <section class="slide hub-group python">
+      <span class="kicker">Tasks</span>
+      <h2>Practice</h2>
+      <div class="tiles">
           <a class="tile" href="getting-toy-data.html" style="--img: url('/assets/2025-10-18-08-01-50.png')"><span>Getting Toy Data</span></a>
         </div>
-      </div>
+    </section>
 
-      <div class="group">
-        <h3><span>Resources</span>Video</h3>
-        <div class="tiles video">
+    <section class="slide hub-group python">
+      <span class="kicker">Resources</span>
+      <h2>Video</h2>
+      <div class="tiles video">
           <a class="tile" href="https://www.youtube.com/watch?v=GfH4QL4VqJ0" style="--img: url('https://img.youtube.com/vi/GfH4QL4VqJ0/0.jpg')"><span>Python: The Documentary<small>YouTube</small></span></a>
         </div>
-      </div>
     </section>
   </body>
 </html>

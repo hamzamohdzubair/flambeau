@@ -154,7 +154,7 @@
         white-space: nowrap;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .wv {
           grid-template-columns: minmax(0, 1fr);
           gap: 0.8rem;
@@ -242,7 +242,7 @@
       .tree {
         width: 100%;
         height: auto;
-        max-height: 60vh;
+        max-height: 60cqh;
         overflow: visible;
       }
 
@@ -334,14 +334,14 @@
         cursor: pointer;
       }
 
-      @media (max-width: 900px) {
+      @container slide (max-width: 900px) {
         .stacked,
         #cache-tree .cols {
           grid-template-columns: minmax(0, 1fr);
         }
 
         .tree {
-          max-height: 42vh;
+          max-height: 42cqh;
         }
       }
     </style>

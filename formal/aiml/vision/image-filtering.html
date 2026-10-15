@@ -29,7 +29,7 @@
       .kside .kgrid { margin-bottom: 1.4rem; }
 
       /* cover */
-      #title canvas { width: min(30rem, 84vw); }
+      #title canvas { width: min(30rem, 84cqw); }
       #title .split { position: relative; }
       #title .split span { position: absolute; bottom: 0.5rem; font: 500 0.75rem var(--font-mono); color: #fff; background: rgba(5, 6, 15, 0.7); padding: 0.1rem 0.45rem; border-radius: 4px; }
 
@@ -51,7 +51,7 @@
       /* bilateral weights */
       .bw { display: grid; grid-template-columns: repeat(4, auto); gap: 0.6rem 1rem; align-items: center; justify-content: center; }
       .bw figure { margin: 0; }
-      .bw canvas { width: min(9rem, 20vw); aspect-ratio: 1; image-rendering: pixelated; border-radius: 8px; border: 1px solid var(--border); }
+      .bw canvas { width: min(9rem, 20cqw); aspect-ratio: 1; image-rendering: pixelated; border-radius: 8px; border: 1px solid var(--border); }
       .bw .op { font-size: 1.4rem; color: var(--faint); }
 
       /* playground */
@@ -67,11 +67,11 @@
       .qa pre { width: 100%; font-size: 0.92rem; }
       .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .codeside, .kside { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; justify-items: center; }
         .bw { grid-template-columns: repeat(2, auto); }
         .bw .op { display: none; }
-        .bw canvas { width: min(8rem, 36vw); }
+        .bw canvas { width: min(8rem, 36cqw); }
         .play { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
         #slide-median .stage { height: 14rem; }
         #slide-median .cell { width: 2.1rem; height: 2.1rem; font-size: 0.75rem; }

@@ -390,7 +390,7 @@
         background: var(--cyan);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .slide pre,
         .slide pre.small {
           font-size: 0.85rem;
@@ -408,7 +408,7 @@
         }
 
         .strip .ch {
-          width: var(--cwm, min(1.9rem, 6.6vw));
+          width: var(--cwm, min(1.9rem, 6.6cqw));
           height: 2.1rem;
           font-size: 0.95rem;
         }
@@ -423,7 +423,7 @@
         }
       }
       #problem figure img {
-        max-height: 34vh;
+        max-height: 34cqh;
         border-radius: 12px;
       }
 
@@ -544,7 +544,7 @@
         text-align: center;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #solve .duo {
           grid-template-columns: 1fr;
           gap: 0.8rem;

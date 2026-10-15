@@ -25,7 +25,7 @@
       .codeside .side p { font-size: 0.9rem; }
 
       /* ---------- cover mosaic ---------- */
-      #title canvas { width: min(26rem, 80vw); height: auto; border-radius: 14px; image-rendering: pixelated; box-shadow: 0 30px 70px -20px rgba(139, 92, 246, 0.6); }
+      #title canvas { width: min(26rem, 80cqw); height: auto; border-radius: 14px; image-rendering: pixelated; box-shadow: 0 30px 70px -20px rgba(139, 92, 246, 0.6); }
       #title .lbl { font-family: var(--font-mono); font-size: 0.85rem; color: var(--cyan); min-height: 1.3em; }
 
       /* ---------- array cards ---------- */
@@ -49,7 +49,7 @@
       .inspect .cross::before { left: -400%; right: -400%; top: 50%; height: 1px; }
       .inspect .cross::after { top: -400%; bottom: -400%; left: 50%; width: 1px; }
       .inspect .stage .axis { position: absolute; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text); background: rgba(5, 6, 15, 0.7); padding: 0.1rem 0.4rem; border-radius: 4px; }
-      .mag { display: grid; grid-template-columns: repeat(11, 1fr); gap: 1px; width: min(15rem, 60vw); margin: 0 auto; padding: 4px; border-radius: 10px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); }
+      .mag { display: grid; grid-template-columns: repeat(11, 1fr); gap: 1px; width: min(15rem, 60cqw); margin: 0 auto; padding: 4px; border-radius: 10px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); }
       .mag span { aspect-ratio: 1; border-radius: 2px; }
       .mag span.mid { outline: 2px solid var(--cyan); outline-offset: -1px; }
       .readout { margin-top: 1rem; font-family: var(--font-mono); font-size: 1rem; text-align: center; line-height: 1.9; }
@@ -76,7 +76,7 @@
 
       /* ---------- memory ---------- */
       .mem { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.4rem; align-items: center; width: min(100%, 60rem); }
-      .mem svg { width: min(20rem, 70vw); overflow: visible; }
+      .mem svg { width: min(20rem, 70cqw); overflow: visible; }
       .mem svg text { font-family: var(--font-mono); fill: var(--muted); font-size: 13px; }
       .mem .formula { font-family: var(--font-mono); font-size: 1.15rem; }
       .mem .formula .big { font-size: 2.3rem; display: block; margin-top: 0.4rem; }
@@ -89,7 +89,7 @@
       .qa pre { width: 100%; font-size: 0.92rem; }
       .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .codeside, .inspect, .mem { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
         .mixer { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 1rem; }
         .sliders { width: 100%; }

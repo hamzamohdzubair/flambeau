@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -255,7 +255,7 @@
       }
 
       #title svg {
-        width: min(24rem, 75vw);
+        width: min(24rem, 75cqw);
         height: auto;
       }
 
@@ -306,7 +306,7 @@
 
       /* diagrams beside code */
       .side svg {
-        width: min(20rem, 80vw);
+        width: min(20rem, 80cqw);
         height: auto;
         overflow: visible;
       }
@@ -396,7 +396,7 @@
 
       .lab .right canvas {
         max-width: 100%;
-        max-height: 46vh;
+        max-height: 46cqh;
         border-radius: 10px;
         box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.8);
       }
@@ -411,7 +411,7 @@
         font-size: 0.75rem;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .pipe {
           grid-template-columns: 1fr 1fr;
         }

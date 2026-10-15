@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -324,7 +324,7 @@
       }
 
       .ring {
-        --c: min(2.6rem, 9vw, 6vh);
+        --c: min(2.6rem, 9cqw, 6cqh);
         position: relative;
         display: grid;
         grid-template-columns: repeat(7, var(--c));
@@ -423,7 +423,7 @@
       }
 
       canvas.patch {
-        width: min(17rem, 70vw, 40vh);
+        width: min(17rem, 70cqw, 40cqh);
         height: auto;
         border-radius: 50%;
         box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.5), 0 20px 50px -12px rgba(0, 0, 0, 0.8);
@@ -509,7 +509,7 @@
         font-size: 0.72rem;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .patchrow {
           grid-template-columns: 1fr;
           justify-items: center;

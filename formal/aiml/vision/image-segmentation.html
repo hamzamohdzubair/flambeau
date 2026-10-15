@@ -39,7 +39,7 @@
       .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
       .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .twocol, .codeside { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
         .three { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
         .four { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
@@ -51,7 +51,7 @@
     <!-- ================================================================ cover -->
     <section class="slide cover" id="title">
       <span class="kicker">Computer vision</span>
-      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84vw)" aria-label="A photo split into k colour regions by k-means"></canvas>
+      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84cqw)" aria-label="A photo split into k colour regions by k-means"></canvas>
       <h1>Image Segmentation</h1>
       <p>Split an image into meaningful regions, so every pixel knows which object it belongs to.</p>
     </section>

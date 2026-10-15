@@ -233,7 +233,7 @@
         pointer-events: none;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .play {
           grid-template-columns: 1fr;
           gap: 0.8rem;
@@ -350,7 +350,7 @@
       /* ---------- Hamming ---------- */
       .bits {
         display: grid;
-        grid-template-columns: 6.5rem repeat(16, min(2rem, 4.6vw));
+        grid-template-columns: 6.5rem repeat(16, min(2rem, 4.6cqw));
         gap: 4px;
         align-items: center;
         font-family: var(--font-mono);
@@ -366,7 +366,7 @@
       .bits b {
         display: grid;
         place-items: center;
-        height: min(2rem, 4.6vw);
+        height: min(2rem, 4.6cqw);
         border-radius: 5px;
         background: rgba(255, 255, 255, 0.06);
         font-weight: 400;
@@ -529,7 +529,7 @@
         grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         #what .cards {
           grid-template-columns: 1fr 1fr;
         }

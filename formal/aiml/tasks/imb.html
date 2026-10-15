@@ -8,7 +8,7 @@
     <script src="/deck/deck.js" defer></script>
     <style>
       #what .lead {
-        font-size: clamp(1.8rem, 5vw, 2.8rem);
+        font-size: clamp(1.8rem, 5cqw, 2.8rem);
       }
 
       .figs.white img {
@@ -30,7 +30,7 @@
         align-items: flex-end;
         justify-content: center;
         gap: 2.4rem;
-        height: min(18rem, 40vh);
+        height: min(18rem, 40cqh);
         padding-bottom: 2rem;
         border-bottom: 2px solid var(--faint);
       }
@@ -97,11 +97,11 @@
       }
 
       #trap .ctrl input {
-        width: min(18rem, 70vw);
+        width: min(18rem, 70cqw);
         accent-color: var(--pink);
       }
 
-      @media (max-width: 700px) {
+      @container slide (max-width: 700px) {
         #trap .stage {
           grid-template-columns: 1fr;
         }

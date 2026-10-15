@@ -10,7 +10,7 @@
       .graph {
         width: min(100%, 60rem);
         height: auto;
-        max-height: 58vh;
+        max-height: 58cqh;
         overflow: visible;
       }
 
@@ -146,10 +146,10 @@
       }
 
       #error figure img {
-        max-height: 46vh;
+        max-height: 46cqh;
       }
 
-      @media (max-width: 760px) {
+      @container slide (max-width: 760px) {
         .term {
           font-size: 0.75rem;
         }
@@ -185,7 +185,7 @@
     <section class="slide">
       <h2>The same picture</h2>
       <figure class="zoom-on-reveal">
-        <img src="/assets/2025-09-29-12-59-51.png" alt="origin/main has commits A then C; John's local main has A then C (Improve error handling); your local main has A then B (Add cute dog)" style="max-height: 62vh" />
+        <img src="/assets/2025-09-29-12-59-51.png" alt="origin/main has commits A then C; John's local main has A then C (Improve error handling); your local main has A then B (Add cute dog)" style="max-height: 62cqh" />
       </figure>
       <p class="center">Both histories start at A, then split: <strong>they have diverged</strong>.</p>
     </section>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Computer Vision</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #vision {
+        gap: 1.6rem;
+      }
+
+      #vision .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      #vision h1 {
+        text-align: center;
+      }
+
+      #vision .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      #vision .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      #vision .group h3 span {
+        margin-right: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      #vision .tile {
+        min-height: 5.6rem;
+      }
+
+      #vision .book {
+        display: flex;
+        align-items: center;
+        gap: 1.6rem;
+      }
+
+      #vision .book img {
+        width: 9rem;
+        max-height: none;
+      }
+
+      #vision .book p a {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide top" id="vision">
+      <span class="kicker">AI/ML</span>
+      <h1>Computer Vision</h1>
+
+      <div class="group">
+        <h3><span>Fundamentals</span>Basics</h3>
+        <div class="tiles">
+          <a class="tile" href="image-representation.html"><span>Image Representation</span></a>
+          <a class="tile" href="color-spaces.html"><span>Color Spaces</span></a>
+          <a class="tile" href="pixel-operations.html"><span>Pixel Operations</span></a>
+          <a class="tile" href="image-filtering.html"><span>Image Filtering</span></a>
+          <a class="tile" href="kernels-convolution.html"><span>Kernels &amp; Convolution</span></a>
+          <a class="tile" href="edge-detection.html"><span>Edge Detection</span></a>
+          <a class="tile" href="image-transforms.html"><span>Image Transforms</span></a>
+          <a class="tile" href="noise-blurring.html"><span>Noise &amp; Blurring</span></a>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span>Fundamentals</span>Features</h3>
+        <div class="tiles">
+          <a class="tile" href="feature-detection.html"><span>Feature Detection</span></a>
+          <a class="tile" href="feature-descriptors.html"><span>Feature Descriptors</span></a>
+          <a class="tile" href="sift-surf.html"><span>SIFT &amp; SURF</span></a>
+          <a class="tile" href="orb-features.html"><span>ORB Features</span></a>
+          <a class="tile" href="keypoint-matching.html"><span>Keypoint Matching</span></a>
+          <a class="tile" href="feature-extraction.html"><span>Feature Extraction</span></a>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span>Intermediate</span>Transforms</h3>
+        <div class="tiles">
+          <a class="tile" href="geometric-transforms.html"><span>Geometric Transforms</span></a>
+          <a class="tile" href="perspective-transform.html"><span>Perspective Transform</span></a>
+          <a class="tile" href="morphological-operations.html"><span>Morphological Operations</span></a>
+          <a class="tile" href="image-segmentation.html"><span>Image Segmentation</span></a>
+          <a class="tile" href="region-processing.html"><span>Region Processing</span></a>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span>Intermediate</span>Advanced filters</h3>
+        <div class="tiles">
+          <div class="tile" style="opacity: 0.45"><span>Bilateral Filtering<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Median Filtering<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Guided Filtering<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Adaptive Filters<small>coming soon</small></span></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span>Advanced</span>Object detection</h3>
+        <div class="tiles">
+          <div class="tile" style="opacity: 0.45"><span>Sliding Window<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Cascade Classifiers<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Region Proposals<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>YOLO Basics<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>R-CNN Family<small>coming soon</small></span></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span>Advanced</span>Segmentation</h3>
+        <div class="tiles">
+          <div class="tile" style="opacity: 0.45"><span>FCN Networks<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>U-Net Architecture<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>DeepLab<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Mask R-CNN<small>coming soon</small></span></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span>Advanced</span>Applications</h3>
+        <div class="tiles">
+          <div class="tile" style="opacity: 0.45"><span>Face Detection<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Pose Estimation<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>3D Vision<small>coming soon</small></span></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span>Resources</span>Textbook</h3>
+        <div class="book">
+          <figure><img src="/assets/2025-10-12-13-06-55.png" alt="Cover of Computer Vision: Algorithms and Applications, second edition, by Richard Szeliski" /></figure>
+          <p>
+            Richard Szeliski, <em>Computer Vision: Algorithms and Applications</em>, 2nd edition.<br />
+            <a href="https://szeliski.org/Book/">Free access to the book</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

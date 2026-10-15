@@ -1,0 +1,1370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kernels &amp; Convolution</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Kernel matrices (built by the script from data-k) ---------- */
+      .kgrid {
+        --kc: 2.6rem;
+        position: relative;
+        display: inline-grid;
+        gap: 4px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .kgrid b {
+        display: grid;
+        place-items: center;
+        width: var(--kc);
+        height: var(--kc);
+        border-radius: 6px;
+        font-size: calc(var(--kc) * 0.36);
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .kgrid .div {
+        position: absolute;
+        right: -0.2rem;
+        bottom: -1.5rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .kgrid.small {
+        --kc: 1.9rem;
+      }
+
+      .kgrid.tiny {
+        --kc: 1.45rem;
+      }
+
+      .kcard {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.9rem;
+        text-align: center;
+      }
+
+      .kcard .kgrid {
+        margin-bottom: 0.9rem;
+      }
+
+      /* Code next to its kernel */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 66rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.6rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      /* ---------- Worked example ---------- */
+      .worked {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1rem 1.4rem;
+        font-family: var(--font-mono);
+      }
+
+      .worked .op {
+        font-size: 1.8rem;
+        color: var(--faint);
+      }
+
+      .worked figure figcaption {
+        font-family: var(--font);
+      }
+
+      .mgrid {
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        gap: 4px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+      }
+
+      .mgrid > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.2rem;
+        height: 2.7rem;
+        padding: 0 0.5rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 1rem;
+      }
+
+      .mgrid.patch > span {
+        background: rgba(139, 92, 246, calc(var(--v) / 140));
+      }
+
+      .mgrid.prods > span {
+        min-width: 5.6rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .mgrid.prods > span b {
+        margin-left: 0.4em;
+        color: var(--text);
+      }
+
+      .worked-sum {
+        font-family: var(--font-mono);
+        font-size: 1.15rem;
+        text-align: center;
+      }
+
+      .worked-sum .big {
+        font-size: 2.6rem;
+        vertical-align: middle;
+        margin-left: 0.4rem;
+      }
+
+      /* ---------- Sliding-kernel demo ---------- */
+      #slide-demo {
+        --cell: min(2.9rem, 10.2vw, 6.4vh);
+      }
+
+      .conv {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        align-items: center;
+        justify-content: center;
+        gap: 1.4rem 2.6rem;
+      }
+
+      .conv h4 {
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        text-align: center;
+      }
+
+      .conv .grid {
+        position: relative;
+        display: grid;
+        gap: 3px;
+        padding: 5px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+      }
+
+      .conv .grid.in {
+        grid-template-columns: repeat(7, var(--cell));
+      }
+
+      .conv .grid.out {
+        grid-template-columns: repeat(5, var(--cell));
+      }
+
+      .conv .px {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: var(--cell);
+        height: var(--cell);
+        border-radius: 5px;
+        font-family: var(--font-mono);
+        font-size: calc(var(--cell) * 0.3);
+        transition: box-shadow 0.25s, outline-color 0.25s, opacity 0.3s;
+        outline: 2px solid transparent;
+        outline-offset: -2px;
+      }
+
+      .conv .px i {
+        position: absolute;
+        top: 1px;
+        right: 3px;
+        font-style: normal;
+        font-size: calc(var(--cell) * 0.22);
+        color: var(--cyan);
+        opacity: 0;
+        transition: opacity 0.25s;
+      }
+
+      .conv .in.live .px:not(.hot) {
+        opacity: 0.55;
+      }
+
+      .conv .in .px.hot i {
+        opacity: 1;
+      }
+
+      .conv .out .px {
+        background: rgba(255, 255, 255, 0.04);
+        color: transparent;
+      }
+
+      .conv .out .px.done {
+        color: inherit;
+      }
+
+      .conv .out .px.now {
+        outline-color: var(--pink);
+        box-shadow: 0 0 18px rgba(236, 72, 153, 0.7);
+      }
+
+      .conv .window {
+        position: absolute;
+        left: 0;
+        top: 0;
+        border-radius: 8px;
+        border: 3px solid var(--cyan);
+        box-shadow: 0 0 24px rgba(34, 211, 238, 0.8);
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .conv .mid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .conv .mid .kgrid {
+        --kc: calc(var(--cell) * 0.82);
+      }
+
+      .conv .mid .pgrid {
+        display: grid;
+        grid-template-columns: repeat(3, calc(var(--cell) * 1.25));
+        gap: 3px;
+        padding: 5px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+      }
+
+      .conv .pgrid span {
+        display: grid;
+        place-items: center;
+        height: calc(var(--cell) * 0.82);
+        border-radius: 5px;
+        font-family: var(--font-mono);
+        font-size: calc(var(--cell) * 0.27);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .conv .sum {
+        font-family: var(--font-mono);
+        font-size: 1.05rem;
+        text-align: center;
+        min-height: 3.2em;
+      }
+
+      .conv .sum b {
+        color: var(--pink);
+      }
+
+      .conv .sum small {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.85rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* ---------- Edge handling ---------- */
+      .pads {
+        display: grid;
+        gap: 0.9rem;
+        width: min(100%, 50rem);
+      }
+
+      .pad-row {
+        display: grid;
+        grid-template-columns: 13rem auto;
+        align-items: center;
+        gap: 1.2rem;
+      }
+
+      .pad-row .name {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        color: var(--text);
+      }
+
+      .pad-row .name code {
+        display: block;
+        margin-top: 0.2rem;
+        font-size: 0.68rem;
+        width: max-content;
+      }
+
+      .cells {
+        display: flex;
+        gap: 4px;
+      }
+
+      .cells span {
+        display: grid;
+        place-items: center;
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        color: #fff;
+        background: var(--c, rgba(255, 255, 255, 0.08));
+      }
+
+      .cells .bar {
+        width: 3px;
+        background: var(--faint);
+        border-radius: 2px;
+      }
+
+      .cells .pad {
+        outline: 2px dashed rgba(255, 255, 255, 0.55);
+        outline-offset: -2px;
+        opacity: 0;
+        transform: scale(0.4);
+        transition:
+          opacity 0.4s var(--ease),
+          transform 0.4s var(--ease);
+      }
+
+      .shown .cells .pad {
+        opacity: 0.85;
+        transform: none;
+      }
+
+      .shown .cells .pad:nth-child(2),
+      .shown .cells .pad:nth-last-child(2) {
+        transition-delay: 0.45s;
+      }
+
+      .shown .cells .pad:nth-child(1),
+      .shown .cells .pad:nth-last-child(1) {
+        transition-delay: 0.65s;
+      }
+
+      .cells .pad.z {
+        --c: rgba(255, 255, 255, 0.08);
+      }
+
+      .va { --c: #7c3aed; }
+      .vb { --c: #db2777; }
+      .vc { --c: #0891b2; }
+      .vd { --c: #ca8a04; }
+      .ve { --c: #16a34a; }
+
+      #slide-edges .problem {
+        display: flex;
+        align-items: center;
+        gap: 1.6rem;
+        max-width: 50rem;
+      }
+
+      #slide-edges .problem svg {
+        flex: none;
+        width: 9rem;
+      }
+
+      /* ---------- Playground ---------- */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 620 / 349;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      #slide-play .under {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+      }
+
+      #slide-play .chips {
+        max-width: 40rem;
+      }
+
+      /* ---------- Exercises ---------- */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 60rem);
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.5rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa {
+        counter-reset: q;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa .two {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.1rem;
+      }
+
+      @media (max-width: 760px) {
+        .conv {
+          grid-template-columns: auto;
+          gap: 0.8rem;
+        }
+
+        #slide-demo {
+          --cell: min(2.15rem, 9vw);
+        }
+
+        .conv > div {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .conv h4 {
+          margin-bottom: 0.3rem;
+        }
+
+        .conv .mid {
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .conv .mid h4 {
+          display: none;
+        }
+
+        .codek {
+          grid-template-columns: 1fr;
+          gap: 1.6rem;
+        }
+
+        .pad-row {
+          grid-template-columns: 1fr;
+          gap: 0.4rem;
+        }
+
+        .cells span {
+          width: 1.9rem;
+          height: 1.9rem;
+          font-size: 0.85rem;
+        }
+
+        .play,
+        .qa .two {
+          grid-template-columns: 1fr;
+        }
+
+        #slide-edges .problem {
+          flex-direction: column;
+        }
+
+        .worked .op {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <div class="kgrid" id="cover-k" data-k="1 2 1|2 4 2|1 2 1" data-div="16"></div>
+      <h1>Kernels &amp; Convolution</h1>
+      <p>A tiny grid of weights, slid across an image, can blur it, sharpen it or find its edges.</p>
+    </section>
+
+    <!-- ================================================================ what is a kernel -->
+    <section class="slide">
+      <h2>What is a kernel?</h2>
+      <p class="lead">A <strong>kernel</strong> (or <strong>filter</strong>) is a small matrix used to apply effects to an image.</p>
+      <div class="cards" style="width: min(100%, 52rem)">
+        <div class="card kcard">
+          <div class="kgrid" data-k="0 0 0|0 1 0|0 0 0"></div>
+          <h3>Identity</h3>
+        </div>
+        <div class="card kcard">
+          <div class="kgrid" data-k="1 1 1|1 1 1|1 1 1" data-div="9"></div>
+          <h3>Blur</h3>
+        </div>
+        <div class="card kcard">
+          <div class="kgrid" data-k="0 -1 0|-1 5 -1|0 -1 0"></div>
+          <h3>Sharpen</h3>
+        </div>
+      </div>
+      <ul>
+        <li class="step"><strong>Size:</strong> usually small (3×3, 5×5, 7×7) and odd-sized, so it has a centre pixel.</li>
+        <li class="step"><strong>Purpose:</strong> it defines how to combine a pixel's neighbourhood into one new value.</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ what is convolution -->
+    <section class="slide">
+      <h2>What is convolution?</h2>
+      <p class="lead"><strong>Convolution</strong> slides a kernel over an image and computes a weighted sum at every position.</p>
+      <ol>
+        <li class="step">Place the kernel on an image region</li>
+        <li class="step">Multiply corresponding elements</li>
+        <li class="step">Sum all the products</li>
+        <li class="step">The sum is the new pixel value</li>
+        <li class="step">Slide the kernel to the next position and repeat</li>
+      </ol>
+      <div class="step center">
+        <p class="lead">$$\text{Output}(x, y) = \sum_{i}\sum_{j} \text{Kernel}(i, j) \times \text{Image}(x + i,\ y + j)$$</p>
+        <p class="muted" style="max-width: 52rem; margin: 0 auto">\(i, j\) run over the kernel's offsets: −1, 0, 1 for a 3×3 kernel. Strictly this is <em>correlation</em>; true convolution flips the kernel first, which changes nothing for symmetric kernels. <code>cv2.filter2D</code> computes exactly this sum.</p>
+      </div>
+    </section>
+
+    <!-- ================================================================ worked example -->
+    <section class="slide" id="slide-worked">
+      <h2>One output pixel, by hand</h2>
+      <div class="worked">
+        <figure>
+          <div class="mgrid patch">
+            <span style="--v: 10">10</span><span style="--v: 20">20</span><span style="--v: 30">30</span>
+            <span style="--v: 40">40</span><span style="--v: 50">50</span><span style="--v: 60">60</span>
+            <span style="--v: 70">70</span><span style="--v: 80">80</span><span style="--v: 90">90</span>
+          </div>
+          <figcaption>Image patch</figcaption>
+        </figure>
+        <span class="op">×</span>
+        <figure>
+          <div class="kgrid" data-k="1 0 -1|1 0 -1|1 0 -1"></div>
+          <figcaption>Kernel</figcaption>
+        </figure>
+        <span class="op">=</span>
+        <figure>
+          <div class="mgrid prods">
+            <span class="step" data-step="1" data-anim="zoom">10×1<b>10</b></span><span class="step" data-step="1" data-anim="zoom">20×0<b>0</b></span><span class="step" data-step="1" data-anim="zoom">30×(−1)<b>−30</b></span>
+            <span class="step" data-step="2" data-anim="zoom">40×1<b>40</b></span><span class="step" data-step="2" data-anim="zoom">50×0<b>0</b></span><span class="step" data-step="2" data-anim="zoom">60×(−1)<b>−60</b></span>
+            <span class="step" data-step="3" data-anim="zoom">70×1<b>70</b></span><span class="step" data-step="3" data-anim="zoom">80×0<b>0</b></span><span class="step" data-step="3" data-anim="zoom">90×(−1)<b>−90</b></span>
+          </div>
+          <figcaption>Products</figcaption>
+        </figure>
+      </div>
+      <p class="worked-sum step" data-step="4">Sum = (10 − 30) + (40 − 60) + (70 − 90) = <span class="big grad">−60</span></p>
+      <p class="center step" data-step="5"><strong>Result:</strong> one output pixel value, −60. The kernel then slides one pixel and does it again.</p>
+    </section>
+
+    <!-- ================================================================ sliding demo -->
+    <section class="slide" id="slide-demo">
+      <h2>Watch the kernel slide</h2>
+      <div class="conv">
+        <div>
+          <h4>Input image, 7×7</h4>
+          <div class="grid in"><div class="window"></div></div>
+        </div>
+        <div class="mid">
+          <h4>Kernel</h4>
+          <div class="kgrid live"></div>
+          <h4>Pixel × weight</h4>
+          <div class="pgrid"></div>
+          <div class="sum">Σ = <b>…</b><small>&nbsp;</small></div>
+        </div>
+        <div>
+          <h4>Output, 5×5</h4>
+          <div class="grid out"></div>
+        </div>
+      </div>
+      <div class="chips" data-interactive>
+        <button class="chip on" data-kernel="edge">Vertical edge</button>
+        <button class="chip" data-kernel="blur">Box blur</button>
+        <button class="chip" data-kernel="sharpen">Sharpen</button>
+        <button class="chip ghost" data-act="toggle">Pause</button>
+        <button class="chip ghost" data-act="step">Step</button>
+        <button class="chip ghost" data-act="restart">Restart</button>
+      </div>
+      <p class="muted center">No padding here, so a 7×7 image gives a 5×5 output. Shades are the stored 8-bit values: sums below 0 or above 255 are clipped.</p>
+    </section>
+
+    <!-- ================================================================ edge handling -->
+    <section class="slide" id="slide-edges">
+      <h2>Edge handling</h2>
+      <div class="problem">
+        <svg viewBox="0 0 120 120" aria-label="A 3 by 3 kernel hanging off the corner of an image">
+          <g fill="rgba(255,255,255,0.08)">
+            <rect x="34" y="34" width="26" height="26" rx="3" /><rect x="62" y="34" width="26" height="26" rx="3" /><rect x="90" y="34" width="26" height="26" rx="3" />
+            <rect x="34" y="62" width="26" height="26" rx="3" /><rect x="62" y="62" width="26" height="26" rx="3" /><rect x="90" y="62" width="26" height="26" rx="3" />
+            <rect x="34" y="90" width="26" height="26" rx="3" /><rect x="62" y="90" width="26" height="26" rx="3" /><rect x="90" y="90" width="26" height="26" rx="3" />
+          </g>
+          <g fill="none" stroke="#f87171" stroke-dasharray="4 3" stroke-width="1.5">
+            <rect x="6" y="6" width="26" height="26" rx="3" /><rect x="34" y="6" width="26" height="26" rx="3" /><rect x="62" y="6" width="26" height="26" rx="3" />
+            <rect x="6" y="34" width="26" height="26" rx="3" /><rect x="6" y="62" width="26" height="26" rx="3" />
+          </g>
+          <g fill="#f87171" font-family="JetBrains Mono, monospace" font-size="14" text-anchor="middle">
+            <text x="19" y="24">?</text><text x="47" y="24">?</text><text x="75" y="24">?</text><text x="19" y="52">?</text><text x="19" y="80">?</text>
+          </g>
+          <rect x="4" y="4" width="86" height="86" rx="6" fill="none" stroke="#22d3ee" stroke-width="3" />
+        </svg>
+        <p><strong>Problem:</strong> at a border pixel, the kernel extends beyond the image. Those five cells have no pixels, so we must invent values for them.</p>
+      </div>
+      <div class="pads">
+        <div class="pad-row step">
+          <div class="name">Zero padding<code>BORDER_CONSTANT</code></div>
+          <div class="cells"><span class="pad z">0</span><span class="pad z">0</span><i class="bar"></i><span class="va">a</span><span class="vb">b</span><span class="vc">c</span><span class="vd">d</span><span class="ve">e</span><i class="bar"></i><span class="pad z">0</span><span class="pad z">0</span></div>
+        </div>
+        <div class="pad-row step">
+          <div class="name">Border replication<code>BORDER_REPLICATE</code></div>
+          <div class="cells"><span class="pad va">a</span><span class="pad va">a</span><i class="bar"></i><span class="va">a</span><span class="vb">b</span><span class="vc">c</span><span class="vd">d</span><span class="ve">e</span><i class="bar"></i><span class="pad ve">e</span><span class="pad ve">e</span></div>
+        </div>
+        <div class="pad-row step">
+          <div class="name">Reflection<code>BORDER_REFLECT_101</code></div>
+          <div class="cells"><span class="pad vc">c</span><span class="pad vb">b</span><i class="bar"></i><span class="va">a</span><span class="vb">b</span><span class="vc">c</span><span class="vd">d</span><span class="ve">e</span><i class="bar"></i><span class="pad vd">d</span><span class="pad vc">c</span></div>
+        </div>
+        <div class="pad-row step">
+          <div class="name">Wrap around<code>BORDER_WRAP</code></div>
+          <div class="cells"><span class="pad vd">d</span><span class="pad ve">e</span><i class="bar"></i><span class="va">a</span><span class="vb">b</span><span class="vc">c</span><span class="vd">d</span><span class="ve">e</span><i class="bar"></i><span class="pad va">a</span><span class="pad vb">b</span></div>
+        </div>
+      </div>
+      <p class="step center">OpenCV's default is reflection: <code>cv2.BORDER_REFLECT_101</code> mirrors the pixels without repeating the edge one.</p>
+    </section>
+
+    <!-- ================================================================ code: identity -->
+    <section class="slide">
+      <h2>Custom convolution in OpenCV</h2>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          import cv2
+          import numpy as np
+          # define a 3x3 identity kernel
+          kernel = np.array([[0, 0, 0],
+                             [0, 1, 0],
+                             [0, 0, 0]], dtype=np.float32)
+          # apply convolution
+          result = cv2.filter2D(img, -1, kernel)
+          # ans: -1 means output has the same depth as the input
+          # identity kernel returns the original image
+          # ans: centre weight = 1, others = 0, so nothing changes
+        </code></pre>
+        <div class="side">
+          <div class="kgrid" data-k="0 0 0|0 1 0|0 0 0"></div>
+          <p>Identity</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ code: box blur -->
+    <section class="slide">
+      <h2>Box blur kernel</h2>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          # 3x3 averaging kernel
+          kernel = np.ones((3, 3), dtype=np.float32) / 9
+          # ans: all weights = 1/9, they sum to 1
+          # apply box blur
+          blurred = cv2.filter2D(img, -1, kernel)
+          # ans: same as cv2.blur(img, (3, 3))
+          # 5x5 box blur kernel
+          kernel = np.ones((5, 5), dtype=np.float32) / 25
+          result = cv2.filter2D(img, -1, kernel)
+          # ans: averages 25 pixels, so more blur
+        </code></pre>
+        <div class="side">
+          <div class="kgrid small" data-k="1 1 1|1 1 1|1 1 1" data-div="9"></div>
+          <div class="kgrid tiny" data-k="1 1 1 1 1|1 1 1 1 1|1 1 1 1 1|1 1 1 1 1|1 1 1 1 1" data-div="25"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ code: sharpen -->
+    <section class="slide">
+      <h2>Sharpening kernel</h2>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          # sharpen kernel (enhances edges)
+          kernel = np.array([[ 0, -1,  0],
+                             [-1,  5, -1],
+                             [ 0, -1,  0]], dtype=np.float32)
+          # ans: centre = 5, neighbours = -1, enhances differences
+          sharpened = cv2.filter2D(img, -1, kernel)
+          # ans: edges become more pronounced
+          # why does this sharpen?
+          # ans: it amplifies the centre and subtracts the neighbours
+        </code></pre>
+        <div class="side">
+          <div class="kgrid" data-k="0 -1 0|-1 5 -1|0 -1 0"></div>
+          <p>Weights sum to 1: flat areas stay the same,<br />differences get bigger.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ code: edges -->
+    <section class="slide">
+      <h2>Edge detection kernels</h2>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          # horizontal edge detection (Prewitt)
+          kernel_h = np.array([[-1, -1, -1],
+                               [ 0,  0,  0],
+                               [ 1,  1,  1]], dtype=np.float32)
+          # ans: detects horizontal edges (top-to-bottom change)
+          # vertical edge detection
+          kernel_v = np.array([[-1,  0,  1],
+                               [-1,  0,  1],
+                               [-1,  0,  1]], dtype=np.float32)
+          # ans: detects vertical edges (left-to-right change)
+          edges_h = cv2.filter2D(gray, -1, kernel_h)
+          edges_v = cv2.filter2D(gray, -1, kernel_v)
+          # ans: apply to grayscale for best results
+        </code></pre>
+        <div class="side">
+          <div class="kgrid small" data-k="-1 -1 -1|0 0 0|1 1 1"></div>
+          <p>Horizontal</p>
+          <div class="kgrid small" data-k="-1 0 1|-1 0 1|-1 0 1"></div>
+          <p>Vertical</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ code: gaussian -->
+    <section class="slide">
+      <h2>Gaussian kernel</h2>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          # 5x5 gaussian kernel approximation
+          kernel = np.array([[1,  4,  6,  4, 1],
+                             [4, 16, 24, 16, 4],
+                             [6, 24, 36, 24, 6],
+                             [4, 16, 24, 16, 4],
+                             [1,  4,  6,  4, 1]], dtype=np.float32) / 256
+          # ans: weights decrease away from the centre (gaussian distribution)
+          gaussian = cv2.filter2D(img, -1, kernel)
+          # ans: similar to cv2.GaussianBlur, but with a custom kernel
+        </code></pre>
+        <div class="side">
+          <div class="kgrid small" data-k="1 4 6 4 1|4 16 24 16 4|6 24 36 24 6|4 16 24 16 4|1 4 6 4 1" data-div="256"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ normalization -->
+    <section class="slide">
+      <h2>Kernel normalization</h2>
+      <p class="lead"><strong>Why normalize?</strong> To keep the output in the valid range, 0 to 255. <span class="muted">Divide by the sum of the kernel's weights.</span></p>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          # unnormalized kernel
+          kernel = np.array([[1, 2, 1],
+                             [2, 4, 2],
+                             [1, 2, 1]], dtype=np.float32)
+          # sum of weights
+          kernel_sum = kernel.sum()  # = 16
+          # ans: sum = 1+2+1+2+4+2+1+2+1 = 16
+          # normalize
+          kernel_norm = kernel / kernel_sum
+          # ans: ensures the output stays in range
+        </code></pre>
+        <div class="side">
+          <div class="kgrid" data-k="1 2 1|2 4 2|1 2 1" data-div="16"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ playground -->
+    <section class="slide" id="slide-play">
+      <h2>Every kernel, on a real photo</h2>
+      <div class="play">
+        <figure><canvas class="src" width="620" height="349"></canvas><figcaption>Original</figcaption></figure>
+        <figure><canvas class="dst" width="620" height="349"></canvas><figcaption class="name">Identity</figcaption></figure>
+      </div>
+      <div class="under">
+        <div class="chips" data-interactive></div>
+        <div class="kgrid tiny live"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What does convolution do?</p><p class="answer">Slides a kernel over the image and computes weighted sums.</p></div>
+        <div class="q"><p>Why are kernel sizes odd?</p><p class="answer">It needs a centre pixel, for symmetry.</p></div>
+        <div class="q">
+          <p>What does this kernel do?</p>
+          <pre><code class="language-python">
+            kernel = np.array([[0, 0, 0],
+                               [0, 1, 0],
+                               [0, 0, 0]])
+          </code></pre>
+          <p class="answer">It is the identity kernel: it returns the original image unchanged.</p>
+        </div>
+        <div class="q"><p>What does a sum of weights equal to 1 ensure?</p><p class="answer">Brightness is preserved; nothing is amplified.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What kind of kernel detects vertical edges?</p><p class="answer">One with a <code>[-1, 0, 1]</code> pattern running horizontally.</p></div>
+        <div class="q">
+          <p>What is the <code>ddepth</code> parameter of <code>cv2.filter2D</code>?</p>
+          <pre><code class="language-python">
+            result = cv2.filter2D(img, -1, kernel)
+          </code></pre>
+          <p class="answer"><code>-1</code> means the output has the same depth as the source.</p>
+        </div>
+        <div class="q"><p>What is the difference between blur and sharpen kernels?</p><p class="answer">Blur averages (all weights positive); sharpen enhances (negative neighbours).</p></div>
+        <div class="q"><p>Why apply edge detection to grayscale?</p><p class="answer">It is simpler: one channel, and edges are changes in intensity.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Create a 3×3 identity kernel and apply it.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.array([[0, 0, 0],
+                               [0, 1, 0],
+                               [0, 0, 0]], dtype=np.float32)
+            result = cv2.filter2D(img, -1, kernel)
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Create a 3×3 box blur kernel and apply it.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.ones((3, 3), dtype=np.float32) / 9
+            result = cv2.filter2D(img, -1, kernel)
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Create a sharpen kernel and apply it.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.array([[ 0, -1,  0],
+                               [-1,  5, -1],
+                               [ 0, -1,  0]], dtype=np.float32)
+            sharpened = cv2.filter2D(img, -1, kernel)
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Create a horizontal edge kernel.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.array([[-1, -1, -1],
+                               [ 0,  0,  0],
+                               [ 1,  1,  1]], dtype=np.float32)
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · coding</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Create an emboss kernel and apply it to a grayscale image.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.array([[-2, -1,  0],
+                               [-1,  1,  1],
+                               [ 0,  1,  2]], dtype=np.float32)
+            embossed = cv2.filter2D(gray, -1, kernel)
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Create an outline kernel and apply it.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.array([[-1, -1, -1],
+                               [-1,  8, -1],
+                               [-1, -1, -1]], dtype=np.float32)
+            outline = cv2.filter2D(img, -1, kernel)
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 6 · mixed</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Normalize this custom kernel.</p>
+          <div class="two">
+            <pre><code class="language-python">
+              kernel = np.array([[1, 2, 1],
+                                 [2, 4, 2],
+                                 [1, 2, 1]], dtype=np.float32)
+            </code></pre>
+            <pre class="answer"><code class="language-python">
+              kernel_norm = kernel / kernel.sum()
+              # sum = 16, so divide by 16
+            </code></pre>
+          </div>
+        </div>
+        <div class="q"><p>What is the sum after normalization?</p><p class="answer">1.0, which preserves brightness.</p></div>
+        <div class="q">
+          <p>Create a strong sharpen kernel (centre = 9).</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.array([[-1, -1, -1],
+                               [-1,  9, -1],
+                               [-1, -1, -1]], dtype=np.float32)
+            # eight neighbours of -1 balance the 9: weights still sum to 1
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 7 · mixed</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Create a 5×5 average kernel.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.ones((5, 5), dtype=np.float32) / 25
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Create a left edge detection kernel.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.array([[1,  0, -1],
+                               [2,  0, -2],
+                               [1,  0, -1]], dtype=np.float32)
+            # this is the Sobel-X kernel (sign flipped: bright-to-dark edges are positive)
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Combine these two edge detections into one image.</p>
+          <pre><code class="language-python">
+            edges_h = cv2.filter2D(gray, -1, kernel_h)
+            edges_v = cv2.filter2D(gray, -1, kernel_v)
+            edges = cv2.addWeighted(edges_h, 0.5, edges_v, 0.5, 0)  # ans: horizontal and vertical edges, half each
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 8 · advanced</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Create a horizontal motion blur kernel.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.zeros((5, 5), dtype=np.float32)
+            kernel[2, :] = 1/5
+            # one row of weights: a horizontal motion blur
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Apply a convolution with an explicit border mode.</p>
+          <pre class="answer"><code class="language-python">
+            result = cv2.filter2D(img, -1, kernel, borderType=cv2.BORDER_CONSTANT)
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Create a custom gaussian-like 3×3 kernel.</p>
+          <pre class="answer"><code class="language-python">
+            kernel = np.array([[1, 2, 1],
+                               [2, 4, 2],
+                               [1, 2, 1]], dtype=np.float32) / 16
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ kernel matrices
+      // Weight colour: violet for positive, cyan for negative, faint for zero
+      function paintKernel(el, rows, div) {
+        const k = rows.map((r) => r.map(Number));
+        const max = Math.max(...k.flat().map(Math.abs)) || 1;
+        el.style.gridTemplateColumns = `repeat(${k[0].length}, var(--kc))`;
+        el.innerHTML = k
+          .flat()
+          .map((w) => {
+            const a = 0.12 + 0.6 * (Math.abs(w) / max);
+            const bg = w > 0 ? `rgba(139,92,246,${a})` : w < 0 ? `rgba(34,211,238,${a})` : "rgba(255,255,255,0.04)";
+            return `<b style="background:${bg}">${w < 0 ? "−" + -w : w}</b>`;
+          })
+          .join("") + (div ? `<span class="div">÷ ${div}</span>` : "");
+      }
+      const parseK = (s) => s.split("|").map((r) => r.trim().split(/\s+/));
+      document.querySelectorAll(".kgrid[data-k]").forEach((el) => paintKernel(el, parseK(el.dataset.k), el.dataset.div));
+
+      const gsap = await Deck.load("gsap");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("#cover-k b"), { scale: 0, opacity: 0, rotate: -30, stagger: { each: 0.05, from: "center" }, duration: 0.6, ease: "back.out(2)" });
+          gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, delay: 0.3, duration: 0.8 });
+        },
+      });
+
+      // ------------------------------------------------------------ sliding demo
+      const IMG = [
+        [200, 200, 200, 200, 30, 30, 30],
+        [200, 200, 60, 200, 30, 30, 30],
+        [200, 200, 200, 200, 30, 30, 30],
+        [200, 200, 200, 200, 30, 30, 30],
+        [200, 200, 200, 200, 30, 160, 30],
+        [200, 200, 200, 200, 30, 30, 30],
+        [200, 200, 200, 200, 30, 30, 30],
+      ];
+      const KERNELS = {
+        edge: { k: [[1, 0, -1], [1, 0, -1], [1, 0, -1]], div: 1 },
+        blur: { k: [[1, 1, 1], [1, 1, 1], [1, 1, 1]], div: 9 },
+        sharpen: { k: [[0, -1, 0], [-1, 5, -1], [0, -1, 0]], div: 1 },
+      };
+      const clip = (v) => Math.max(0, Math.min(255, Math.round(v)));
+      const shade = (v) => {
+        const g = clip(v);
+        return `background: rgb(${g},${g},${Math.min(255, g + 12)}); color: ${g > 130 ? "#05060f" : "#e2e8f0"}`;
+      };
+      const fmt = (v) => {
+        const r = Math.round(v * 10) / 10;
+        const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
+        return s.replace("-", "−");
+      };
+
+      const demo = document.querySelector("#slide-demo");
+      const gIn = demo.querySelector(".grid.in");
+      const gOut = demo.querySelector(".grid.out");
+      const win = demo.querySelector(".window");
+      const kLive = demo.querySelector(".kgrid.live");
+      const pGrid = demo.querySelector(".pgrid");
+      const sumEl = demo.querySelector(".sum");
+      IMG.flat().forEach((v) => gIn.insertAdjacentHTML("beforeend", `<div class="px" style="${shade(v)}">${v}<i></i></div>`));
+      for (let i = 0; i < 25; i++) gOut.insertAdjacentHTML("beforeend", `<div class="px"></div>`);
+      for (let i = 0; i < 9; i++) pGrid.insertAdjacentHTML("beforeend", "<span></span>");
+      const inCells = [...gIn.querySelectorAll(".px")];
+      const outCells = [...gOut.querySelectorAll(".px")];
+      const prodCells = [...pGrid.children];
+
+      let kname = "edge";
+      let pos = -1;
+      let playing = false;
+      let timer = null;
+
+      const outputAt = (p, K) => {
+        const r = Math.floor(p / 5), c = p % 5;
+        const prods = [];
+        for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) prods.push((IMG[r + i][c + j] * K.k[i][j]) / K.div);
+        return { r, c, prods, sum: prods.reduce((a, b) => a + b, 0) };
+      };
+
+      function placeWindow(p, animate) {
+        const r = Math.floor(p / 5), c = p % 5;
+        const a = inCells[r * 7 + c], b = inCells[(r + 2) * 7 + c + 2];
+        const box = { x: a.offsetLeft - 4, y: a.offsetTop - 4, width: b.offsetLeft + b.offsetWidth - a.offsetLeft + 8, height: b.offsetTop + b.offsetHeight - a.offsetTop + 8 };
+        if (animate) gsap.to(win, { ...box, opacity: 1, duration: 0.3, ease: "power2.inOut" });
+        else gsap.set(win, { ...box, opacity: 1 });
+      }
+
+      function show(p, animate = true) {
+        const K = KERNELS[kname];
+        const { r, c, prods, sum } = outputAt(p, K);
+        placeWindow(p, animate);
+        gIn.classList.add("live");
+        inCells.forEach((cell) => cell.classList.remove("hot"));
+        for (let i = 0; i < 3; i++)
+          for (let j = 0; j < 3; j++) {
+            const cell = inCells[(r + i) * 7 + c + j];
+            cell.classList.add("hot");
+            const w = K.k[i][j];
+            cell.querySelector("i").textContent = "×" + (K.div > 1 ? `${w}/${K.div}` : fmt(w));
+          }
+        prods.forEach((v, i) => {
+          prodCells[i].textContent = fmt(v);
+          prodCells[i].style.color = v > 0 ? "#c4b5fd" : v < 0 ? "#67e8f9" : "var(--faint)";
+        });
+        if (animate) gsap.fromTo(prodCells, { scale: 0.6, opacity: 0.3 }, { scale: 1, opacity: 1, stagger: 0.025, duration: 0.25, delay: 0.2 });
+        const clipped = clip(sum) !== Math.round(sum);
+        sumEl.innerHTML = `Σ = <b>${fmt(Math.round(sum))}</b><small>${clipped ? "stored as " + clip(sum) + " (clipped)" : "&nbsp;"}</small>`;
+        outCells.forEach((cell, i) => {
+          cell.classList.toggle("now", i === p);
+          if (i > p) {
+            cell.classList.remove("done");
+            cell.removeAttribute("style");
+            cell.textContent = "";
+          }
+        });
+        for (let i = 0; i <= p; i++) {
+          const v = outputAt(i, K).sum;
+          if (!outCells[i].classList.contains("done") || i === p) {
+            outCells[i].setAttribute("style", shade(v));
+            outCells[i].textContent = fmt(Math.round(v));
+            outCells[i].classList.add("done");
+          }
+        }
+        if (animate) gsap.fromTo(outCells[p], { scale: 0.5 }, { scale: 1, duration: 0.35, delay: 0.3, ease: "back.out(2.5)" });
+      }
+
+      function clearDemo() {
+        pos = -1;
+        gsap.set(win, { opacity: 0 });
+        gIn.classList.remove("live");
+        inCells.forEach((cell) => cell.classList.remove("hot"));
+        outCells.forEach((cell) => {
+          cell.className = "px";
+          cell.removeAttribute("style");
+          cell.textContent = "";
+        });
+        prodCells.forEach((cell) => (cell.textContent = ""));
+        sumEl.innerHTML = "Σ = <b>…</b><small>&nbsp;</small>";
+        const K = KERNELS[kname];
+        paintKernel(kLive, K.k, K.div > 1 ? K.div : 0);
+      }
+
+      function tick() {
+        pos = (pos + 1) % 25;
+        if (pos === 0) clearDemo(), (pos = 0);
+        show(pos);
+        // Linger on the first positions, then speed up; pause at the end
+        const wait = pos < 2 ? 2.4 : pos === 24 ? 3.5 : 0.75;
+        if (playing) timer = gsap.delayedCall(wait, tick);
+      }
+
+      const toggleBtn = demo.querySelector('[data-act="toggle"]');
+      function play() {
+        playing = true;
+        toggleBtn.textContent = "Pause";
+        timer?.kill();
+        timer = gsap.delayedCall(0.4, tick);
+      }
+      function pause() {
+        playing = false;
+        toggleBtn.textContent = "Play";
+        timer?.kill();
+      }
+
+      demo.querySelector(".chips").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        if (b.dataset.kernel) {
+          kname = b.dataset.kernel;
+          demo.querySelectorAll("[data-kernel]").forEach((x) => x.classList.toggle("on", x === b));
+          clearDemo();
+          play();
+        } else if (b.dataset.act === "toggle") playing ? pause() : play();
+        else if (b.dataset.act === "step") {
+          pause();
+          tick();
+        } else if (b.dataset.act === "restart") {
+          clearDemo();
+          play();
+        }
+      });
+      window.addEventListener("resize", () => pos >= 0 && placeWindow(pos, false));
+
+      Deck.scene("#slide-demo", {
+        enter() {
+          clearDemo();
+          play();
+        },
+        leave() {
+          pause();
+        },
+      });
+
+      // ------------------------------------------------------------ playground
+      const PLAY = [
+        ["Identity", "0 0 0|0 1 0|0 0 0"],
+        ["Box blur 3×3", "1 1 1|1 1 1|1 1 1", 9],
+        ["Box blur 5×5", "1 1 1 1 1|1 1 1 1 1|1 1 1 1 1|1 1 1 1 1|1 1 1 1 1", 25],
+        ["Gaussian 5×5", "1 4 6 4 1|4 16 24 16 4|6 24 36 24 6|4 16 24 16 4|1 4 6 4 1", 256],
+        ["Motion blur", "0 0 0 0 0|0 0 0 0 0|1 1 1 1 1|0 0 0 0 0|0 0 0 0 0", 5],
+        ["Sharpen", "0 -1 0|-1 5 -1|0 -1 0"],
+        ["Strong sharpen", "-1 -1 -1|-1 9 -1|-1 -1 -1"],
+        ["Horizontal edges", "-1 -1 -1|0 0 0|1 1 1", 1, true],
+        ["Vertical edges", "-1 0 1|-1 0 1|-1 0 1", 1, true],
+        ["Emboss", "-2 -1 0|-1 1 1|0 1 2", 1, true],
+        ["Outline", "-1 -1 -1|-1 8 -1|-1 -1 -1"],
+      ];
+      const ps = document.querySelector("#slide-play");
+      const src = ps.querySelector("canvas.src");
+      const dst = ps.querySelector("canvas.dst");
+      const chips = ps.querySelector(".chips");
+      const kSmall = ps.querySelector(".kgrid.live");
+      chips.innerHTML = PLAY.map((p, i) => `<button class="chip${i ? "" : " on"}" data-i="${i}">${p[0]}</button>`).join("");
+      let base = null;
+
+      // Reflect-101 border, like OpenCV's default; 8-bit output saturates
+      function filter(i) {
+        const [name, ks, div = 1, gray] = PLAY[i];
+        const K = parseK(ks).map((r) => r.map((v) => Number(v) / div));
+        const n = K.length, h = (n - 1) / 2;
+        const { width: W, height: H, data } = base;
+        let s = data;
+        if (gray) {
+          s = new Uint8ClampedArray(data.length);
+          for (let p = 0; p < data.length; p += 4) {
+            const g = 0.299 * data[p] + 0.587 * data[p + 1] + 0.114 * data[p + 2];
+            s[p] = s[p + 1] = s[p + 2] = g;
+            s[p + 3] = 255;
+          }
+        }
+        const out = new ImageData(W, H);
+        const refl = (v, m) => (v < 0 ? -v : v >= m ? 2 * m - v - 2 : v);
+        for (let y = 0; y < H; y++)
+          for (let x = 0; x < W; x++) {
+            let r = 0, g = 0, b = 0;
+            for (let i2 = 0; i2 < n; i2++) {
+              const yy = refl(y + i2 - h, H);
+              for (let j = 0; j < n; j++) {
+                const w = K[i2][j];
+                if (!w) continue;
+                const q = (yy * W + refl(x + j - h, W)) * 4;
+                r += w * s[q];
+                g += w * s[q + 1];
+                b += w * s[q + 2];
+              }
+            }
+            const o = (y * W + x) * 4;
+            out.data[o] = r;
+            out.data[o + 1] = g;
+            out.data[o + 2] = b;
+            out.data[o + 3] = 255;
+          }
+        dst.getContext("2d").putImageData(out, 0, 0);
+        ps.querySelector(".name").textContent = name + (gray ? " (on grayscale)" : "");
+        paintKernel(kSmall, parseK(ks), div > 1 ? div : 0);
+      }
+
+      let current = 0;
+      chips.addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b || !base) return;
+        current = +b.dataset.i;
+        chips.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+        filter(current);
+        gsap.fromTo(dst, { opacity: 0.4 }, { opacity: 1, duration: 0.4 });
+      });
+
+      const photo = new Image();
+      photo.src = "/assets/2025-10-09-22-21-33.png";
+      photo.decode().then(() => {
+        const ctx = src.getContext("2d", { willReadFrequently: true });
+        src.width = dst.width = photo.naturalWidth;
+        src.height = dst.height = photo.naturalHeight;
+        ctx.drawImage(photo, 0, 0);
+        base = ctx.getImageData(0, 0, src.width, src.height);
+        filter(current);
+      });
+
+      // Cycle through a few kernels on entry so the slide shows itself off
+      let tour = null;
+      Deck.scene("#slide-play", {
+        enter() {
+          let k = 0;
+          const seq = [0, 2, 6, 8, 10];
+          const next = () => {
+            if (!base) return (tour = gsap.delayedCall(0.5, next));
+            chips.querySelectorAll("button")[seq[k]].click();
+            if (++k < seq.length) tour = gsap.delayedCall(1.6, next);
+          };
+          tour = gsap.delayedCall(0.6, next);
+          chips.addEventListener("pointerdown", () => tour?.kill(), { once: true });
+        },
+        leave() {
+          tour?.kill();
+        },
+      });
+    </script>
+  </body>
+</html>

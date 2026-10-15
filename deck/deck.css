@@ -363,6 +363,8 @@ mark {
 code {
   font-family: var(--font-mono);
   font-size: 0.9em;
+  /* No ligatures: >= must look like >= in a lesson, not ≥ */
+  font-variant-ligatures: none;
 }
 
 :not(pre) > code {
@@ -783,8 +785,16 @@ pre .line.step.current {
   font-size: 0.8rem;
   background: linear-gradient(180deg, rgba(5, 6, 15, 0.85), rgba(5, 6, 15, 0));
   transition:
+    background 0.3s,
     opacity 0.4s,
     transform 0.4s var(--ease);
+}
+
+body.scrolled .deck-bar {
+  background: rgba(5, 6, 15, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
 }
 
 .deck-home {
@@ -1024,7 +1034,14 @@ body.idle {
     display: none;
   }
 
-  .deck-home {
+  body.scrolled .deck-bar {
+  background: rgba(5, 6, 15, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.deck-home {
     padding: 0.35rem;
   }
 

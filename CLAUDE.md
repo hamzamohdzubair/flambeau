@@ -117,8 +117,10 @@ Click any figure image to zoom it.
 - Highlighted at load with highlight.js; common indentation is stripped, so indent the code to
   match the HTML around it. Escape `<`, `>` and `&` as `&lt;`, `&gt;`, `&amp;`.
 - Lines are numbered. `<pre class="steps">` reveals the code one line at a time.
-- A line containing `# ans:` (or `// ans:`) is an answer line: hidden until revealed, and the
-  `ans:` marker is not shown. Use it for "what does this print?" slides.
+- A line containing `# ans: text` (or `// ans: text`) is an answer line: hidden until revealed,
+  shown as `# text`. Use it for "what does this print?" slides. A line ending in a bare `# ans:`
+  hides its own code as the answer (the marker is removed). A whole block can be an answer:
+  `<pre class="answer">`.
 
 ## Maths
 
@@ -128,7 +130,8 @@ page contains any. A literal dollar sign in text is fine as long as it is not do
 ## Animation
 
 Put scripts in a `<script type="module">` at the end of `<body>` (module scripts run after deck.js,
-so `Deck` exists). Load libraries on demand: they are pinned and cached.
+so `Deck` exists). `await Deck.ready` before querying markup deck.js generates (code `.line`
+spans). Load libraries on demand: they are pinned and cached.
 
 ```js
 const gsap = await Deck.load("gsap");          // also gsapMotionPath, gsapText
@@ -147,10 +150,18 @@ Deck.scene("#my-slide", {
 - Drive a script-only sequence with invisible steps: `<span class="step" data-anim="none"></span>`
   per beat, then react in `step()` / `unstep()`.
 - Rendering loops (three.js, canvas) must stop in `leave()`; only one slide is visible at a time.
+- `step` can fire for several steps in one tick (↓/↑ and links into a deck show all steps at
+  once). Make handlers idempotent and state-based; when `detail.dir < 0` (going back) or many steps
+  arrive together, jump to the final state instead of animating.
+- `enter` fires before that slide's step events.
 - `Deck.on('enter' | 'leave' | 'step' | 'unstep', fn)` listens across all slides. Each slide also
   fires DOM events `slide:enter` / `slide:leave`, and step elements fire `step:show` / `step:hide`.
-- Canvases, iframes, videos, links and anything with `data-interactive` do not advance the slide
-  when clicked or swiped.
+- Canvases, iframes, videos, buttons, links and anything with `data-interactive` (put it on a
+  row of controls) do not advance the slide when clicked or swiped.
+- Same-origin `/assets` images can be drawn on a canvas and read with `getImageData`, for live
+  image-processing demos.
+- On phones, size grids with `min(Xrem, Nvw, Nvh)`, keep code lines and comments short, and check
+  the slide at 390×844.
 - Gotcha: gradient text (`background-clip: text`) disappears on children that get their own
   transform. Animate words inside a `grad-each` heading instead.
 - Inline SVG is the easiest canvas for diagrams: draw it in the HTML, give parts classes, and

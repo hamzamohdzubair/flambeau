@@ -204,9 +204,14 @@
       pre.classList.add("lines");
       code.innerHTML = splitLines(html)
         .map((line) => {
-          // "# ans:" / "// ans:" marks an answer line; the marker is not shown
-          const isAnswer = /(#|\/\/)\s*ans:/.test(line.replace(/<[^>]+>/g, ""));
-          if (isAnswer) line = line.replace(/(#|\/\/)(\s*)ans:\s?/, "$1$2");
+          // "# ans: text" marks an answer line and shows "# text"; a bare
+          // trailing "# ans:" hides the line's code itself as the answer
+          const plain = line.replace(/<[^>]+>/g, "");
+          const isAnswer = /(#|\/\/)\s*ans:/.test(plain);
+          if (isAnswer) {
+            if (/(#|\/\/)\s*ans:\s*$/.test(plain)) line = line.replace(/\s*(<span[^>]*>)?\s*(#|\/\/)\s*ans:\s*(<\/span>)?\s*$/, "");
+            else line = line.replace(/(#|\/\/)\s*ans:\s?/, "$1 ");
+          }
           const cls = ["line"];
           if (steps || isAnswer) cls.push("step");
           if (isAnswer) cls.push("answer");
@@ -317,6 +322,8 @@
   let index = -1;
   let step = 0;
   let ui;
+  let markReady;
+  const ready = new Promise((r) => (markReady = r));
 
   function collectSteps(slide) {
     const els = $$(".step, .answer", slide);
@@ -513,12 +520,20 @@
       if (i !== index) go(i, s);
     });
 
+    // The top bar gets a backdrop once a tall slide scrolls under it
+    for (const sl of slides) sl.addEventListener("scroll", () => document.body.classList.toggle("scrolled", sl.scrollTop > 8), { passive: true });
+    Deck.on("enter", (sl) => document.body.classList.toggle("scrolled", sl.scrollTop > 8));
+
+    markReady();
     const [i, s] = fromHash();
     go(i, s, 1);
     document.documentElement.classList.add("deck-ready");
   }
 
   window.Deck = {
+    // Resolves once code is highlighted and split into .line spans and steps
+    // are collected: await it before querying generated markup
+    ready,
     on(name, fn) {
       if (!listeners[name]) throw new Error("Unknown deck event " + name);
       listeners[name].push(fn);

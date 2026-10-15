@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Neural Networks</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #title {
+        overflow: hidden;
+      }
+
+      #title .bgnet {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.35;
+      }
+
+      #topics .tiles {
+        grid-template-columns: minmax(0, 36rem);
+        justify-content: center;
+      }
+
+      #topics .tile {
+        min-height: 20rem;
+        font-size: 2.2rem;
+      }
+
+      #topics .tile small {
+        font-size: 1rem;
+      }
+
+      #contents ol {
+        display: grid;
+        gap: 1rem;
+        font-family: var(--font-display);
+        font-size: 2.4rem;
+        color: var(--text);
+      }
+
+      #contents small {
+        font-family: var(--font);
+        font-size: 1rem;
+        color: var(--faint);
+      }
+
+      #fire svg.net {
+        width: 100%;
+        max-height: 64cqh;
+        height: auto;
+      }
+
+      #fire > span.step {
+        position: absolute;
+      }
+
+      #fire p {
+        font-size: 1.3rem;
+      }
+
+      .net line {
+        stroke: rgba(167, 139, 250, 0.3);
+        stroke-width: 1.5;
+      }
+
+      .net circle {
+        fill: #0b0d1a;
+        stroke: #a78bfa;
+        stroke-width: 2.5;
+      }
+
+      .net text {
+        font-family: var(--font-mono);
+        font-size: 18px;
+        fill: var(--muted);
+        text-anchor: middle;
+      }
+
+      #book img {
+        height: 66cqh;
+        max-height: 66cqh;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <svg class="bgnet net" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+      <span class="kicker">AI/ML · ML algorithms</span>
+      <h1>Neural Networks</h1>
+      <p>Layers of simple units that, trained together, learn very complicated patterns.</p>
+    </section>
+
+    <section class="slide" id="topics">
+      <h2>Chapters</h2>
+      <div class="tiles">
+        <a class="tile" href="cnn/index.html" style="--img: url('/assets/2025-10-04-12-02-13.png')"><span>CNN<small>Convolutional neural networks</small></span></a>
+      </div>
+    </section>
+
+    <section class="slide" id="contents">
+      <h2>Contents</h2>
+      <ol>
+        <li class="step">History <small>slides coming</small></li>
+        <li class="step">Types of neural networks <small>slides coming</small></li>
+        <li class="step">Training: maths + code <small>slides coming</small></li>
+      </ol>
+    </section>
+
+    <section class="slide" id="fire">
+      <h2>Signals through a network</h2>
+      <svg class="net" viewBox="0 0 640 330"></svg>
+      <p class="center">Press → to fire each layer: every unit sums its weighted inputs and passes the result on.</p>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <section class="slide" id="book">
+      <h2>Resources</h2>
+      <figure class="step">
+        <img src="/assets/2025-10-05-09-08-25.png" alt="Book cover: Dive into Deep Learning by Zhang, Lipton, Li and Smola" />
+        <figcaption>Free access: <a href="https://d2l.ai">d2l.ai</a></figcaption>
+      </figure>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent, text) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        if (text) e.textContent = text;
+        parent?.appendChild(e);
+        return e;
+      };
+
+      // Build a layered network into an SVG; returns lines/circles grouped by layer
+      function buildNet(svg, layers, x0, dx, cy, dy, r) {
+        const pos = layers.map((n, li) => Array.from({ length: n }, (_, k) => [x0 + li * dx, cy + (k - (n - 1) / 2) * dy]));
+        const lines = layers.map(() => []), dots = layers.map(() => []);
+        pos.slice(0, -1).forEach((col, li) =>
+          col.forEach(([x1, y1]) => pos[li + 1].forEach(([x2, y2]) => lines[li + 1].push(el("line", { x1, y1, x2, y2 }, svg))))
+        );
+        pos.forEach((col, li) => col.forEach(([cx, cy]) => dots[li].push(el("circle", { cx, cy, r }, svg))));
+        return { lines, dots, pos };
+      }
+
+      // Cover: a big faint network with pulses running through it
+      const bg = buildNet(document.querySelector("#title .bgnet"), [5, 8, 8, 8, 4], 160, 220, 350, 80, 14);
+      let bgTl = null;
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+          bgTl?.kill();
+          bgTl = gsap.timeline({ repeat: -1 });
+          bg.lines.slice(1).forEach((ls, li) => {
+            bgTl.to(ls, { stroke: "#22d3ee", strokeWidth: 2.5, duration: 0.35, stagger: { each: 0.004, from: "random" } }, li * 0.5);
+            bgTl.to(bg.dots[li + 1], { fill: "#8b5cf6", duration: 0.3 }, li * 0.5 + 0.3);
+            bgTl.to(ls, { stroke: "rgba(167,139,250,0.3)", strokeWidth: 1.5, duration: 0.6 }, li * 0.5 + 0.6);
+            bgTl.to(bg.dots[li + 1], { fill: "#0b0d1a", duration: 0.6 }, li * 0.5 + 0.9);
+          });
+        },
+        leave: () => bgTl?.kill(),
+      });
+
+      // Step-by-step firing
+      const svg = document.querySelector("#fire .net");
+      const net = buildNet(svg, [3, 5, 5, 2], 80, 160, 165, 54, 16);
+      el("text", { x: 80, y: 320 }, svg, "input");
+      el("text", { x: 240, y: 320 }, svg, "hidden");
+      el("text", { x: 400, y: 320 }, svg, "hidden");
+      el("text", { x: 560, y: 320 }, svg, "output");
+      const fire = (n, on, animate) => {
+        const d = animate ? 0.5 : 0;
+        if (n > 0) gsap.to(net.lines[n], { stroke: on ? "#22d3ee" : "rgba(167,139,250,0.3)", strokeWidth: on ? 2.5 : 1.5, duration: d, stagger: d ? 0.01 : 0 });
+        gsap.to(net.dots[n], { fill: on ? "#8b5cf6" : "#0b0d1a", scale: on ? 1.15 : 1, transformOrigin: "center", duration: d * 0.8, delay: d * 0.5 });
+      };
+      Deck.scene("#fire", {
+        enter: () => {
+          for (let k = 1; k <= 3; k++) fire(k, false, false);
+          fire(0, true, true);
+        },
+        step: (s, n, e, d) => fire(n, true, d.dir > 0),
+        unstep: (s, n) => fire(n, false, false),
+      });
+    </script>
+  </body>
+</html>

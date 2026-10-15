@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Python</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .python {
+        gap: 1.6rem;
+      }
+
+      .python .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .python h1 {
+        text-align: center;
+      }
+
+      .python .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      .python .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      .python .group h3 span {
+        margin-right: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .python .tile {
+        min-height: 5.6rem;
+      }
+
+      .python .libs .tile {
+        min-height: 7rem;
+      }
+
+      .python .video {
+        max-width: 22rem;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide hub-cover python" id="python">
+      <span class="kicker">CS · Programming</span>
+      <h1>Python</h1>
+      <nav class="contents">
+        <a class="pill" href="#2">Scientific Python and deep learning</a>
+        <a class="pill" href="#3">Basics</a>
+        <a class="pill" href="#4">Control flow</a>
+        <a class="pill" href="#5">Functions</a>
+        <a class="pill" href="#6">Data structures</a>
+        <a class="pill" href="#7">Strings</a>
+        <a class="pill" href="#8">File I/O</a>
+        <a class="pill" href="#9">Error handling</a>
+        <a class="pill" href="#10">Comprehensions</a>
+        <a class="pill" href="#11">Object-oriented programming</a>
+        <a class="pill" href="#12">Decorators</a>
+        <a class="pill" href="#13">Iterators &amp; generators</a>
+        <a class="pill" href="#14">Practice</a>
+        <a class="pill" href="#15">Video</a>
+      </nav>
+    </section>
+
+    <section class="slide hub-group libs python">
+      <span class="kicker">Libraries</span>
+      <h2>Scientific Python and deep learning</h2>
+      <div class="tiles">
+          <a class="tile" href="numpy/index.html" style="--img: url('/assets/2025-10-19-00-46-48.png')" aria-label="NumPy"><span></span></a>
+          <div class="tile" style="--img: url('/assets/2025-10-05-12-17-07.png'); opacity: 0.45"><span aria-label="Pandas"><small>coming soon</small></span></div>
+          <div class="tile" style="--img: url('/assets/2025-10-05-12-16-08.png'); opacity: 0.45"><span aria-label="scikit-learn"><small>coming soon</small></span></div>
+          <div class="tile" style="--img: url('/assets/2025-10-05-12-21-55.png'); opacity: 0.45"><span aria-label="Keras"><small>coming soon</small></span></div>
+          <div class="tile" style="--img: url('/assets/2025-10-05-12-11-41.png'); opacity: 0.45"><span>TensorFlow<small>coming soon</small></span></div>
+          <div class="tile" style="--img: url('/assets/2025-10-05-12-12-25.png'); opacity: 0.45"><span>PyTorch<small>coming soon</small></span></div>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Basics</h2>
+      <div class="tiles">
+          <a class="tile" href="1-variables-assignment.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-1-variables-assignment.jpg')"><span>Variables &amp; Assignment</span></a>
+          <a class="tile" href="1-data-types.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-1-data-types.jpg')"><span>Data Types</span></a>
+          <a class="tile" href="1-arithmetic-operations.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-1-arithmetic-operations.jpg')"><span>Arithmetic Operations</span></a>
+          <a class="tile" href="1-comparison-operations.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-1-comparison-operations.jpg')"><span>Comparison Operations</span></a>
+          <a class="tile" href="1-logical-operations.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-1-logical-operations.jpg')"><span>Logical Operations</span></a>
+          <a class="tile" href="1-type-conversion.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-1-type-conversion.jpg')"><span>Type Conversion</span></a>
+          <a class="tile" href="1-input-output.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-1-input-output.jpg')"><span>Input &amp; Output</span></a>
+          <a class="tile" href="1-comments.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-1-comments.jpg')"><span>Comments</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Control flow</h2>
+      <div class="tiles">
+          <a class="tile" href="if-statements.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-if-statements.jpg')"><span>If Statements</span></a>
+          <a class="tile" href="ternary-operator.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-ternary-operator.jpg')"><span>Ternary Operator</span></a>
+          <a class="tile" href="for-loops.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-for-loops.jpg')"><span>For Loops</span></a>
+          <a class="tile" href="while-loops.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-while-loops.jpg')"><span>While Loops</span></a>
+          <a class="tile" href="break-continue.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-break-continue.jpg')"><span>Break &amp; Continue</span></a>
+          <a class="tile" href="loop-else.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-loop-else.jpg')"><span>Loop Else</span></a>
+          <a class="tile" href="match-statement.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-match-statement.jpg')"><span>Match Statement</span></a>
+          <a class="tile" href="pass-statement.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-pass-statement.jpg')"><span>Pass Statement</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Functions</h2>
+      <div class="tiles">
+          <a class="tile" href="function-basics.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-function-basics.jpg')"><span>Function Basics</span></a>
+          <a class="tile" href="function-parameters.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-function-parameters.jpg')"><span>Parameters</span></a>
+          <a class="tile" href="function-return.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-function-return.jpg')"><span>Return Values</span></a>
+          <a class="tile" href="lambda-functions.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-lambda-functions.jpg')"><span>Lambda Functions</span></a>
+          <a class="tile" href="function-scope.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-function-scope.jpg')"><span>Scope</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Data structures</h2>
+      <div class="tiles">
+          <a class="tile" href="lists-basics.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-lists-basics.jpg')"><span>Lists Basics</span></a>
+          <a class="tile" href="lists-methods.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-lists-methods.jpg')"><span>List Methods</span></a>
+          <a class="tile" href="tuples.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-tuples.jpg')"><span>Tuples</span></a>
+          <a class="tile" href="dictionaries-basics.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-dictionaries-basics.jpg')"><span>Dictionaries Basics</span></a>
+          <a class="tile" href="dictionaries-methods.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-dictionaries-methods.jpg')"><span>Dictionary Methods</span></a>
+          <a class="tile" href="sets.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-sets.jpg')"><span>Sets</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Fundamentals</span>
+      <h2>Strings</h2>
+      <div class="tiles">
+          <a class="tile" href="strings-basics.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-strings-basics.jpg')"><span>String Basics</span></a>
+          <a class="tile" href="string-methods.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-string-methods.jpg')"><span>String Methods</span></a>
+          <a class="tile" href="string-formatting.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-string-formatting.jpg')"><span>String Formatting</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Intermediate</span>
+      <h2>File I/O</h2>
+      <div class="tiles">
+          <a class="tile" href="file-reading.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-file-reading.jpg')"><span>File Reading</span></a>
+          <a class="tile" href="file-writing.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-file-writing.jpg')"><span>File Writing</span></a>
+          <a class="tile" href="file-paths.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-file-paths.jpg')"><span>File Paths</span></a>
+          <a class="tile" href="csv-json.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-csv-json.jpg')"><span>CSV &amp; JSON</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Intermediate</span>
+      <h2>Error handling</h2>
+      <div class="tiles">
+          <a class="tile" href="try-except.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-try-except.jpg')"><span>Try Except</span></a>
+          <a class="tile" href="exceptions.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-exceptions.jpg')"><span>Exceptions</span></a>
+          <a class="tile" href="custom-exceptions.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-custom-exceptions.jpg')"><span>Custom Exceptions</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Intermediate</span>
+      <h2>Comprehensions</h2>
+      <div class="tiles">
+          <a class="tile" href="list-comprehensions.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-list-comprehensions.jpg')"><span>List Comprehensions</span></a>
+          <a class="tile" href="dict-set-comprehensions.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-dict-set-comprehensions.jpg')"><span>Dict &amp; Set Comprehensions</span></a>
+          <a class="tile" href="generator-expressions.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-generator-expressions.jpg')"><span>Generator Expressions</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Advanced</span>
+      <h2>Object-oriented programming</h2>
+      <div class="tiles">
+          <a class="tile" href="classes-objects.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-classes-objects.jpg')"><span>Classes &amp; Objects</span></a>
+          <a class="tile" href="methods.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-methods.jpg')"><span>Methods</span></a>
+          <a class="tile" href="inheritance.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-inheritance.jpg')"><span>Inheritance</span></a>
+          <a class="tile" href="properties.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-properties.jpg')"><span>Properties</span></a>
+          <a class="tile" href="magic-methods.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-magic-methods.jpg')"><span>Magic Methods</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Advanced</span>
+      <h2>Decorators</h2>
+      <div class="tiles">
+          <a class="tile" href="decorators-basics.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-decorators-basics.jpg')"><span>Decorators Basics</span></a>
+          <a class="tile" href="decorators-advanced.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-decorators-advanced.jpg')"><span>Decorators Advanced</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Advanced</span>
+      <h2>Iterators &amp; generators</h2>
+      <div class="tiles">
+          <a class="tile" href="iterators.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-iterators.jpg')"><span>Iterators</span></a>
+          <a class="tile" href="generators.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-generators.jpg')"><span>Generators</span></a>
+          <a class="tile" href="itertools.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-itertools.jpg')"><span>Itertools</span></a>
+          <a class="tile" href="iterators-generators.html" style="--img: url('/assets/tiles/tile-formal-cs-programming-python-iterators-generators.jpg')"><span>Iterators &amp; Generators<small>full lecture</small></span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Tasks</span>
+      <h2>Practice</h2>
+      <div class="tiles">
+          <a class="tile" href="getting-toy-data.html" style="--img: url('/assets/2025-10-18-08-01-50.png')"><span>Getting Toy Data</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group python">
+      <span class="kicker">Resources</span>
+      <h2>Video</h2>
+      <div class="tiles video">
+          <a class="tile" href="https://www.youtube.com/watch?v=GfH4QL4VqJ0" style="--img: url('https://img.youtube.com/vi/GfH4QL4VqJ0/0.jpg')"><span>Python: The Documentary<small>YouTube</small></span></a>
+        </div>
+    </section>
+  </body>
+</html>

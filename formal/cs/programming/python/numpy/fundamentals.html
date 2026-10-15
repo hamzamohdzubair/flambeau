@@ -1,0 +1,1320 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Array Fundamentals</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ================= shared lesson widgets (tracer, strip, rewrite) ================= */
+      /* font shorthands reset ligatures, so force them off: == must stay two characters */
+      pre code,
+      .strip,
+      .strip *,
+      .rw,
+      .rw *,
+      .chip,
+      .state * {
+        font-variant-ligatures: none !important;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+        max-width: 100%;
+        font-size: 1.5rem;
+        line-height: 1.45;
+        flex-shrink: 0;
+      }
+
+      .slide pre.small {
+        font-size: 1.3rem;
+      }
+
+      .slide pre.tiny {
+        font-size: 1.12rem;
+      }
+
+      /* the closing recap: big cards, two by two (three in a row when there are three) */
+      .cards.recap {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 76rem);
+      }
+
+      .cards.recap:has(> .card:nth-child(3):last-child) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .cards.recap .card {
+        padding: 1.5rem 1.9rem;
+      }
+
+      .cards.recap h3 {
+        font-size: 1.6rem;
+      }
+
+      .cards.recap p {
+        font-size: 1.3rem;
+        line-height: 1.5;
+      }
+
+      /* section dividers: the title and its line sit together in the middle */
+      .slide.section > h2:first-of-type {
+        margin-top: auto;
+      }
+
+      .slide.section > h2:first-of-type + * {
+        margin-top: 0;
+      }
+
+      .slide.section > p {
+        font-size: 1.4rem;
+      }
+
+      /* .pair (code, then a widget) put side by side when the code fits better that way */
+      .slide .pair.beside {
+        grid-template-columns: max-content minmax(0, 1fr);
+        align-items: center;
+        justify-content: center;
+        column-gap: 3rem;
+      }
+
+      .slide .pair.beside > pre {
+        min-width: 0;
+      }
+
+      .pair.beside .rw .ex {
+        font-size: 1.6rem;
+      }
+
+      .pair.beside > .pair-col {
+        display: grid;
+        justify-items: center;
+        gap: 1.2rem;
+        min-width: 0;
+      }
+
+      /* a comment is prose: when the code would otherwise shrink for it (.wrapc),
+         let it wrap under its own text */
+      .slide pre.lines.wrapc .line.cl {
+        white-space: pre-wrap;
+        padding-left: 3em;
+        text-indent: -3em;
+      }
+
+      /* ---------- Tracer: lines light up in the order Python runs them ---------- */
+      .tracer {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 1.6rem;
+        width: 100%;
+      }
+
+      .tracer > pre {
+        flex: 0 1 auto;
+      }
+
+      .state {
+        flex: 0 0 19rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+        font-size: 1.25rem;
+      }
+
+      .state .box {
+        min-width: 0;
+        padding: 0.9rem 1.1rem;
+        border-radius: 14px;
+        background: var(--glass);
+        border: 1px solid var(--border);
+      }
+
+      .state h4 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 0 0.5rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .state .vars {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.2rem 0.8rem;
+        font-family: var(--font-mono);
+        min-height: 1.6em;
+      }
+
+      .state .vars .k {
+        color: var(--muted);
+      }
+
+      .state .vars .v {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        color: var(--text);
+        border-radius: 4px;
+        padding: 0 0.3em;
+        transition: background 0.4s;
+      }
+
+      .state .vars .v.flash {
+        background: rgba(34, 211, 238, 0.35);
+        transition: none;
+      }
+
+      .state .out {
+        font-family: var(--font-mono);
+        color: var(--green);
+        min-height: 1.6em;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .state .out .err {
+        color: var(--red);
+      }
+
+      .state .empty {
+        color: var(--faint);
+        font-family: var(--font);
+        font-size: 1rem;
+      }
+
+      .replay {
+        border: 1px solid var(--border);
+        background: var(--glass-light);
+        color: var(--muted);
+        border-radius: 999px;
+        font: 500 0.78rem var(--font);
+        padding: 0.15rem 0.7rem;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        text-transform: none;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.4;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.28;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.8em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb + .tb {
+        margin-left: 0.4em;
+      }
+
+      /* chips to try other values */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        font-size: 1.15rem;
+        color: var(--muted);
+      }
+
+      .state > .try {
+        justify-content: flex-start;
+        gap: 0.5rem;
+      }
+
+      .state > .try .chip {
+        min-width: 0;
+        padding: 0.35rem 0.8rem;
+      }
+
+      .try:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3.6rem;
+        padding: 0.4rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1.2rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 1.1rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- Strip: the characters / items of a sequence with their indices ---------- */
+      .strip {
+        display: grid;
+        justify-items: center;
+        gap: 0.9rem;
+        width: 100%;
+      }
+
+      .strip .cells {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 0.4rem;
+        max-width: 100%;
+      }
+
+      .strip .cell {
+        display: grid;
+        justify-items: center;
+        gap: 0.2rem;
+        font-family: var(--font-mono);
+      }
+
+      .strip .ix {
+        font-size: 0.95rem;
+        color: var(--faint);
+        transition: color 0.3s;
+      }
+
+      .strip .ch {
+        display: grid;
+        place-items: center;
+        width: var(--cw, 3.2rem);
+        height: 3.6rem;
+        border-radius: 10px;
+        background: rgba(15, 18, 35, 0.85);
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        font-size: 1.75rem;
+        white-space: pre;
+        transition:
+          background 0.35s,
+          border-color 0.35s,
+          opacity 0.35s;
+      }
+
+      .strip .ch.sp {
+        color: var(--faint);
+      }
+
+      .strip.picking .cell:not(.pick) .ch {
+        opacity: 0.35;
+      }
+
+      .strip .cell.pick .ch {
+        background: rgba(236, 72, 153, 0.28);
+        border-color: var(--pink);
+      }
+
+      .strip .cell.pick .ix {
+        color: #f0abfc;
+      }
+
+      .strip .ord {
+        font-size: 0.95rem;
+        color: var(--cyan);
+        height: 1.2rem;
+      }
+
+      .strip .res {
+        min-height: 3rem;
+        font: 500 1.8rem var(--font-mono);
+        max-width: 100%;
+        text-align: center;
+        color: var(--green);
+      }
+
+      .strip .res .lbl {
+        color: var(--faint);
+        font-size: 1rem;
+        margin-right: 0.8rem;
+      }
+
+      /* ---------- Rewrite: an expression turning into what Python actually runs ---------- */
+      .rw {
+        display: grid;
+        justify-items: center;
+        width: 100%;
+      }
+
+      .rw > .rs {
+        grid-area: 1 / 1;
+        display: grid;
+        justify-items: center;
+        gap: 0.7rem;
+        opacity: 0;
+        transform: translateY(0.8rem);
+        transition:
+          opacity 0.45s var(--ease),
+          transform 0.45s var(--ease);
+        pointer-events: none;
+      }
+
+      .slide .rw > .rs:not(.cur) {
+        opacity: 0;
+        filter: none;
+        transform: translateY(0.8rem);
+      }
+
+      .slide .rw > .rs.past:not(.cur) {
+        transform: translateY(-0.8rem);
+      }
+
+      .slide .rw > .rs.cur {
+        opacity: 1;
+        filter: none;
+        transform: none;
+      }
+
+      .rw .ex {
+        font: 500 1.85rem var(--font-mono);
+        padding: 0.8rem 1.6rem;
+        border-radius: 16px;
+        background: rgba(10, 12, 26, 0.78);
+        border: 1px solid var(--border);
+        white-space: pre;
+        color: var(--text);
+      }
+
+      .rw .ex mark {
+        color: #f0abfc;
+        background: rgba(236, 72, 153, 0.18);
+        border-radius: 4px;
+        padding: 0 0.1em;
+      }
+
+      .rw small {
+        color: var(--muted);
+        font-size: 1.15rem;
+      }
+
+      .rw-dots {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 0.6rem;
+      }
+
+      .rw-dots i {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: var(--border);
+        transition: background 0.3s;
+      }
+
+      .rw-dots i.on {
+        background: var(--cyan);
+      }
+      .pair {
+        display: grid;
+        gap: 1.4rem;
+        justify-items: center;
+        width: 100%;
+      }
+
+      .duo {
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-content: center;
+        align-items: center;
+        gap: 4rem;
+        width: 100%;
+      }
+
+      .masks {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 0.6rem 1.2rem;
+        align-items: center;
+        font: 1.15rem var(--font-mono);
+      }
+
+      .masks > span {
+        justify-self: end;
+        color: var(--muted);
+      }
+
+      .masks .strip .ix {
+        display: none;
+      }
+
+      .masks .strip .res,
+      .masks .strip .ord {
+        display: none;
+      }
+
+      .masks .strip {
+        gap: 0;
+      }
+
+      .masks .strip .ch {
+        --cw: 4.4rem;
+        height: 3rem;
+        font-size: 1.15rem;
+      }
+
+      .masks .strip .ch.T {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.6);
+      }
+
+      .masks .strip .ch.F {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.4);
+      }
+
+      /* ---------- newaxis: a row becomes a column ---------- */
+      .axis {
+        position: relative;
+        width: calc(8 * 3.1rem);
+        height: calc(8 * 3.1rem);
+      }
+
+      .axis .c {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: grid;
+        place-items: center;
+        width: 2.8rem;
+        height: 2.8rem;
+        border-radius: 8px;
+        background: rgba(15, 18, 35, 0.9);
+        border: 1px solid rgba(34, 211, 238, 0.6);
+        font: 500 1.2rem var(--font-mono);
+      }
+
+      .axis-cap {
+        text-align: center;
+        font: 500 1.3rem var(--font-mono);
+        color: var(--cyan);
+        min-height: 1.6em;
+      }
+
+      /* ---------- 3-D array ---------- */
+      .cube {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .layer {
+        display: grid;
+        justify-items: center;
+        gap: 0.4rem;
+        transition: opacity 0.4s, transform 0.4s;
+      }
+
+      .layer .g {
+        display: grid;
+        grid-template-columns: repeat(3, 3.6rem);
+        gap: 0.35rem;
+        padding: 0.6rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        transition: border-color 0.4s, background 0.4s;
+      }
+
+      .layer .g span {
+        display: grid;
+        place-items: center;
+        height: 3.6rem;
+        border-radius: 8px;
+        background: rgba(15, 18, 35, 0.9);
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        font: 500 1.45rem var(--font-mono);
+      }
+
+      .layer small {
+        font: 1.15rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .cube.picking .layer:not(.pick) {
+        opacity: 0.3;
+      }
+
+      .layer.pick {
+        transform: translateY(-6px);
+      }
+
+      .layer.pick .g {
+        border-color: var(--pink);
+        background: rgba(236, 72, 153, 0.18);
+      }
+
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">NumPy</span>
+      <h1 class="grad-each"><span>Array</span> <span>Fundamentals</span></h1>
+      <p>Indexing NumPy arrays: positions, slices, lists of positions, boolean masks, new axes and ellipses.</p>
+    </section>
+
+    <section class="slide">
+      <h2>The array we will index</h2>
+      <pre class="steps"><code class="language-python">
+        import numpy as np
+        one = np.array([10, 20, 30, 40, 50, 60, 70, 80])
+      </code></pre>
+      <div class="strip step" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel=""></div>
+    </section>
+
+    <!-- ================================================================ basic -->
+    <section class="slide">
+      <h2>Basic indexing</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          one[2]
+          # ans: 30
+          one[-1]
+          # ans: 80
+        </code></pre>
+        <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="2;-1"></div>
+      </div>
+      <p class="hint">One integer picks one element, counting from 0, or from -1 at the end, exactly like a list.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Slicing</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # start 1, stop before 6, step 2
+          one[1:6:2]
+          # ans: array([20, 40, 60])
+        </code></pre>
+        <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="1:6:2"></div>
+      </div>
+      <p class="hint">A slice of an array is a <em>view</em>: it shares memory with <code>one</code>, so changing it changes <code>one</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Fancy indexing</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # a list of positions, in any order, repeats allowed
+          one[[4, 0, 3, 0]]
+          # ans: array([50, 10, 40, 10])
+        </code></pre>
+        <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="[4,0,3,0]"></div>
+      </div>
+      <p class="hint">The small numbers show the order of the result: position 0 is used twice. Fancy indexing returns a copy.</p>
+    </section>
+
+    <!-- ================================================================ masking -->
+    <section class="slide" id="mask">
+      <h2>Masking</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          one[(one &lt; 30) &amp; (one &gt; 60)]
+          # ans: array([], dtype=int64): nothing is both below 30 and above 60
+          one[(one &lt; 30) | (one &gt; 60)]
+          # ans: array([10, 20, 70, 80])
+        </code></pre>
+        <div class="masks">
+          <span>one</span><div class="strip" data-chars data-neg="off" data-items='["10","20","30","40","50","60","70","80"]'></div>
+          <span>one &lt; 30</span><div class="strip m" data-chars data-items='["T","T","F","F","F","F","F","F"]'></div>
+          <span>one &gt; 60</span><div class="strip m" data-chars data-items='["F","F","F","F","F","F","T","T"]'></div>
+          <span class="op">&amp;</span><div class="strip m comb" data-chars data-items='["F","F","F","F","F","F","F","F"]'></div>
+        </div>
+      </div>
+      <p class="hint">A comparison gives one True/False per element; <code>&amp;</code> (and) / <code>|</code> (or) combine them, and the array keeps the True positions.</p>
+    </section>
+
+    <!-- ================================================================ newaxis -->
+    <section class="slide" id="newaxis">
+      <h2>newaxis / None indexing</h2>
+      <div class="duo">
+        <pre><code class="language-python">
+          one.shape
+          # ans: (8,)
+          one[:, np.newaxis]
+          # ans: shape (8, 1): a column
+          one[:, None]
+          # ans: the same: None is np.newaxis
+        </code></pre>
+        <div>
+          <div class="axis"></div>
+          <p class="axis-cap">shape (8,)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ 3d + ellipsis -->
+    <section class="slide" id="cube">
+      <h2>Higher dimensions and the ellipsis</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          two = np.arange(27).reshape(3, 3, 3)
+          two[1, ...]
+          # ans: array([[ 9, 10, 11], [12, 13, 14], [15, 16, 17]])
+        </code></pre>
+        <div class="cube"></div>
+      </div>
+      <p class="hint"><code>...</code> means "all the remaining axes", so <code>two[1, ...]</code> is <code>two[1, :, :]</code>: the middle 3×3 block.</p>
+    </section>
+
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards recap">
+        <div class="card step"><h3>Integers and slices</h3><p><code>a[2]</code>, <code>a[1:6:2]</code>: like lists, but slices are views.</p></div>
+        <div class="card step"><h3>Lists of positions</h3><p><code>a[[4, 0, 3]]</code> picks in that order, as a copy.</p></div>
+        <div class="card step"><h3>Masks</h3><p><code>a[(a &gt; x) &amp; (a &lt; y)]</code>: brackets around each comparison.</p></div>
+        <div class="card step"><h3>Shape tools</h3><p><code>None</code> adds an axis; <code>...</code> fills in the rest.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      // ================= shared lesson widgets (tracer, strip, rewrite) =================
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ------------------------------------------------------------ tracer
+      // data-trace on a <pre class="trace">: beats separated by ";". Each beat is
+      //   N            light code line N (1-based)
+      //   T[note] F[note] E[note] ~[note]   a badge: True / False / error / neutral
+      //   {a=1|b=2}    set variables (an empty value deletes one)
+      //   > text       print a line of output
+      const BEAT = /^\s*(\d+)\s*(?:([TFE~])(?:\x5B([^\x5D]*)\x5D)?)?\s*(?:\{([^}]*)\})?\s*(?:>\s?(.*))?$/; // \x5B \x5D are [ ], spelled so KaTeX isn't triggered
+      const parseTrace = (s) =>
+        (s || "").split(";").filter((t) => t.trim()).map((t) => {
+          const m = t.match(BEAT);
+          if (!m) throw new Error("bad trace beat: " + t);
+          const vars = m[4] ? m[4].split("|").map((kv) => { const i = kv.indexOf("="); return [kv.slice(0, i).trim(), kv.slice(i + 1).trim()]; }) : null;
+          return { line: +m[1], kind: m[2], note: m[3], vars, out: m[5] };
+        });
+      const speed = (n) => Math.max(0.28, Math.min(0.5, 8 / Math.max(n, 1)));
+
+      function buildPanel(pre) {
+        const seq = parseTrace(pre.dataset.trace);
+        const needs = pre.hasAttribute("data-panel") || seq.some((s) => s.vars || s.out !== undefined);
+        if (!needs || pre._panel) return;
+        const wrap = document.createElement("div");
+        wrap.className = "tracer";
+        pre.replaceWith(wrap);
+        wrap.appendChild(pre);
+        const st = document.createElement("div");
+        st.className = "state";
+        st.innerHTML = `<div class="box"><h4>Variables <button class="replay" title="Run the trace again">replay</button></h4><div class="vars"></div></div><div class="box"><h4>Output</h4><div class="out"></div></div>`;
+        st.setAttribute("data-interactive", "");
+        wrap.appendChild(st);
+        // chips that rerun this code sit in the panel, beside the code
+        const chips = wrap.closest(".slide")?.querySelector(":scope > .try");
+        if (chips) st.appendChild(chips);
+        pre._panel = st;
+        st.querySelector(".replay").addEventListener("click", () => trace(pre, false));
+        clearPanel(pre);
+      }
+
+      function clearPanel(pre) {
+        const st = pre._panel;
+        if (!st) return;
+        pre._vars = new Map();
+        st.querySelector(".vars").innerHTML = `<span class="empty">none yet</span>`;
+        st.querySelector(".out").innerHTML = `<span class="empty">nothing printed</span>`;
+        pre._outN = 0;
+      }
+
+      function setVars(pre, vars, instant) {
+        const box = pre._panel.querySelector(".vars");
+        for (const [k, v] of vars) v === "" ? pre._vars.delete(k) : pre._vars.set(k, v);
+        box.innerHTML = pre._vars.size ? [...pre._vars].map(([k, v]) => `<span class="k">${esc(k)}</span><span class="v" data-k="${esc(k)}">${esc(v)}</span>`).join("") : `<span class="empty">none</span>`;
+        if (instant) return;
+        for (const [k, v] of vars) {
+          const el = [...box.querySelectorAll(".v")].find((e) => e.dataset.k === k);
+          if (!el) continue;
+          el.classList.add("flash");
+          requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove("flash")));
+        }
+      }
+
+      function print(pre, text, err, instant) {
+        const out = pre._panel.querySelector(".out");
+        if (!pre._outN) out.innerHTML = "";
+        pre._outN++;
+        const d = document.createElement("div");
+        if (err) d.className = "err";
+        d.textContent = text;
+        out.appendChild(d);
+        if (!instant) gsap.from(d, { x: -12, opacity: 0, duration: 0.3 });
+      }
+
+      function reset(pre) {
+        pre._tl?.kill();
+        pre.classList.remove("tracing", "traced");
+        pre.querySelectorAll(".line").forEach((l) => {
+          l.classList.remove("run", "now");
+          l.querySelectorAll(".tb").forEach((b) => b.remove());
+        });
+        clearPanel(pre);
+        pre._onReset?.();
+      }
+
+      function trace(pre, instant, from = 0, to) {
+        reset(pre);
+        const seq = parseTrace(pre.dataset.trace);
+        to = to ?? seq.length;
+        const STEP = speed(seq.length);
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        pre.classList.add("tracing");
+        const tl = gsap.timeline();
+        seq.slice(0, to).forEach((s, k) => {
+          const fast = instant || k < from;
+          tl.call(() => {
+            lines.forEach((l) => l.classList.remove("now"));
+            const el = lines[s.line - 1];
+            if (el) el.classList.add("run", "now");
+            if (s.kind && el) {
+              el.querySelectorAll(".tb").forEach((o) => o.remove());
+              const b = document.createElement("span");
+              b.className = "tb " + ({ T: "t", F: "f", E: "f", "~": "" })[s.kind];
+              b.textContent = s.note ?? (s.kind === "T" ? "True" : s.kind === "F" ? "False" : "");
+              el.appendChild(b);
+              if (!fast) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+            }
+            if (s.vars && pre._panel) setVars(pre, s.vars, fast);
+            if (s.out !== undefined && pre._panel) print(pre, s.out, s.kind === "E", fast);
+            pre._onBeat?.(s, k, fast);
+          }, null, Math.max(0, k - from) * STEP);
+        });
+        tl.call(() => {
+          lines.forEach((l) => l.classList.remove("now"));
+          pre.classList.replace("tracing", "traced");
+        }, null, Math.max(0, to - from) * STEP);
+        if (instant) tl.progress(1);
+        pre._tl = tl;
+      }
+
+      const traces = [...document.querySelectorAll("pre.trace[data-trace]")];
+      traces.forEach(buildPanel);
+      const setDelay = (pre) => pre.style.setProperty("--ans-delay", parseTrace(pre.dataset.trace).length * speed(parseTrace(pre.dataset.trace).length) + "s");
+      traces.filter((p) => !p.hasAttribute("data-upto")).forEach(setDelay);
+      const firstAnswer = (pre) => pre.querySelector(".line.answer");
+
+      // A trace runs when its first answer line is revealed, or on a [data-go] step
+      Deck.on("step", (slide, i, d) => {
+        for (const el of d.elements) {
+          let pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el !== firstAnswer(pre)) pre = null;
+          if (!pre && el.hasAttribute("data-go")) pre = slide.querySelector("pre.trace[data-trace]");
+          if (pre) trace(pre, d.dir < 0);
+        }
+      });
+      Deck.on("unstep", (slide, i, d) => {
+        for (const el of d.elements) {
+          const pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el === firstAnswer(pre)) reset(pre);
+          if (el.hasAttribute("data-go")) slide.querySelectorAll("pre.trace[data-trace]").forEach(reset);
+        }
+      });
+      Deck.on("enter", (slide, i, d) => {
+        slide.querySelectorAll("pre.trace[data-trace]").forEach((pre) => {
+          reset(pre);
+          if (pre.hasAttribute("data-auto")) trace(pre, d.dir < 0);
+        });
+      });
+      Deck.on("leave", (slide) => slide.querySelectorAll("pre.trace").forEach(reset));
+
+      // data-upto: straight-line code with several answers. Each revealed answer
+      // runs the code up to its own line.
+      function upto(slide, instant) {
+        for (const pre of slide.querySelectorAll("pre.trace[data-upto]")) {
+          const answers = [...pre.querySelectorAll(".line.answer")];
+          const n = answers.filter((a) => a.classList.contains("shown")).length;
+          const prev = pre._upto || 0;
+          if (!n) {
+            reset(pre);
+            pre._upto = 0;
+            continue;
+          }
+          const lines = [...pre.querySelectorAll(".line")];
+          const L = lines.indexOf(answers[n - 1]) + 1;
+          const seq = parseTrace(pre.dataset.trace);
+          let to = seq.findIndex((b) => b.line > L);
+          if (to < 0) to = seq.length;
+          if (to > prev && !instant) trace(pre, false, prev, to);
+          else trace(pre, true, 0, to);
+          pre._upto = to;
+        }
+      }
+      Deck.on("step", (slide, i, d) => upto(slide, d.dir < 0 || d.elements.length > 1));
+      Deck.on("unstep", (slide) => upto(slide, true));
+      Deck.on("enter", (slide) => slide.querySelectorAll("pre.trace[data-upto]").forEach((p) => (p._upto = 0)));
+
+      // Chips: try the same code with another value. Each chip carries the new
+      // literal (data-lit, written into line data-lit-line), its trace and output.
+      for (const box of document.querySelectorAll(".try")) {
+        const slide = box.closest(".slide");
+        const pre = slide.querySelector("pre.trace");
+        const chips = [...box.querySelectorAll(".chip[data-trace]")];
+        if (!pre || !chips.length) continue;
+        const apply = (chip, run) => {
+          chips.forEach((c) => c.classList.toggle("on", c === chip));
+          const line = pre.querySelectorAll(".line")[+pre.dataset.litLine - 1];
+          const lit = line?.querySelector(".hljs-string, .hljs-number, .hljs-literal, .hljs-keyword:last-child");
+          if (lit) lit.textContent = chip.dataset.lit;
+          const ans = firstAnswer(pre);
+          if (ans) (ans.querySelector(".hljs-comment") || ans).textContent = "# " + chip.dataset.out;
+          pre.dataset.trace = chip.dataset.trace;
+          setDelay(pre);
+          if (run) trace(pre, false);
+        };
+        box.addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (c) apply(c, true);
+        });
+        Deck.scene(slide, { enter: () => apply(chips[0], false) });
+      }
+
+      // ------------------------------------------------------------ strip
+      // <div class="strip" data-s="Hello"> (characters) or data-items='[1,2]' with
+      // data-kind="list|tuple|array". data-sel: one selection per answer line of the
+      // slide, separated by ";": an index, a slice a:b:c, a list [i,j], #sub (count),
+      // @sub (find), "-" (nothing). Add "=>text" to override the result shown.
+      function pyIndices(n, sel) {
+        sel = sel.trim();
+        if (sel === "-" || sel === "") return [];
+        if (sel.startsWith("[")) return JSON.parse(sel).map((i) => (i < 0 ? n + i : i));
+        if (!sel.includes(":")) {
+          const i = +sel;
+          return [i < 0 ? n + i : i];
+        }
+        let [a, b, c] = sel.split(":").map((x) => (x.trim() === "" ? null : +x));
+        c = c ?? 1;
+        const norm = (x, d) => (x === null ? d : x < 0 ? Math.max(n + x, c < 0 ? -1 : 0) : Math.min(x, c < 0 ? n - 1 : n));
+        a = norm(a, c > 0 ? 0 : n - 1);
+        b = norm(b, c > 0 ? n : -1);
+        const out = [];
+        for (let i = a; c > 0 ? i < b : i > b; i += c) out.push(i);
+        return out;
+      }
+
+      for (const strip of document.querySelectorAll(".strip")) {
+        const items = strip.dataset.items ? JSON.parse(strip.dataset.items) : [...strip.dataset.s];
+        const isStr = !strip.dataset.items || strip.hasAttribute("data-chars");
+        const kind = strip.dataset.kind || (isStr ? "str" : "list");
+        const n = items.length;
+        const show = (v) => (isStr ? (v === " " ? "␣" : v) : typeof v === "string" ? `'${v}'` : String(v));
+        const rep = (v) => (isStr ? `'${v}'` : typeof v === "string" ? `'${v}'` : String(v));
+        strip.innerHTML =
+          `<div class="cells">` +
+          items.map((v, i) => `<div class="cell"><span class="ord"></span><span class="ix">${i}</span><span class="ch${v === " " ? " sp" : ""}">${esc(show(v))}</span><span class="ix">${i - n}</span></div>`).join("") +
+          `</div><div class="res"></div>`;
+        if (strip.dataset.neg === "off") strip.querySelectorAll(".cell .ix:last-child").forEach((e) => (e.style.visibility = "hidden"));
+        const cells = [...strip.querySelectorAll(".cell")];
+        const res = strip.querySelector(".res");
+        const sels = (strip.dataset.sel || "").split(";");
+        const slide = strip.closest(".slide");
+        let cur = -2;
+
+        function pick(k, instant) {
+          if (k === cur) return;
+          cur = k;
+          gsap.killTweensOf(strip.querySelectorAll(".ch, .res"));
+          cells.forEach((c) => {
+            c.classList.remove("pick");
+            c.querySelector(".ord").textContent = "";
+          });
+          gsap.set(strip.querySelectorAll(".ch"), { y: 0 });
+          gsap.set(res, { clearProps: "opacity,transform" });
+          if (k < 0 || !sels[k] || sels[k].trim() === "-") {
+            strip.classList.remove("picking");
+            res.innerHTML = "";
+            return;
+          }
+          let [sel, override] = sels[k].split("=>");
+          sel = sel.trim();
+          let idx, text;
+          if (sel.startsWith("#") || sel.startsWith("@")) {
+            const sub = sel.slice(1);
+            const s = items.join("");
+            idx = [];
+            let first = -1;
+            for (let p = s.indexOf(sub); p >= 0; p = s.indexOf(sub, p + sub.length)) {
+              if (first < 0) first = p;
+              for (let j = 0; j < sub.length; j++) idx.push(p + j);
+              if (sel[0] === "@") break;
+            }
+            text = sel[0] === "#" ? String(idx.length / Math.max(sub.length, 1)) : String(first);
+          } else {
+            idx = pyIndices(n, sel);
+            const vals = idx.map((i) => items[i]);
+            const single = !sel.includes(":") && !sel.startsWith("[");
+            if (single) text = rep(vals[0]);
+            else if (isStr) text = `'${vals.join("")}'`;
+            else if (kind === "tuple") text = vals.length === 1 ? `(${rep(vals[0])},)` : `(${vals.map(rep).join(", ")})`;
+            else if (kind === "array") text = `array([${vals.map(rep).join(", ")}])`;
+            else text = `[${vals.map(rep).join(", ")}]`;
+          }
+          if (override !== undefined) text = override.trim();
+          strip.classList.add("picking");
+          res.innerHTML = `<span class="lbl">result</span>${esc(text)}`;
+          idx.forEach((i, o) => {
+            const c = cells[i];
+            if (!c) return;
+            c.classList.add("pick");
+            if (idx.length > 1 && !sel.startsWith("#") && !sel.startsWith("@")) {
+              const od = c.querySelector(".ord");
+              od.textContent = od.textContent ? od.textContent + "," + (o + 1) : o + 1;
+            }
+            if (!instant) gsap.fromTo(c.querySelector(".ch"), { y: 0 }, { y: -8, duration: 0.25, delay: o * 0.12, yoyo: true, repeat: 1, ease: "power2.out" });
+          });
+          if (!instant) gsap.from(res, { opacity: 0, y: 8, duration: 0.4, delay: idx.length * 0.12 });
+        }
+        const sync = (instant) => {
+          const scope = strip.dataset.scope ? slide.querySelector(strip.dataset.scope) : slide;
+          let k = scope.querySelectorAll(".line.answer.shown, .sel.shown").length - 1;
+          if (strip.hasAttribute("data-lines")) {
+            // one selection per code line; blank entries keep the previous one
+            const n = scope.querySelectorAll("pre .line.step.shown").length;
+            k = -1;
+            for (let i = n - 1; i >= 0; i--) if (sels[i] && sels[i].trim()) { k = i; break; }
+          }
+          pick(k, instant);
+        };
+        Deck.scene(slide, {
+          enter: () => {
+            cur = -2;
+            pick(-1, true);
+          },
+          step: (s, n, els, d) => sync(d.dir < 0 || els.length > 1),
+          unstep: () => sync(true),
+        });
+      }
+
+      // ------------------------------------------------------------ rewrite
+      // <div class="rw"><div class="rs">first</div><div class="rs step" data-anim="none">next</div>…</div>
+      for (const rw of document.querySelectorAll(".rw")) {
+        const states = [...rw.querySelectorAll(":scope > .rs")];
+        const dots = document.createElement("div");
+        dots.className = "rw-dots";
+        dots.innerHTML = states.map(() => "<i></i>").join("");
+        rw.after(dots);
+        const sync = () => {
+          let k = 0;
+          states.forEach((s, i) => {
+            if (i === 0 || s.classList.contains("shown")) k = i;
+          });
+          states.forEach((s, i) => {
+            s.classList.toggle("cur", i === k);
+            s.classList.toggle("past", i < k);
+          });
+          [...dots.children].forEach((d, i) => d.classList.toggle("on", i <= k));
+        };
+        sync();
+        const slide = rw.closest(".slide");
+        Deck.scene(slide, { enter: sync, step: sync, unstep: sync });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+      // ------------------------------------------------------------ code sizing
+      // Each slide is a fixed 1600x900 canvas. Scale the slide's code blocks to the
+      // largest size (up to 2.5rem) that fits, both across (no scrollbars, room for the
+      // tracer's widest badges) and down the slide; shrink no further than 1.1rem.
+      const REM = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      function fitCode(slide) {
+        const pres = [...slide.querySelectorAll("pre")].filter((p) => !p.closest(".deck-zoom"));
+        if (!pres.length || slide.hasAttribute("data-fixed-code")) return;
+        pres.forEach((p) => (p.style.fontSize = ""));
+        const base = pres.map((p) => parseFloat(getComputedStyle(p).fontSize));
+        // worst case for width: every traced line carries its longest badge, and the panel is full
+        const temp = [];
+        for (const pre of pres.filter((p) => p.matches(".trace[data-trace]") && !p.matches(".tracing, .traced"))) {
+          trace(pre, true);
+          const lines = [...pre.querySelectorAll(".line")];
+          const longest = new Map();
+          for (const s of parseTrace(pre.dataset.trace)) {
+            if (!s.kind) continue;
+            const t = s.note ?? (s.kind === "T" ? "True" : s.kind === "F" ? "False" : "");
+            if ((longest.get(s.line) || "").length < t.length) longest.set(s.line, t);
+          }
+          for (const [ln, t] of longest) {
+            const el = lines[ln - 1];
+            if (!el) continue;
+            el.querySelectorAll(".tb").forEach((o) => o.remove());
+            const b = document.createElement("span");
+            b.className = "tb";
+            b.textContent = t;
+            el.appendChild(b);
+          }
+          temp.push(pre);
+        }
+        // a wrapped comment may take two lines, not more
+        const wrapsOk = (p) => {
+          if (!p.classList.contains("wrapc")) return true;
+          const lh = parseFloat(getComputedStyle(p).lineHeight) * 0.9; // code is 0.9em of the pre
+          return [...p.querySelectorAll(".line.cl")].every((l) => l.offsetHeight <= 2.2 * lh);
+        };
+        // a centred grid that is too wide spills out on both sides, which scrollWidth misses
+        const inside = (w) => {
+          const r = w.getBoundingClientRect();
+          return [...w.children].every((c) => {
+            const q = c.getBoundingClientRect();
+            return !q.width || (q.left >= r.left - 1 && q.right <= r.right + 1);
+          });
+        };
+        const zoom = slide.style.zoom;
+        slide.style.zoom = "";
+        const fits = () =>
+          slide.scrollHeight <= slide.clientHeight + 1 && slide.scrollWidth <= slide.clientWidth + 1 && pres.every((p) => p.scrollWidth <= p.clientWidth + 1 && p.scrollHeight <= p.clientHeight + 1 && wrapsOk(p)) &&
+          [...slide.querySelectorAll(".strip, .rw, .pair, .pair-col, .duo, .code2")].every((w) => w.scrollWidth <= w.clientWidth + 1 && inside(w));
+        const set = (k) => pres.forEach((p, i) => (p.style.fontSize = Math.max(Math.min(base[i] * k, 2.5 * REM), Math.min(base[i], 1.1 * REM)) + "px"));
+        const over = () =>
+          Math.max(
+            slide.scrollHeight / slide.clientHeight,
+            slide.scrollWidth / slide.clientWidth,
+            ...[...pres, ...slide.querySelectorAll(".strip, .rw, .pair, .pair-col, .duo, .code2")].map((w) => w.scrollWidth / (w.clientWidth || 1)),
+            ...pres.map((p) => p.scrollHeight / (p.clientHeight || 1)),
+          );
+        const best = (top = 1.7) => {
+          const tried = [];
+          for (let k = top; k > 0.7; k -= 0.05) {
+            set(k);
+            if (fits()) return k;
+            tried.push([k, over()]);
+          }
+          // Nothing fits: shrink the code only as far as that actually helps
+          const least = Math.min(...tried.map((x) => x[1]));
+          const k = tried.find((x) => x[1] <= least + 0.01)[0];
+          set(k);
+          return k;
+        };
+        let k1 = best();
+        // Rather than shrink the code for a long comment, let comment lines wrap
+        if (k1 < 0.999) {
+          pres.forEach((p) => {
+            p.querySelectorAll(".line").forEach((l) => l.classList.toggle("cl", /^\s*#/.test(l.textContent) || l.classList.contains("answer")));
+            p.classList.add("wrapc");
+          });
+          const kw = best(1.3);
+          if (kw > k1 + 0.04) k1 = kw;
+          else {
+            pres.forEach((p) => p.classList.remove("wrapc"));
+            set(k1);
+          }
+        }
+        // Code with a widget stacked under it (a one-column .pair): try the widget
+        // beside the code instead
+        const pair = slide.querySelector(".pair");
+        if (k1 < 1.2 && pair && !pair.matches(".side, .beside") && getComputedStyle(pair).gridTemplateColumns.split(" ").length < 2 && pair.children.length > 1 && pair.firstElementChild.matches("pre, .tracer")) {
+          const fit1 = fits();
+          const col = document.createElement("div");
+          col.className = "pair-col";
+          col.append(...[...pair.children].slice(1));
+          pair.append(col);
+          pair.classList.add("beside");
+          // beside a widget, the code shouldn't dwarf it; a wide widget may shrink a little
+          let k2 = best(1.15);
+          for (let z = 0.9; !fits() && z > 0.69; z -= 0.1) {
+            col.style.zoom = z;
+            k2 = best(1.15);
+          }
+          // keep it if stacking didn't fit, or if the code gets bigger (by any amount when
+          // stacking had squeezed it below its usual size)
+          if (!fits() || (fit1 && k2 < k1 + (k1 < 0.9 ? 0 : 0.1))) {
+            col.style.zoom = "";
+            pair.classList.remove("beside");
+            pair.append(...col.children);
+            col.remove();
+            set(k1);
+            fits();
+          } else {
+            // then grow the widget column into the room left beside the code
+            const z0 = col.style.zoom;
+            for (let z = 1.6; z > +(z0 || 1); z -= 0.1) {
+              col.style.zoom = z;
+              if (fits()) break;
+              col.style.zoom = z0;
+            }
+          }
+        }
+        // Still too big with the code at its floor: shrink the widgets a little
+        // instead of the whole slide
+        const widgets = [...slide.querySelectorAll(".strip, .rw, .try")];
+        if (!fits() && widgets.length) {
+          let z = 0.95;
+          for (; z > 0.79; z -= 0.05) {
+            widgets.forEach((w) => (w.style.zoom = z));
+            if (fits()) break;
+          }
+          if (z < 0.79) widgets.forEach((w) => (w.style.zoom = ""));
+        }
+        slide.style.zoom = zoom;
+        temp.forEach(reset);
+      }
+      document.fonts.ready.then(() =>
+        setTimeout(() => {
+          Deck.slides.forEach(fitCode);
+          Deck.fit();
+        }, 0),
+      );
+
+      // ================= end shared widgets =================
+
+      // ------------------------------------------------------------ masks: colour T/F and fill the combined row per answer
+      {
+        const slide = document.getElementById("mask");
+        slide.querySelectorAll(".strip.m .ch").forEach((c) => {
+          const v = c.textContent;
+          c.classList.add(v);
+          c.textContent = v === "T" ? "True" : "False";
+        });
+        const op = slide.querySelector(".op");
+        const comb = [...slide.querySelectorAll(".strip.comb .ch")];
+        const vals = slide.querySelectorAll(".strip")[0].querySelectorAll(".ch");
+        const A = [1, 1, 0, 0, 0, 0, 0, 0];
+        const B = [0, 0, 0, 0, 0, 0, 1, 1];
+        const render = (instant) => {
+          const k = slide.querySelectorAll(".line.answer.shown").length;
+          const or = k >= 2;
+          op.textContent = or ? "|" : "&";
+          comb.forEach((c, i) => {
+            const v = or ? A[i] || B[i] : A[i] && B[i];
+            c.className = "ch " + (v ? "T" : "F");
+            c.textContent = v ? "True" : "False";
+            vals[i].style.borderColor = k && v ? "var(--pink)" : "";
+            vals[i].style.background = k && v ? "rgba(236, 72, 153, 0.28)" : "";
+          });
+          gsap.killTweensOf(comb);
+          gsap.set(comb, { y: 0, opacity: 1 });
+          if (!instant && k) gsap.fromTo(comb, { y: -10, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.05, duration: 0.3 });
+        };
+        Deck.scene(slide, {
+          enter: () => render(true),
+          step: (s, n, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+        });
+      }
+
+      // ------------------------------------------------------------ newaxis: the row turns into a column
+      {
+        const slide = document.getElementById("newaxis");
+        const box = slide.querySelector(".axis");
+        const cap = slide.querySelector(".axis-cap");
+        const vals = [10, 20, 30, 40, 50, 60, 70, 80];
+        box.innerHTML = vals.map((v) => `<div class="c">${v}</div>`).join("");
+        const cells = [...box.children];
+        const render = (instant) => {
+          const k = slide.querySelectorAll(".line.answer.shown").length;
+          const col = k >= 2;
+          const step = box.clientWidth / 8;
+          cap.textContent = col ? "shape (8, 1)" : "shape (8,)";
+          cells.forEach((c, i) => {
+            const to = col ? { x: (box.clientWidth - c.offsetWidth) / 2, y: i * step } : { x: i * step, y: (box.clientHeight - c.offsetHeight) / 2 };
+            gsap.to(c, { ...to, duration: instant ? 0 : 0.8, delay: instant ? 0 : i * 0.06, ease: "power2.inOut" });
+          });
+        };
+        Deck.scene(slide, {
+          enter: () => render(true),
+          step: (s, n, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+        });
+      }
+
+      // ------------------------------------------------------------ 3-D array: pick the middle layer
+      {
+        const slide = document.getElementById("cube");
+        const cube = slide.querySelector(".cube");
+        cube.innerHTML = [0, 1, 2]
+          .map((l) => `<div class="layer"><div class="g">${Array.from({ length: 9 }, (_, i) => `<span>${l * 9 + i}</span>`).join("")}</div><small>two[${l}]</small></div>`)
+          .join("");
+        const mid = cube.children[1];
+        const render = (instant) => {
+          const on = slide.querySelectorAll(".line.answer.shown").length > 0;
+          cube.classList.toggle("picking", on);
+          mid.classList.toggle("pick", on);
+          if (on && !instant) gsap.from(mid.querySelectorAll(".g span"), { scale: 0.5, opacity: 0, stagger: 0.04, duration: 0.3 });
+        };
+        Deck.scene(slide, {
+          enter: () => render(true),
+          step: (s, n, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+        });
+      }
+    </script>
+  </body>
+</html>

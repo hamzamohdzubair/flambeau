@@ -1,0 +1,1311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SIFT &amp; SURF</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.45rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 1.6rem;
+        font-size: 1rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 11rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 72rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.3rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        font-size: 1.2rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      pre.ex,
+      pre.steps {
+        width: 100%;
+        font-size: 1.15rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 1.15rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 1.15rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+
+      #title canvas {
+        width: min(28rem, 80cqw);
+        border-radius: 12px;
+      }
+
+      #overview .cards,
+      #steps .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.2rem 1.6rem;
+        width: min(100%, 64rem);
+      }
+
+      #steps .cards {
+        width: 100%;
+      }
+
+      #steps .card h3 {
+        font-size: 1.35rem;
+      }
+
+      #steps .card ul {
+        margin: 0;
+      }
+
+      #steps .card h3 span {
+        color: var(--cyan);
+        font-family: var(--font-mono);
+        margin-right: 0.3rem;
+      }
+
+      /* ---------- scale space ---------- */
+      .ss {
+        display: grid;
+        gap: 0.8rem;
+        width: 100%;
+      }
+
+      .ss .row {
+        display: grid;
+        grid-template-columns: 6.5rem repeat(6, minmax(0, 1fr));
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .ss .row.dog {
+        grid-template-columns: 6.5rem 0.5fr repeat(5, minmax(0, 1fr)) 0.5fr;
+      }
+
+      .ss .row > span {
+        font-size: 1rem;
+        line-height: 1.3;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .ss figure {
+        gap: 0.15rem;
+      }
+
+      .ss canvas {
+        width: 100%;
+        border-radius: 6px;
+      }
+
+      .ss figcaption {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+      }
+
+      /* ---------- extrema cube ---------- */
+      .cube {
+        --c: 4.4rem;
+        display: flex;
+        gap: 2.4rem;
+        justify-content: center;
+        align-items: flex-end;
+        flex-wrap: wrap;
+      }
+
+      .cube .layer {
+        display: grid;
+        justify-items: center;
+        gap: 0.4rem;
+      }
+
+      .cube .g {
+        display: grid;
+        grid-template-columns: repeat(3, var(--c));
+        gap: 3px;
+        padding: 5px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+      }
+
+      .cube .g span {
+        display: grid;
+        place-items: center;
+        width: var(--c);
+        height: var(--c);
+        border-radius: 5px;
+        font: 1.5rem var(--font-mono);
+        background: rgba(255, 255, 255, 0.06);
+        transition: background 0.2s, box-shadow 0.2s;
+      }
+
+      .cube .g span.cmp {
+        background: rgba(34, 211, 238, 0.35);
+      }
+
+      .cube .g span.x {
+        background: var(--pink);
+        color: #fff;
+        box-shadow: 0 0 18px rgba(236, 72, 153, 0.8);
+      }
+
+      .cube .layer p {
+        margin: 0;
+        font-size: 1.05rem;
+        color: var(--muted);
+      }
+
+      /* ---------- descriptor ---------- */
+      .desc {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 2.6rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      .desc canvas.patchc {
+        width: 26rem;
+        border-radius: 10px;
+      }
+
+      .desc canvas.vec {
+        width: 100%;
+        height: 6rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      /* ---------- integral image ---------- */
+      .ii {
+        --c: 2.4rem;
+        display: flex;
+        gap: 2.4rem;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      .ii .g {
+        display: grid;
+        gap: 3px;
+        padding: 5px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+      }
+
+      .ii .g span {
+        display: grid;
+        place-items: center;
+        width: var(--c);
+        height: var(--c);
+        border-radius: 5px;
+        font: 1.1rem var(--font-mono);
+        background: rgba(255, 255, 255, 0.06);
+        transition: background 0.3s;
+      }
+
+      .ii .g span.box {
+        background: rgba(139, 92, 246, 0.55);
+      }
+
+      .ii .g span.pad {
+        color: var(--faint);
+      }
+
+      .ii .g span.A,
+      .ii .g span.D {
+        background: rgba(134, 239, 172, 0.55);
+        color: #05060f;
+      }
+
+      .ii .g span.B,
+      .ii .g span.C {
+        background: rgba(248, 113, 113, 0.6);
+        color: #05060f;
+      }
+
+      .ii h4 {
+        margin: 0 0 0.4rem;
+        text-align: center;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .iisum {
+        font-family: var(--font-mono);
+        font-size: 1.15rem;
+        line-height: 1.7;
+        text-align: left;
+        align-self: center;
+        width: 19rem;
+        min-height: 5.1em;
+        margin: 0;
+      }
+
+      .boxf {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .boxf {
+        display: inline-flex !important;
+        vertical-align: middle;
+        margin-left: 0.6rem;
+      }
+
+      .boxf svg {
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 8px;
+      }
+
+      #kps .lab {
+        display: grid;
+        grid-template-columns: 40rem minmax(0, 1fr);
+        gap: 2rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      #kps canvas.img {
+        width: 100%;
+      }
+
+      #kps .side,
+      #kps .ctl {
+        display: grid;
+        gap: 1.3rem;
+        justify-content: stretch;
+      }
+
+      #kps .ctl label {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.2rem 0.6rem;
+      }
+
+      #kps .ctl input {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+      }
+
+      #kps .readout,
+      #kps .note {
+        text-align: left;
+        margin: 0;
+      }
+
+      #vs .cols {
+        width: min(100%, 64rem);
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas width="960" height="540"></canvas>
+      <h1>SIFT &amp; SURF</h1>
+      <p>Keypoints that survive zooming, turning and relighting, and the 128 numbers that describe each one.</p>
+    </section>
+
+    <!-- ================================================================ overview -->
+    <section class="slide" id="overview">
+      <h2>SIFT overview</h2>
+      <p class="lead"><strong>SIFT:</strong> Scale-Invariant Feature Transform (David Lowe, 1999).</p>
+      <div class="cards">
+        <div class="card step"><h3>Scale invariant</h3><p>Detects features at multiple scales.</p></div>
+        <div class="card step"><h3>Rotation invariant</h3><p>Assigns an orientation to each keypoint.</p></div>
+        <div class="card step"><h3>Illumination invariant</h3><p>Robust to lighting changes.</p></div>
+        <div class="card step"><h3>Occlusion resistant</h3><p>Copes with partial occlusion.</p></div>
+      </div>
+      <p class="step center"><strong>Patent expired in 2020:</strong> now free to use commercially (<code>cv2.SIFT_create</code> is in the main OpenCV package).</p>
+    </section>
+
+    <!-- ================================================================ steps -->
+    <section class="slide" id="steps">
+      <h2>The SIFT algorithm</h2>
+      <div class="cards">
+        <div class="card step"><h3><span>1</span>Scale-space extrema</h3><ul><li>Build a Gaussian pyramid (multiple scales)</li><li>Compute the Difference of Gaussians (DoG)</li><li>Find local maxima/minima across scales</li></ul></div>
+        <div class="card step"><h3><span>2</span>Keypoint localization</h3><ul><li>Reject low-contrast points</li><li>Eliminate edge responses</li></ul></div>
+        <div class="card step"><h3><span>3</span>Orientation assignment</h3><ul><li>Compute a gradient histogram</li><li>Assign the dominant orientation(s)</li></ul></div>
+        <div class="card step"><h3><span>4</span>Descriptor generation</h3><ul><li>16×16 neighbourhood → 4×4 grid</li><li>An 8-bin histogram per cell → 128 values</li></ul></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ scale space -->
+    <section class="slide">
+      <h2>Scale-space detection</h2>
+      <div class="cols top" style="width: min(100%, 68rem)">
+        <div class="card">
+          <h3>Why multiple scales?</h3>
+          <ul>
+            <li>Features appear at different sizes.</li>
+            <li>The same feature in different images may have different scales.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Gaussian pyramid</h3>
+          <p class="formula" style="font-family: var(--font-mono); color: var(--cyan)">Original → Blur → Downsample → Blur → Downsample …</p>
+          <p class="step"><strong>DoG</strong> (Difference of Gaussians) approximates the Laplacian:</p>
+          <p class="step">$$\text{DoG} = G(k\sigma) - G(\sigma)$$</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide top" id="space">
+      <h2>Scale space, live</h2>
+      <div class="ss">
+        <div class="row gauss"><span>octave 0 <br />Gaussians</span></div>
+        <div class="row dog step" data-anim="fade"><span>DoG</span><i></i></div>
+        <div class="row gauss2 step" data-anim="fade"><span>octave 1 <br />(half size)</span></div>
+      </div>
+      <p class="muted center" style="font-size: 1rem; max-width: 60rem">σ grows by k = 2<sup>1/3</sup> per level. Each DoG is the difference of its two neighbours above, scaled up so you can see it: grey is 0, bright and dark are blobs at that scale.</p>
+    </section>
+
+    <!-- ================================================================ extrema -->
+    <section class="slide" id="extrema">
+      <h2>Finding extrema across scales</h2>
+      <div class="cube">
+        <div class="layer"><div class="g a"></div><p>DoG at the scale above</p></div>
+        <div class="layer"><div class="g b"></div><p>this scale</p></div>
+        <div class="layer"><div class="g c"></div><p>DoG at the scale below</p></div>
+      </div>
+      <p class="center readout"></p>
+      <p class="center">A pixel is a candidate keypoint if it is larger (or smaller) than all <strong>26 neighbours</strong>: 8 in its own DoG image and 9 in each neighbouring scale.</p>
+    </section>
+
+    <!-- ================================================================ keypoints live -->
+    <section class="slide top" id="kps">
+      <h2>SIFT keypoints, live</h2>
+      <div class="lab">
+        <canvas class="img" width="1440" height="810"></canvas>
+        <div class="side">
+          <div class="ctl" data-interactive>
+            <label>contrastThreshold <input type="range" name="c" min="0.01" max="0.12" step="0.005" value="0.04" /><output></output></label>
+            <label>edgeThreshold <input type="range" name="e" min="2" max="30" value="10" /><output></output></label>
+          </div>
+          <p class="readout">computing…</p>
+          <p class="muted note" style="font-size: 1rem">DoG extrema over 3 octaves, low contrast and edge responses rejected, dominant orientation from a 36-bin gradient histogram. Circle radius = scale.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ params -->
+    <section class="slide">
+      <h2>SIFT parameters</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        # create SIFT with default parameters
+        sift = cv2.SIFT_create()  # ans:
+        # custom parameters
+        sift = cv2.SIFT_create(nfeatures=500, nOctaveLayers=3,  # ans:
+                               contrastThreshold=0.04, edgeThreshold=10, sigma=1.6)  # ans:
+        # nfeatures: max features to retain (0 = all)
+        # ans: keeps the 500 best features
+        # nOctaveLayers: layers per octave
+        # ans: more layers = more scales, slower
+        # contrastThreshold: filter low-contrast
+        # ans: higher = fewer, stronger features
+        # edgeThreshold: filter edge responses
+        # ans: higher = more edge-like features accepted
+        # sigma: initial gaussian blur
+        # ans: 1.6 is the standard value
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>SIFT detection and computation</h2>
+      <pre class="steps"><code class="language-python">
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        sift = cv2.SIFT_create()
+        # detect keypoints only
+        keypoints = sift.detect(gray, None)  # ans:
+        # detect and compute descriptors
+        keypoints, descriptors = sift.detectAndCompute(gray, None)  # ans:
+        # keypoint properties
+        kp = keypoints[0]  # ans:
+        x, y = kp.pt  # ans:
+        # ans: position
+        size = kp.size  # ans:
+        # ans: scale
+        angle = kp.angle  # ans:
+        # ans: orientation (degrees)
+        response = kp.response  # ans:
+        # ans: strength of the detector response
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ descriptor -->
+    <section class="slide" id="desc">
+      <h2>The SIFT descriptor</h2>
+      <div class="desc">
+        <canvas class="patchc" width="640" height="640"></canvas>
+        <div>
+          <p><strong>A 128-dimensional vector</strong> built from gradients around the keypoint:</p>
+          <ul>
+            <li class="step" data-step="1">Gradients of the 16×16 neighbourhood (arrows)</li>
+            <li class="step" data-step="2">A 4×4 grid of cells, an 8-bin gradient histogram per cell</li>
+            <li class="step" data-step="3">4 × 4 × 8 = <strong>128 values</strong></li>
+          </ul>
+          <canvas class="vec step" data-step="3" data-anim="fade" width="1280" height="180"></canvas>
+          <p class="step" data-step="4"><strong>Normalization</strong> makes it illumination invariant. <strong>Matching:</strong> L2 (Euclidean) distance.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ SURF -->
+    <section class="slide">
+      <h2>SURF overview</h2>
+      <p class="lead"><strong>SURF:</strong> Speeded-Up Robust Features (Herbert Bay, 2006).</p>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step good"><h3>3 to 5× faster</h3><p>Uses integral images.</p></div>
+        <div class="card step good"><h3>Comparable performance</h3><p>Close to SIFT's matching quality.</p></div>
+        <div class="card step"><h3>64 or 128 dimensions</h3><p>The extended descriptor has 128.</p></div>
+      </div>
+      <p class="step center"><strong>Caveat:</strong> still patented; it needs <code>opencv-contrib</code> (built with the non-free modules).</p>
+    </section>
+
+    <section class="slide" id="integral">
+      <h2>SURF's speed trick: integral images</h2>
+      <div class="ii">
+        <div><h4>image</h4><div class="g img"></div></div>
+        <div><h4>integral image</h4><div class="g int"></div></div>
+        <p class="iisum"></p>
+      </div>
+      <ol style="width: min(100%, 66rem); font-size: 1rem; margin: 0">
+        <li class="step"><strong>Integral images:</strong> each cell holds the sum of everything above and to its left, so any box sum costs 4 lookups.</li>
+        <li class="step"><strong>Hessian approximation:</strong> box filters instead of Gaussian derivatives, at any size for the same cost.
+          <span class="boxf"><svg viewBox="0 0 9 9" aria-label="Dyy box filter"><rect width="9" height="9" fill="#1e2235" /><rect x="2" y="0" width="5" height="3" fill="#e2e8f0" /><rect x="2" y="3" width="5" height="3" fill="#0b0d1a" /><rect x="2" y="6" width="5" height="3" fill="#e2e8f0" /></svg><svg viewBox="0 0 9 9" aria-label="Dxy box filter"><rect width="9" height="9" fill="#1e2235" /><rect x="1" y="1" width="3" height="3" fill="#e2e8f0" /><rect x="5" y="1" width="3" height="3" fill="#0b0d1a" /><rect x="1" y="5" width="3" height="3" fill="#0b0d1a" /><rect x="5" y="5" width="3" height="3" fill="#e2e8f0" /></svg></span></li>
+        <li class="step"><strong>Wavelet responses:</strong> simplified gradient computation.</li>
+        <li class="step"><strong>Steps similar to SIFT:</strong> scale-space detection (using the Hessian), orientation assignment, descriptor generation.</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <h2>SURF in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # requires opencv-contrib-python
+        # create SURF detector
+        surf = cv2.xfeatures2d.SURF_create()  # ans:
+        # set Hessian threshold
+        surf.setHessianThreshold(400)  # ans:
+        # ans: lower = more features, weaker ones
+        # detect and compute
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        keypoints, descriptors = surf.detectAndCompute(gray, None)  # ans:
+        # use extended descriptor (128-dim instead of 64)
+        surf.setExtended(True)  # ans:
+        # ans: 128 dimensions for more distinctiveness
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ vs -->
+    <section class="slide" id="vs">
+      <h2>SIFT vs SURF</h2>
+      <div class="cols top">
+        <div class="card">
+          <h3>SIFT</h3>
+          <ul>
+            <li class="step">More accurate, distinctive</li>
+            <li class="step">Better for difficult matching</li>
+            <li class="step">Slower (Gaussian filters)</li>
+            <li class="step">128 dimensions</li>
+            <li class="step">Patent expired (free)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>SURF</h3>
+          <ul>
+            <li class="step">Faster (integral images)</li>
+            <li class="step">Good for real-time</li>
+            <li class="step">64 or 128 dimensions</li>
+            <li class="step">Still patented</li>
+            <li class="step">A good SIFT alternative</li>
+          </ul>
+        </div>
+      </div>
+      <p class="step center"><strong>Both:</strong> scale and rotation invariant, with robust descriptors.</p>
+    </section>
+
+    <!-- ================================================================ matching -->
+    <section class="slide">
+      <h2>Matching SIFT features</h2>
+      <pre class="steps"><code class="language-python">
+        # detect SIFT in two images
+        sift = cv2.SIFT_create()
+        kp1, des1 = sift.detectAndCompute(gray1, None)
+        kp2, des2 = sift.detectAndCompute(gray2, None)
+        # brute-force matcher with L2 norm
+        bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)  # ans:
+        matches = bf.match(des1, des2)  # ans:
+        matches = sorted(matches, key=lambda x: x.distance)  # ans:
+        # draw matches
+        img_matches = cv2.drawMatches(img1, kp1, img2, kp2, matches[:30], None, flags=2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Ratio test (Lowe's ratio)</h2>
+      <div style="display: grid; gap: 1.6rem; justify-items: center; width: min(100%, 60rem)">
+        <div style="font-size: 1.25rem">
+          <p><strong>Problem:</strong> ambiguous matches, when several descriptors look alike.</p>
+          <p class="step"><strong>Solution:</strong> compare the best match with the second-best match.</p>
+          <p class="step"><strong>0.75</strong> is the standard threshold: lower it for stricter matching, raise it for looser.</p>
+          <p class="step muted">See it filter real matches in <a href="keypoint-matching.html#10">Keypoint Matching</a>.</p>
+        </div>
+        <pre class="step" style="font-size: 1.4rem; width: max-content"><code class="language-python">
+          if distance(1st) &lt; 0.75 * distance(2nd):
+              accept match
+          else:
+              reject  # ambiguous
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Ratio test implementation</h2>
+      <pre class="steps"><code class="language-python">
+        # BFMatcher with kNN (k=2)
+        bf = cv2.BFMatcher(cv2.NORM_L2)
+        matches = bf.knnMatch(des1, des2, k=2)  # ans:
+        # ans: returns the 2 best matches for each descriptor
+        # apply ratio test
+        good_matches = []
+        for m, n in matches:  # ans:
+            if m.distance &lt; 0.75 * n.distance:  # ans:
+                good_matches.append(m)  # ans:
+        # draw good matches
+        img_matches = cv2.drawMatches(img1, kp1, img2, kp2, good_matches, None, flags=2)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What does SIFT stand for?</p><p class="answer">Scale-Invariant Feature Transform.</p></div>
+        <div class="q"><p>How many dimensions in a SIFT descriptor?</p><p class="answer">128.</p></div>
+        <div class="q"><p>What is DoG?</p><p class="answer">Difference of Gaussians; it approximates the Laplacian.</p></div>
+        <div class="q"><p>Why multiple scales in SIFT?</p><p class="answer">Features appear at different sizes across images.</p></div>
+        <div class="q"><p>The main advantage of SURF over SIFT?</p><p class="answer">3 to 5× faster, using integral images.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is Lowe's ratio test?</p><p class="answer">Compare the best match with the second best; reject if the ratio is above 0.75.</p></div>
+        <div class="q"><p>Why the ratio test?</p><p class="answer">It filters ambiguous matches (several similar descriptors).</p></div>
+        <div class="q"><p>The SIFT descriptor's grid structure?</p><p class="answer">4×4 cells with an 8-bin histogram each = 128 values.</p></div>
+        <div class="q"><p>Which distance metric for SIFT?</p><p class="answer">L2 (Euclidean) distance.</p></div>
+        <div class="q"><p>Is SIFT rotation invariant?</p><p class="answer">Yes: it assigns an orientation to each keypoint.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # create SIFT with 1000 features
+        sift = cv2.SIFT_create(nfeatures=1000)  # ans:
+        # detect and compute SIFT
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        keypoints, descriptors = sift.detectAndCompute(gray, None)  # ans:
+        # get first keypoint properties
+        kp = keypoints[0]  # ans:
+        x, y = kp.pt  # ans:
+        size = kp.size  # ans:
+        angle = kp.angle  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # match SIFT features
+        sift = cv2.SIFT_create()
+        kp1, des1 = sift.detectAndCompute(gray1, None)
+        kp2, des2 = sift.detectAndCompute(gray2, None)
+        bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)  # ans:
+        matches = bf.match(des1, des2)  # ans:
+        matches = sorted(matches, key=lambda x: x.distance)  # ans:
+        # apply ratio test
+        bf = cv2.BFMatcher(cv2.NORM_L2)
+        matches = bf.knnMatch(des1, des2, k=2)  # ans:
+        good = [m for m, n in matches if m.distance &lt; 0.75 * n.distance]  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # SIFT with higher contrast threshold
+        sift = cv2.SIFT_create(contrastThreshold=0.08)  # ans:
+        # ans: fewer features, higher quality
+        # draw SIFT keypoints with rich info
+        sift = cv2.SIFT_create()
+        kp, des = sift.detectAndCompute(gray, None)
+        img_kp = cv2.drawKeypoints(img, kp, None,  # ans:
+                                   flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)  # ans:
+        # ans: shows size and orientation
+        # stricter ratio test
+        bf = cv2.BFMatcher(cv2.NORM_L2)
+        matches = bf.knnMatch(des1, des2, k=2)
+        good = [m for m, n in matches if m.distance &lt; 0.6 * n.distance]  # ans:
+        # ans: 0.6 is stricter than 0.75: fewer but better matches
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      const gsap = await Deck.load("gsap");
+      const W = 480, H = 270;
+      const photo = await loadImage("/assets/2025-10-16-19-17-39.png");
+      const base = readPixels(photo, W, H);
+      const gray0 = toGray(base).map((v) => v / 255);
+
+      // ------------------------------------------------------------ Gaussian scale space
+      function blur(src, w, h, sigma) {
+        const r = Math.max(1, Math.ceil(3 * sigma));
+        const k = Array.from({ length: 2 * r + 1 }, (_, i) => Math.exp(-((i - r) ** 2) / (2 * sigma * sigma)));
+        const s = k.reduce((a, b) => a + b, 0);
+        const kk = k.map((v) => v / s);
+        const tmp = new Float32Array(w * h), out = new Float32Array(w * h);
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++) {
+            let a = 0;
+            for (let i = -r; i <= r; i++) a += kk[i + r] * src[y * w + clamp(x + i, 0, w - 1)];
+            tmp[y * w + x] = a;
+          }
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++) {
+            let a = 0;
+            for (let i = -r; i <= r; i++) a += kk[i + r] * tmp[clamp(y + i, 0, h - 1) * w + x];
+            out[y * w + x] = a;
+          }
+        return out;
+      }
+      const S = 3, SIGMA = 1.6, K = Math.pow(2, 1 / S);
+      // Build octaves: S + 3 Gaussians and S + 2 DoGs each, blurring incrementally like SIFT
+      function buildOctaves(n) {
+        const octs = [];
+        let img = blur(gray0, W, H, Math.sqrt(SIGMA * SIGMA - 0.25)), w = W, h = H;
+        for (let o = 0; o < n; o++) {
+          const gs = [img];
+          for (let i = 1; i < S + 3; i++) {
+            const prev = SIGMA * Math.pow(K, i - 1), next = prev * K;
+            gs.push(blur(gs[i - 1], w, h, Math.sqrt(next * next - prev * prev)));
+          }
+          const dogs = gs.slice(1).map((g, i) => g.map((v, j) => v - gs[i][j]));
+          octs.push({ w, h, gs, dogs, scale: 1 << o });
+          // next octave starts from the Gaussian with twice the base sigma, downsampled by 2
+          const src = gs[S], nw = w >> 1, nh = h >> 1;
+          img = new Float32Array(nw * nh);
+          for (let y = 0; y < nh; y++) for (let x = 0; x < nw; x++) img[y * nw + x] = src[2 * y * w + 2 * x];
+          (w = nw), (h = nh);
+        }
+        return octs;
+      }
+      const OCTS = buildOctaves(3);
+
+      // Detect DoG extrema, reject low contrast and edges, assign orientations
+      function detect(contrast, edgeR) {
+        const thr = contrast / S;
+        const kps = [];
+        OCTS.forEach(({ w, h, dogs, gs, scale }, o) => {
+          for (let s = 1; s <= S; s++) {
+            const D = dogs[s], Dm = dogs[s - 1], Dp = dogs[s + 1];
+            for (let y = 5; y < h - 5; y++)
+              for (let x = 5; x < w - 5; x++) {
+                const i = y * w + x, v = D[i];
+                if (Math.abs(v) <= thr) continue;
+                let isMax = true, isMin = true;
+                for (let dy = -1; dy <= 1 && (isMax || isMin); dy++)
+                  for (let dx = -1; dx <= 1; dx++) {
+                    const j = i + dy * w + dx;
+                    for (const L of [Dm, D, Dp]) {
+                      if (L === D && !dx && !dy) continue;
+                      if (L[j] >= v) isMax = false;
+                      if (L[j] <= v) isMin = false;
+                    }
+                  }
+                if (!isMax && !isMin) continue;
+                // edge test on the 2x2 Hessian of the DoG
+                const dxx = D[i + 1] + D[i - 1] - 2 * v, dyy = D[i + w] + D[i - w] - 2 * v;
+                const dxy = (D[i + w + 1] - D[i + w - 1] - D[i - w + 1] + D[i - w - 1]) / 4;
+                const tr = dxx + dyy, det = dxx * dyy - dxy * dxy;
+                if (det <= 0 || (tr * tr) / det >= ((edgeR + 1) ** 2) / edgeR) continue;
+                // dominant orientation: 36-bin histogram of gradients, Gaussian-weighted
+                const sig = SIGMA * Math.pow(K, s), G = gs[s], rad = Math.round(3 * 1.5 * sig);
+                const hist = new Float32Array(36);
+                for (let j = -rad; j <= rad; j++)
+                  for (let k2 = -rad; k2 <= rad; k2++) {
+                    const xx = x + k2, yy = y + j;
+                    if (xx < 1 || yy < 1 || xx >= w - 1 || yy >= h - 1) continue;
+                    const gx = G[yy * w + xx + 1] - G[yy * w + xx - 1], gy = G[(yy + 1) * w + xx] - G[(yy - 1) * w + xx];
+                    const wgt = Math.exp(-(j * j + k2 * k2) / (2 * (1.5 * sig) ** 2));
+                    const b = Math.floor(((Math.atan2(gy, gx) + Math.PI) / (2 * Math.PI)) * 36) % 36;
+                    hist[b] += wgt * Math.hypot(gx, gy);
+                  }
+                let best = 0;
+                for (let b = 1; b < 36; b++) if (hist[b] > hist[best]) best = b;
+                kps.push({ x: x * scale, y: y * scale, size: sig * scale, angle: ((best + 0.5) / 36) * 2 * Math.PI - Math.PI, o, s, response: Math.abs(v) });
+              }
+          }
+        });
+        return kps;
+      }
+      // The photo, drawn at the canvas's own resolution in W x H coordinates
+      function drawBase(ctx) {
+        ctx.setTransform(ctx.canvas.width / W, 0, 0, ctx.canvas.height / H, 0, 0);
+        ctx.drawImage(photo, 0, 0, W, H);
+      }
+      function drawKps(ctx, kps, alpha = 1) {
+        kps.forEach((k) => {
+          const r = k.size * 2;
+          ctx.strokeStyle = ["#86efac", "#67e8f9", "#f0abfc"][k.o];
+          ctx.globalAlpha = alpha;
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.arc(k.x, k.y, r, 0, 7);
+          ctx.moveTo(k.x, k.y);
+          ctx.lineTo(k.x + Math.cos(k.angle) * r, k.y + Math.sin(k.angle) * r);
+          ctx.stroke();
+        });
+        ctx.globalAlpha = 1;
+      }
+      const KPS = detect(0.04, 10);
+
+      // ------------------------------------------------------------ cover: keypoints pop in
+      {
+        const cv = document.querySelector("#title canvas");
+        const ctx = cv.getContext("2d");
+        const sorted = [...KPS].sort((a, b) => b.response - a.response).slice(0, 160);
+        let tw = null;
+        Deck.scene("#title", {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+            tw?.kill();
+            const st = { n: 0 };
+            drawBase(ctx);
+            tw = gsap.to(st, {
+              n: sorted.length, duration: 2.6, delay: 0.6, ease: "power1.in",
+              onUpdate() {
+                drawBase(ctx);
+                drawKps(ctx, sorted.slice(0, Math.round(st.n)));
+              },
+            });
+          },
+          leave: () => tw?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ scale space rows
+      {
+        const sl = document.querySelector("#space");
+        const toImg = (a, w, h, f) => grayToImage(a.map(f), w, h);
+        const fig = (row, a, w, h, f, cap) => {
+          const c = document.createElement("canvas");
+          show(c, toImg(a, w, h, f));
+          const el = document.createElement("figure");
+          el.appendChild(c);
+          el.insertAdjacentHTML("beforeend", `<figcaption>${cap}</figcaption>`);
+          row.appendChild(el);
+        };
+        const o0 = OCTS[0], o1 = OCTS[1];
+        o0.gs.forEach((g, i) => fig(sl.querySelector(".gauss"), g, o0.w, o0.h, (v) => v * 255, `σ=${(SIGMA * Math.pow(K, i)).toFixed(2)}`));
+        const dogRow = sl.querySelector(".dog");
+        o0.dogs.forEach((d, i) => fig(dogRow, d, o0.w, o0.h, (v) => 128 + v * 1400, `G${i + 1} − G${i}`));
+        dogRow.insertAdjacentHTML("beforeend", "<i></i>");
+        o1.gs.forEach((g, i) => fig(sl.querySelector(".gauss2"), g, o1.w, o1.h, (v) => v * 255, `σ=${(2 * SIGMA * Math.pow(K, i)).toFixed(2)}`));
+        Deck.scene("#space", {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll(".gauss figure"), { opacity: 0, y: 16, stagger: 0.12, duration: 0.5 });
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ 26-neighbour comparison
+      {
+        const sl = document.querySelector("#extrema");
+        const layers = ["a", "b", "c"].map((k) => sl.querySelector(".g." + k));
+        const vals = [
+          [3, 5, 2, 4, 9, 6, 1, 3, 2],
+          [4, 6, 3, 7, 14, 8, 2, 5, 4],
+          [2, 4, 1, 5, 8, 3, 2, 2, 1],
+        ];
+        layers.forEach((g, l) => (g.innerHTML = vals[l].map((v) => `<span>${v}</span>`).join("")));
+        const cells = layers.flatMap((g, l) => [...g.children].map((c, i) => ({ c, l, i })));
+        const centre = layers[1].children[4];
+        const read = sl.querySelector(".readout");
+        let tl = null;
+        function play() {
+          tl?.kill();
+          cells.forEach(({ c }) => c.classList.remove("cmp", "x"));
+          centre.classList.add("x");
+          read.innerHTML = "centre = <b>14</b>";
+          let n = 0;
+          tl = gsap.timeline({ delay: 0.6 });
+          cells.filter(({ c }) => c !== centre).forEach(({ c }) =>
+            tl.call(() => {
+              c.classList.add("cmp");
+              read.innerHTML = `centre = <b>14</b> &gt; ${c.textContent} ✓ · ${++n} of 26 neighbours`;
+            }, null, "+=0.14")
+          );
+          tl.call(() => (read.innerHTML = "<b>14</b> beats all 26 neighbours → a scale-space maximum: candidate keypoint"), null, "+=0.4");
+        }
+        Deck.scene("#extrema", { enter: play, leave: () => tl?.kill() });
+      }
+
+      // ------------------------------------------------------------ live keypoints
+      {
+        const sl = document.querySelector("#kps");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const inputs = Object.fromEntries([...sl.querySelectorAll("input")].map((i) => [i.name, i]));
+        let t = 0;
+        function render() {
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          const t0 = performance.now();
+          const kps = detect(+inputs.c.value, +inputs.e.value);
+          drawBase(ctx);
+          ctx.fillStyle = "rgba(5,6,15,0.35)";
+          ctx.fillRect(0, 0, W, H);
+          drawKps(ctx, kps);
+          const per = [0, 1, 2].map((o) => kps.filter((k) => k.o === o).length);
+          sl.querySelector(".readout").innerHTML = `<b>${kps.length}</b> keypoints (octaves: ${per.join(" / ")}) · ${(performance.now() - t0).toFixed(0)} ms`;
+        }
+        sl.addEventListener("input", () => {
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          clearTimeout(t);
+          t = setTimeout(render, 50);
+        });
+        render();
+      }
+
+      // ------------------------------------------------------------ descriptor build-up
+      {
+        const sl = document.querySelector("#desc");
+        const cv = sl.querySelector(".patchc"), vec = sl.querySelector(".vec");
+        const ctx = cv.getContext("2d"), vx = vec.getContext("2d");
+        // a strong keypoint in the first octave, away from the border
+        const kp = KPS.filter((k) => k.o === 0 && k.x > 20 && k.y > 20 && k.x < W - 20 && k.y < H - 20).sort((a, b) => b.response - a.response)[0];
+        const G = OCTS[0].gs[kp.s];
+        const px = (x, y) => G[clamp(Math.round(kp.y) + y, 0, H - 1) * W + clamp(Math.round(kp.x) + x, 0, W - 1)];
+        const Z = 20;
+        const grads = [];
+        for (let y = -8; y < 8; y++)
+          for (let x = -8; x < 8; x++) {
+            const gx = px(x + 1, y) - px(x - 1, y), gy = px(x, y + 1) - px(x, y - 1);
+            grads.push({ x: x + 8, y: y + 8, m: Math.hypot(gx, gy), a: Math.atan2(gy, gx) });
+          }
+        const maxM = Math.max(...grads.map((g) => g.m));
+        // 4x4 cells x 8 orientation bins
+        const hist = Array.from({ length: 16 }, () => new Float32Array(8));
+        grads.forEach((g) => {
+          const cell = Math.floor(g.y / 4) * 4 + Math.floor(g.x / 4);
+          const b = Math.floor(((g.a + Math.PI) / (2 * Math.PI)) * 8) % 8;
+          const wgt = Math.exp(-((g.x - 7.5) ** 2 + (g.y - 7.5) ** 2) / (2 * 8 * 8));
+          hist[cell][b] += g.m * wgt;
+        });
+        const flat = hist.flatMap((h) => [...h]);
+        const norm = Math.hypot(...flat) || 1;
+        const v128 = flat.map((v) => v / norm);
+        const maxH = Math.max(...flat);
+        let stage = 0, tw = null;
+        const st = { t: 1 };
+        function draw() {
+          ctx.setTransform(cv.width / 320, 0, 0, cv.height / 320, 0, 0);
+          ctx.clearRect(0, 0, 320, 320);
+          for (let y = 0; y < 16; y++)
+            for (let x = 0; x < 16; x++) {
+              const v = px(x - 8, y - 8) * 255;
+              ctx.fillStyle = `rgb(${v},${v},${v})`;
+              ctx.fillRect(x * Z, y * Z, Z, Z);
+            }
+          ctx.fillStyle = "rgba(5,6,15,0.45)";
+          ctx.fillRect(0, 0, 320, 320);
+          if (stage >= 1) {
+            ctx.strokeStyle = "#67e8f9";
+            ctx.lineWidth = 1.5;
+            const shown = stage === 1 ? Math.round(st.t * grads.length) : grads.length;
+            grads.slice(0, shown).forEach((g) => {
+              const L = (g.m / maxM) * 9 * (stage >= 2 ? 1 - 0.7 * st.t : 1);
+              const cx = g.x * Z + Z / 2, cy = g.y * Z + Z / 2;
+              ctx.beginPath();
+              ctx.moveTo(cx - Math.cos(g.a) * L, cy - Math.sin(g.a) * L);
+              ctx.lineTo(cx + Math.cos(g.a) * L, cy + Math.sin(g.a) * L);
+              ctx.stroke();
+            });
+          }
+          if (stage >= 2) {
+            ctx.strokeStyle = "rgba(255,255,255,0.6)";
+            ctx.lineWidth = 2;
+            for (let i = 1; i < 4; i++) {
+              ctx.beginPath();
+              ctx.moveTo(i * 80, 0);
+              ctx.lineTo(i * 80, 320);
+              ctx.moveTo(0, i * 80);
+              ctx.lineTo(320, i * 80);
+              ctx.stroke();
+            }
+            ctx.strokeStyle = "#f0abfc";
+            ctx.lineWidth = 3;
+            hist.forEach((h, c) => {
+              const cx = (c % 4) * 80 + 40, cy = Math.floor(c / 4) * 80 + 40;
+              h.forEach((v, b) => {
+                const a = ((b + 0.5) / 8) * 2 * Math.PI - Math.PI, L = (v / maxH) * 34 * (stage === 2 ? st.t : 1);
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(a) * L, cy + Math.sin(a) * L);
+                ctx.stroke();
+              });
+            });
+          }
+          vx.setTransform(vec.width / 640, 0, 0, vec.height / 90, 0, 0);
+          vx.clearRect(0, 0, 640, 90);
+          if (stage >= 3) {
+            const n = stage === 3 ? Math.round(st.t * 128) : 128;
+            const mx = Math.max(...v128);
+            for (let i = 0; i < n; i++) {
+              vx.fillStyle = Math.floor(i / 8) % 2 ? "#f0abfc" : "#c084fc";
+              const bh = (v128[i] / mx) * 80;
+              vx.fillRect(i * 5, 88 - bh, 4, bh);
+            }
+          }
+        }
+        function go(s, animate) {
+          stage = s;
+          tw?.kill();
+          st.t = animate ? 0 : 1;
+          if (animate) tw = gsap.to(st, { t: 1, duration: s === 3 ? 1.2 : 1.4, ease: "power1.inOut", onUpdate: draw });
+          draw();
+        }
+        Deck.scene("#desc", {
+          enter: () => go(0, false),
+          step: (slide, n, els, d) => n <= 3 && go(n, d.dir > 0),
+          unstep: (slide, n) => n <= 3 && go(n - 1, false),
+          leave: () => tw?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ integral image
+      {
+        const sl = document.querySelector("#integral");
+        const IMG = [
+          [3, 1, 4, 1, 5],
+          [9, 2, 6, 5, 3],
+          [5, 8, 9, 7, 9],
+          [3, 2, 3, 8, 4],
+          [6, 2, 6, 4, 3],
+        ];
+        const N = 5;
+        const II = Array.from({ length: N + 1 }, () => new Array(N + 1).fill(0));
+        for (let y = 1; y <= N; y++) for (let x = 1; x <= N; x++) II[y][x] = IMG[y - 1][x - 1] + II[y - 1][x] + II[y][x - 1] - II[y - 1][x - 1];
+        const gI = sl.querySelector(".g.img"), gS = sl.querySelector(".g.int");
+        gI.style.gridTemplateColumns = `repeat(${N}, var(--c))`;
+        gS.style.gridTemplateColumns = `repeat(${N + 1}, var(--c))`;
+        gI.innerHTML = IMG.flat().map((v) => `<span>${v}</span>`).join("");
+        gS.innerHTML = II.flat().map((v, i) => `<span class="${i < N + 1 || i % (N + 1) === 0 ? "pad" : ""}">${i < N + 1 || i % (N + 1) === 0 ? 0 : ""}</span>`).join("");
+        const sCells = [...gS.children], iCells = [...gI.children];
+        const sum = sl.querySelector(".iisum");
+        // box = rows 1..3, cols 1..3 of the image
+        const y0 = 1, y1 = 3, x0 = 1, x1 = 3;
+        const A = II[y0][x0], B = II[y0][x1 + 1], C = II[y1 + 1][x0], D = II[y1 + 1][x1 + 1];
+        let tl = null;
+        function fill(instant) {
+          tl?.kill();
+          tl = gsap.timeline();
+          for (let y = 1; y <= N; y++)
+            for (let x = 1; x <= N; x++) {
+              const c = sCells[y * (N + 1) + x];
+              if (instant) c.textContent = II[y][x];
+              else tl.call(() => (c.textContent = II[y][x]), null, ((y - 1) * N + x) * 0.09);
+            }
+        }
+        function boxOn(on) {
+          iCells.forEach((c, i) => {
+            const y = Math.floor(i / N), x = i % N;
+            c.classList.toggle("box", on && y >= y0 && y <= y1 && x >= x0 && x <= x1);
+          });
+          [["A", y0, x0], ["B", y0, x1 + 1], ["C", y1 + 1, x0], ["D", y1 + 1, x1 + 1]].forEach(([k, y, x]) => sCells[y * (N + 1) + x].classList.toggle(k, on));
+          let direct = 0;
+          for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) direct += IMG[y][x];
+          sum.innerHTML = on ? `box sum = D − B − C + A<br>= ${D} − ${B} − ${C} + ${A} = <b style="color:var(--green)">${D - B - C + A}</b><br><span class="muted">adding 9 pixels gives ${direct}</span>` : "&nbsp;";
+        }
+        Deck.scene("#integral", {
+          enter() {
+            sCells.forEach((c, i) => !(i < N + 1 || i % (N + 1) === 0) && (c.textContent = ""));
+            boxOn(false);
+            fill(false);
+            tl.call(() => boxOn(true), null, "+=0.5");
+          },
+          leave: () => tl?.kill(),
+        });
+      }
+    </script>
+  </body>
+</html>

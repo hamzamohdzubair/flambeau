@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Why learn AI/ML?</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .papers {
+        width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem 2rem;
+      }
+
+      .papers figure img {
+        background: #fff;
+        object-fit: contain;
+        aspect-ratio: 16 / 6;
+        max-height: none;
+      }
+
+      .wall {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.3rem 1.4rem;
+      }
+
+      .wall.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: min(100%, 56rem);
+      }
+
+      .wall.two figure img {
+        max-height: 29cqh;
+      }
+
+      .wall.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .wall figure img {
+        aspect-ratio: 4 / 3;
+        max-height: 32cqh;
+      }
+
+      .wall.two figure img,
+      .wall.three figure img {
+        aspect-ratio: 16 / 10;
+      }
+
+      .wall figcaption {
+        font-size: 1rem;
+      }
+
+      #surrounded .lead {
+        font-size: 4rem;
+        text-align: center;
+        background: none;
+      }
+
+      #intuition .big {
+        font-size: 5rem;
+      }
+
+      #intuition p:not(.big) {
+        font-size: 1.4rem;
+        max-width: 52rem;
+      }
+
+      /* ---------- Merge into AI literacy ---------- */
+      .merge {
+        position: relative;
+        width: min(100%, 72rem);
+        height: 30rem;
+      }
+
+      .merge .src {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        padding: 0.7rem 1.3rem;
+        border-radius: 999px;
+        border: 1px solid rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.18);
+        color: var(--text);
+        font-family: var(--font-display);
+        font-size: 1.9rem;
+        white-space: nowrap;
+      }
+
+      .merge .src:nth-of-type(1) {
+        left: 20%;
+        top: 22%;
+      }
+
+      .merge .src:nth-of-type(2) {
+        left: 80%;
+        top: 22%;
+      }
+
+      .merge .src:nth-of-type(3) {
+        left: 50%;
+        top: 86%;
+      }
+
+      .merge .target {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 7rem;
+        white-space: nowrap;
+        opacity: 0;
+      }
+
+      .merge .glow {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 26rem;
+        height: 26rem;
+        margin: -13rem 0 0 -13rem;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(236, 72, 153, 0.45), rgba(139, 92, 246, 0) 70%);
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Introduction to AI/ML</span>
+      <h1>Why learn AI/ML?</h1>
+      <p>Algorithms already decide much of what we see, buy and are offered. Understanding them is now part of being literate.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Individual's competence &amp; resilience</h2>
+      <p class="lead step">Digital literacy</p>
+      <div class="figs papers">
+        <figure class="step"><img src="/assets/2025-11-01-09-31-35.png" alt="Digital literacy as a new determinant of health: a scoping review" /><figcaption><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10569540/">Journal article</a></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-11-01-10-04-32.png" alt="Digital literacy impacts quality of life among older adults" /><figcaption><a href="https://www.nature.com/articles/s41598-025-04472-9">Nature article</a></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-11-01-11-30-05.png" alt="The impacts of digital literacy on citizen civic engagement: evidence from China" /><figcaption><a href="https://dl.acm.org/doi/10.1145/3532785">Journal article</a></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-11-01-11-34-28.png" alt="Technological literacy and employment: adoption of learning technologies" /><figcaption><a href="https://www.sciencedirect.com/science/article/pii/S0308596124001617">Journal article</a></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Individual's competence &amp; resilience</h2>
+      <p class="lead step">Legal literacy</p>
+      <div class="figs papers">
+        <figure class="step"><img src="/assets/2025-11-01-11-40-32.png" alt="A study on the impact of legal literacy on crime control and prevention" /><figcaption><a href="http://journals.sjp.ac.lk/index.php/vjhss/article/view/5988">Journal article</a></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-11-01-11-55-06.png" alt="Legal literacy: the role of housewives in overcoming phishing criminals" /><figcaption><a href="https://jurnal-umbuton.ac.id/index.php/Pencerah/article/view/5075">Journal article</a></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-11-01-11-57-04.png" alt="Legal awareness and access to justice" /><figcaption><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5233069">Journal article</a></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-11-01-11-54-37.png" alt="Significance and role of legal literacy and awareness in establishing the rule of law in India" /><figcaption><a href="https://www.journalofpoliticalscience.com/archives/2025.v7.i5.C.556">Journal article</a></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>The algorithm: in your pocket</h2>
+      <div class="figs wall">
+        <figure class="step landscape"><img src="/assets/2025-10-22-18-15-49.png" alt="ChatGPT usage statistics 2025" /><figcaption><a href="https://nerdynav.com/chatgpt-statistics/">LLM users</a></figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-16-12-48-33.png" alt="Logos of search engines" /><figcaption>Search engines</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-16-21-02-20.png" alt="Smart speakers and personal assistants" /><figcaption>Personal assistants</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-16-12-56-32.png" alt="Face unlock on a phone" /><figcaption>Face unlock</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-16-12-59-25.png" alt="Endless social media feed" /><figcaption>Doom scrolling</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-16-12-51-19.png" alt="Streaming entertainment" /><figcaption>Entertainment</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-16-12-52-39.png" alt="Product recommendations" /><figcaption>Recommendations</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>The algorithm: in industry</h2>
+      <div class="figs wall two">
+        <figure class="step landscape"><img data-src="https://diqn32j8nouaz.cloudfront.net/amazon_warehouse_robot.gif" alt="Amazon warehouse robots moving shelves" /><figcaption>Amazon robots</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-24-22-13-32.png" alt="High speed camera inspection" /><figcaption>High speed cameras</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-24-22-14-31.png" alt="Automated manufacturing line" /><figcaption>Manufacturing</figcaption></figure>
+        <figure class="step landscape"><img data-src="https://www.yuyin.sh.cn/uploads/allimg/211229/1-2112291413410-L.gif" alt="Automated parcel sorting" /><figcaption>Logistics</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>The algorithm: deciding about you</h2>
+      <div class="figs wall">
+        <figure class="step landscape"><img src="/assets/2025-10-22-18-33-22.png" alt="Automated loan and credit decisions" /><figcaption>Loans &amp; credit</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-22-18-36-51.png" alt="Map of robotaxi services in 2025" /><figcaption><a href="https://www.visualcapitalist.com/mapped-every-robotaxi-service-operating-in-2025/">Robotaxis</a></figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-22-16-16-14.png" alt="Food delivery drone in Shenzhen" /><figcaption><a href="https://www.technologyreview.com/2023/05/23/1073500/drone-food-delivery-shenzhen-meituan/">Drone delivery</a></figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-22-16-24-17.png" alt="Aadhaar face recognition for ration distribution" /><figcaption><a href="https://www.business-standard.com/india-news/himachal-first-to-use-aadhaar-face-recognition-for-ration-distribution-125070500563_1.html">Face recognition</a></figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-22-17-36-43.png" alt="AI used in medical diagnosis" /><figcaption><a href="https://www.bbc.com/news/articles/c3e1xdk0d7wo">Diagnosis</a></figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-22-17-52-11.png" alt="AI used in hiring and firing" /><figcaption><a href="https://www.thequint.com/tech-and-auto/tech-news/ai-algorithms-hiring-firing-pay-transparency-india#read-more">AI in HR</a></figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-22-18-43-50.png" alt="A robot performing surgery" /><figcaption><a href="https://www.medscape.com/viewarticle/how-robot-performed-surgery-without-human-assistance-2025a1000mp6">Robo surgery</a></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide" id="literacy">
+      <h2>So what do we need?</h2>
+      <div class="merge">
+        <div class="glow"></div>
+        <span class="src">Digital literacy</span>
+        <span class="src">Legal literacy</span>
+        <span class="src">Competence &amp; resilience</span>
+        <span class="target grad big">AI literacy</span>
+      </div>
+      <span class="step" data-anim="none" style="position: absolute"></span>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      // The two animated GIFs are large (9 MB): fetch them only when their slide is shown
+      Deck.on("enter", (slide) => slide.querySelectorAll("img[data-src]").forEach((img) => {
+        img.src = img.dataset.src;
+        img.removeAttribute("data-src");
+      }));
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // Three kinds of literacy drift, then fuse into one: AI literacy
+      const slide = document.querySelector("#literacy");
+      const srcs = [...slide.querySelectorAll(".src")];
+      const target = slide.querySelector(".target");
+      const glow = slide.querySelector(".glow");
+      const home = [{ left: "20%", top: "22%" }, { left: "80%", top: "22%" }, { left: "50%", top: "86%" }];
+      let floatTl = null;
+      function merged(on, animate) {
+        gsap.killTweensOf([...srcs, target, glow]);
+        floatTl?.kill();
+        const d = animate ? 1 : 0;
+        if (on) {
+          gsap.to(srcs, { left: "50%", top: "50%", opacity: 0, scale: 0.5, duration: d, ease: "power3.in", stagger: 0.08 });
+          gsap.to(glow, { opacity: 1, scale: 1.2, duration: d, delay: d * 0.7 });
+          gsap.fromTo(target, { opacity: 0, scale: animate ? 0.4 : 1 }, { opacity: 1, scale: 1, duration: d, delay: d * 0.8, ease: "back.out(1.8)" });
+        } else {
+          srcs.forEach((s, i) => gsap.set(s, { left: home[i].left, top: home[i].top, opacity: 1, scale: 1, y: 0 }));
+          gsap.set(target, { opacity: 0 });
+          gsap.set(glow, { opacity: 0, scale: 1 });
+          floatTl = gsap.timeline({ repeat: -1, yoyo: true });
+          srcs.forEach((s, i) => floatTl.to(s, { y: i % 2 ? 10 : -10, duration: 1.6, ease: "sine.inOut" }, i * 0.3));
+        }
+      }
+      Deck.scene("#literacy", {
+        enter: () => merged(false, false),
+        step: (s, n, els, d) => merged(true, d.dir > 0),
+        unstep: () => merged(false, false),
+        leave: () => floatTl?.kill(),
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>If Statements</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Traced code: lines light up in the order Python runs them ---------- */
+      .slide pre.trace {
+        width: auto;
+        min-width: min(100%, 44rem);
+        max-width: 100%;
+        font-size: 1.6rem;
+      }
+
+      /* Show >= as typed, not as the font's ligature */
+      pre code,
+      .flow text {
+        font-variant-ligatures: none;
+      }
+
+      .slide > pre.trace {
+        flex-shrink: 0;
+        line-height: 1.45;
+      }
+
+      .slide > pre.trace .line {
+        min-height: 1.45em;
+      }
+
+      .slide pre.trace[data-trace] {
+        font-size: 1.85rem;
+        min-width: 50rem;
+      }
+
+      #elif pre.trace {
+        font-size: 1.35rem;
+        line-height: 1.45;
+        min-width: 0;
+      }
+
+      #elif {
+        gap: 0.9rem;
+      }
+
+      #elif pre .line {
+        min-height: 1.45em;
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.4;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.28;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      /* The answer waits for the trace to finish */
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border: 1px solid rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      /* ---------- Value chips under a lesson's code ---------- */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        font-size: 1.2rem;
+        color: var(--muted);
+      }
+
+      .try code {
+        margin-right: 0.3rem;
+      }
+
+      .try:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1.2rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 1.2rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- The elif flowchart ---------- */
+      #elif .cols {
+        grid-template-columns: auto minmax(0, 30rem);
+        justify-content: center;
+        gap: 3rem;
+        width: 100%;
+      }
+
+      .flow {
+        width: 100%;
+        height: auto;
+        max-height: 60cqh;
+        overflow: visible;
+      }
+
+      .flow .node {
+        fill: rgba(15, 18, 35, 0.85);
+        stroke: rgba(167, 139, 250, 0.6);
+        stroke-width: 2;
+        transition:
+          fill 0.35s,
+          stroke 0.35s;
+      }
+
+      .flow .node.t {
+        fill: rgba(134, 239, 172, 0.18);
+        stroke: var(--green);
+      }
+
+      .flow .node.f {
+        fill: rgba(248, 113, 113, 0.14);
+        stroke: var(--red);
+      }
+
+      .flow .node.hit {
+        fill: rgba(236, 72, 153, 0.25);
+        stroke: var(--pink);
+      }
+
+      .flow text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 20px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .flow text.lbl {
+        font-family: var(--font);
+        font-size: 18px;
+        fill: var(--muted);
+      }
+
+      .flow .edge {
+        stroke: rgba(167, 139, 250, 0.45);
+        stroke-width: 2;
+        marker-end: url(#arrow);
+      }
+
+      .flow .token {
+        fill: #f0abfc;
+        filter: drop-shadow(0 0 8px #ec4899);
+      }
+
+      /* ---------- Recap ---------- */
+      #recap .card h3 code {
+        font-size: 0.85em;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · control flow</span>
+      <h1 class="grad-each"><span>If</span> <span>Statements</span></h1>
+      <p>Run a block of code only when a condition is true, and choose between branches.</p>
+    </section>
+
+    <!-- ================================================================ basic if -->
+    <section class="slide" id="basic">
+      <h2>Basic if</h2>
+      <pre class="trace"><code class="language-python">
+        # simple if
+        x = 10
+        if x &gt; 5:
+            print("x is greater than 5")
+        # ans: output: x is greater than 5
+      </code></pre>
+      <div class="try step" data-step="1" data-interactive><code>x =</code></div>
+      <p class="hint">The indented line runs only when the condition is <strong>True</strong>.</p>
+    </section>
+
+    <!-- ================================================================ if else -->
+    <section class="slide" id="ifelse">
+      <h2>If-else</h2>
+      <pre class="trace"><code class="language-python">
+        # if with else
+        age = 18
+        if age &gt;= 18:
+            print("Adult")
+        else:
+            print("Minor")
+        # ans: output: Adult
+      </code></pre>
+      <div class="try step" data-step="1" data-interactive><code>age =</code></div>
+      <p class="hint">Exactly one of the two branches runs.</p>
+    </section>
+
+    <!-- ================================================================ if elif else -->
+    <section class="slide" id="elif">
+      <h2>If-elif-else</h2>
+      <div class="cols">
+        <pre class="trace"><code class="language-python">
+          # multiple conditions
+          score = 85
+          if score &gt;= 90:
+              print("A")
+          elif score &gt;= 80:
+              print("B")
+          elif score &gt;= 70:
+              print("C")
+          else:
+              print("F")
+          # ans: output: B
+        </code></pre>
+        <svg class="flow" viewBox="0 0 480 470" aria-label="Flowchart: score is checked against 90, 80 and 70 in turn; the first true check prints its grade, otherwise F">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="rgba(167,139,250,0.7)" />
+            </marker>
+          </defs>
+          <line class="edge" x1="150" y1="58" x2="150" y2="83" />
+          <line class="edge" x1="150" y1="165" x2="150" y2="183" />
+          <line class="edge" x1="150" y1="265" x2="150" y2="283" />
+          <line class="edge" x1="150" y1="365" x2="150" y2="408" />
+          <line class="edge" x1="255" y1="125" x2="318" y2="125" />
+          <line class="edge" x1="255" y1="225" x2="318" y2="225" />
+          <line class="edge" x1="255" y1="325" x2="318" y2="325" />
+          <text class="lbl" x="287" y="108">True</text>
+          <text class="lbl" x="287" y="208">True</text>
+          <text class="lbl" x="287" y="308">True</text>
+          <text class="lbl" x="188" y="174">False</text>
+          <text class="lbl" x="188" y="274">False</text>
+          <text class="lbl" x="188" y="388">False</text>
+
+          <rect class="node" data-node="start" x="60" y="14" width="180" height="44" rx="22" />
+          <text class="start-text" x="150" y="36">score = 85</text>
+          <polygon class="node" data-node="c1" points="150,85 255,125 150,165 45,125" />
+          <text x="150" y="125">score &gt;= 90</text>
+          <polygon class="node" data-node="c2" points="150,185 255,225 150,265 45,225" />
+          <text x="150" y="225">score &gt;= 80</text>
+          <polygon class="node" data-node="c3" points="150,285 255,325 150,365 45,325" />
+          <text x="150" y="325">score &gt;= 70</text>
+          <rect class="node" data-node="oA" x="320" y="103" width="146" height="44" rx="8" />
+          <text x="393" y="125">print("A")</text>
+          <rect class="node" data-node="oB" x="320" y="203" width="146" height="44" rx="8" />
+          <text x="393" y="225">print("B")</text>
+          <rect class="node" data-node="oC" x="320" y="303" width="146" height="44" rx="8" />
+          <text x="393" y="325">print("C")</text>
+          <rect class="node" data-node="oF" x="77" y="410" width="146" height="44" rx="8" />
+          <text x="150" y="432">print("F")</text>
+          <circle class="token" r="9" cx="150" cy="36" opacity="0" />
+        </svg>
+      </div>
+      <div class="try step" data-step="1" data-interactive><code>score =</code></div>
+      <p class="hint">Conditions are checked top to bottom; the first True one wins and the rest are skipped.</p>
+    </section>
+
+    <!-- ================================================================ nested -->
+    <section class="slide" id="nested">
+      <h2>Nested if</h2>
+      <pre class="trace"><code class="language-python">
+        # if inside if
+        x = 15
+        if x &gt; 10:
+            if x &lt; 20:
+                print("Between 10 and 20")
+        # ans: output: Between 10 and 20
+      </code></pre>
+      <div class="try step" data-step="1" data-interactive><code>x =</code></div>
+      <p class="hint">The inner <code>if</code> is only checked when the outer one is True.</p>
+    </section>
+
+    <!-- ================================================================ multiple elif -->
+    <section class="slide" id="many">
+      <h2>Multiple elif</h2>
+      <pre class="trace"><code class="language-python">
+        # many elif branches
+        num = 3
+        if num == 1:
+            print("One")
+        elif num == 2:
+            print("Two")
+        elif num == 3:
+            print("Three")
+        # ans: output: Three
+      </code></pre>
+      <div class="try step" data-step="1" data-interactive><code>num =</code></div>
+      <p class="hint">With no <code>else</code>, it is possible that nothing runs at all.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the output, then press → to trace the code and check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre class="trace" data-trace="2 3:F 5 6"><code class="language-python">
+        # what is printed?
+        x = 5
+        if x &gt; 10:
+            print("Big")
+        else:
+            print("Small")
+        # ans: Small
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre class="trace" data-trace="2 3:T 4"><code class="language-python">
+        # what about this?
+        score = 90
+        if score &gt;= 90:
+            print("A")
+        elif score &gt;= 80:
+            print("B")
+        # ans: A (only the first matching condition runs)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre class="trace" data-trace="2 3:F 5 6"><code class="language-python">
+        # edge case?
+        x = 0
+        if x:
+            print("True")
+        else:
+            print("False")
+        # ans: False (0 is falsy)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre class="trace" data-trace="2 3:T 4 5:T 6"><code class="language-python">
+        # what prints?
+        age = 18
+        if age &gt;= 18:
+            print("Adult")
+        if age &lt; 21:
+            print("Not 21 yet")
+        # ans: Adult
+        # ans: Not 21 yet (two separate ifs: both run)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre class="trace" data-trace="2:T 3 6"><code class="language-python">
+        # tricky: what happens?
+        if True:
+            x = 5
+        else:
+            x = 10
+        y = 20
+        # ans: x is 5, y is 20 (y = 20 is outside the if)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre class="trace" data-trace="2 3:T 4:T 5"><code class="language-python">
+        # what is result?
+        x = 15
+        if x &gt; 10:
+            if x &lt; 20:
+                result = "Between"
+            else:
+                result = "Big"
+        # ans: result is "Between"
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre class="trace" data-trace="2 3:T 4"><code class="language-python">
+        # what prints?
+        score = 70
+        if score &gt;= 70:
+            pass
+        else:
+            print("Fail")
+        # ans: nothing (pass does nothing)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre class="trace" data-trace="2 3:F 5 6"><code class="language-python">
+        # condition evaluation?
+        x = None
+        if x:
+            print("Yes")
+        else:
+            print("No")
+        # ans: No (None is falsy)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre class="trace" data-trace="2 3:T 4"><code class="language-python">
+        # multiple conditions?
+        x = 5
+        if x &gt; 0 and x &lt; 10:
+            print("In range")
+        # ans: In range
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre class="trace" data-trace="2:F 4:T 5"><code class="language-python">
+        # what happens?
+        if False:
+            print("A")
+        elif True:
+            print("B")
+        elif True:
+            print("C")
+        # ans: B (stops at the first True)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 11</h2>
+      <pre class="trace" data-trace="2 3:F 5 6"><code class="language-python">
+        # empty list check?
+        items = []
+        if items:
+            print("Has items")
+        else:
+            print("Empty")
+        # ans: Empty (an empty list is falsy)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Indentation is the block</h3><p>Only the indented lines belong to the <code>if</code>; the next unindented line always runs.</p></div>
+        <div class="card step"><h3>First True wins</h3><p>In an <code>if</code> / <code>elif</code> chain, Python stops at the first True condition and skips the rest.</p></div>
+        <div class="card step"><h3>Separate ifs are separate</h3><p>Two <code>if</code> statements in a row are both checked.</p></div>
+        <div class="card step"><h3>Falsy values</h3><p><code>0</code>, <code>None</code> and an empty list <code>[]</code> all count as False.</p></div>
+        <div class="card step"><h3><code>pass</code></h3><p>Does nothing: a placeholder for a block that must exist.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const STEP = 0.5; // seconds per traced line
+
+      // ------------------------------------------------------------ the tracer
+      // A trace is a list of { line, cond, note, node }: line is 1-based in the
+      // code block, cond (true/false) marks a condition, node lights the flowchart.
+      const parseTrace = (s) =>
+        s.trim().split(/\s+/).map((t) => {
+          const [line, c] = t.split(":");
+          return { line: +line, cond: c === undefined ? undefined : c === "T" };
+        });
+
+      function reset(pre) {
+        pre._tl?.kill();
+        pre.classList.remove("tracing", "traced");
+        pre.querySelectorAll(".line").forEach((l) => {
+          l.classList.remove("run", "now");
+          l.querySelector(".tb")?.remove();
+        });
+        pre._flowReset?.();
+      }
+
+      function trace(pre, seq, instant = false) {
+        reset(pre);
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        pre.classList.add("tracing");
+        const tl = gsap.timeline();
+        seq.forEach((s, k) => {
+          tl.call(() => {
+            lines.forEach((l) => l.classList.remove("now"));
+            const el = lines[s.line - 1];
+            el.classList.add("run", "now");
+            if (s.cond !== undefined) {
+              const b = document.createElement("span");
+              b.className = "tb " + (s.cond ? "t" : "f");
+              b.textContent = s.note ? `${s.note} → ${s.cond ? "True" : "False"}` : s.cond ? "True" : "False";
+              el.appendChild(b);
+              if (!instant) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+            }
+            pre._flow?.(s, instant);
+          }, null, k * STEP);
+        });
+        tl.call(() => {
+          lines.forEach((l) => l.classList.remove("now"));
+          pre.classList.replace("tracing", "traced");
+        }, null, seq.length * STEP);
+        if (instant) tl.progress(1);
+        pre._tl = tl;
+      }
+
+      // ------------------------------------------------------------ lessons: try other values
+      const LESSONS = {
+        basic: {
+          name: "x", values: [10, 5, 3],
+          run: (x) => (x > 5 ? { seq: [{ line: 2 }, { line: 3, cond: true, note: `${x} > 5` }, { line: 4 }], out: "x is greater than 5" } : { seq: [{ line: 2 }, { line: 3, cond: false, note: `${x} > 5` }], out: "nothing is printed" }),
+        },
+        ifelse: {
+          name: "age", values: [18, 30, 17, 12],
+          run: (a) => (a >= 18 ? { seq: [{ line: 2 }, { line: 3, cond: true, note: `${a} >= 18` }, { line: 4 }], out: "Adult" } : { seq: [{ line: 2 }, { line: 3, cond: false, note: `${a} >= 18` }, { line: 5 }, { line: 6 }], out: "Minor" }),
+        },
+        elif: {
+          name: "score", values: [85, 95, 90, 75, 50],
+          run(s) {
+            const seq = [{ line: 2, node: "start" }];
+            const checks = [[90, "A"], [80, "B"], [70, "C"]];
+            for (let i = 0; i < checks.length; i++) {
+              const ok = s >= checks[i][0];
+              seq.push({ line: 3 + 2 * i, cond: ok, note: `${s} >= ${checks[i][0]}`, node: "c" + (i + 1) });
+              if (ok) {
+                seq.push({ line: 4 + 2 * i, node: "o" + checks[i][1] });
+                return { seq, out: checks[i][1] };
+              }
+            }
+            seq.push({ line: 9 }, { line: 10, node: "oF" });
+            return { seq, out: "F" };
+          },
+        },
+        nested: {
+          name: "x", values: [15, 25, 5],
+          run(x) {
+            const seq = [{ line: 2 }, { line: 3, cond: x > 10, note: `${x} > 10` }];
+            if (x > 10) seq.push({ line: 4, cond: x < 20, note: `${x} < 20` });
+            if (x > 10 && x < 20) seq.push({ line: 5 });
+            return { seq, out: x > 10 && x < 20 ? "Between 10 and 20" : "nothing is printed" };
+          },
+        },
+        many: {
+          name: "num", values: [3, 1, 2, 4],
+          run(n) {
+            const seq = [{ line: 2 }];
+            const words = ["One", "Two", "Three"];
+            for (let i = 0; i < 3; i++) {
+              const ok = n === i + 1;
+              seq.push({ line: 3 + 2 * i, cond: ok, note: `${n} == ${i + 1}` });
+              if (ok) {
+                seq.push({ line: 4 + 2 * i });
+                return { seq, out: words[i] };
+              }
+            }
+            return { seq, out: "nothing is printed" };
+          },
+        },
+      };
+
+      // The flowchart on the elif slide follows the same trace
+      const flow = document.querySelector("#elif .flow");
+      const token = flow.querySelector(".token");
+      // The token stops where the arrow enters a node, so it never hides the text
+      const centre = (id) => {
+        const b = flow.querySelector(`[data-node="${id}"]`).getBBox();
+        if (id === "start") return { cx: b.x + b.width / 2, cy: b.y + b.height };
+        if (/^o[ABC]$/.test(id)) return { cx: b.x, cy: b.y + b.height / 2 };
+        return { cx: b.x + b.width / 2, cy: b.y };
+      };
+      const elifPre = document.querySelector("#elif pre");
+      elifPre._flow = (s, instant) => {
+        if (!s.node) return;
+        const node = flow.querySelector(`[data-node="${s.node}"]`);
+        node.classList.add(s.cond === undefined ? (s.node === "start" ? "run" : "hit") : s.cond ? "t" : "f");
+        if (instant) gsap.set(token, { attr: centre(s.node), opacity: 1 });
+        else gsap.to(token, { attr: centre(s.node), opacity: 1, duration: 0.4, ease: "power2.inOut" });
+      };
+      elifPre._flowReset = () => {
+        gsap.killTweensOf(token);
+        gsap.set(token, { attr: centre("start"), opacity: 0 });
+        flow.querySelectorAll(".node").forEach((n) => n.classList.remove("t", "f", "hit", "run"));
+      };
+
+      function setValue(slide, v, run) {
+        const L = LESSONS[slide.id];
+        const pre = slide.querySelector("pre");
+        const { seq, out } = L.run(v);
+        // Rewrite the literal in the code, and the output in the answer line
+        const lines = pre.querySelectorAll(".line");
+        const num = lines[1].querySelector(".hljs-number");
+        if (num) num.textContent = v;
+        const ans = pre.querySelector(".answer .hljs-comment") || pre.querySelector(".answer");
+        ans.textContent = "# output: " + out;
+        if (slide.id === "elif") flow.querySelector(".start-text").textContent = `score = ${v}`;
+        slide.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.v === v));
+        pre.style.setProperty("--ans-delay", seq.length * STEP + "s");
+        if (run) trace(pre, seq, run === "instant");
+        return seq;
+      }
+
+      for (const id of Object.keys(LESSONS)) {
+        const slide = document.getElementById(id);
+        const box = slide.querySelector(".try");
+        box.insertAdjacentHTML("beforeend", LESSONS[id].values.map((v) => `<button class="chip" data-v="${v}">${v}</button>`).join(""));
+        box.addEventListener("click", (e) => {
+          const b = e.target.closest(".chip");
+          if (b) setValue(slide, +b.dataset.v, true);
+        });
+        Deck.scene(slide, {
+          enter: () => {
+            reset(slide.querySelector("pre"));
+            setValue(slide, LESSONS[id].values[0], false);
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ run a trace when the answer is revealed
+      const firstAnswer = (pre) => pre.querySelector(".line.answer");
+
+      Deck.on("step", (slide, i, d) => {
+        for (const el of d.elements) {
+          const pre = el.closest("pre.trace");
+          if (!pre || el !== firstAnswer(pre)) continue;
+          const instant = d.dir < 0;
+          if (LESSONS[slide.id]) {
+            const v = +(slide.querySelector(".chip.on")?.dataset.v ?? LESSONS[slide.id].values[0]);
+            setValue(slide, v, instant ? "instant" : true);
+          } else trace(pre, parseTrace(pre.dataset.trace), instant);
+        }
+      });
+
+      Deck.on("unstep", (slide, i, d) => {
+        for (const el of d.elements) {
+          const pre = el.closest("pre.trace");
+          if (pre && el === firstAnswer(pre)) reset(pre);
+        }
+      });
+
+      Deck.on("leave", (slide) => slide.querySelectorAll("pre.trace").forEach(reset));
+
+      // Exercises: delay each answer until its trace has played
+      Deck.on("enter", (slide) =>
+        slide.querySelectorAll("pre.trace[data-trace]").forEach((pre) => pre.style.setProperty("--ans-delay", parseTrace(pre.dataset.trace).length * STEP + "s"))
+      );
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

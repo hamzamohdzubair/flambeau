@@ -1,0 +1,2007 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Object-Oriented Programming</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ================= shared lesson widgets (tracer, strip, rewrite) ================= */
+      /* font shorthands reset ligatures, so force them off: == must stay two characters */
+      pre code,
+      .strip,
+      .strip *,
+      .rw,
+      .rw *,
+      .chip,
+      .state * {
+        font-variant-ligatures: none !important;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+        max-width: 100%;
+        font-size: 1.5rem;
+        line-height: 1.45;
+        flex-shrink: 0;
+      }
+
+      .slide pre.small {
+        font-size: 1.3rem;
+      }
+
+      .slide pre.tiny {
+        font-size: 1.12rem;
+      }
+
+      /* the closing recap: big cards, two by two (three in a row when there are three) */
+      .cards.recap {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 76rem);
+      }
+
+      .cards.recap:has(> .card:nth-child(3):last-child) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .cards.recap .card {
+        padding: 1.5rem 1.9rem;
+      }
+
+      .cards.recap h3 {
+        font-size: 1.6rem;
+      }
+
+      .cards.recap p {
+        font-size: 1.3rem;
+        line-height: 1.5;
+      }
+
+      /* section dividers: the title and its line sit together in the middle */
+      .slide.section > h2:first-of-type {
+        margin-top: auto;
+      }
+
+      .slide.section > h2:first-of-type + * {
+        margin-top: 0;
+      }
+
+      .slide.section > p {
+        font-size: 1.4rem;
+      }
+
+      /* .pair (code, then a widget) put side by side when the code fits better that way */
+      .slide .pair.beside {
+        grid-template-columns: max-content minmax(0, 1fr);
+        align-items: center;
+        justify-content: center;
+        column-gap: 3rem;
+      }
+
+      .slide .pair.beside > pre {
+        min-width: 0;
+      }
+
+      .pair.beside .rw .ex {
+        font-size: 1.6rem;
+      }
+
+      .pair.beside > .pair-col {
+        display: grid;
+        justify-items: center;
+        gap: 1.2rem;
+        min-width: 0;
+      }
+
+      /* a comment is prose: when the code would otherwise shrink for it (.wrapc),
+         let it wrap under its own text */
+      .slide pre.lines.wrapc .line.cl {
+        white-space: pre-wrap;
+        padding-left: 3em;
+        text-indent: -3em;
+      }
+
+      /* ---------- Tracer: lines light up in the order Python runs them ---------- */
+      .tracer {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 1.6rem;
+        width: 100%;
+      }
+
+      .tracer > pre {
+        flex: 0 1 auto;
+      }
+
+      .state {
+        flex: 0 0 19rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+        font-size: 1.25rem;
+      }
+
+      .state .box {
+        min-width: 0;
+        padding: 0.9rem 1.1rem;
+        border-radius: 14px;
+        background: var(--glass);
+        border: 1px solid var(--border);
+      }
+
+      .state h4 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 0 0.5rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .state .vars {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.2rem 0.8rem;
+        font-family: var(--font-mono);
+        min-height: 1.6em;
+      }
+
+      .state .vars .k {
+        color: var(--muted);
+      }
+
+      .state .vars .v {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        color: var(--text);
+        border-radius: 4px;
+        padding: 0 0.3em;
+        transition: background 0.4s;
+      }
+
+      .state .vars .v.flash {
+        background: rgba(34, 211, 238, 0.35);
+        transition: none;
+      }
+
+      .state .out {
+        font-family: var(--font-mono);
+        color: var(--green);
+        min-height: 1.6em;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .state .out .err {
+        color: var(--red);
+      }
+
+      .state .empty {
+        color: var(--faint);
+        font-family: var(--font);
+        font-size: 1rem;
+      }
+
+      .replay {
+        border: 1px solid var(--border);
+        background: var(--glass-light);
+        color: var(--muted);
+        border-radius: 999px;
+        font: 500 0.78rem var(--font);
+        padding: 0.15rem 0.7rem;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        text-transform: none;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.4;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.28;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.8em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb + .tb {
+        margin-left: 0.4em;
+      }
+
+      /* chips to try other values */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        font-size: 1.15rem;
+        color: var(--muted);
+      }
+
+      .state > .try {
+        justify-content: flex-start;
+        gap: 0.5rem;
+      }
+
+      .state > .try .chip {
+        min-width: 0;
+        padding: 0.35rem 0.8rem;
+      }
+
+      .try:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3.6rem;
+        padding: 0.4rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1.2rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 1.1rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- Strip: the characters / items of a sequence with their indices ---------- */
+      .strip {
+        display: grid;
+        justify-items: center;
+        gap: 0.9rem;
+        width: 100%;
+      }
+
+      .strip .cells {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 0.4rem;
+        max-width: 100%;
+      }
+
+      .strip .cell {
+        display: grid;
+        justify-items: center;
+        gap: 0.2rem;
+        font-family: var(--font-mono);
+      }
+
+      .strip .ix {
+        font-size: 0.95rem;
+        color: var(--faint);
+        transition: color 0.3s;
+      }
+
+      .strip .ch {
+        display: grid;
+        place-items: center;
+        width: var(--cw, 3.2rem);
+        height: 3.6rem;
+        border-radius: 10px;
+        background: rgba(15, 18, 35, 0.85);
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        font-size: 1.75rem;
+        white-space: pre;
+        transition:
+          background 0.35s,
+          border-color 0.35s,
+          opacity 0.35s;
+      }
+
+      .strip .ch.sp {
+        color: var(--faint);
+      }
+
+      .strip.picking .cell:not(.pick) .ch {
+        opacity: 0.35;
+      }
+
+      .strip .cell.pick .ch {
+        background: rgba(236, 72, 153, 0.28);
+        border-color: var(--pink);
+      }
+
+      .strip .cell.pick .ix {
+        color: #f0abfc;
+      }
+
+      .strip .ord {
+        font-size: 0.95rem;
+        color: var(--cyan);
+        height: 1.2rem;
+      }
+
+      .strip .res {
+        min-height: 3rem;
+        font: 500 1.8rem var(--font-mono);
+        max-width: 100%;
+        text-align: center;
+        color: var(--green);
+      }
+
+      .strip .res .lbl {
+        color: var(--faint);
+        font-size: 1rem;
+        margin-right: 0.8rem;
+      }
+
+      /* ---------- Rewrite: an expression turning into what Python actually runs ---------- */
+      .rw {
+        display: grid;
+        justify-items: center;
+        width: 100%;
+      }
+
+      .rw > .rs {
+        grid-area: 1 / 1;
+        display: grid;
+        justify-items: center;
+        gap: 0.7rem;
+        opacity: 0;
+        transform: translateY(0.8rem);
+        transition:
+          opacity 0.45s var(--ease),
+          transform 0.45s var(--ease);
+        pointer-events: none;
+      }
+
+      .slide .rw > .rs:not(.cur) {
+        opacity: 0;
+        filter: none;
+        transform: translateY(0.8rem);
+      }
+
+      .slide .rw > .rs.past:not(.cur) {
+        transform: translateY(-0.8rem);
+      }
+
+      .slide .rw > .rs.cur {
+        opacity: 1;
+        filter: none;
+        transform: none;
+      }
+
+      .rw .ex {
+        font: 500 1.85rem var(--font-mono);
+        padding: 0.8rem 1.6rem;
+        border-radius: 16px;
+        background: rgba(10, 12, 26, 0.78);
+        border: 1px solid var(--border);
+        white-space: pre;
+        color: var(--text);
+      }
+
+      .rw .ex mark {
+        color: #f0abfc;
+        background: rgba(236, 72, 153, 0.18);
+        border-radius: 4px;
+        padding: 0 0.1em;
+      }
+
+      .rw small {
+        color: var(--muted);
+        font-size: 1.15rem;
+      }
+
+      .rw-dots {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 0.6rem;
+      }
+
+      .rw-dots i {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: var(--border);
+        transition: background 0.3s;
+      }
+
+      .rw-dots i.on {
+        background: var(--cyan);
+      }
+      .duo {
+        display: grid;
+        grid-template-columns: max-content minmax(26rem, 1fr);
+        justify-content: center;
+        align-items: center;
+        gap: 3rem;
+        width: 100%;
+      }
+
+      .duo > div {
+        display: grid;
+        justify-items: center;
+        gap: 1rem;
+      }
+
+      /* a long program: the definition and its use side by side */
+      .code2 {
+        display: grid;
+        grid-template-columns: max-content max-content;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        width: 100%;
+      }
+
+      .code2 pre {
+        min-width: 0;
+      }
+
+      #inherit .duo {
+        grid-template-columns: max-content max-content;
+      }
+
+      #inherit .dia {
+        width: 30rem;
+        max-height: 34cqh;
+      }
+
+      .duo pre {
+        min-width: 0;
+      }
+
+      .dia {
+        width: 100%;
+        height: auto;
+        max-height: 68cqh;
+        overflow: visible;
+      }
+
+      .dia .box {
+        fill: rgba(15, 18, 35, 0.9);
+        stroke: rgba(167, 139, 250, 0.6);
+        stroke-width: 2;
+        transition: stroke 0.3s, fill 0.3s;
+      }
+
+      .dia .box.cls {
+        stroke: var(--cyan);
+        stroke-dasharray: 7 5;
+      }
+
+      .dia .box.hit {
+        stroke: var(--pink);
+        fill: rgba(236, 72, 153, 0.18);
+      }
+
+      .dia text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 14px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .dia text.ttl {
+        font-size: 16px;
+        font-weight: 600;
+        fill: var(--violet-soft);
+      }
+
+      .dia text.row {
+        transition: fill 0.3s;
+      }
+
+      .dia text.row.hit {
+        fill: #f0abfc;
+      }
+
+      .dia .link {
+        stroke: rgba(167, 139, 250, 0.4);
+        stroke-width: 2;
+        stroke-dasharray: 4 4;
+        fill: none;
+      }
+
+      .dia .edge {
+        stroke: rgba(167, 139, 250, 0.55);
+        stroke-width: 2;
+        fill: none;
+        marker-end: url(#oarrow);
+      }
+
+      .dia .dot {
+        fill: #f0abfc;
+        filter: drop-shadow(0 0 8px #ec4899);
+      }
+
+      .dia .lbl {
+        font-family: var(--font);
+        font-size: 14px;
+        fill: var(--muted);
+      }
+
+      .mro {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        justify-content: center;
+        align-items: center;
+        font: 500 1.3rem var(--font-mono);
+        min-height: 2.8rem;
+      }
+
+      .mro span {
+        padding: 0.2rem 0.6rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      .mro span.hit {
+        border-color: var(--pink);
+        background: rgba(236, 72, 153, 0.25);
+      }
+
+      .mro i {
+        color: var(--faint);
+        font-style: normal;
+      }
+
+      .cap {
+        min-height: 1.5em;
+        color: var(--cyan);
+        text-align: center;
+        font-size: 1.2rem;
+      }
+
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · object-oriented</span>
+      <h1 class="grad-each"><span>Object-Oriented</span> <span>Programming</span></h1>
+      <p>Classes, objects, methods, inheritance, properties, magic methods, abstract classes and dataclasses: the whole tour.</p>
+    </section>
+
+    <!-- ================================================================ classes & objects -->
+    <section class="slide section">
+      <h2>Classes and objects</h2>
+    </section>
+
+    <section class="slide">
+      <h2>A class and an object</h2>
+      <pre class="steps"><code class="language-python">
+        # define a class
+        class Dog:
+            pass
+        # create an object
+        my_dog = Dog()
+      </code></pre>
+      <p class="hint step">A class is a blueprint; calling it like a function builds an object (an <em>instance</em>).</p>
+    </section>
+
+    <section class="slide" id="blueprint">
+      <h2>Attributes with __init__</h2>
+      <div class="duo">
+        <pre class="steps small"><code class="language-python">
+          # simple class with attributes
+          class Dog:
+              def __init__(self, name, age):
+                  self.name = name
+                  self.age = age
+          # create instances
+          dog1 = Dog("Rex", 3)
+          dog2 = Dog("Max", 5)
+          # access attributes
+          print(dog1.name)  # Rex
+          print(dog2.age)   # 5
+        </code></pre>
+        <svg class="dia" viewBox="0 0 440 290" aria-label="The Dog class and two Dog objects made from it">
+          <g data-show="2">
+            <rect class="box cls" x="120" y="10" width="200" height="74" rx="12" />
+            <text class="ttl" x="220" y="34">class Dog</text>
+            <text x="220" y="62">__init__(name, age)</text>
+          </g>
+          <g data-show="7" class="obj" data-from="220,47">
+            <path class="link" d="M115 180 L180 84" />
+            <rect class="box" data-b="d1" x="20" y="180" width="190" height="96" rx="12" />
+            <text class="ttl" x="115" y="202">dog1</text>
+            <text class="row" data-r="d1name" x="115" y="232">name = "Rex"</text>
+            <text class="row" x="115" y="258">age = 3</text>
+          </g>
+          <g data-show="8" class="obj" data-from="220,47">
+            <path class="link" d="M325 180 L260 84" />
+            <rect class="box" data-b="d2" x="230" y="180" width="190" height="96" rx="12" />
+            <text class="ttl" x="325" y="202">dog2</text>
+            <text class="row" x="325" y="232">name = "Max"</text>
+            <text class="row" data-r="d2age" x="325" y="258">age = 5</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ================================================================ methods -->
+    <section class="slide">
+      <h2>Instance methods</h2>
+      <pre class="steps"><code class="language-python">
+        class Dog:
+            def __init__(self, name):
+                self.name = name
+            def bark(self):
+                return f"{self.name} says Woof!"
+            def birthday(self):
+                self.age += 1
+        dog = Dog("Rex")
+        dog.bark()  # "Rex says Woof!"
+      </code></pre>
+      <p class="hint step">Careful: this <code>Dog</code> never sets <code>self.age</code>, so <code>dog.birthday()</code> would raise <code>AttributeError</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Methods with parameters</h2>
+      <pre class="steps"><code class="language-python">
+        class Calculator:
+            def add(self, a, b):
+                return a + b
+            def multiply(self, a, b):
+                return a * b
+        calc = Calculator()
+        calc.add(5, 3)       # 8
+        calc.multiply(4, 2)  # 8
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ class vs instance variables -->
+    <section class="slide" id="shared">
+      <h2>Class variables are shared</h2>
+      <div class="duo">
+        <pre class="steps tiny"><code class="language-python">
+          class Dog:
+              species = "Canis familiaris"  # class var
+              def __init__(self, name):
+                  self.name = name  # instance var
+          dog1 = Dog("Rex")
+          dog2 = Dog("Max")
+          dog1.species  # "Canis familiaris"
+          dog2.species  # "Canis familiaris"
+          Dog.species   # "Canis familiaris"
+          # modifying the class variable
+          Dog.species = "Canis lupus"
+          dog1.species  # "Canis lupus"
+          dog2.species  # "Canis lupus"
+        </code></pre>
+        <div>
+          <svg class="dia vars" viewBox="0 0 460 300" aria-label="Attribute lookup: an object is searched first, then its class">
+            <g data-show="1">
+              <rect class="box cls" data-b="cls" x="90" y="10" width="280" height="84" rx="12" />
+              <text class="ttl" x="230" y="34">class Dog</text>
+              <text class="row" data-r="cls" x="230" y="66">species = "Canis familiaris"</text>
+            </g>
+            <g data-show="5">
+              <path class="link" d="M110 180 L170 94" />
+              <rect class="box" data-b="d1" x="15" y="180" width="200" height="104" rx="12" />
+              <text class="ttl" x="115" y="202">dog1</text>
+              <text class="row" x="115" y="232">name = "Rex"</text>
+            </g>
+            <g data-show="6">
+              <path class="link" d="M350 180 L290 94" />
+              <rect class="box" data-b="d2" x="245" y="180" width="200" height="104" rx="12" />
+              <text class="ttl" x="345" y="202">dog2</text>
+              <text class="row" x="345" y="232">name = "Max"</text>
+            </g>
+            <circle class="dot" r="8" cx="0" cy="0" opacity="0" />
+          </svg>
+          <p class="cap"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="shadow">
+      <h2>Instance variables shadow class variables</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # after Dog.species = "Canis lupus"
+          dog1.species = "Different"
+          dog1.species  # "Different"
+          dog2.species  # "Canis lupus"
+        </code></pre>
+        <div>
+          <svg class="dia vars" viewBox="0 0 460 300" aria-label="dog1 gets its own species attribute, which hides the class one">
+            <g>
+              <rect class="box cls" data-b="cls" x="90" y="10" width="280" height="84" rx="12" />
+              <text class="ttl" x="230" y="34">class Dog</text>
+              <text class="row" data-r="cls" x="230" y="66">species = "Canis lupus"</text>
+            </g>
+            <g>
+              <path class="link" d="M110 180 L170 94" />
+              <rect class="box" data-b="d1" x="15" y="180" width="200" height="104" rx="12" />
+              <text class="ttl" x="115" y="202">dog1</text>
+              <text class="row" x="115" y="232">name = "Rex"</text>
+              <text class="row" data-r="d1sp" data-show="2" x="115" y="262">species = "Different"</text>
+            </g>
+            <g>
+              <path class="link" d="M350 180 L290 94" />
+              <rect class="box" data-b="d2" x="245" y="180" width="200" height="104" rx="12" />
+              <text class="ttl" x="345" y="202">dog2</text>
+              <text class="row" x="345" y="232">name = "Max"</text>
+            </g>
+            <circle class="dot" r="8" cx="0" cy="0" opacity="0" />
+          </svg>
+          <p class="cap"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ class & static methods -->
+    <section class="slide">
+      <h2>Class methods</h2>
+      <div class="code2">
+      <pre class="steps small"><code class="language-python">
+        class Dog:
+            count = 0
+            def __init__(self, name, age=0):
+                self.name = name
+                self.age = age
+                Dog.count += 1
+            @classmethod
+            def get_count(cls):
+                return cls.count
+            @classmethod
+            def from_string(cls, dog_str):
+                name, age = dog_str.split(",")
+                return cls(name, int(age))
+      </code></pre>
+        <pre class="steps small"><code class="language-python">
+        Dog.get_count()  # 0
+        dog1 = Dog("Rex")
+        Dog.get_count()  # 1
+      </code></pre>
+      </div>
+      <p class="hint step"><code>Dog.from_string("Rex,3")</code> is an <em>alternative constructor</em>: it builds a Dog from text.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Static methods</h2>
+      <pre class="steps"><code class="language-python">
+        class MathUtils:
+            @staticmethod
+            def add(a, b):
+                return a + b
+            @staticmethod
+            def is_even(n):
+                return n % 2 == 0
+        MathUtils.add(5, 3)    # 8
+        MathUtils.is_even(4)   # True
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ inheritance -->
+    <section class="slide section">
+      <h2>Inheritance</h2>
+    </section>
+
+    <section class="slide" id="inherit">
+      <h2>Inheritance basics</h2>
+      <div class="duo">
+        <pre class="steps tiny"><code class="language-python">
+          # base class
+          class Animal:
+              def __init__(self, name):
+                  self.name = name
+              def speak(self):
+                  return "Some sound"
+          # derived classes
+          class Dog(Animal):
+              def speak(self):
+                  return "Woof!"
+          class Cat(Animal):
+              def speak(self):
+                  return "Meow!"
+        </code></pre>
+        <div>
+          <svg class="dia" viewBox="0 0 460 260" aria-label="Animal is the parent of Dog and Cat; Python looks in the child class first">
+            <defs>
+              <marker id="oarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="rgba(167,139,250,0.8)" />
+              </marker>
+            </defs>
+            <path class="edge" d="M110 160 L190 94" />
+            <path class="edge" d="M350 160 L270 94" />
+            <rect class="box" data-b="Animal" x="130" y="10" width="200" height="84" rx="12" />
+            <text class="ttl" x="230" y="30">Animal</text>
+            <text class="row" data-r="init" x="230" y="56">__init__(name)</text>
+            <text class="row" data-r="aspeak" x="230" y="78">speak(): "Some sound"</text>
+            <rect class="box" data-b="Dog" x="15" y="160" width="190" height="64" rx="12" />
+            <text class="ttl" x="110" y="180">Dog(Animal)</text>
+            <text class="row" data-r="dspeak" x="110" y="206">speak(): "Woof!"</text>
+            <rect class="box" data-b="Cat" x="255" y="160" width="190" height="64" rx="12" />
+            <text class="ttl" x="350" y="180">Cat(Animal)</text>
+            <text class="row" data-r="cspeak" x="350" y="206">speak(): "Meow!"</text>
+            <circle class="dot" r="8" cx="0" cy="0" opacity="0" />
+          </svg>
+          <p class="cap"></p>
+          <pre class="steps tiny"><code class="language-python">
+            dog = Dog("Rex")
+            cat = Cat("Whiskers")
+            dog.speak()  # "Woof!"
+            cat.speak()  # "Meow!"
+            dog.name     # "Rex" (set by Animal.__init__)
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>super(): calling the parent constructor</h2>
+      <pre class="steps"><code class="language-python">
+        class Animal:
+            def __init__(self, name):
+                self.name = name
+        class Dog(Animal):
+            def __init__(self, name, breed):
+                super().__init__(name)
+                self.breed = breed
+        dog = Dog("Rex", "Labrador")
+        dog.name   # "Rex"
+        dog.breed  # "Labrador"
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>super(): calling parent methods</h2>
+      <pre class="steps"><code class="language-python">
+        class Animal:
+            def speak(self):
+                return "Some sound"
+        class Dog(Animal):
+            def speak(self):
+                parent_sound = super().speak()
+                return f"{parent_sound} and Woof!"
+        dog = Dog()
+        dog.speak()  # "Some sound and Woof!"
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Multiple inheritance</h2>
+      <pre class="steps small"><code class="language-python">
+        class Flyer:
+            def fly(self):
+                return "Flying"
+        class Swimmer:
+            def swim(self):
+                return "Swimming"
+        class Duck(Flyer, Swimmer):
+            def quack(self):
+                return "Quack"
+        duck = Duck()
+        duck.fly()    # "Flying"
+        duck.swim()   # "Swimming"
+        duck.quack()  # "Quack"
+        # method resolution order (MRO)
+        Duck.__mro__
+        # (Duck, Flyer, Swimmer, object)
+      </code></pre>
+    </section>
+
+    <section class="slide" id="diamond">
+      <h2>The diamond problem</h2>
+      <div class="duo">
+        <pre class="small"><code class="language-python">
+          class A:
+              def method(self):
+                  return "A"
+          class B(A):
+              def method(self):
+                  return "B"
+          class C(A):
+              def method(self):
+                  return "C"
+          class D(B, C):
+              pass
+          D().method()  # "B" (left to right)
+        </code></pre>
+        <div>
+          <svg class="dia" viewBox="0 0 400 290" aria-label="D inherits from B and C, which both inherit from A">
+            <path class="edge" d="M185 222 L128 168" />
+            <path class="edge" d="M215 222 L272 168" />
+            <path class="edge" d="M128 118 L185 66" />
+            <path class="edge" d="M272 118 L215 66" />
+            <rect class="box" data-b="A" x="140" y="16" width="120" height="50" rx="12" />
+            <text class="ttl" x="200" y="34">A</text><text class="row" x="200" y="52">method: "A"</text>
+            <rect class="box" data-b="B" x="50" y="118" width="120" height="50" rx="12" />
+            <text class="ttl" x="110" y="136">B(A)</text><text class="row" x="110" y="154">method: "B"</text>
+            <rect class="box" data-b="C" x="230" y="118" width="120" height="50" rx="12" />
+            <text class="ttl" x="290" y="136">C(A)</text><text class="row" x="290" y="154">method: "C"</text>
+            <rect class="box" data-b="D" x="140" y="222" width="120" height="50" rx="12" />
+            <text class="ttl" x="200" y="240">D(B, C)</text><text class="row" x="200" y="258">(pass)</text>
+            <circle class="dot" r="8" cx="0" cy="0" opacity="0" />
+          </svg>
+          <div class="mro"></div>
+          <p class="cap"></p>
+        </div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <!-- ================================================================ properties -->
+    <section class="slide section">
+      <h2>Properties</h2>
+    </section>
+
+    <section class="slide">
+      <h2>Using @property</h2>
+      <div class="code2">
+      <pre class="steps tiny"><code class="language-python">
+        class Circle:
+            def __init__(self, radius):
+                self._radius = radius
+            @property
+            def radius(self):
+                return self._radius
+            @radius.setter
+            def radius(self, value):
+                if value &lt; 0:
+                    raise ValueError(
+                        "Radius cannot be negative")
+                self._radius = value
+            @property
+            def area(self):
+                return 3.14 * self._radius ** 2
+      </code></pre>
+        <pre class="steps tiny"><code class="language-python">
+        circle = Circle(5)
+        circle.radius       # 5
+        circle.area         # 78.5
+        circle.radius = 10  # setter called
+        circle.area         # 314.0
+      </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Property deleter</h2>
+      <pre class="steps"><code class="language-python">
+        class Person:
+            def __init__(self, name):
+                self._name = name
+            @property
+            def name(self):
+                return self._name
+            @name.deleter
+            def name(self):
+                del self._name
+        person = Person("Alice")
+        del person.name
+      </code></pre>
+      <p class="hint">More in <a href="properties.html">Properties</a>.</p>
+    </section>
+
+    <!-- ================================================================ magic methods -->
+    <section class="slide section">
+      <h2>Magic methods</h2>
+    </section>
+
+    <section class="slide">
+      <h2>__str__ and __repr__</h2>
+      <pre class="steps small"><code class="language-python">
+        class Point:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+            def __str__(self):
+                return f"Point({self.x}, {self.y})"
+            def __repr__(self):
+                return f"Point(x={self.x}, y={self.y})"
+        p = Point(3, 4)
+        str(p)    # "Point(3, 4)"
+        repr(p)   # "Point(x=3, y=4)"
+        print(p)  # uses __str__
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>__format__</h2>
+      <pre class="steps"><code class="language-python">
+        class Point:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+            def __format__(self, format_spec):
+                return f"({self.x}, {self.y})"
+        p = Point(3, 4)
+        f"{p}"  # "(3, 4)"
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Arithmetic operators</h2>
+      <pre class="steps small"><code class="language-python">
+        class Vector:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+            def __add__(self, other):
+                return Vector(self.x + other.x, self.y + other.y)
+            def __sub__(self, other):
+                return Vector(self.x - other.x, self.y - other.y)
+            def __mul__(self, scalar):
+                return Vector(self.x * scalar, self.y * scalar)
+        v1 = Vector(1, 2)
+        v2 = Vector(3, 4)
+        v3 = v1 + v2  # Vector(4, 6)
+        v4 = v1 * 2   # Vector(2, 4)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Comparison operators</h2>
+      <pre class="steps small"><code class="language-python">
+        class Point:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+            def __eq__(self, other):
+                return self.x == other.x and self.y == other.y
+            def __lt__(self, other):
+                return (self.x**2 + self.y**2) &lt; (other.x**2 + other.y**2)
+        p1 = Point(1, 2)
+        p2 = Point(1, 2)
+        p1 == p2  # True
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Collections: len and indexing</h2>
+      <div class="code2">
+      <pre class="steps tiny"><code class="language-python">
+        class MyList:
+            def __init__(self):
+                self.items = []
+            def __len__(self):
+                return len(self.items)
+            def __getitem__(self, index):
+                return self.items[index]
+            def __setitem__(self, index, value):
+                self.items[index] = value
+            def append(self, value):
+                self.items.append(value)
+      </code></pre>
+        <pre class="steps tiny"><code class="language-python">
+        ml = MyList()
+        ml.append(1)
+        ml.append(2)
+        len(ml)    # 2
+        ml[0]      # 1
+        ml[1] = 5  # now ml[1] is 5
+      </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Collections: __contains__</h2>
+      <pre class="steps"><code class="language-python">
+        class MySet:
+            def __init__(self, items):
+                self.items = set(items)
+            def __contains__(self, item):
+                return item in self.items
+        s = MySet([1, 2, 3])
+        2 in s  # True
+        5 in s  # False
+      </code></pre>
+      <p class="hint">More in <a href="magic-methods.html">Magic Methods</a>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Context managers</h2>
+      <pre class="steps tiny"><code class="language-python">
+        class FileManager:
+            def __init__(self, filename, mode):
+                self.filename = filename
+                self.mode = mode
+                self.file = None
+            def __enter__(self):
+                self.file = open(self.filename, self.mode)
+                return self.file
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                if self.file:
+                    self.file.close()
+                return False
+        with FileManager("data.txt", "r") as file:
+            data = file.read()
+      </code></pre>
+      <p class="hint step"><code>__exit__</code> runs even if the block raises, so the file is always closed. Returning False lets any error carry on.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Context manager: a database connection</h2>
+      <pre class="steps"><code class="language-python">
+        class DatabaseConnection:
+            def __enter__(self):
+                self.conn = connect_to_db()
+                return self.conn
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                if exc_type:
+                    self.conn.rollback()
+                else:
+                    self.conn.commit()
+                self.conn.close()
+      </code></pre>
+      <p class="hint step">An error inside the <code>with</code> block undoes the changes; success saves them. Either way the connection closes. (<code>connect_to_db</code> stands for your database library.)</p>
+    </section>
+
+    <!-- ================================================================ abstract classes -->
+    <section class="slide section">
+      <h2>Abstraction and encapsulation</h2>
+    </section>
+
+    <section class="slide">
+      <h2>Abstract base classes</h2>
+      <pre class="steps"><code class="language-python">
+        from abc import ABC, abstractmethod
+        class Shape(ABC):
+            @abstractmethod
+            def area(self):
+                pass
+            @abstractmethod
+            def perimeter(self):
+                pass
+        # cannot instantiate an abstract class
+        # shape = Shape()  # Error!
+      </code></pre>
+      <p class="hint step">An abstract class is a contract: subclasses must implement every <code>@abstractmethod</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>A concrete class</h2>
+      <pre class="steps"><code class="language-python">
+        class Rectangle(Shape):
+            def __init__(self, width, height):
+                self.width = width
+                self.height = height
+            def area(self):
+                return self.width * self.height
+            def perimeter(self):
+                return 2 * (self.width + self.height)
+        rect = Rectangle(5, 3)
+        rect.area()       # 15
+        rect.perimeter()  # 16
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Encapsulation</h2>
+      <pre class="steps small"><code class="language-python">
+        # private attributes (by convention)
+        class BankAccount:
+            def __init__(self, balance):
+                self._balance = balance  # protected: one underscore
+                self.__pin = "1234"      # private: two underscores
+            def deposit(self, amount):
+                if amount &gt; 0:
+                    self._balance += amount
+            def get_balance(self):
+                return self._balance
+        account = BankAccount(1000)
+        account._balance    # accessible but discouraged
+        # account.__pin     # Error! Name mangled to _BankAccount__pin
+        account._BankAccount__pin  # can still access (not truly private)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Read-only property</h2>
+      <pre class="steps"><code class="language-python">
+        class Person:
+            def __init__(self, name):
+                self._name = name
+            @property
+            def name(self):
+                return self._name
+        person = Person("Alice")
+        person.name  # "Alice"
+        # person.name = "Bob"  # Error! no setter
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ dataclasses -->
+    <section class="slide section">
+      <h2>Dataclasses <span class="pill">Python 3.7+</span></h2>
+    </section>
+
+    <section class="slide">
+      <h2>A simple dataclass</h2>
+      <pre class="steps"><code class="language-python">
+        from dataclasses import dataclass
+        @dataclass
+        class Point:
+            x: int
+            y: int
+        p = Point(3, 4)
+        print(p)  # Point(x=3, y=4)
+      </code></pre>
+      <p class="hint step"><code>@dataclass</code> writes <code>__init__</code>, <code>__repr__</code> and <code>__eq__</code> for you from the annotated fields.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Defaults and frozen dataclasses</h2>
+      <pre class="steps"><code class="language-python">
+        # with defaults
+        @dataclass
+        class Person:
+            name: str
+            age: int = 0
+            city: str = "Unknown"
+        # immutable dataclass
+        @dataclass(frozen=True)
+        class ImmutablePoint:
+            x: int
+            y: int
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Methods and __post_init__</h2>
+      <pre class="steps small"><code class="language-python">
+        # with methods
+        @dataclass
+        class Rectangle:
+            width: float
+            height: float
+            def area(self):
+                return self.width * self.height
+        # with post-init
+        @dataclass
+        class Circle:
+            radius: float
+            area: float = 0.0
+            def __post_init__(self):
+                self.area = 3.14 * self.radius ** 2
+      </code></pre>
+      <p class="hint step"><code>__post_init__</code> runs right after the generated <code>__init__</code>, for derived fields.</p>
+    </section>
+
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards recap">
+        <div class="card step"><h3>Lookup order</h3><p><code>obj.attr</code> checks the object, then its class, then the parents in MRO order.</p></div>
+        <div class="card step"><h3>Shared vs own</h3><p>Class variables are shared; assigning on an instance creates its own copy that hides the shared one.</p></div>
+        <div class="card step"><h3><code>super()</code></h3><p>Calls the next class in the MRO, usually the parent.</p></div>
+        <div class="card step"><h3>Let Python write it</h3><p>Properties, magic methods and <code>@dataclass</code> remove boilerplate.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      // ================= shared lesson widgets (tracer, strip, rewrite) =================
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ------------------------------------------------------------ tracer
+      // data-trace on a <pre class="trace">: beats separated by ";". Each beat is
+      //   N            light code line N (1-based)
+      //   T[note] F[note] E[note] ~[note]   a badge: True / False / error / neutral
+      //   {a=1|b=2}    set variables (an empty value deletes one)
+      //   > text       print a line of output
+      const BEAT = /^\s*(\d+)\s*(?:([TFE~])(?:\x5B([^\x5D]*)\x5D)?)?\s*(?:\{([^}]*)\})?\s*(?:>\s?(.*))?$/; // \x5B \x5D are [ ], spelled so KaTeX isn't triggered
+      const parseTrace = (s) =>
+        (s || "").split(";").filter((t) => t.trim()).map((t) => {
+          const m = t.match(BEAT);
+          if (!m) throw new Error("bad trace beat: " + t);
+          const vars = m[4] ? m[4].split("|").map((kv) => { const i = kv.indexOf("="); return [kv.slice(0, i).trim(), kv.slice(i + 1).trim()]; }) : null;
+          return { line: +m[1], kind: m[2], note: m[3], vars, out: m[5] };
+        });
+      const speed = (n) => Math.max(0.28, Math.min(0.5, 8 / Math.max(n, 1)));
+
+      function buildPanel(pre) {
+        const seq = parseTrace(pre.dataset.trace);
+        const needs = pre.hasAttribute("data-panel") || seq.some((s) => s.vars || s.out !== undefined);
+        if (!needs || pre._panel) return;
+        const wrap = document.createElement("div");
+        wrap.className = "tracer";
+        pre.replaceWith(wrap);
+        wrap.appendChild(pre);
+        const st = document.createElement("div");
+        st.className = "state";
+        st.innerHTML = `<div class="box"><h4>Variables <button class="replay" title="Run the trace again">replay</button></h4><div class="vars"></div></div><div class="box"><h4>Output</h4><div class="out"></div></div>`;
+        st.setAttribute("data-interactive", "");
+        wrap.appendChild(st);
+        // chips that rerun this code sit in the panel, beside the code
+        const chips = wrap.closest(".slide")?.querySelector(":scope > .try");
+        if (chips) st.appendChild(chips);
+        pre._panel = st;
+        st.querySelector(".replay").addEventListener("click", () => trace(pre, false));
+        clearPanel(pre);
+      }
+
+      function clearPanel(pre) {
+        const st = pre._panel;
+        if (!st) return;
+        pre._vars = new Map();
+        st.querySelector(".vars").innerHTML = `<span class="empty">none yet</span>`;
+        st.querySelector(".out").innerHTML = `<span class="empty">nothing printed</span>`;
+        pre._outN = 0;
+      }
+
+      function setVars(pre, vars, instant) {
+        const box = pre._panel.querySelector(".vars");
+        for (const [k, v] of vars) v === "" ? pre._vars.delete(k) : pre._vars.set(k, v);
+        box.innerHTML = pre._vars.size ? [...pre._vars].map(([k, v]) => `<span class="k">${esc(k)}</span><span class="v" data-k="${esc(k)}">${esc(v)}</span>`).join("") : `<span class="empty">none</span>`;
+        if (instant) return;
+        for (const [k, v] of vars) {
+          const el = [...box.querySelectorAll(".v")].find((e) => e.dataset.k === k);
+          if (!el) continue;
+          el.classList.add("flash");
+          requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove("flash")));
+        }
+      }
+
+      function print(pre, text, err, instant) {
+        const out = pre._panel.querySelector(".out");
+        if (!pre._outN) out.innerHTML = "";
+        pre._outN++;
+        const d = document.createElement("div");
+        if (err) d.className = "err";
+        d.textContent = text;
+        out.appendChild(d);
+        if (!instant) gsap.from(d, { x: -12, opacity: 0, duration: 0.3 });
+      }
+
+      function reset(pre) {
+        pre._tl?.kill();
+        pre.classList.remove("tracing", "traced");
+        pre.querySelectorAll(".line").forEach((l) => {
+          l.classList.remove("run", "now");
+          l.querySelectorAll(".tb").forEach((b) => b.remove());
+        });
+        clearPanel(pre);
+        pre._onReset?.();
+      }
+
+      function trace(pre, instant, from = 0, to) {
+        reset(pre);
+        const seq = parseTrace(pre.dataset.trace);
+        to = to ?? seq.length;
+        const STEP = speed(seq.length);
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        pre.classList.add("tracing");
+        const tl = gsap.timeline();
+        seq.slice(0, to).forEach((s, k) => {
+          const fast = instant || k < from;
+          tl.call(() => {
+            lines.forEach((l) => l.classList.remove("now"));
+            const el = lines[s.line - 1];
+            if (el) el.classList.add("run", "now");
+            if (s.kind && el) {
+              el.querySelectorAll(".tb").forEach((o) => o.remove());
+              const b = document.createElement("span");
+              b.className = "tb " + ({ T: "t", F: "f", E: "f", "~": "" })[s.kind];
+              b.textContent = s.note ?? (s.kind === "T" ? "True" : s.kind === "F" ? "False" : "");
+              el.appendChild(b);
+              if (!fast) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+            }
+            if (s.vars && pre._panel) setVars(pre, s.vars, fast);
+            if (s.out !== undefined && pre._panel) print(pre, s.out, s.kind === "E", fast);
+            pre._onBeat?.(s, k, fast);
+          }, null, Math.max(0, k - from) * STEP);
+        });
+        tl.call(() => {
+          lines.forEach((l) => l.classList.remove("now"));
+          pre.classList.replace("tracing", "traced");
+        }, null, Math.max(0, to - from) * STEP);
+        if (instant) tl.progress(1);
+        pre._tl = tl;
+      }
+
+      const traces = [...document.querySelectorAll("pre.trace[data-trace]")];
+      traces.forEach(buildPanel);
+      const setDelay = (pre) => pre.style.setProperty("--ans-delay", parseTrace(pre.dataset.trace).length * speed(parseTrace(pre.dataset.trace).length) + "s");
+      traces.filter((p) => !p.hasAttribute("data-upto")).forEach(setDelay);
+      const firstAnswer = (pre) => pre.querySelector(".line.answer");
+
+      // A trace runs when its first answer line is revealed, or on a [data-go] step
+      Deck.on("step", (slide, i, d) => {
+        for (const el of d.elements) {
+          let pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el !== firstAnswer(pre)) pre = null;
+          if (!pre && el.hasAttribute("data-go")) pre = slide.querySelector("pre.trace[data-trace]");
+          if (pre) trace(pre, d.dir < 0);
+        }
+      });
+      Deck.on("unstep", (slide, i, d) => {
+        for (const el of d.elements) {
+          const pre = el.closest("pre.trace[data-trace]:not([data-upto])");
+          if (pre && el === firstAnswer(pre)) reset(pre);
+          if (el.hasAttribute("data-go")) slide.querySelectorAll("pre.trace[data-trace]").forEach(reset);
+        }
+      });
+      Deck.on("enter", (slide, i, d) => {
+        slide.querySelectorAll("pre.trace[data-trace]").forEach((pre) => {
+          reset(pre);
+          if (pre.hasAttribute("data-auto")) trace(pre, d.dir < 0);
+        });
+      });
+      Deck.on("leave", (slide) => slide.querySelectorAll("pre.trace").forEach(reset));
+
+      // data-upto: straight-line code with several answers. Each revealed answer
+      // runs the code up to its own line.
+      function upto(slide, instant) {
+        for (const pre of slide.querySelectorAll("pre.trace[data-upto]")) {
+          const answers = [...pre.querySelectorAll(".line.answer")];
+          const n = answers.filter((a) => a.classList.contains("shown")).length;
+          const prev = pre._upto || 0;
+          if (!n) {
+            reset(pre);
+            pre._upto = 0;
+            continue;
+          }
+          const lines = [...pre.querySelectorAll(".line")];
+          const L = lines.indexOf(answers[n - 1]) + 1;
+          const seq = parseTrace(pre.dataset.trace);
+          let to = seq.findIndex((b) => b.line > L);
+          if (to < 0) to = seq.length;
+          if (to > prev && !instant) trace(pre, false, prev, to);
+          else trace(pre, true, 0, to);
+          pre._upto = to;
+        }
+      }
+      Deck.on("step", (slide, i, d) => upto(slide, d.dir < 0 || d.elements.length > 1));
+      Deck.on("unstep", (slide) => upto(slide, true));
+      Deck.on("enter", (slide) => slide.querySelectorAll("pre.trace[data-upto]").forEach((p) => (p._upto = 0)));
+
+      // Chips: try the same code with another value. Each chip carries the new
+      // literal (data-lit, written into line data-lit-line), its trace and output.
+      for (const box of document.querySelectorAll(".try")) {
+        const slide = box.closest(".slide");
+        const pre = slide.querySelector("pre.trace");
+        const chips = [...box.querySelectorAll(".chip[data-trace]")];
+        if (!pre || !chips.length) continue;
+        const apply = (chip, run) => {
+          chips.forEach((c) => c.classList.toggle("on", c === chip));
+          const line = pre.querySelectorAll(".line")[+pre.dataset.litLine - 1];
+          const lit = line?.querySelector(".hljs-string, .hljs-number, .hljs-literal, .hljs-keyword:last-child");
+          if (lit) lit.textContent = chip.dataset.lit;
+          const ans = firstAnswer(pre);
+          if (ans) (ans.querySelector(".hljs-comment") || ans).textContent = "# " + chip.dataset.out;
+          pre.dataset.trace = chip.dataset.trace;
+          setDelay(pre);
+          if (run) trace(pre, false);
+        };
+        box.addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (c) apply(c, true);
+        });
+        Deck.scene(slide, { enter: () => apply(chips[0], false) });
+      }
+
+      // ------------------------------------------------------------ strip
+      // <div class="strip" data-s="Hello"> (characters) or data-items='[1,2]' with
+      // data-kind="list|tuple|array". data-sel: one selection per answer line of the
+      // slide, separated by ";": an index, a slice a:b:c, a list [i,j], #sub (count),
+      // @sub (find), "-" (nothing). Add "=>text" to override the result shown.
+      function pyIndices(n, sel) {
+        sel = sel.trim();
+        if (sel === "-" || sel === "") return [];
+        if (sel.startsWith("[")) return JSON.parse(sel).map((i) => (i < 0 ? n + i : i));
+        if (!sel.includes(":")) {
+          const i = +sel;
+          return [i < 0 ? n + i : i];
+        }
+        let [a, b, c] = sel.split(":").map((x) => (x.trim() === "" ? null : +x));
+        c = c ?? 1;
+        const norm = (x, d) => (x === null ? d : x < 0 ? Math.max(n + x, c < 0 ? -1 : 0) : Math.min(x, c < 0 ? n - 1 : n));
+        a = norm(a, c > 0 ? 0 : n - 1);
+        b = norm(b, c > 0 ? n : -1);
+        const out = [];
+        for (let i = a; c > 0 ? i < b : i > b; i += c) out.push(i);
+        return out;
+      }
+
+      for (const strip of document.querySelectorAll(".strip")) {
+        const items = strip.dataset.items ? JSON.parse(strip.dataset.items) : [...strip.dataset.s];
+        const isStr = !strip.dataset.items || strip.hasAttribute("data-chars");
+        const kind = strip.dataset.kind || (isStr ? "str" : "list");
+        const n = items.length;
+        const show = (v) => (isStr ? (v === " " ? "␣" : v) : typeof v === "string" ? `'${v}'` : String(v));
+        const rep = (v) => (isStr ? `'${v}'` : typeof v === "string" ? `'${v}'` : String(v));
+        strip.innerHTML =
+          `<div class="cells">` +
+          items.map((v, i) => `<div class="cell"><span class="ord"></span><span class="ix">${i}</span><span class="ch${v === " " ? " sp" : ""}">${esc(show(v))}</span><span class="ix">${i - n}</span></div>`).join("") +
+          `</div><div class="res"></div>`;
+        if (strip.dataset.neg === "off") strip.querySelectorAll(".cell .ix:last-child").forEach((e) => (e.style.visibility = "hidden"));
+        const cells = [...strip.querySelectorAll(".cell")];
+        const res = strip.querySelector(".res");
+        const sels = (strip.dataset.sel || "").split(";");
+        const slide = strip.closest(".slide");
+        let cur = -2;
+
+        function pick(k, instant) {
+          if (k === cur) return;
+          cur = k;
+          gsap.killTweensOf(strip.querySelectorAll(".ch, .res"));
+          cells.forEach((c) => {
+            c.classList.remove("pick");
+            c.querySelector(".ord").textContent = "";
+          });
+          gsap.set(strip.querySelectorAll(".ch"), { y: 0 });
+          gsap.set(res, { clearProps: "opacity,transform" });
+          if (k < 0 || !sels[k] || sels[k].trim() === "-") {
+            strip.classList.remove("picking");
+            res.innerHTML = "";
+            return;
+          }
+          let [sel, override] = sels[k].split("=>");
+          sel = sel.trim();
+          let idx, text;
+          if (sel.startsWith("#") || sel.startsWith("@")) {
+            const sub = sel.slice(1);
+            const s = items.join("");
+            idx = [];
+            let first = -1;
+            for (let p = s.indexOf(sub); p >= 0; p = s.indexOf(sub, p + sub.length)) {
+              if (first < 0) first = p;
+              for (let j = 0; j < sub.length; j++) idx.push(p + j);
+              if (sel[0] === "@") break;
+            }
+            text = sel[0] === "#" ? String(idx.length / Math.max(sub.length, 1)) : String(first);
+          } else {
+            idx = pyIndices(n, sel);
+            const vals = idx.map((i) => items[i]);
+            const single = !sel.includes(":") && !sel.startsWith("[");
+            if (single) text = rep(vals[0]);
+            else if (isStr) text = `'${vals.join("")}'`;
+            else if (kind === "tuple") text = vals.length === 1 ? `(${rep(vals[0])},)` : `(${vals.map(rep).join(", ")})`;
+            else if (kind === "array") text = `array([${vals.map(rep).join(", ")}])`;
+            else text = `[${vals.map(rep).join(", ")}]`;
+          }
+          if (override !== undefined) text = override.trim();
+          strip.classList.add("picking");
+          res.innerHTML = `<span class="lbl">result</span>${esc(text)}`;
+          idx.forEach((i, o) => {
+            const c = cells[i];
+            if (!c) return;
+            c.classList.add("pick");
+            if (idx.length > 1 && !sel.startsWith("#") && !sel.startsWith("@")) {
+              const od = c.querySelector(".ord");
+              od.textContent = od.textContent ? od.textContent + "," + (o + 1) : o + 1;
+            }
+            if (!instant) gsap.fromTo(c.querySelector(".ch"), { y: 0 }, { y: -8, duration: 0.25, delay: o * 0.12, yoyo: true, repeat: 1, ease: "power2.out" });
+          });
+          if (!instant) gsap.from(res, { opacity: 0, y: 8, duration: 0.4, delay: idx.length * 0.12 });
+        }
+        const sync = (instant) => {
+          const scope = strip.dataset.scope ? slide.querySelector(strip.dataset.scope) : slide;
+          let k = scope.querySelectorAll(".line.answer.shown, .sel.shown").length - 1;
+          if (strip.hasAttribute("data-lines")) {
+            // one selection per code line; blank entries keep the previous one
+            const n = scope.querySelectorAll("pre .line.step.shown").length;
+            k = -1;
+            for (let i = n - 1; i >= 0; i--) if (sels[i] && sels[i].trim()) { k = i; break; }
+          }
+          pick(k, instant);
+        };
+        Deck.scene(slide, {
+          enter: () => {
+            cur = -2;
+            pick(-1, true);
+          },
+          step: (s, n, els, d) => sync(d.dir < 0 || els.length > 1),
+          unstep: () => sync(true),
+        });
+      }
+
+      // ------------------------------------------------------------ rewrite
+      // <div class="rw"><div class="rs">first</div><div class="rs step" data-anim="none">next</div>…</div>
+      for (const rw of document.querySelectorAll(".rw")) {
+        const states = [...rw.querySelectorAll(":scope > .rs")];
+        const dots = document.createElement("div");
+        dots.className = "rw-dots";
+        dots.innerHTML = states.map(() => "<i></i>").join("");
+        rw.after(dots);
+        const sync = () => {
+          let k = 0;
+          states.forEach((s, i) => {
+            if (i === 0 || s.classList.contains("shown")) k = i;
+          });
+          states.forEach((s, i) => {
+            s.classList.toggle("cur", i === k);
+            s.classList.toggle("past", i < k);
+          });
+          [...dots.children].forEach((d, i) => d.classList.toggle("on", i <= k));
+        };
+        sync();
+        const slide = rw.closest(".slide");
+        Deck.scene(slide, { enter: sync, step: sync, unstep: sync });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+      // ------------------------------------------------------------ code sizing
+      // Each slide is a fixed 1600x900 canvas. Scale the slide's code blocks to the
+      // largest size (up to 2.5rem) that fits, both across (no scrollbars, room for the
+      // tracer's widest badges) and down the slide; shrink no further than 1.1rem.
+      const REM = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      function fitCode(slide) {
+        const pres = [...slide.querySelectorAll("pre")].filter((p) => !p.closest(".deck-zoom"));
+        if (!pres.length || slide.hasAttribute("data-fixed-code")) return;
+        pres.forEach((p) => (p.style.fontSize = ""));
+        const base = pres.map((p) => parseFloat(getComputedStyle(p).fontSize));
+        // worst case for width: every traced line carries its longest badge, and the panel is full
+        const temp = [];
+        for (const pre of pres.filter((p) => p.matches(".trace[data-trace]") && !p.matches(".tracing, .traced"))) {
+          trace(pre, true);
+          const lines = [...pre.querySelectorAll(".line")];
+          const longest = new Map();
+          for (const s of parseTrace(pre.dataset.trace)) {
+            if (!s.kind) continue;
+            const t = s.note ?? (s.kind === "T" ? "True" : s.kind === "F" ? "False" : "");
+            if ((longest.get(s.line) || "").length < t.length) longest.set(s.line, t);
+          }
+          for (const [ln, t] of longest) {
+            const el = lines[ln - 1];
+            if (!el) continue;
+            el.querySelectorAll(".tb").forEach((o) => o.remove());
+            const b = document.createElement("span");
+            b.className = "tb";
+            b.textContent = t;
+            el.appendChild(b);
+          }
+          temp.push(pre);
+        }
+        // a wrapped comment may take two lines, not more
+        const wrapsOk = (p) => {
+          if (!p.classList.contains("wrapc")) return true;
+          const lh = parseFloat(getComputedStyle(p).lineHeight) * 0.9; // code is 0.9em of the pre
+          return [...p.querySelectorAll(".line.cl")].every((l) => l.offsetHeight <= 2.2 * lh);
+        };
+        // a centred grid that is too wide spills out on both sides, which scrollWidth misses
+        const inside = (w) => {
+          const r = w.getBoundingClientRect();
+          return [...w.children].every((c) => {
+            const q = c.getBoundingClientRect();
+            return !q.width || (q.left >= r.left - 1 && q.right <= r.right + 1);
+          });
+        };
+        const zoom = slide.style.zoom;
+        slide.style.zoom = "";
+        const fits = () =>
+          slide.scrollHeight <= slide.clientHeight + 1 && slide.scrollWidth <= slide.clientWidth + 1 && pres.every((p) => p.scrollWidth <= p.clientWidth + 1 && p.scrollHeight <= p.clientHeight + 1 && wrapsOk(p)) &&
+          [...slide.querySelectorAll(".strip, .rw, .pair, .pair-col, .duo, .code2")].every((w) => w.scrollWidth <= w.clientWidth + 1 && inside(w));
+        const set = (k) => pres.forEach((p, i) => (p.style.fontSize = Math.max(Math.min(base[i] * k, 2.5 * REM), Math.min(base[i], 1.1 * REM)) + "px"));
+        const over = () =>
+          Math.max(
+            slide.scrollHeight / slide.clientHeight,
+            slide.scrollWidth / slide.clientWidth,
+            ...[...pres, ...slide.querySelectorAll(".strip, .rw, .pair, .pair-col, .duo, .code2")].map((w) => w.scrollWidth / (w.clientWidth || 1)),
+            ...pres.map((p) => p.scrollHeight / (p.clientHeight || 1)),
+          );
+        const best = (top = 1.7) => {
+          const tried = [];
+          for (let k = top; k > 0.7; k -= 0.05) {
+            set(k);
+            if (fits()) return k;
+            tried.push([k, over()]);
+          }
+          // Nothing fits: shrink the code only as far as that actually helps
+          const least = Math.min(...tried.map((x) => x[1]));
+          const k = tried.find((x) => x[1] <= least + 0.01)[0];
+          set(k);
+          return k;
+        };
+        let k1 = best();
+        // Rather than shrink the code for a long comment, let comment lines wrap
+        if (k1 < 0.999) {
+          pres.forEach((p) => {
+            p.querySelectorAll(".line").forEach((l) => l.classList.toggle("cl", /^\s*#/.test(l.textContent) || l.classList.contains("answer")));
+            p.classList.add("wrapc");
+          });
+          const kw = best(1.3);
+          if (kw > k1 + 0.04) k1 = kw;
+          else {
+            pres.forEach((p) => p.classList.remove("wrapc"));
+            set(k1);
+          }
+        }
+        // Code with a widget stacked under it (a one-column .pair): try the widget
+        // beside the code instead
+        const pair = slide.querySelector(".pair");
+        if (k1 < 1.2 && pair && !pair.matches(".side, .beside") && getComputedStyle(pair).gridTemplateColumns.split(" ").length < 2 && pair.children.length > 1 && pair.firstElementChild.matches("pre, .tracer")) {
+          const fit1 = fits();
+          const col = document.createElement("div");
+          col.className = "pair-col";
+          col.append(...[...pair.children].slice(1));
+          pair.append(col);
+          pair.classList.add("beside");
+          // beside a widget, the code shouldn't dwarf it; a wide widget may shrink a little
+          let k2 = best(1.15);
+          for (let z = 0.9; !fits() && z > 0.69; z -= 0.1) {
+            col.style.zoom = z;
+            k2 = best(1.15);
+          }
+          // keep it if stacking didn't fit, or if the code gets bigger (by any amount when
+          // stacking had squeezed it below its usual size)
+          if (!fits() || (fit1 && k2 < k1 + (k1 < 0.9 ? 0 : 0.1))) {
+            col.style.zoom = "";
+            pair.classList.remove("beside");
+            pair.append(...col.children);
+            col.remove();
+            set(k1);
+            fits();
+          } else {
+            // then grow the widget column into the room left beside the code
+            const z0 = col.style.zoom;
+            for (let z = 1.6; z > +(z0 || 1); z -= 0.1) {
+              col.style.zoom = z;
+              if (fits()) break;
+              col.style.zoom = z0;
+            }
+          }
+        }
+        // Still too big with the code at its floor: shrink the widgets a little
+        // instead of the whole slide
+        const widgets = [...slide.querySelectorAll(".strip, .rw, .try")];
+        if (!fits() && widgets.length) {
+          let z = 0.95;
+          for (; z > 0.79; z -= 0.05) {
+            widgets.forEach((w) => (w.style.zoom = z));
+            if (fits()) break;
+          }
+          if (z < 0.79) widgets.forEach((w) => (w.style.zoom = ""));
+        }
+        slide.style.zoom = zoom;
+        temp.forEach(reset);
+      }
+      document.fonts.ready.then(() =>
+        setTimeout(() => {
+          Deck.slides.forEach(fitCode);
+          Deck.fit();
+        }, 0),
+      );
+
+      // ================= end shared widgets =================
+
+      const linesShown = (slide) => slide.querySelectorAll("pre .line.step.shown").length;
+
+      // Move the glowing dot through a list of [x, y] points
+      function travel(dot, pts, instant) {
+        gsap.killTweensOf(dot);
+        if (!pts || !pts.length) return gsap.set(dot, { opacity: 0 });
+        const last = pts[pts.length - 1];
+        if (instant) return gsap.set(dot, { attr: { cx: last[0], cy: last[1] }, opacity: 1 });
+        const tl = gsap.timeline();
+        tl.set(dot, { attr: { cx: pts[0][0], cy: pts[0][1] }, opacity: 1 });
+        pts.slice(1).forEach((p) => tl.to(dot, { attr: { cx: p[0], cy: p[1] }, duration: 0.45, ease: "power1.inOut" }));
+        return tl;
+      }
+      const mark = (svg, boxes = [], rows = []) => {
+        svg.querySelectorAll(".box").forEach((b) => b.classList.toggle("hit", boxes.includes(b.dataset.b)));
+        svg.querySelectorAll(".row").forEach((r) => r.classList.toggle("hit", rows.includes(r.dataset.r)));
+      };
+      const showGroups = (svg, n, instant) =>
+        svg.querySelectorAll("[data-show]").forEach((g) => gsap.to(g, { opacity: n >= +g.dataset.show ? 1 : 0, duration: instant ? 0 : 0.5 }));
+
+      // ------------------------------------------------------------ blueprint → objects
+      {
+        const slide = document.getElementById("blueprint");
+        const svg = slide.querySelector("svg");
+        let prev = 0;
+        const render = (instant) => {
+          const n = linesShown(slide);
+          showGroups(svg, n, true);
+          svg.querySelectorAll(".obj").forEach((g) => {
+            const on = n >= +g.dataset.show;
+            if (on && prev < +g.dataset.show && !instant) gsap.fromTo(g, { opacity: 0, y: -90, scale: 0.6, transformOrigin: "50% 0%" }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.4)" });
+            else gsap.set(g, { opacity: on ? 1 : 0, y: 0, scale: 1 });
+          });
+          mark(svg, n >= 11 ? ["d2"] : n >= 10 ? ["d1"] : [], n >= 11 ? ["d2age"] : n >= 10 ? ["d1name"] : []);
+          prev = n;
+        };
+        Deck.scene(slide, {
+          enter: () => { prev = 0; render(true); },
+          step: (s, k, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+        });
+      }
+
+      // ------------------------------------------------------------ class vs instance variables
+      // Lookup paths: from an object's empty slot, up its link, to the class row
+      const PATH = {
+        d1cls: [[15, 262], [110, 180], [170, 94]],
+        d2cls: [[445, 262], [350, 180], [290, 94]],
+        cls: [[370, 66]],
+        d1own: [[15, 262]],
+      };
+      function varsScene(id, steps) {
+        const slide = document.getElementById(id);
+        const svg = slide.querySelector("svg");
+        const dot = svg.querySelector(".dot");
+        const cap = slide.querySelector(".cap");
+        const clsRow = svg.querySelector('[data-r="cls"]');
+        const clsText = clsRow.textContent;
+        const render = (instant) => {
+          const n = linesShown(slide);
+          showGroups(svg, n, true);
+          let s = { cap: "", path: null, cls: clsText, boxes: [], rows: [] };
+          for (let i = 1; i <= n; i++) if (steps[i]) s = { ...s, path: null, boxes: [], rows: [], ...steps[i] };
+          clsRow.textContent = s.cls;
+          mark(svg, s.boxes, s.rows);
+          cap.textContent = s.cap;
+          travel(dot, s.path, instant);
+        };
+        Deck.scene(slide, {
+          enter: () => render(true),
+          step: (sl, k, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+          leave: () => gsap.killTweensOf(dot),
+        });
+      }
+      varsScene("shared", {
+        2: { cap: "species belongs to the class" },
+        4: { cap: "name belongs to each object" },
+        7: { path: PATH.d1cls, boxes: ["cls"], rows: ["cls"], cap: "dog1 has no species, so Python looks in its class" },
+        8: { path: PATH.d2cls, boxes: ["cls"], rows: ["cls"], cap: "dog2 finds the very same value" },
+        9: { path: PATH.cls, boxes: ["cls"], rows: ["cls"], cap: "and so does the class itself" },
+        11: { cls: 'species = "Canis lupus"', path: PATH.cls, boxes: ["cls"], rows: ["cls"], cap: "change it once on the class..." },
+        12: { cls: 'species = "Canis lupus"', path: PATH.d1cls, boxes: ["cls"], rows: ["cls"], cap: "...and every object sees the change" },
+        13: { cls: 'species = "Canis lupus"', path: PATH.d2cls, boxes: ["cls"], rows: ["cls"], cap: "...and every object sees the change" },
+      });
+      varsScene("shadow", {
+        2: { path: PATH.d1own, boxes: ["d1"], rows: ["d1sp"], cap: "assigning on dog1 creates dog1's own species" },
+        3: { path: PATH.d1own, boxes: ["d1"], rows: ["d1sp"], cap: "dog1 finds it straight away and never reaches the class" },
+        4: { path: PATH.d2cls, boxes: ["cls"], rows: ["cls"], cap: "dog2 has none of its own, so it still uses the class value" },
+      });
+
+      // ------------------------------------------------------------ inheritance lookup
+      varsSceneInherit();
+      function varsSceneInherit() {
+        const slide = document.getElementById("inherit");
+        const svg = slide.querySelector("svg");
+        const dot = svg.querySelector(".dot");
+        const cap = slide.querySelector(".cap");
+        const S = {
+          14: { path: [[110, 224], [110, 160], [190, 94]], boxes: ["Animal"], rows: ["init"], cap: "Dog has no __init__, so Python uses Animal's" },
+          15: { path: [[350, 224], [350, 160], [270, 94]], boxes: ["Animal"], rows: ["init"], cap: "same for Cat" },
+          16: { path: [[110, 224], [15, 206]], boxes: ["Dog"], rows: ["dspeak"], cap: "Dog defines speak itself: the child wins" },
+          17: { path: [[350, 224], [445, 206]], boxes: ["Cat"], rows: ["cspeak"], cap: "Cat's own speak" },
+          18: { path: [[110, 224], [110, 160], [190, 94]], boxes: ["Animal"], rows: ["init"], cap: "name was set on the object by Animal.__init__" },
+        };
+        const render = (instant) => {
+          const n = linesShown(slide);
+          const s = S[n] || { cap: "" };
+          mark(svg, s.boxes || [], s.rows || []);
+          cap.textContent = s.cap;
+          travel(dot, s.path, instant);
+        };
+        Deck.scene(slide, {
+          enter: () => render(true),
+          step: (sl, k, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+          leave: () => gsap.killTweensOf(dot),
+        });
+      }
+
+      // ------------------------------------------------------------ diamond: MRO, then lookup
+      {
+        const slide = document.getElementById("diamond");
+        const svg = slide.querySelector("svg");
+        const dot = svg.querySelector(".dot");
+        const cap = slide.querySelector(".cap");
+        const mro = slide.querySelector(".mro");
+        const order = ["D", "B", "C", "A", "object"];
+        const C = { D: [200, 222], B: [110, 168], C: [290, 168], A: [200, 66] };
+        let tl;
+        const render = (instant) => {
+          tl?.kill();
+          const n = slide.querySelectorAll(".step.shown").length;
+          mark(svg);
+          mro.innerHTML = "";
+          cap.textContent = "";
+          gsap.set(dot, { opacity: 0 });
+          if (n < 1) return;
+          mro.innerHTML = order.map((c) => `<span data-c="${c}">${c}</span>`).join("<i>→</i>");
+          cap.textContent = n < 2 ? "D.__mro__: the order Python searches" : 'D has no method, B has one: D().method() is "B"';
+          const chips = [...mro.querySelectorAll("span")];
+          tl = gsap.timeline();
+          if (n === 1) {
+            chips.forEach((c, i) => {
+              tl.from(c, { opacity: 0, y: 10, duration: 0.3 }, i * 0.25);
+              if (C[c.dataset.c]) tl.call(() => mark(svg, [c.dataset.c]), null, i * 0.25);
+            });
+            tl.call(() => mark(svg), null, order.length * 0.25 + 0.3);
+          } else {
+            tl.set(dot, { attr: { cx: C.D[0], cy: C.D[1] }, opacity: 1 });
+            tl.call(() => { mark(svg, ["D"]); chips[0].classList.add("hit"); });
+            tl.to(dot, { attr: { cx: C.B[0], cy: C.B[1] }, duration: 0.6 }, "+=0.4");
+            tl.call(() => { mark(svg, ["B"]); chips[1].classList.add("hit"); });
+          }
+          if (instant) tl.progress(1);
+        };
+        Deck.scene(slide, {
+          enter: () => render(true),
+          step: (sl, k, els, d) => render(d.dir < 0 || els.length > 1),
+          unstep: () => render(true),
+          leave: () => tl?.kill(),
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Iterators</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tutor: code beside a live call stack and output ---------- */
+      .tutor {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 1fr);
+        gap: 2rem;
+        width: min(100%, 80rem);
+        align-items: start;
+      }
+
+      .tutor pre {
+        width: 100%;
+        font-size: 1.3rem;
+      }
+
+      .tutor .line {
+        border-radius: 4px;
+        transition:
+          background 0.3s,
+          box-shadow 0.3s,
+          opacity 0.3s;
+      }
+
+      .tutor pre.live .line:not(.ran):not(.answer):not(.cmt) {
+        opacity: 0.45;
+      }
+
+      .tutor pre.live .line.ran {
+        background: rgba(139, 92, 246, 0.13);
+      }
+
+      .tutor pre .line.now {
+        opacity: 1;
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.32), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      .tutor .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: max(0.75em, 0.8rem);
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: var(--amber);
+        border: 1px solid rgba(251, 191, 36, 0.45);
+        background: rgba(251, 191, 36, 0.1);
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        min-width: 0;
+      }
+
+      .mh {
+        font: 500 0.8rem var(--font-mono);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .stack,
+      .shelf {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.45rem;
+      }
+
+      .shelf-wrap {
+        display: none;
+      }
+
+      .tutor.has-shelf .shelf-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+
+      .shelf:empty::after {
+        content: "none";
+        font: 0.95rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .frame {
+        padding: 0.5rem 0.9rem 0.6rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0d0f20;
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s,
+          opacity 0.3s;
+      }
+
+      .frame.top {
+        border-color: rgba(34, 211, 238, 0.75);
+        box-shadow: 0 0 22px -6px rgba(34, 211, 238, 0.55);
+      }
+
+      .frame.paused {
+        border-style: dashed;
+        border-color: rgba(167, 139, 250, 0.55);
+        opacity: 0.8;
+      }
+
+      .frame .fn {
+        font: 600 1rem var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .frame[data-id="global"] .fn {
+        color: var(--faint);
+      }
+
+      .frame .vars {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 0.8rem;
+        font: 1.15rem/1.4 var(--font-mono);
+      }
+
+      .frame .row {
+        display: contents;
+      }
+
+      .frame .k {
+        color: var(--muted);
+      }
+
+      .frame .v {
+        color: var(--text);
+        overflow-wrap: anywhere;
+        border-radius: 4px;
+      }
+
+      .frame .ret {
+        margin-top: 0.3rem;
+        font: 1.05rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .frame .ret b,
+      .flychip {
+        display: inline-block;
+        padding: 0 0.55em;
+        border-radius: 999px;
+        font: 600 1.1rem/1.6 var(--font-mono);
+        color: #fff;
+        background: rgba(236, 72, 153, 0.35);
+        border: 1px solid var(--pink);
+      }
+
+      .flychip {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        box-shadow: 0 0 18px rgba(236, 72, 153, 0.7);
+      }
+
+      .console {
+        min-height: 2.4rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.45);
+        font: 1.15rem/1.5 var(--font-mono);
+        color: var(--green);
+        white-space: pre-wrap;
+      }
+
+      .tutor.no-out .out-h,
+      .tutor.no-out .console {
+        display: none;
+      }
+
+      .console .echo {
+        color: var(--cyan);
+      }
+
+      .console .err {
+        color: var(--red);
+      }
+
+      .mhrow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .ctl {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .ctl button {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 600 1.1rem var(--font);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .ctl button:hover {
+        color: var(--text);
+        border-color: rgba(167, 139, 250, 0.7);
+      }
+
+      .ctl span {
+        margin-left: 0.3rem;
+        font: 0.9rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .hint {
+        font-size: 1.2rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- Iterator view: a cursor walking over an iterable ---------- */
+      .itv {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        min-width: 0;
+      }
+
+      .itv .src {
+        max-width: 100%;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+
+      .itv .lbl {
+        padding-top: 1.1rem;
+        font: 500 1.1rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .itv .cells {
+        min-width: 0;
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2.6rem 0.4rem;
+        padding-bottom: 2.6rem;
+      }
+
+      .itv .cell.gstart:not(:first-child) {
+        margin-left: 1.1rem;
+      }
+
+      .itv.small .cell {
+        min-width: 3rem;
+        height: 3.2rem;
+        padding: 0 0.4rem;
+        font-size: 1.25rem;
+      }
+
+      .itv .outs .build b {
+        color: var(--green);
+      }
+
+      .itv .cell {
+        display: grid;
+        place-items: center;
+        min-width: 3.6rem;
+        height: 3.6rem;
+        padding: 0 0.7rem;
+        border-radius: 12px;
+        border: 2px solid rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.14);
+        font: 600 1.5rem var(--font-mono);
+        color: var(--text);
+        transition:
+          opacity 0.35s,
+          border-color 0.35s,
+          background 0.35s;
+      }
+
+      .itv .cell.taken {
+        opacity: 0.35;
+        border-style: dashed;
+        background: transparent;
+      }
+
+      .itv .cell.skip {
+        opacity: 0.4;
+        border-color: var(--red);
+        border-style: dashed;
+        background: transparent;
+        text-decoration: line-through;
+        text-decoration-color: var(--red);
+      }
+
+      .itv .ptr {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 3.6rem;
+        font: 600 1rem var(--font-mono);
+        color: var(--cyan);
+        white-space: nowrap;
+        transition: opacity 0.3s;
+      }
+
+      .itv .ptr::before {
+        content: "";
+        width: 0;
+        height: 0;
+        border: 0.45rem solid transparent;
+        border-bottom: 0.6rem solid var(--cyan);
+        border-top: 0;
+        margin-bottom: 0.15rem;
+      }
+
+      .itv .ptr.end {
+        color: var(--red);
+      }
+
+      .itv .ptr.end::before {
+        border-bottom-color: var(--red);
+      }
+
+      .itv .outs {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: min(100%, 24rem);
+        min-height: 3.2rem;
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 1.2rem/1.5 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .itv .outs b {
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      .itv .outs .err b {
+        color: var(--red);
+      }
+
+      .flyval {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        padding: 0 0.5em;
+        border-radius: 8px;
+        font: 600 1.4rem/1.7 var(--font-mono);
+        color: #fff;
+        background: rgba(34, 211, 238, 0.35);
+        border: 1px solid var(--cyan);
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
+      }
+
+
+      .itv-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .itv-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2.5rem;
+        align-items: center;
+        width: min(100%, 80rem);
+      }
+
+      .itv-cols.stack {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 1.2rem;
+      }
+
+      .itv-cols.stack pre {
+        width: min(100%, 60rem);
+      }
+
+      .itv-cols pre {
+        width: 100%;
+        font-size: 1.3rem;
+      }
+
+      .slide > pre {
+        width: min(100%, 66rem);
+        font-size: 1.45rem;
+      }
+
+      .slide > pre.xl {
+        font-size: 1.85rem;
+      }
+
+      #forloop .codecol {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      #forloop .itv-cols {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      }
+
+      #custom .tutor {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      }
+
+      #custom .tutor pre .line {
+        min-height: 1.45em;
+      }
+
+      #custom .tutor pre {
+        font-size: 1.05rem;
+        line-height: 1.45;
+      }
+
+      #ivi .itv-cols pre {
+        font-size: 1.1rem;
+      }
+
+      /* ---------- Iterable vs iterator diagram ---------- */
+      .ivi {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+      }
+
+      .ivi rect {
+        fill: rgba(15, 18, 35, 0.85);
+        stroke-width: 2;
+      }
+
+      .ivi .able rect {
+        stroke: var(--violet-soft);
+      }
+
+      .ivi .tor rect {
+        stroke: var(--cyan);
+      }
+
+      .ivi text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 24px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .ivi text.lbl {
+        fill: var(--muted);
+        font-family: var(--font);
+        font-size: 19px;
+      }
+
+      .ivi g path {
+        fill: none;
+        stroke: rgba(167, 139, 250, 0.7);
+        stroke-width: 2;
+        marker-end: url(#iviArrow);
+      }
+
+      .ivi .bad path {
+        stroke: var(--red);
+        stroke-dasharray: 5 5;
+        marker-end: none;
+      }
+
+      .ivi .bad text {
+        fill: var(--red);
+      }
+
+      .ivi [data-s] {
+        opacity: 0.12;
+        transition: opacity 0.5s;
+      }
+
+      .ivi [data-s].on {
+        opacity: 1;
+      }
+
+      #ivi .itv-cols {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      }
+
+      /* ---------- recap / overview cards, scaled for the 1600x900 canvas ---------- */
+      .big-cards {
+        width: min(100%, 80rem);
+      }
+
+      .big-cards .card {
+        padding: 1.6rem 1.8rem;
+      }
+
+      .big-cards h3 {
+        font-size: 1.6rem;
+      }
+
+      .big-cards p {
+        font-size: 1.3rem;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · iterators &amp; generators</span>
+      <h1 class="grad-each"><span>Iterators</span></h1>
+      <p>The protocol behind every <code>for</code> loop: <code>iter()</code> makes a cursor, <code>next()</code> moves it, <code>StopIteration</code> says it's done.</p>
+    </section>
+
+    <!-- ================================================================ protocol -->
+    <section class="slide" id="proto">
+      <h2>The iterator protocol</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # get iterator
+          numbers = [1, 2, 3]
+          iterator = iter(numbers)
+          # call next
+          next(iterator)
+          # ans: 1
+          next(iterator)
+          # ans: 2
+          next(iterator)
+          # ans: 3
+          next(iterator)
+          # ans: StopIteration
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">The iterator remembers its position; the list itself is unchanged.</p>
+    </section>
+
+    <!-- ================================================================ for loop -->
+    <section class="slide" id="forloop">
+      <h2>A for loop uses iterators</h2>
+      <div class="itv-cols">
+        <div class="codecol">
+        <pre><code class="language-python">
+          # for loop = iterator protocol
+          for num in [1, 2, 3]:
+              print(num)
+        </code></pre>
+        <pre class="step"><code class="language-python">
+          # equivalent to:
+          iterator = iter([1, 2, 3])
+          while True:
+              try:
+                  num = next(iterator)
+                  print(num)
+              except StopIteration:
+                  break
+        </code></pre>
+        </div>
+        <div class="itv"></div>
+      </div>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <!-- ================================================================ custom -->
+    <section class="slide" id="custom">
+      <h2>A custom iterator</h2>
+      <div class="tutor">
+        <pre><code class="language-python">
+          # iterator class
+          class Counter:
+              def __init__(self, start, end):
+                  self.current = start
+                  self.end = end
+              def __iter__(self):
+                  return self
+              def __next__(self):
+                  if self.current &gt;= self.end:
+                      raise StopIteration
+                  self.current += 1
+                  return self.current - 1
+
+          for num in Counter(0, 3):
+              print(num)
+          # ans: 0, 1, 2
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint">Any object with <code>__iter__</code> and <code>__next__</code> works in a <code>for</code> loop.</p>
+    </section>
+
+    <!-- ================================================================ iterable vs iterator -->
+    <section class="slide" id="ivi">
+      <h2>Iterable vs iterator</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # iterable: has __iter__()
+          # iterator: has __iter__() and __next__()
+
+          # list is iterable but not iterator
+          numbers = [1, 2, 3]
+          iter(numbers)
+          # ans: works
+          next(numbers)
+          # ans: TypeError
+          # iterator is both
+          iterator = iter(numbers)
+          iter(iterator)
+          # ans: returns itself
+          next(iterator)
+          # ans: 1
+        </code></pre>
+        <svg class="ivi" viewBox="-50 30 530 440" aria-label="iter(numbers) makes an iterator; next(numbers) fails; iter(iterator) returns the same iterator; next(iterator) gives 1">
+          <defs>
+            <marker id="iviArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#a78bfa" />
+            </marker>
+          </defs>
+          <g class="able"><rect x="28" y="42" width="210" height="84" rx="17" /><text x="133" y="73">numbers</text><text class="lbl" x="133" y="104">iterable: __iter__</text></g>
+          <g class="tor"><rect x="28" y="294" width="210" height="84" rx="17" /><text x="133" y="325">iterator</text><text class="lbl" x="133" y="356">__iter__ + __next__</text></g>
+          <g data-s="1"><path d="M133 129 L133 288" /><text class="lbl" x="189" y="210">iter()</text></g>
+          <g data-s="2" class="bad"><path d="M241 84 L420 84" /><text x="448" y="84">✕</text><text class="lbl" x="330" y="62">next(numbers)</text><text class="lbl" x="420" y="123">TypeError</text></g>
+          <g data-s="3"><path d="M28 350 C -42 420, 84 462, 98 384" /><text class="lbl" x="14" y="437">iter() → itself</text></g>
+          <g data-s="4"><path d="M241 336 L406 336" /><text class="lbl" x="325" y="314">next()</text><text x="448" y="336">1</text></g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre class="xl"><code class="language-python">
+        # what is iter()?
+        lst = [1, 2, 3]
+        it = iter(lst)
+        type(it)
+        # ans: list_iterator
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # next() on list?
+        lst = [1, 2, 3]
+        next(lst)
+        # ans: TypeError (a list is not an iterator)
+      </code></pre>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # StopIteration when?
+          it = iter([1, 2])
+          next(it)
+          # ans: 1
+          next(it)
+          # ans: 2
+          next(it)
+          # ans: StopIteration
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # iterator exhaustion?
+          it = iter([1, 2])
+          list(it)
+          # ans: [1, 2]
+          list(it)
+          # ans: [] (exhausted)
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre class="xl"><code class="language-python">
+        # iter on iterator?
+        it = iter([1, 2, 3])
+        iter(it) is it
+        # ans: True (returns self)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        # range is iterator?
+        r = range(3)
+        next(r)
+        # ans: TypeError (range is iterable, not an iterator)
+        iter(r)
+        # ans: works (creates an iterator)
+      </code></pre>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # string is iterable?
+          s = "abc"
+          for c in s:
+              print(c)
+          # ans: a, b, c
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e8">
+      <h2>Exercise 8</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          # dict iterator?
+          d = {"a": 1, "b": 2}
+          it = iter(d)
+          next(it)
+          # ans: "a" (iterates keys)
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # custom __iter__ only?
+        class MyIterable:
+            def __iter__(self):
+                return iter([1, 2, 3])
+
+        for x in MyIterable():
+            print(x)
+        # ans: 1, 2, 3
+      </code></pre>
+      <p class="hint step">An iterable only has to <em>give out</em> an iterator; here it borrows the list's.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # infinite iterator?
+        class InfiniteCounter:
+            def __init__(self):
+                self.count = 0
+            def __iter__(self):
+                return self
+            def __next__(self):
+                self.count += 1
+                return self.count
+        # ans: never raises StopIteration
+      </code></pre>
+      <p class="hint step">So a <code>for</code> loop over it needs a <code>break</code>.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards big-cards">
+        <div class="card step"><h3>Iterable</h3><p>Can make an iterator: <code>iter(x)</code> works. Lists, strings, ranges, dicts.</p></div>
+        <div class="card step"><h3>Iterator</h3><p>Hands out values with <code>next()</code> and remembers where it is.</p></div>
+        <div class="card step"><h3>StopIteration</h3><p>Signals the end; a <code>for</code> loop catches it and stops.</p></div>
+        <div class="card step"><h3>One pass</h3><p>An exhausted iterator stays empty; call <code>iter()</code> again for a fresh one.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ Tutor
+      // A trace is built by "running" the code by hand: set variables, call and
+      // return, then L(line) snapshots the state after that line ran.
+      const STEP = 0.85; // seconds per beat when playing
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function trace() {
+        const st = [{ id: "global", v: {} }];
+        const beats = [];
+        let at;
+        const top = () => [...st].reverse().find((f) => !f.p);
+        const find = (id) => st.find((f) => f.id === id);
+        const t = {
+          beats,
+          at(n) { at = n; return t; },
+          set(k, v, id) { (id ? find(id) : top()).v[k] = String(v); return t; },
+          call(id, vars = {}) { st.push({ id, v: Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, String(v)])) }); return t; },
+          ret() { st.splice(st.indexOf(top()), 1); return t; },
+          pause(id) { (id ? find(id) : top()).p = true; return t; },
+          resume(id) { const f = find(id); f.p = false; st.splice(st.indexOf(f), 1); st.push(f); return t; },
+          drop(id) { st.splice(st.indexOf(find(id)), 1); return t; },
+          L(l, o = {}) {
+            beats.push({ l, at, ...o, rid: o.r !== undefined ? top().id : null, s: st.map((f) => ({ id: f.id, v: { ...f.v }, p: !!f.p })) });
+            at = undefined;
+            return t;
+          },
+        };
+        return t;
+      }
+
+      function fly(text, from, to) {
+        const chip = document.createElement("span");
+        chip.className = "flychip";
+        chip.textContent = text;
+        document.body.appendChild(chip);
+        gsap.set(chip, { left: from.left, top: from.top });
+        gsap.to(chip, {
+          left: to.left,
+          top: to.top,
+          duration: 0.6,
+          ease: "power2.inOut",
+          onComplete: () => gsap.to(chip, { opacity: 0, duration: 0.25, onComplete: () => chip.remove() }),
+        });
+      }
+
+      function Tutor(slide, beats) {
+        const root = slide.querySelector(".tutor");
+        const pre = root.querySelector("pre");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const mem = root.querySelector(".mem");
+        mem.innerHTML = `<div class="mhrow"><div class="mh">Frames</div><div class="ctl" data-interactive><button data-do="back" title="Step back">‹</button><button data-do="play" title="Play from the start">▶</button><button data-do="fwd" title="Step forward">›</button><span></span></div></div><div class="stack"></div>
+          <div class="shelf-wrap"><div class="mh">Paused generators</div><div class="shelf"></div></div>
+          <div class="mh out-h">Output</div><div class="console"></div>`;
+        const stack = mem.querySelector(".stack"), shelf = mem.querySelector(".shelf"), con = mem.querySelector(".console"), cnt = mem.querySelector(".ctl span");
+        root.classList.toggle("no-out", !beats.some((b) => b.o !== undefined || b.e !== undefined || b.err));
+        root.classList.toggle("has-shelf", beats.some((b) => b.s.some((f) => f.p)));
+        let a = 1;
+        for (const b of beats) a = b.at = b.at ?? a;
+        const frames = new Map();
+        let k = 0, tl = null, seen = 0, pending = null;
+
+        function makeFrame(id) {
+          const el = document.createElement("div");
+          el.className = "frame";
+          el.dataset.id = id;
+          el.innerHTML = `<div class="fn">${esc(id.split("#")[0])}</div><div class="vars"></div><div class="ret" hidden><span class="rl">return</span> <b></b></div>`;
+          return el;
+        }
+
+        function render(n, anim) {
+          const prev = k ? beats[k - 1] : null;
+          k = n;
+          cnt.textContent = `${n} / ${beats.length}`;
+          const b = n ? beats[n - 1] : null;
+          const state = b ? b.s : [{ id: "global", v: {}, p: false }];
+
+          // code lines
+          const ran = new Set(beats.slice(0, n).map((x) => x.l));
+          pre.classList.toggle("live", n > 0);
+          lines.forEach((el, i) => {
+            el.classList.toggle("now", !!b && b.l === i + 1);
+            el.classList.toggle("ran", ran.has(i + 1));
+            el.querySelector(".tb")?.remove();
+          });
+          if (b && (b.c !== undefined || b.n)) {
+            const tb = document.createElement("span");
+            tb.className = "tb" + (b.c === undefined ? "" : b.c ? " t" : " f");
+            tb.textContent = b.c === undefined ? b.n : (b.n ? b.n + " → " : "") + (b.c ? "True" : "False");
+            lines[b.l - 1].appendChild(tb);
+            if (anim) gsap.from(tb, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+
+          // remember where things were, for FLIP and the flying return value
+          const before = new Map([...frames].map(([id, el]) => [id, el.getBoundingClientRect()]));
+          const retEl = [...root.querySelectorAll(".ret")].find((r) => !r.hidden);
+          const retRect = anim && retEl ? retEl.querySelector("b").getBoundingClientRect() : null;
+          const retText = retEl?.querySelector("b").textContent;
+
+          // frames that are gone
+          const ids = new Set(state.map((f) => f.id));
+          for (const [id, el] of frames) {
+            if (ids.has(id)) continue;
+            frames.delete(id);
+            if (anim) {
+              const r = el.getBoundingClientRect();
+              const ghost = el.cloneNode(true);
+              Object.assign(ghost.style, { position: "fixed", left: r.left + "px", top: r.top + "px", width: r.width + "px", margin: 0, zIndex: 40 });
+              document.body.appendChild(ghost);
+              gsap.to(ghost, { opacity: 0, y: -24, scale: 0.92, duration: 0.35, ease: "power1.out", onComplete: () => ghost.remove() });
+            }
+            el.remove();
+          }
+
+          // frames that stay or arrive, in order
+          const changed = [];
+          const topId = [...state].reverse().find((f) => !f.p)?.id;
+          for (const f of state) {
+            let el = frames.get(f.id);
+            const isNew = !el;
+            if (isNew) frames.set(f.id, (el = makeFrame(f.id)));
+            (f.p ? shelf : stack).appendChild(el);
+            el.classList.toggle("paused", f.p);
+            el.classList.toggle("top", f.id === topId && state.length > 1);
+            const vars = el.querySelector(".vars");
+            const keys = Object.keys(f.v);
+            vars.querySelectorAll(".row").forEach((r) => keys.includes(r.dataset.k) || r.remove());
+            for (const key of keys) {
+              let row = vars.querySelector(`.row[data-k="${CSS.escape(key)}"]`);
+              const val = f.v[key];
+              if (!row) {
+                row = document.createElement("div");
+                row.className = "row";
+                row.dataset.k = key;
+                row.innerHTML = `<span class="k">${esc(key)}</span><span class="v"></span>`;
+                vars.appendChild(row);
+              }
+              const v = row.querySelector(".v");
+              if (v.textContent !== val) {
+                if (!isNew) changed.push(v);
+                v.textContent = val;
+              }
+            }
+            const ret = el.querySelector(".ret");
+            ret.hidden = !(b && b.rid === f.id);
+            if (!ret.hidden) {
+              ret.querySelector(".rl").textContent = b.rl || "return";
+              ret.querySelector("b").textContent = b.r;
+              if (anim) gsap.fromTo(ret, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 });
+            }
+          }
+
+          // output
+          const out = [];
+          for (const x of beats.slice(0, n)) {
+            for (const t of [].concat(x.o ?? [])) out.push(`<div>${esc(t)}</div>`);
+            if (x.e !== undefined) out.push(`<div class="echo">→ ${esc(x.e)}</div>`);
+            if (x.err) out.push(`<div class="err">${esc(x.err)}</div>`);
+          }
+          const grew = out.length > con.children.length;
+          const old = con.children.length;
+          con.innerHTML = out.join("");
+
+          for (const el of frames.values()) {
+            gsap.killTweensOf(el);
+            gsap.set(el, { x: 0, y: 0, opacity: 1, scale: 1 });
+          }
+          if (!anim) return;
+          // where a returned or yielded value lands (measured before anything moves)
+          const newLines = [...con.children].slice(old);
+          // delivered: the frame that showed the value has returned or paused
+          const was = prev && state.find((f) => f.id === prev.rid);
+          const delivered = retRect && prev && prev.rid && (!was || was.p);
+          const target = changed[0] || (grew ? newLines[0] : null) || (b && (lines[b.l - 1].querySelector(".tb") || lines[b.l - 1]));
+          const toRect = delivered && target ? target.getBoundingClientRect() : null;
+          for (const [id, el] of frames) {
+            const r0 = before.get(id);
+            if (!r0) {
+              gsap.fromTo(el, { opacity: 0, y: -16, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power2.out" });
+              continue;
+            }
+            const r1 = el.getBoundingClientRect();
+            const dx = r0.left - r1.left, dy = r0.top - r1.top;
+            if (Math.abs(dx) + Math.abs(dy) > 1) gsap.fromTo(el, { x: dx, y: dy }, { x: 0, y: 0, duration: 0.5, ease: "power2.inOut" });
+          }
+          let delay = 0;
+          if (toRect) {
+            fly(retText, retRect, toRect);
+            delay = 0.55;
+          }
+          changed.forEach((v) => gsap.fromTo(v, { backgroundColor: "rgba(236,72,153,0.4)" }, { backgroundColor: "rgba(236,72,153,0)", duration: 1.1, delay, immediateRender: false }));
+          if (newLines.length) gsap.fromTo(newLines, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.3, delay, stagger: 0.1 });
+        }
+
+        const stop = () => { tl?.kill(); tl = null; };
+        function playTo(t) {
+          stop();
+          const from = k;
+          tl = gsap.timeline();
+          for (let i = from + 1; i <= t; i++) tl.call(() => render(i, true), null, (i - from - 1) * STEP);
+        }
+        const target = () => beats.filter((x) => x.at <= Deck.step).length;
+        function sync(dir) {
+          const t = target();
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          if (dir < 0 || jump > 1 || t < k) { stop(); render(t, false); }
+          else if (t > k) playTo(t);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each answer waits for its part of the trace to play
+        const steps = [...slide.querySelectorAll(".step")];
+        steps.forEach((el, i) => el.style.setProperty("--ans-delay", beats.filter((x) => x.at === i + 1).length * STEP + "s"));
+
+        mem.querySelector(".ctl").addEventListener("click", (e) => {
+          const d = e.target.closest("button")?.dataset.do;
+          if (d === "back") { stop(); render(Math.max(0, k - 1), false); }
+          if (d === "fwd") { stop(); if (k < beats.length) render(k + 1, true); }
+          if (d === "play") { stop(); render(0, false); playTo(beats.length); }
+        });
+
+        Deck.scene(slide, {
+          enter() { stop(); seen = 0; render(0, false); },
+          leave() { stop(); render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        // reserve the tallest state's height so the slide never jumps
+        let tallest = 0;
+        for (let i = 1; i <= beats.length; i++) {
+          render(i, false);
+          tallest = Math.max(tallest, mem.offsetHeight);
+        }
+        mem.style.minHeight = tallest + "px";
+        render(0, false);
+      }
+      const tutor = (id, t) => Tutor(document.getElementById(id), t.beats);
+
+      // ================================================================ Iterator view
+      // An iterable's items in a row, and an iterator's cursor under the next one.
+      // Each deck step runs some operations: "next", "list" (drain the rest) or
+      // "loop" (a for loop: print each, then StopIteration ends it quietly).
+      const escI = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const BEAT = 0.6;
+      const dur = (e) => (e.build ? 0.25 : e.skip !== undefined || (e.take !== undefined && !e.line && !e.add) ? BEAT / 2 : BEAT);
+
+      function Itv(slide, cfg) {
+        const root = cfg.root || slide.querySelector(".itv");
+        root.classList.toggle("small", !!cfg.small);
+        const items = cfg.items;
+        root.innerHTML = `<div class="src"><span class="lbl">${escI(cfg.name || "")}</span><div class="cells">${items.map((v, i) => `<span class="cell${cfg.groups?.includes(i) ? " gstart" : ""}">${escI(v)}</span>`).join("")}<span class="ptr">${escI(cfg.ptr || "iterator")}</span></div></div><div class="outs"></div>`;
+        const cells = [...root.querySelectorAll(".cell")];
+        const ptr = root.querySelector(".ptr");
+        const outs = root.querySelector(".outs");
+        let tl = null, seen = 0, pending = null, fliers = [];
+
+        // cfg.f maps an item to the value handed out; cfg.keep filters items
+        const F = cfg.f || ((v) => v);
+        const keep = cfg.keep || (() => true);
+        function events(k) {
+          const groups = [];
+          let pos = 0;
+          const skipTo = (ev) => {
+            while (pos < items.length && !keep(items[pos])) ev.push({ skip: pos++ });
+          };
+          for (let s = 0; s < k && s < cfg.steps.length; s++) {
+            const ev = [];
+            for (let op of [].concat(cfg.steps[s])) {
+              if (typeof op === "string") op = { op };
+              const call = op.call || cfg.call || "next(iterator)";
+              if (op.op === "next") {
+                skipTo(ev);
+                if (pos < items.length) ev.push({ take: pos, val: F(items[pos]), line: `${escI(call)} → <b>${escI(op.show ?? F(items[pos]))}</b>` }), pos++;
+                else ev.push({ stop: true, line: `${escI(call)} → <b>StopIteration</b>`, err: true });
+              } else if (op.op === "list") {
+                const got = [];
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos }), got.push(F(items[pos]));
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+                ev.push({ line: `${escI(op.call || "list(" + (cfg.ptrName || "it") + ")")} → <b>${escI(op.show ?? "[" + got.join(", ") + "]")}</b>` });
+              } else if (op.op === "loop") {
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos, val: F(items[pos]), line: `${escI(op.call || "print")} → <b>${escI(F(items[pos]))}</b>` });
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+                ev.push({ stop: true, line: `StopIteration → <b>${escI(op.end || "loop ends")}</b>` });
+              } else if (op.op === "build") {
+                // a comprehension: kept items are transformed and added to a growing list
+                ev.push({ build: op.call || "result" });
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos, val: F(items[pos]), add: true });
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+              } else if (op.op === "say") ev.push({ line: op.line, err: op.err });
+            }
+            groups.push(ev);
+          }
+          return groups;
+        }
+
+        function placePtr(pos, anim) {
+          const last = cells[cells.length - 1];
+          const at = pos < cells.length ? cells[pos] : last;
+          const x = pos < cells.length ? at.offsetLeft + at.offsetWidth / 2 : last.offsetLeft + last.offsetWidth + 16;
+          const y = at.offsetTop + at.offsetHeight + 4;
+          ptr.classList.toggle("end", pos >= cells.length);
+          ptr.textContent = pos >= cells.length ? "end" : cfg.ptr || "iterator";
+          const w = ptr.offsetWidth;
+          gsap.killTweensOf(ptr, "x,y");
+          if (anim) gsap.to(ptr, { x: x - w / 2, y, duration: 0.4, ease: "power2.inOut" });
+          else gsap.set(ptr, { x: x - w / 2, y });
+        }
+
+        function clear() {
+          tl?.kill();
+          fliers.forEach((f) => f.remove());
+          fliers = [];
+          cells.forEach((c) => c.classList.remove("taken", "skip"));
+          outs.innerHTML = "";
+          gsap.killTweensOf(ptr);
+          gsap.set(ptr, { rotate: 0 });
+          placePtr(0, false);
+        }
+
+        function apply(e, anim) {
+          if (e.skip !== undefined) {
+            cells[e.skip].classList.add("skip");
+            placePtr(e.skip + 1, anim);
+            if (anim) gsap.fromTo(cells[e.skip], { x: -4 }, { x: 0, duration: 0.3, ease: "elastic.out(1, 0.3)" });
+            return;
+          }
+          let line = null;
+          if (e.build) {
+            line = document.createElement("div");
+            line.className = "build";
+            line.innerHTML = `${escI(e.build)} = [<span class="acc"></span>]`;
+            outs.appendChild(line);
+            if (anim) gsap.fromTo(line, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+            return;
+          }
+          if (e.add) {
+            const acc = [...outs.querySelectorAll(".build .acc")].pop();
+            if (acc.children.length) acc.append(", ");
+            line = document.createElement("b");
+            line.textContent = e.val;
+            acc.appendChild(line);
+          }
+          if (e.line) {
+            line = document.createElement("div");
+            if (e.err) line.className = "err";
+            line.innerHTML = e.line;
+            outs.appendChild(line);
+          }
+          if (e.take !== undefined) {
+            const cell = cells[e.take];
+            if (anim && line) {
+              const from = cell.getBoundingClientRect();
+              const to = (line.matches("b") ? line : line.querySelector("b")).getBoundingClientRect();
+              gsap.set(line, { opacity: 0 });
+              const f = document.createElement("span");
+              f.className = "flyval";
+              f.textContent = e.val ?? cell.textContent;
+              document.body.appendChild(f);
+              fliers.push(f);
+              gsap.set(f, { left: from.left, top: from.top });
+              gsap.to(f, { left: to.left, top: to.top - 4, duration: 0.5, ease: "power2.inOut", onComplete: () => { f.remove(); gsap.to(line, { opacity: 1, duration: 0.2 }); } });
+            }
+            cell.classList.add("taken");
+            if (anim && !line) gsap.fromTo(cell, { y: -10 }, { y: 0, duration: 0.3 });
+            placePtr(e.take + 1, anim);
+          } else if (anim && line) {
+            gsap.fromTo(line, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 });
+            if (e.stop) gsap.fromTo(ptr, { rotate: -12 }, { rotate: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+          }
+          if (e.stop) placePtr(cells.length, anim);
+        }
+
+        function render(k, anim) {
+          clear();
+          const groups = events(k);
+          const lastAnim = anim ? groups.pop() : null;
+          groups.flat().forEach((e) => apply(e, false));
+          if (!lastAnim) return;
+          tl = gsap.timeline();
+          let t = 0;
+          lastAnim.forEach((e) => {
+            tl.call(() => apply(e, true), null, t);
+            t += dur(e);
+          });
+        }
+
+        function sync(dir) {
+          const n = Deck.step - (cfg.offset || 0);
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          render(Math.max(0, n), dir > 0 && jump === 1 && n > 0 && n <= cfg.steps.length);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each step's answer waits for its animation
+        const steps = [...slide.querySelectorAll(".step")];
+        cfg.steps.forEach((ops, i) => {
+          const el = steps[i + (cfg.offset || 0)];
+          const ev = events(i + 1)[i];
+          const t = ev.slice(0, -1).reduce((a, e) => a + dur(e), 0);
+          if (el && ev.length > 1) el.style.setProperty("--ans-delay", t + 0.5 + "s");
+        });
+
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        // reserve the tallest output so the slide never grows mid-animation
+        let tallest = 0;
+        for (let k = 0; k <= cfg.steps.length; k++) {
+          render(k, false);
+          tallest = Math.max(tallest, outs.offsetHeight);
+        }
+        outs.style.minHeight = tallest + "px";
+        render(0, false);
+      }
+      const itv = (id, cfg) => Itv(document.getElementById(id), cfg);
+      // ================================================================ iterator views
+      itv("proto", { items: ["1", "2", "3"], name: "numbers", ptr: "iterator", call: "next(iterator)", steps: ["next", "next", "next", "next"] });
+      itv("forloop", { items: ["1", "2", "3"], name: "[1, 2, 3]", ptr: "iterator", offset: 1, steps: [{ op: "loop", call: "print(num)" }] });
+      itv("e3", { items: ["1", "2"], name: "[1, 2]", ptr: "it", call: "next(it)", steps: ["next", "next", "next"] });
+      itv("e4", { items: ["1", "2"], name: "[1, 2]", ptr: "it", steps: [{ op: "list", call: "list(it)" }, { op: "list", call: "list(it)" }] });
+      itv("e7", { items: ["a", "b", "c"], name: '"abc"', ptr: "iterator", steps: [{ op: "loop", call: "print(c)" }] });
+      itv("e8", { items: ['"a"', '"b"'], name: "d's keys", ptr: "it", call: "next(it)", steps: ["next"] });
+
+      // ================================================================ Counter trace
+      {
+        const obj = (c) => `current=${c}, end=3`;
+        const t = trace()
+          .set("Counter", "class").L(2)
+          .L(14, { n: "Counter(0, 3) makes an object" })
+          .set("(the Counter)", "current=?, end=?")
+          .call("__init__", { self: "the Counter", start: 0, end: 3 }).set("(the Counter)", "current=0, end=?", "global").L(4)
+          .set("(the Counter)", obj(0), "global").L(5)
+          .ret().L(14, { n: "for calls iter() on it" })
+          .call("__iter__", { self: "the Counter" }).L(7, { r: "self" })
+          .ret().L(14);
+        for (let c = 0; c < 3; c++) {
+          t.call("__next__", { self: "the Counter" }).L(9, { c: false, n: `${c} >= 3` })
+            .set("(the Counter)", obj(c + 1), "global").L(11)
+            .L(12, { r: c })
+            .ret().set("num", c).L(14)
+            .L(15, { o: String(c) });
+        }
+        t.call("__next__", { self: "the Counter" }).L(9, { c: true, n: "3 >= 3" })
+          .L(10)
+          .ret().L(14, { n: "StopIteration ends the loop" });
+        tutor("custom", t);
+      }
+
+      // ================================================================ iterable vs iterator
+      {
+        // Deck.step is updated after the step events, so read it a frame later
+        const show = (slide) => requestAnimationFrame(() => slide.querySelectorAll(".ivi [data-s]").forEach((g) => g.classList.toggle("on", +g.dataset.s <= Deck.step)));
+        Deck.scene("#ivi", { enter: show, step: show, unstep: show });
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

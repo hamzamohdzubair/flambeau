@@ -1,0 +1,1299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Region Processing</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 1.4rem;
+        font-size: 1rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 12rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 0.95rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 60rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      pre.ex {
+        width: min(100%, 64rem);
+        font-size: 1.1rem;
+      }
+
+      .slide > pre.steps {
+        width: min(100%, 64rem);
+        font-size: 1.1rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 0.95rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+
+      #title canvas {
+        width: min(28rem, 80cqw);
+        border-radius: 12px;
+      }
+
+      /* ---------- connectivity grids ---------- */
+      #conn {
+        --cell: min(1.9rem, 4.2cqw, 4.4cqh);
+      }
+
+      .cgrids {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.2rem 3rem;
+      }
+
+      .cgrid {
+        display: grid;
+        grid-template-columns: repeat(10, var(--cell));
+        gap: 2px;
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+      }
+
+      .cgrid span {
+        display: grid;
+        place-items: center;
+        width: var(--cell);
+        height: var(--cell);
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.05);
+        font: 500 calc(var(--cell) * 0.45) var(--font-mono);
+        color: #05060f;
+        transition: background 0.25s;
+      }
+
+      .cgrid span.fg {
+        background: rgba(226, 232, 240, 0.85);
+      }
+
+      .cgrid + p {
+        margin: 0.4rem 0 0;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+      }
+
+      .cgrid + p b {
+        color: var(--cyan);
+      }
+
+      .nbr {
+        display: inline-grid;
+        grid-template-columns: repeat(3, 1rem);
+        gap: 2px;
+        vertical-align: middle;
+        margin-right: 0.4rem;
+      }
+
+      .nbr i {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .nbr i.on {
+        background: var(--cyan);
+      }
+
+      .nbr i.c {
+        background: var(--pink);
+      }
+
+      /* ---------- image labs: canvas left, controls right ---------- */
+      .rlab {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 17rem;
+        gap: 2rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      .rlab canvas.img {
+        width: 100%;
+        cursor: pointer;
+      }
+
+      .rlab .panel {
+        display: grid;
+        gap: 1.1rem;
+        align-content: center;
+      }
+
+      .rlab .panel .lead {
+        margin: 0;
+        font-size: 1.15rem;
+        text-align: left;
+      }
+
+      .rlab .chips {
+        justify-content: flex-start;
+      }
+
+      .rlab .ctl {
+        justify-content: flex-start;
+      }
+
+      .rlab .ctl label {
+        flex-wrap: wrap;
+        white-space: normal;
+      }
+
+      .rlab .readout {
+        text-align: left;
+        line-height: 1.6;
+      }
+
+      .props {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.8rem;
+        width: min(100%, 56rem);
+      }
+
+      .props .card {
+        padding: 0.8rem 1rem;
+      }
+
+      .props .card h3 {
+        font-size: 1rem;
+        margin: 0;
+      }
+
+      .swatch {
+        display: inline-block;
+        width: 0.8rem;
+        height: 0.8rem;
+        border-radius: 3px;
+        margin-right: 0.4rem;
+        vertical-align: -1px;
+      }
+
+      #hull .cols {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      }
+
+      #hull pre {
+        width: 100%;
+        font-size: 0.9rem;
+      }
+
+      #hull canvas {
+        width: 100%;
+        border-radius: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas width="625" height="360"></canvas>
+      <h1>Region Processing</h1>
+      <p>From a black-and-white mask to counted, measured and named objects.</p>
+    </section>
+
+    <!-- ================================================================ connected components -->
+    <section class="slide" id="conn">
+      <h2>Connected components</h2>
+      <p class="lead">A <strong>connected component</strong> is a group of connected pixels with the same value.</p>
+      <div class="cgrids">
+        <div><p class="center" style="margin: 0 0 0.4rem"><span class="nbr"><i></i><i class="on"></i><i></i><i class="on"></i><i class="c"></i><i class="on"></i><i></i><i class="on"></i><i></i></span><strong>4-connectivity:</strong> up, down, left, right</p><div class="cgrid g4"></div><p></p></div>
+        <div><p class="center" style="margin: 0 0 0.4rem"><span class="nbr"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="c"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><strong>8-connectivity:</strong> plus diagonals</p><div class="cgrid g8"></div><p></p></div>
+      </div>
+      <p class="center"><strong>Use cases:</strong> count objects, label regions, extract features. <button class="chip ghost" data-act="replay" data-interactive>Replay</button></p>
+    </section>
+
+    <section class="slide">
+      <h2>Connected components labeling</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        # binary image
+        _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        # label connected components
+        num_labels, labels = cv2.connectedComponents(binary)  # ans:
+        # ans: num_labels includes the background (label 0)
+        # ans: actual objects = num_labels - 1
+        # labels is the same size as binary
+        # ans: each pixel has a label (0=background, 1,2,3...=objects)
+        # visualize labels
+        labels_vis = np.uint8(255 * labels / labels.max())  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ CC lab -->
+    <section class="slide" id="cc">
+      <h2>Labels and stats, live</h2>
+      <div class="rlab">
+        <canvas class="img" width="625" height="360"></canvas>
+        <div class="panel">
+        <div class="chips" data-interactive>
+          <button class="chip" data-v="bin">binary</button>
+          <button class="chip on" data-v="labels">labels</button>
+          <button class="chip" data-v="stats">stats + centroids</button>
+          <button class="chip ghost" data-c="4">connectivity=4</button>
+        </div>
+        <div class="ctl" data-interactive><label>min_area <input type="range" min="0" max="2500" step="50" value="0" /><output></output></label></div>
+        <p class="readout"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Connected components with stats</h2>
+      <pre class="steps"><code class="language-python">
+        # get statistics for each component
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(  # ans:
+            binary, connectivity=8)  # ans:
+        # stats: [x, y, width, height, area] for each label
+        for i in range(1, num_labels):  # ans:
+            x, y, w, h, area = stats[i]  # ans:
+            cx, cy = centroids[i]  # ans:
+            print(f"Object {i}: area={area}, center=({cx}, {cy})")  # ans:
+        # filter by area
+        min_area = 100  # ans:
+        large_components = [i for i in range(1, num_labels)  # ans:
+                            if stats[i, cv2.CC_STAT_AREA] &gt; min_area]  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ contour properties -->
+    <section class="slide" id="props">
+      <h2>Contour properties</h2>
+      <div class="rlab">
+        <canvas class="img" width="625" height="360"></canvas>
+        <div class="panel">
+        <p class="lead">A <strong>contour</strong> is the boundary of a region. Click a shape to measure it.</p>
+        <div class="chips" data-interactive>
+          <button class="chip on" data-p="contour"><span class="swatch" style="background: #22d3ee"></span>contour</button>
+          <button class="chip on" data-p="rect"><span class="swatch" style="background: #86efac"></span>boundingRect</button>
+          <button class="chip" data-p="minrect"><span class="swatch" style="background: #f87171"></span>minAreaRect</button>
+          <button class="chip on" data-p="centroid"><span class="swatch" style="background: #60a5fa"></span>centroid</button>
+          <button class="chip" data-p="hull"><span class="swatch" style="background: #fbbf24"></span>convexHull</button>
+        </div>
+        <p class="readout"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Contour area and perimeter</h2>
+      <pre class="steps"><code class="language-python">
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for cnt in contours:  # ans:
+            # area
+            area = cv2.contourArea(cnt)  # ans:
+            # perimeter
+            perimeter = cv2.arcLength(cnt, True)  # ans:
+            # ans: True means a closed contour
+            # aspect ratio
+            x, y, w, h = cv2.boundingRect(cnt)  # ans:
+            aspect_ratio = float(w) / h  # ans:
+      </code></pre>
+      <p class="muted center"><code>contourArea</code> measures the polygon through the boundary pixels, so it comes out a little smaller than the pixel count in <code>stats</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Bounding rectangle</h2>
+      <pre class="steps"><code class="language-python">
+        # straight bounding rectangle
+        x, y, w, h = cv2.boundingRect(cnt)  # ans:
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)  # ans:
+        # minimum area rectangle (can be rotated)
+        rect = cv2.minAreaRect(cnt)  # ans:
+        box = cv2.boxPoints(rect)  # ans:
+        box = np.intp(box)  # ans:
+        cv2.drawContours(img, [box], 0, (0, 0, 255), 2)  # ans:
+      </code></pre>
+      <p class="muted center"><code>minAreaRect</code> returns ((cx, cy), (w, h), angle). Older code uses <code>np.int0</code>, which NumPy 2 removed; <code>np.intp</code> is the same type.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Centroid</h2>
+      <p class="lead">The <strong>centroid</strong> is the centre of mass of a region, computed from its moments.</p>
+      <pre class="steps"><code class="language-python">
+        # compute moments
+        M = cv2.moments(cnt)  # ans:
+        # centroid coordinates
+        if M['m00'] != 0:  # ans:
+            cx = int(M['m10'] / M['m00'])  # ans:
+            cy = int(M['m01'] / M['m00'])  # ans:
+        else:  # ans:
+            cx, cy = 0, 0  # ans:
+        # draw centroid
+        cv2.circle(img, (cx, cy), 5, (255, 0, 0), -1)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ hull -->
+    <section class="slide" id="hull">
+      <h2>Convex hull</h2>
+      <div class="cols">
+        <figure><canvas width="420" height="260"></canvas><figcaption class="readout"></figcaption></figure>
+        <div style="display: grid; gap: 0.7rem">
+          <p>The <strong>convex hull</strong> is the smallest convex polygon containing the contour: a rubber band around the shape.</p>
+          <p><strong>Convexity defects</strong> are the gaps between the contour and its hull (pink).</p>
+          <pre class="steps"><code class="language-python">
+            # compute convex hull
+            hull = cv2.convexHull(cnt)  # ans:
+            cv2.drawContours(img, [hull], 0, (0, 255, 0), 2)  # ans:
+            # check if contour is convex
+            is_convex = cv2.isContourConvex(cnt)  # ans:
+            # convexity defects
+            hull = cv2.convexHull(cnt, returnPoints=False)  # ans:
+            defects = cv2.convexityDefects(cnt, hull)  # ans:
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ shape matching -->
+    <section class="slide" id="match">
+      <h2>Shape matching</h2>
+      <div class="rlab">
+        <canvas class="img" width="625" height="360"></canvas>
+        <div class="panel">
+        <p class="lead"><code>cv2.matchShapes</code> compares two contours using <strong>Hu moments</strong>, which do not change with rotation or scale. Lower distance = more similar; 0 means identical.</p>
+        <p class="readout">Click a shape to compare every other shape with it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>matchShapes in code</h2>
+      <pre class="steps"><code class="language-python">
+        # compare two contours
+        cnt1 = contours[0]
+        cnt2 = contours[1]
+        distance = cv2.matchShapes(cnt1, cnt2, cv2.CONTOURS_MATCH_I1, 0)  # ans:
+        # ans: lower distance = more similar shapes
+        # ans: 0 means identical, larger = more different
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ approxPolyDP -->
+    <section class="slide" id="approx">
+      <h2>Approximating contours</h2>
+      <div class="rlab">
+        <canvas class="img" width="625" height="360"></canvas>
+        <div class="panel">
+        <p class="lead"><code>approxPolyDP</code> simplifies a contour to a polygon with fewer points (the Douglas-Peucker algorithm). Count the vertices to name the shape.</p>
+        <div class="ctl" data-interactive><label>epsilon = <output></output> × arcLength <input type="range" min="0.002" max="0.08" step="0.002" value="0.02" /></label></div>
+        <p class="readout"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>approxPolyDP in code</h2>
+      <pre class="steps"><code class="language-python">
+        # approximate contour
+        epsilon = 0.01 * cv2.arcLength(cnt, True)
+        approx = cv2.approxPolyDP(cnt, epsilon, True)  # ans:
+        # ans: epsilon: approximation accuracy (smaller = more accurate)
+        # detect shapes by number of vertices
+        if len(approx) == 3:  # ans:
+            shape = "Triangle"  # ans:
+        elif len(approx) == 4:  # ans:
+            shape = "Rectangle"  # ans:
+        elif len(approx) &gt; 4:  # ans:
+            shape = "Circle"  # ans:
+      </code></pre>
+      <p class="muted center">A crude rule: on the previous slide the plus signs and digits have many vertices too, and get called circles.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is a connected component?</p><p class="answer">A group of connected pixels with the same value.</p></div>
+        <div class="q"><p>4 vs 8 connectivity?</p><p class="answer">4 uses up/down/left/right; 8 adds the diagonals.</p></div>
+        <div class="q"><p>What is a contour?</p><p class="answer">The boundary of a shape or region.</p></div>
+        <div class="q"><p>What is a centroid?</p><p class="answer">The centre of mass of a region.</p></div>
+        <div class="q"><p>What is a convex hull?</p><p class="answer">The smallest convex polygon containing the contour.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What are moments?</p><p class="answer">Weighted sums over a shape's pixels that describe it: area, centre, spread, orientation.</p></div>
+        <div class="q"><p>How do you compute the centroid from moments?</p><p class="answer">cx = M10/M00, cy = M01/M00.</p></div>
+        <div class="q"><p>What is <code>approxPolyDP</code>?</p><p class="answer">It simplifies a contour to a polygon with fewer points.</p></div>
+        <div class="q"><p>What is shape matching?</p><p class="answer">Comparing the similarity of two contours.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # label connected components
+        _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        num_labels, labels = cv2.connectedComponents(binary)  # ans:
+        print(f"Found {num_labels - 1} objects")  # ans:
+        # connected components with stats
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary)  # ans:
+        for i in range(1, num_labels):  # ans:
+            area = stats[i, cv2.CC_STAT_AREA]  # ans:
+            cx, cy = centroids[i]  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # find and draw contours
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for cnt in contours:  # ans:
+            area = cv2.contourArea(cnt)  # ans:
+            if area &gt; 100:  # ans:
+                x, y, w, h = cv2.boundingRect(cnt)  # ans:
+                cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # compute centroid
+        M = cv2.moments(cnt)
+        cx = int(M['m10'] / M['m00'])  # ans:
+        cy = int(M['m01'] / M['m00'])  # ans:
+        cv2.circle(img, (cx, cy), 5, (255, 0, 0), -1)  # ans:
+        # convex hull
+        hull = cv2.convexHull(cnt)  # ans:
+        cv2.drawContours(img, [hull], 0, (0, 255, 0), 2)  # ans:
+        # approximate contour
+        epsilon = 0.02 * cv2.arcLength(cnt, True)
+        approx = cv2.approxPolyDP(cnt, epsilon, True)  # ans:
+        print(f"Vertices: {len(approx)}")  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      // ------------------------------------------------------------ region analysis in JavaScript
+      // connectedComponentsWithStats, contour tracing, moments, hull, minAreaRect, approxPolyDP, Hu moments
+      function connectedComponents(bin, w, h, conn = 8) {
+        const labels = new Int32Array(w * h);
+        const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        const N8 = [...N4, [1, 1], [1, -1], [-1, 1], [-1, -1]];
+        const nb = conn === 4 ? N4 : N8;
+        const stats = [null];
+        let n = 0;
+        const queue = new Int32Array(w * h);
+        for (let i = 0; i < w * h; i++) {
+          if (!bin[i] || labels[i]) continue;
+          n++;
+          let qh = 0, qt = 0;
+          queue[qt++] = i;
+          labels[i] = n;
+          let x0 = w, y0 = h, x1 = 0, y1 = 0, area = 0, sx = 0, sy = 0;
+          while (qh < qt) {
+            const p = queue[qh++], x = p % w, y = (p / w) | 0;
+            area++;
+            sx += x;
+            sy += y;
+            if (x < x0) x0 = x;
+            if (y < y0) y0 = y;
+            if (x > x1) x1 = x;
+            if (y > y1) y1 = y;
+            for (const [dx, dy] of nb) {
+              const xx = x + dx, yy = y + dy;
+              if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+              const q = yy * w + xx;
+              if (bin[q] && !labels[q]) (labels[q] = n), (queue[qt++] = q);
+            }
+          }
+          stats.push({ label: n, x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1, area, cx: sx / area, cy: sy / area, start: i });
+        }
+        return { n: n + 1, labels, stats };
+      }
+      // Moore-neighbour boundary following (8-connected), starting at the top-left pixel
+      function traceContour(labels, w, h, label, start) {
+        const D = [[1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1]];
+        const at = (x, y) => x >= 0 && y >= 0 && x < w && y < h && labels[y * w + x] === label;
+        const sx = start % w, sy = (start / w) | 0;
+        const pts = [[sx, sy]];
+        let x = sx, y = sy, dir = 5, first = -1;
+        for (let it = 0; it < 4 * w * h; it++) {
+          let moved = -1;
+          for (let k = 0; k < 8; k++) {
+            const d = (dir + k) % 8;
+            if (at(x + D[d][0], y + D[d][1])) {
+              moved = d;
+              break;
+            }
+          }
+          if (moved < 0) break;
+          if (x === sx && y === sy && moved === first && pts.length > 1) break;
+          if (first < 0) first = moved;
+          x += D[moved][0];
+          y += D[moved][1];
+          if (x === sx && y === sy) {
+            dir = moved % 2 ? (moved + 6) % 8 : (moved + 7) % 8;
+            continue;
+          }
+          pts.push([x, y]);
+          dir = moved % 2 ? (moved + 6) % 8 : (moved + 7) % 8;
+        }
+        return pts;
+      }
+      const contourArea = (c) => Math.abs(c.reduce((s, [x, y], i) => {
+        const [u, v] = c[(i + 1) % c.length];
+        return s + x * v - u * y;
+      }, 0)) / 2;
+      const arcLength = (c, closed = true) => c.reduce((s, p, i) => (i || closed ? s + Math.hypot(p[0] - c[(i + c.length - 1) % c.length][0], p[1] - c[(i + c.length - 1) % c.length][1]) : s), 0);
+      function convexHull(pts) {
+        const P = pts.map((p, i) => [p[0], p[1], i]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+        const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+        const lo = [], up = [];
+        for (const p of P) {
+          while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop();
+          lo.push(p);
+        }
+        for (let i = P.length - 1; i >= 0; i--) {
+          const p = P[i];
+          while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop();
+          up.push(p);
+        }
+        return lo.slice(0, -1).concat(up.slice(0, -1));
+      }
+      // Smallest rotated rectangle around the hull: try each hull edge as a side
+      function minAreaRect(hull) {
+        let best = null;
+        for (let i = 0; i < hull.length; i++) {
+          const a = hull[i], b = hull[(i + 1) % hull.length];
+          const len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+          const ux = (b[0] - a[0]) / len, uy = (b[1] - a[1]) / len;
+          let mn = 1e9, mx = -1e9, mn2 = 1e9, mx2 = -1e9;
+          for (const p of hull) {
+            const s = p[0] * ux + p[1] * uy, t = -p[0] * uy + p[1] * ux;
+            mn = Math.min(mn, s), mx = Math.max(mx, s), mn2 = Math.min(mn2, t), mx2 = Math.max(mx2, t);
+          }
+          const area = (mx - mn) * (mx2 - mn2);
+          if (!best || area < best.area) {
+            const P = (s, t) => [s * ux - t * uy, s * uy + t * ux];
+            best = { area, box: [P(mn, mn2), P(mx, mn2), P(mx, mx2), P(mn, mx2)], size: [mx - mn, mx2 - mn2], angle: (Math.atan2(uy, ux) * 180) / Math.PI };
+          }
+        }
+        return best;
+      }
+      // Douglas-Peucker on a closed contour, like cv2.approxPolyDP(cnt, eps, True)
+      function approxPolyDP(c, eps) {
+        if (c.length < 4) return c.slice();
+        const dist = (p, a, b) => {
+          const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+          return L ? Math.abs(dy * p[0] - dx * p[1] + b[0] * a[1] - b[1] * a[0]) / L : Math.hypot(p[0] - a[0], p[1] - a[1]);
+        };
+        function dp(pts) {
+          let idx = -1, dmax = 0;
+          for (let i = 1; i < pts.length - 1; i++) {
+            const d = dist(pts[i], pts[0], pts[pts.length - 1]);
+            if (d > dmax) (dmax = d), (idx = i);
+          }
+          if (dmax > eps) return [...dp(pts.slice(0, idx + 1)).slice(0, -1), ...dp(pts.slice(idx))];
+          return [pts[0], pts[pts.length - 1]];
+        }
+        let far = 0, fd = 0;
+        c.forEach((p, i) => {
+          const d = Math.hypot(p[0] - c[0][0], p[1] - c[0][1]);
+          if (d > fd) (fd = d), (far = i);
+        });
+        const a = dp(c.slice(0, far + 1)), b = dp([...c.slice(far), c[0]]);
+        return [...a.slice(0, -1), ...b.slice(0, -1)];
+      }
+      // Moments of one label's pixels, and its 7 Hu invariants
+      function moments(labels, w, s) {
+        const m = { m00: 0, m10: 0, m01: 0 };
+        const px = [];
+        for (let y = s.y; y < s.y + s.h; y++) for (let x = s.x; x < s.x + s.w; x++) if (labels[y * w + x] === s.label) px.push([x, y]);
+        px.forEach(([x, y]) => ((m.m00 += 1), (m.m10 += x), (m.m01 += y)));
+        const cx = m.m10 / m.m00, cy = m.m01 / m.m00;
+        const mu = (p, q) => px.reduce((a, [x, y]) => a + (x - cx) ** p * (y - cy) ** q, 0);
+        const n = (p, q) => mu(p, q) / Math.pow(m.m00, 1 + (p + q) / 2);
+        const n20 = n(2, 0), n02 = n(0, 2), n11 = n(1, 1), n30 = n(3, 0), n03 = n(0, 3), n21 = n(2, 1), n12 = n(1, 2);
+        const a = n30 + n12, b = n21 + n03;
+        m.hu = [
+          n20 + n02,
+          (n20 - n02) ** 2 + 4 * n11 ** 2,
+          (n30 - 3 * n12) ** 2 + (3 * n21 - n03) ** 2,
+          a ** 2 + b ** 2,
+          (n30 - 3 * n12) * a * (a ** 2 - 3 * b ** 2) + (3 * n21 - n03) * b * (3 * a ** 2 - b ** 2),
+          (n20 - n02) * (a ** 2 - b ** 2) + 4 * n11 * a * b,
+          (3 * n21 - n03) * a * (a ** 2 - 3 * b ** 2) - (n30 - 3 * n12) * b * (3 * a ** 2 - b ** 2),
+        ];
+        m.cx = cx;
+        m.cy = cy;
+        return m;
+      }
+      // cv2.CONTOURS_MATCH_I1 on Hu moments
+      function matchShapesI1(hA, hB) {
+        let s = 0;
+        for (let i = 0; i < 7; i++) {
+          const a = hA[i], b = hB[i];
+          if (Math.abs(a) < 1e-5 || Math.abs(b) < 1e-5) continue; // OpenCV skips near-zero invariants too
+          const ma = Math.sign(a) * Math.log10(Math.abs(a)), mb = Math.sign(b) * Math.log10(Math.abs(b));
+          s += Math.abs(1 / ma - 1 / mb);
+        }
+        return s;
+      }
+      const gsap = await Deck.load("gsap");
+      const PALETTE = ["#8b5cf6", "#ec4899", "#22d3ee", "#fbbf24", "#86efac", "#f87171", "#60a5fa", "#c084fc", "#2dd4bf", "#fb923c", "#a3e635", "#f472b6"];
+      const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+      // ------------------------------------------------------------ the binary picture
+      const pic = await loadImage("/assets/2025-10-24-12-40-55.png");
+      const W = 625, H = 360;
+      const g = toGray(readPixels(pic, W, H));
+      const bin = g.map((v) => (v > 60 ? 255 : 0));
+      const binImg = grayToImage(bin, W, H);
+      const CC8 = connectedComponents(bin, W, H, 8);
+      const CC4 = connectedComponents(bin, W, H, 4);
+      // Per-shape geometry (8-connectivity)
+      const SHAPES = CC8.stats.slice(1).map((s) => {
+        const contour = traceContour(CC8.labels, W, H, s.label, s.start);
+        const hull = convexHull(contour);
+        return { ...s, contour, hull, area2: contourArea(contour), perim: arcLength(contour), mar: minAreaRect(hull), mom: moments(CC8.labels, W, s) };
+      });
+      const labelImage = (cc, keep) => {
+        const out = new ImageData(W, H);
+        for (let i = 0; i < W * H; i++) {
+          const l = cc.labels[i];
+          const c = l && keep(l) ? rgb(PALETTE[(l - 1) % PALETTE.length]) : l ? [70, 74, 90] : [0, 0, 0];
+          out.data.set([...c, 255], i * 4);
+        }
+        return out;
+      };
+      const shapeAt = (x, y) => {
+        // the clicked label, or the nearest shape within 12 px
+        const l = CC8.labels[Math.round(y) * W + Math.round(x)];
+        if (l) return SHAPES[l - 1];
+        let best = null, bd = 144;
+        SHAPES.forEach((s) => {
+          const d = (s.cx - x) ** 2 + (s.cy - y) ** 2;
+          if (d < bd && x > s.x - 12 && x < s.x + s.w + 12 && y > s.y - 12 && y < s.y + s.h + 12) (bd = d), (best = s);
+        });
+        return best;
+      };
+      // Canvas font size (backing px) that renders at `px` slide px, given the displayed width
+      const labelFont = (cv, px) => `600 ${Math.ceil((px * cv.width) / (cv.clientWidth || 930))}px JetBrains Mono, monospace`;
+      // Centred label that steps down a line if it would overlap a label already drawn
+      function placeLabel(ctx, placed, text, x, y) {
+        const w = ctx.measureText(text).width, h = parseFloat(ctx.font.match(/([\d.]+)px/)[1]);
+        let yy = y;
+        for (let k = 0; k < 4 && placed.some((r) => Math.abs(r.x - x) < (r.w + w) / 2 + 2 && Math.abs(r.y - yy) < h); k++) yy += h;
+        placed.push({ x, y: yy, w });
+        ctx.fillText(text, x, yy);
+      }
+      const poly = (ctx, pts, close = true) => {
+        ctx.beginPath();
+        pts.forEach(([x, y], i) => (i ? ctx.lineTo(x + 0.5, y + 0.5) : ctx.moveTo(x + 0.5, y + 0.5)));
+        if (close) ctx.closePath();
+      };
+
+      // ------------------------------------------------------------ cover: labels flood in one by one
+      {
+        const cv = document.querySelector("#title canvas");
+        let tl = null;
+        function play() {
+          tl?.kill();
+          show(cv, binImg);
+          const st = { n: 0 };
+          tl = gsap.to(st, {
+            n: CC8.n - 1, duration: 3, delay: 0.6, ease: "none",
+            onUpdate: () => show(cv, labelImage(CC8, (l) => l <= st.n)),
+          });
+        }
+        Deck.scene("#title", {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+            play();
+          },
+          leave: () => tl?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ 4 vs 8 connectivity flood fill
+      {
+        const sl = document.querySelector("#conn");
+        const GRID = [
+          "0000000000",
+          "0110000110",
+          "0110000110",
+          "0001100000",
+          "0001100011",
+          "0000011011",
+          "0110011000",
+          "0110000000",
+        ].map((r) => [...r].map(Number));
+        const R = GRID.length, C = 10;
+        const flat = GRID.flat();
+        function setup(el) {
+          el.innerHTML = flat.map((v) => `<span class="${v ? "fg" : ""}"></span>`).join("");
+          return [...el.children];
+        }
+        const grids = { 4: sl.querySelector(".g4"), 8: sl.querySelector(".g8") };
+        let tls = [];
+        function run(conn) {
+          const cells = setup(grids[conn]);
+          const out = grids[conn].nextElementSibling;
+          out.textContent = "";
+          const nb = conn === 4 ? [[1, 0], [-1, 0], [0, 1], [0, -1]] : [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+          const lab = new Array(R * C).fill(0);
+          const tl = gsap.timeline({ delay: 0.5 });
+          let n = 0, t = 0;
+          for (let i = 0; i < R * C; i++) {
+            if (!flat[i] || lab[i]) continue;
+            n++;
+            const color = PALETTE[(n - 1) % PALETTE.length], num = n;
+            let frontier = [i];
+            lab[i] = n;
+            while (frontier.length) {
+              const layer = frontier;
+              tl.call(() => layer.forEach((p) => ((cells[p].style.background = color), (cells[p].textContent = num))), null, t);
+              t += 0.12;
+              const next = [];
+              for (const p of layer) {
+                const x = p % C, y = (p / C) | 0;
+                for (const [dx, dy] of nb) {
+                  const xx = x + dx, yy = y + dy, q = yy * C + xx;
+                  if (xx >= 0 && yy >= 0 && xx < C && yy < R && flat[q] && !lab[q]) (lab[q] = n), next.push(q);
+                }
+              }
+              frontier = next;
+            }
+            t += 0.35;
+          }
+          tl.call(() => (out.innerHTML = `<b>${n}</b> components`), null, t);
+          tls.push(tl);
+        }
+        function play() {
+          tls.forEach((t) => t.kill());
+          tls = [];
+          run(4);
+          run(8);
+        }
+        sl.querySelector("[data-act=replay]").addEventListener("click", play);
+        Deck.scene("#conn", { enter: play, leave: () => tls.forEach((t) => t.kill()) });
+      }
+
+      // ------------------------------------------------------------ labels + stats lab
+      {
+        const sl = document.querySelector("#cc");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const input = sl.querySelector("input");
+        const read = sl.querySelector(".readout");
+        let view = "labels", conn = 8;
+        function render() {
+          const minA = +input.value;
+          sl.querySelector("output").textContent = minA;
+          const cc = conn === 8 ? CC8 : CC4;
+          const keep = (l) => cc.stats[l].area > minA;
+          const kept = cc.stats.slice(1).filter((s) => keep(s.label));
+          if (view === "bin") show(cv, binImg);
+          else show(cv, labelImage(cc, keep));
+          if (view === "stats") {
+            ctx.font = labelFont(cv, 19);
+            kept.forEach((s) => {
+              ctx.strokeStyle = "#86efac";
+              ctx.lineWidth = 1.5;
+              ctx.strokeRect(s.x - 0.5, s.y - 0.5, s.w + 1, s.h + 1);
+              ctx.fillStyle = "#fff";
+              ctx.beginPath();
+              ctx.arc(s.cx, s.cy, 3, 0, 7);
+              ctx.fill();
+              ctx.fillStyle = "#e2e8f0";
+              ctx.fillText(s.area, s.x, s.y - 4);
+            });
+          }
+          read.innerHTML = `num_labels = <b>${cc.n}</b><br>background + ${cc.n - 1} objects<br>connectivity=${conn}` + (minA ? `<br>area &gt; ${minA}: <b>${kept.length}</b> left` : "") + (view === "stats" ? "<br><br>green: stats x, y, w, h<br>white dot: centroid<br>number: area" : "");
+        }
+        chipGroup(sl.querySelector(".chips"), "[data-v]", (b) => ((view = b.dataset.v), render()));
+        sl.querySelector("[data-c]").addEventListener("click", (e) => {
+          conn = conn === 8 ? 4 : 8;
+          e.currentTarget.classList.toggle("on", conn === 4);
+          render();
+        });
+        input.addEventListener("input", render);
+        render();
+      }
+
+      // ------------------------------------------------------------ contour property inspector
+      {
+        const sl = document.querySelector("#props");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const read = sl.querySelector(".readout");
+        const on = new Set(["contour", "rect", "centroid"]);
+        // start on a triangle: its bounding box, rotated box and contour all differ
+        const TRI = SHAPES.filter((s) => s.area > 800).sort((a, b) => a.area / (a.w * a.h) - b.area / (b.w * b.h))[0];
+        let sel = TRI;
+        function render() {
+          show(cv, binImg);
+          ctx.fillStyle = "rgba(5,6,15,0.55)";
+          ctx.fillRect(0, 0, W, H);
+          const s = sel;
+          if (on.has("hull")) {
+            ctx.strokeStyle = "#fbbf24";
+            ctx.lineWidth = 2;
+            poly(ctx, s.hull);
+            ctx.stroke();
+          }
+          if (on.has("minrect")) {
+            ctx.strokeStyle = "#f87171";
+            ctx.lineWidth = 2;
+            poly(ctx, s.mar.box);
+            ctx.stroke();
+          }
+          if (on.has("rect")) {
+            ctx.strokeStyle = "#86efac";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(s.x - 0.5, s.y - 0.5, s.w + 1, s.h + 1);
+          }
+          if (on.has("contour")) {
+            ctx.strokeStyle = "#22d3ee";
+            ctx.lineWidth = 2;
+            poly(ctx, s.contour);
+            ctx.stroke();
+          }
+          if (on.has("centroid")) {
+            ctx.fillStyle = "#60a5fa";
+            ctx.beginPath();
+            ctx.arc(s.mom.cx, s.mom.cy, 5, 0, 7);
+            ctx.fill();
+          }
+          read.innerHTML = `area <b>${s.area2.toFixed(0)}</b><br>perimeter <b>${s.perim.toFixed(1)}</b><br>boundingRect (${s.x}, ${s.y}, ${s.w}, ${s.h})<br>aspect ratio <b>${(s.w / s.h).toFixed(2)}</b><br>centroid (${s.mom.cx.toFixed(0)}, ${s.mom.cy.toFixed(0)})<br>minAreaRect ${s.mar.size.map((v) => v.toFixed(0)).join("×")}, ${s.mar.angle.toFixed(0)}°<br>${s.contour.length} contour points`;
+        }
+        sl.querySelector(".chips").addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          on.has(b.dataset.p) ? on.delete(b.dataset.p) : on.add(b.dataset.p);
+          b.classList.toggle("on", on.has(b.dataset.p));
+          render();
+        });
+        cv.addEventListener("click", (e) => {
+          const s = shapeAt(...canvasPoint(cv, e));
+          if (s) (sel = s), render();
+        });
+        render();
+      }
+
+      // ------------------------------------------------------------ convex hull + defects on a plus sign
+      {
+        const sl = document.querySelector("#hull");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        // the biggest non-convex symbol: largest gap between hull area and contour area
+        const target = SHAPES.filter((s) => s.area > 150).reduce((a, b) => {
+          const ga = 1 - a.area2 / contourArea(a.hull), gb = 1 - b.area2 / contourArea(b.hull);
+          return gb > ga ? b : a;
+        });
+        const pad = 14, S = Math.min((420 - 2 * pad) / target.w, (260 - 2 * pad) / target.h);
+        const T = ([x, y]) => [pad + (x - target.x) * S + ((420 - 2 * pad) - target.w * S) / 2, pad + (y - target.y) * S + ((260 - 2 * pad) - target.h * S) / 2];
+        // defects: for each hull edge, the contour point between its ends that lies farthest inside
+        const hullIdx = target.hull.map((p) => p[2]).sort((a, b) => a - b);
+        const defects = [];
+        const c = target.contour;
+        hullIdx.forEach((a, k) => {
+          const b = hullIdx[(k + 1) % hullIdx.length];
+          const A = c[a], B = c[b];
+          const L = Math.hypot(B[0] - A[0], B[1] - A[1]) || 1;
+          let best = -1, depth = 0;
+          for (let i = (a + 1) % c.length; i !== b; i = (i + 1) % c.length) {
+            const d = Math.abs((B[1] - A[1]) * c[i][0] - (B[0] - A[0]) * c[i][1] + B[0] * A[1] - B[1] * A[0]) / L;
+            if (d > depth) (depth = d), (best = i);
+          }
+          if (depth > 2) defects.push({ A, B, F: c[best], depth });
+        });
+        let tl = null;
+        const st = { h: 0, d: 0 };
+        function draw() {
+          ctx.clearRect(0, 0, 420, 260);
+          ctx.fillStyle = "rgba(226,232,240,0.9)";
+          poly(ctx, c.map(T));
+          ctx.fill();
+          // hull drawn progressively
+          const hp = target.hull.map(T);
+          const n = Math.floor(st.h * hp.length);
+          ctx.strokeStyle = "#fbbf24";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          for (let i = 0; i <= n && i <= hp.length; i++) {
+            const p = hp[i % hp.length];
+            i ? ctx.lineTo(...p) : ctx.moveTo(...p);
+          }
+          ctx.stroke();
+          defects.slice(0, Math.round(st.d * defects.length)).forEach(({ A, B, F }) => {
+            ctx.fillStyle = "rgba(236,72,153,0.35)";
+            ctx.beginPath();
+            ctx.moveTo(...T(A));
+            ctx.lineTo(...T(F));
+            ctx.lineTo(...T(B));
+            ctx.fill();
+            ctx.fillStyle = "#ec4899";
+            ctx.beginPath();
+            ctx.arc(...T(F), 5, 0, 7);
+            ctx.fill();
+          });
+        }
+        sl.querySelector(".readout").textContent = `A symbol from the picture: ${target.hull.length} hull points, ${defects.length} convexity defects, isContourConvex = False`;
+        Deck.scene("#hull", {
+          enter() {
+            tl?.kill();
+            st.h = st.d = 0;
+            draw();
+            tl = gsap.timeline({ delay: 0.4 }).to(st, { h: 1, duration: 1.6, ease: "none", onUpdate: draw }).to(st, { d: 1, duration: 1, ease: "none", onUpdate: draw });
+          },
+          leave: () => tl?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ matchShapes
+      {
+        const sl = document.querySelector("#match");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const read = sl.querySelector(".readout");
+        const big = SHAPES.filter((s) => s.area > 200);
+        function render(ref) {
+          show(cv, binImg);
+          ctx.fillStyle = "rgba(5,6,15,0.6)";
+          ctx.fillRect(0, 0, W, H);
+          if (!ref) return;
+          ctx.font = labelFont(cv, 19);
+          ctx.textAlign = "center";
+          const ds = big.map((s) => [s, matchShapesI1(ref.mom.hu, s.mom.hu)]);
+          const placed = [];
+          ds.forEach(([s, d]) => {
+            const close = d < 0.05;
+            ctx.strokeStyle = s === ref ? "#ec4899" : close ? "#86efac" : "rgba(255,255,255,0.25)";
+            ctx.lineWidth = s === ref ? 3 : 2;
+            poly(ctx, s.contour);
+            ctx.stroke();
+            if (s !== ref) {
+              ctx.fillStyle = close ? "#86efac" : "#cbd5e1";
+              placeLabel(ctx, placed, d.toFixed(3), s.cx, s.y + s.h + 15);
+            }
+          });
+          read.innerHTML = `matchShapes(selected, other,<br>&nbsp; CONTOURS_MATCH_I1, 0)<br><span style="color:#86efac">green</span> = distance &lt; 0.05<br>computed from each shape's pixel moments<br>click a shape to pick another`;
+        }
+        cv.addEventListener("click", (e) => {
+          const s = shapeAt(...canvasPoint(cv, e));
+          if (s && s.area > 200) render(s);
+        });
+        render(big.filter((s) => s.area > 800).sort((a, b) => a.area / (a.w * a.h) - b.area / (b.w * b.h))[0]);
+      }
+
+      // ------------------------------------------------------------ approxPolyDP
+      {
+        const sl = document.querySelector("#approx");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const input = sl.querySelector("input");
+        const read = sl.querySelector(".readout");
+        function render() {
+          const k = +input.value;
+          sl.querySelector("output").textContent = k.toFixed(3);
+          show(cv, binImg);
+          ctx.fillStyle = "rgba(5,6,15,0.6)";
+          ctx.fillRect(0, 0, W, H);
+          ctx.font = labelFont(cv, 19);
+          ctx.textAlign = "center";
+          const counts = { Triangle: 0, Rectangle: 0, Circle: 0 };
+          const placed = [];
+          SHAPES.filter((s) => s.area > 40).forEach((s) => {
+            const ap = approxPolyDP(s.contour, k * s.perim);
+            const name = ap.length === 3 ? "Triangle" : ap.length === 4 ? "Rectangle" : ap.length > 4 ? "Circle" : "?";
+            if (counts[name] !== undefined) counts[name]++;
+            ctx.strokeStyle = name === "Triangle" ? "#fbbf24" : name === "Rectangle" ? "#f87171" : "#22d3ee";
+            ctx.lineWidth = 2;
+            poly(ctx, ap);
+            ctx.stroke();
+            ctx.fillStyle = ctx.strokeStyle;
+            ap.forEach(([x, y]) => ctx.fillRect(x - 2, y - 2, 4, 4));
+            ctx.fillStyle = "#e2e8f0";
+            placeLabel(ctx, placed, `${ap.length}`, s.cx, s.y + s.h + 15);
+          });
+          read.innerHTML = `number under each shape = len(approx)<br><span style="color:#fbbf24">Triangle ${counts.Triangle}</span> · <span style="color:#f87171">Rectangle ${counts.Rectangle}</span> · <span style="color:#22d3ee">Circle ${counts.Circle}</span>`;
+        }
+        input.addEventListener("input", render);
+        render();
+      }
+    </script>
+  </body>
+</html>

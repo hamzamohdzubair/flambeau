@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data Types</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      pre code {
+        font-variant-ligatures: none;
+      }
+
+      .slide pre {
+        width: min(100%, 60rem);
+        font-size: 1.5rem;
+      }
+
+      .slide pre.big {
+        font-size: 1.75rem;
+        width: min(100%, 56rem);
+      }
+
+      #recap .card p {
+        font-size: 1.2rem;
+      }
+
+      .slide pre.long {
+        font-size: 1.32rem;
+      }
+
+      .slide .hint {
+        font-size: 1.3rem;
+      }
+
+      /* ---------- Type sorter: each value drops into the bin of its type ---------- */
+      #sorter .chute {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        min-height: 5rem;
+        font: 500 2.2rem var(--font-mono);
+      }
+
+      #sorter .chute .expr {
+        color: var(--text);
+      }
+
+      #sorter .chute .arrow {
+        color: var(--faint);
+      }
+
+      .bins {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.8rem;
+        width: 100%;
+      }
+
+      .bin {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+        min-height: 16rem;
+        padding: 1rem 0.5rem;
+        border-radius: 0 0 var(--radius) var(--radius);
+        border: 2px solid rgba(167, 139, 250, 0.45);
+        border-top: none;
+        background: linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.1));
+      }
+
+      .bin h3 {
+        margin: 0 0 0.3rem;
+        font: 600 1.5rem var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .bin.hit {
+        border-color: var(--cyan);
+      }
+
+      .vchip {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1.15;
+        padding: 0.25rem 0.8rem;
+        border-radius: 12px;
+        border: 1px solid rgba(240, 171, 252, 0.6);
+        background: rgba(236, 72, 153, 0.16);
+        color: #fbcfe8;
+        font: 500 1.25rem var(--font-mono);
+        white-space: nowrap;
+      }
+
+      .vchip small {
+        color: var(--faint);
+        font-size: 0.8em;
+      }
+
+      .bin[data-t="int"] h3 {
+        color: #a5f3fc;
+      }
+
+      .bin[data-t="float"] h3 {
+        color: #f0abfc;
+      }
+
+      .bin[data-t="str"] h3 {
+        color: var(--green);
+      }
+
+      .bin[data-t="bool"] h3 {
+        color: var(--amber);
+      }
+
+      .bin[data-t="NoneType"] h3 {
+        color: var(--muted);
+      }
+
+      .replay {
+        padding: 0.25rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 1rem var(--font);
+        cursor: pointer;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · basics</span>
+      <h1 class="grad-each"><span>Data</span> <span>Types</span></h1>
+      <p>Every value in Python has a type: whole numbers, decimals, text, truth values and "nothing".</p>
+    </section>
+
+    <!-- ================================================================ int -->
+    <section class="slide">
+      <h2>Integer type</h2>
+      <pre class="steps"><code class="language-python">
+        # integer
+        age = 25
+        type(age)
+        # ans: &lt;class 'int'&gt;
+        count = -10
+        # ans: negative integer
+        big_num = 1000000
+        # ans: large integer
+      </code></pre>
+      <p class="hint step">Whole numbers, positive or negative, with no size limit.</p>
+    </section>
+
+    <!-- ================================================================ float -->
+    <section class="slide">
+      <h2>Float type</h2>
+      <pre class="steps"><code class="language-python">
+        # float
+        price = 19.99
+        type(price)
+        # ans: &lt;class 'float'&gt;
+        pi = 3.14159
+        # ans: float value
+        negative = -5.5
+        # ans: negative float
+      </code></pre>
+      <p class="hint step">Numbers with a decimal point.</p>
+    </section>
+
+    <!-- ================================================================ str -->
+    <section class="slide">
+      <h2>String type</h2>
+      <pre class="steps long"><code class="language-python">
+        # string
+        message = "Hello"
+        type(message)
+        # ans: &lt;class 'str'&gt;
+        name = 'Alice'
+        # ans: single quotes
+        text = """multi
+        line"""
+        # ans: multiline string
+      </code></pre>
+      <p class="hint step">Text, in single, double or triple quotes.</p>
+    </section>
+
+    <!-- ================================================================ bool -->
+    <section class="slide">
+      <h2>Boolean type</h2>
+      <pre class="steps big"><code class="language-python">
+        # boolean
+        is_valid = True
+        type(is_valid)
+        # ans: &lt;class 'bool'&gt;
+        is_empty = False
+        # ans: False value
+      </code></pre>
+      <p class="hint step">Exactly two values, <code>True</code> and <code>False</code>, with capital letters.</p>
+    </section>
+
+    <!-- ================================================================ None -->
+    <section class="slide">
+      <h2>NoneType</h2>
+      <pre class="steps big"><code class="language-python">
+        # None type
+        x = None
+        type(x)
+        # ans: &lt;class 'NoneType'&gt;
+        # ans: represents absence of value
+        result = None
+        # ans: no value yet
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ type() -->
+    <section class="slide">
+      <h2>Checking types</h2>
+      <pre class="steps long"><code class="language-python">
+        # type() function
+        x = 5
+        type(x)
+        # ans: &lt;class 'int'&gt;
+        y = "hello"
+        type(y)
+        # ans: &lt;class 'str'&gt;
+        z = 3.14
+        type(z)
+        # ans: &lt;class 'float'&gt;
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ sorter -->
+    <section class="slide" id="sorter">
+      <h2>Every value lands in one type</h2>
+      <div class="chute"><span class="expr"></span><span class="arrow"></span><span class="slot"></span></div>
+      <div class="bins">
+        <div class="bin" data-t="int"><h3>int</h3></div>
+        <div class="bin" data-t="float"><h3>float</h3></div>
+        <div class="bin" data-t="str"><h3>str</h3></div>
+        <div class="bin" data-t="bool"><h3>bool</h3></div>
+        <div class="bin" data-t="NoneType"><h3>NoneType</h3></div>
+      </div>
+      <button class="replay" type="button">Replay</button>
+      <p class="hint">Python evaluates the expression first; the type belongs to the resulting value.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Name the type before you reveal it.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre class="long"><code class="language-python">
+        # what type is this?
+        x = 5.0
+        # ans: &lt;class 'float'&gt;
+        # what type is this?
+        y = "123"
+        # ans: &lt;class 'str'&gt;
+        # what type results?
+        result = 10 / 2
+        # ans: &lt;class 'float'&gt;
+        # what type is this?
+        z = True + False
+        # ans: &lt;class 'int'&gt; (True=1, False=0)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre class="long"><code class="language-python">
+        # what type?
+        a = 5
+        b = 2
+        c = a / b
+        # ans: &lt;class 'float'&gt;
+        # what type?
+        x = 10
+        y = 3
+        z = x // y
+        # ans: &lt;class 'int'&gt;
+      </code></pre>
+      <p class="hint step"><code>/</code> always gives a float; <code>//</code> on two ints gives an int.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        # tricky: what type?
+        value = "5" + "3"
+        # ans: &lt;class 'str'&gt; (result is "53")
+        # what is the type?
+        x = None
+        # ans: &lt;class 'NoneType'&gt;
+        # what type is this expression?
+        result = 5 &gt; 3
+        # ans: &lt;class 'bool'&gt;
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # what happens?
+        x = int(True)
+        # ans: 1, type is &lt;class 'int'&gt;
+        # mixing types?
+        x = 5 + 2.5
+        # ans: 7.5, type is &lt;class 'float'&gt;
+        # edge case?
+        x = bool([])
+        # ans: False, type is &lt;class 'bool'&gt;
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        # what type?
+        x = 0
+        # ans: &lt;class 'int'&gt;
+        # empty string type?
+        s = ""
+        # ans: &lt;class 'str'&gt;
+        # what type?
+        x = float(5)
+        # ans: 5.0, &lt;class 'float'&gt;
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 72rem)">
+        <div class="card step"><h3><code>int</code> and <code>float</code></h3><p>Whole numbers and decimals. Mixing them, or dividing with <code>/</code>, gives a float.</p></div>
+        <div class="card step"><h3><code>str</code></h3><p>Text in quotes. <code>"5" + "3"</code> joins text: <code>"53"</code>.</p></div>
+        <div class="card step"><h3><code>bool</code></h3><p><code>True</code> and <code>False</code>; they behave like 1 and 0 in arithmetic.</p></div>
+        <div class="card step"><h3><code>None</code></h3><p>The single value of <code>NoneType</code>: "no value yet".</p></div>
+        <div class="card step"><h3><code>type(x)</code></h3><p>Asks any value for its type.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ type sorter
+      const VALUES = [
+        ["25", "25", "int"],
+        ["19.99", "19.99", "float"],
+        ['"Hello"', "'Hello'", "str"],
+        ["True", "True", "bool"],
+        ["None", "None", "NoneType"],
+        ["10 / 2", "5.0", "float"],
+        ["10 // 3", "3", "int"],
+        ['"5" + "3"', "'53'", "str"],
+        ["5 > 3", "True", "bool"],
+        ["True + False", "1", "int"],
+        ["5 + 2.5", "7.5", "float"],
+        ["bool([])", "False", "bool"],
+        ['""', "''", "str"],
+      ];
+      const slide = document.querySelector("#sorter");
+      const expr = slide.querySelector(".expr");
+      const arrow = slide.querySelector(".arrow");
+      const slot = slide.querySelector(".slot");
+      const bins = Object.fromEntries([...slide.querySelectorAll(".bin")].map((b) => [b.dataset.t, b]));
+      let tl;
+
+      const chip = ([src, val]) => {
+        const c = document.createElement("span");
+        c.className = "vchip";
+        c.innerHTML = src === val ? val : `${val}<small>${src}</small>`;
+        return c;
+      };
+
+      function clear() {
+        tl?.kill();
+        slide.querySelectorAll(".bin .vchip").forEach((c) => c.remove());
+        expr.textContent = arrow.textContent = slot.textContent = "";
+      }
+
+      function play() {
+        clear();
+        tl = gsap.timeline();
+        VALUES.forEach((v, i) => {
+          const [src, val, t] = v;
+          tl.call(() => {
+            expr.textContent = src;
+            arrow.textContent = src === val ? "" : "→";
+            slot.textContent = src === val ? "" : val;
+          });
+          tl.fromTo(slide.querySelector(".chute"), { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.2 });
+          tl.call(
+            () => {
+              // FLIP: put the chip in its bin, then animate it from the chute
+              const from = slot.textContent ? slot.getBoundingClientRect() : expr.getBoundingClientRect();
+              const c = chip(v);
+              bins[t].appendChild(c);
+              const to = c.getBoundingClientRect();
+              // the canvas is scaled: convert screen px to canvas px
+              const k = slide.getBoundingClientRect().width / slide.offsetWidth || 1;
+              gsap.from(c, { x: (from.left - to.left) / k, y: (from.top - to.top) / k, duration: 0.5, ease: "power2.in" });
+              gsap.fromTo(bins[t], { borderColor: "#22d3ee" }, { borderColor: "rgba(167,139,250,0.45)", duration: 0.9, delay: 0.55 });
+            },
+            null,
+            "+=0.25"
+          );
+          tl.to({}, { duration: 0.5 });
+        });
+        tl.call(() => (expr.textContent = arrow.textContent = slot.textContent = ""));
+      }
+      slide.querySelector(".replay").addEventListener("click", play);
+      Deck.scene(slide, { enter: play, leave: clear });
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

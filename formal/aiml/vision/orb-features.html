@@ -1,0 +1,1449 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ORB Features</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.45rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 1.6rem;
+        font-size: 1rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 11rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 72rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.3rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        font-size: 1.2rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      pre.ex,
+      pre.steps {
+        width: 100%;
+        font-size: 1.15rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 1.15rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 1.15rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+
+      .acro {
+        font-family: var(--font-display);
+        font-size: 2.6rem;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      .acro b {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .acro b.hl {
+        background: var(--gradient-text);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      #what .cols {
+        width: min(100%, 64rem);
+      }
+
+      /* ---------- Algorithm steps ---------- */
+      .flow {
+        display: grid;
+        gap: 0.9rem;
+        width: min(100%, 60rem);
+        counter-reset: s;
+      }
+
+      .flow > div {
+        display: grid;
+        grid-template-columns: 2.8rem 1fr;
+        gap: 1.2rem;
+        align-items: center;
+        padding: 0.9rem 1.3rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      .flow > div::before {
+        counter-increment: s;
+        content: counter(s);
+        display: grid;
+        place-items: center;
+        width: 2.6rem;
+        height: 2.6rem;
+        border-radius: 50%;
+        background: var(--gradient);
+        font-family: var(--font-mono);
+        color: #fff;
+      }
+
+      .flow p {
+        margin: 0;
+        font-size: 1.35rem;
+        color: var(--muted);
+      }
+
+      .flow p b {
+        color: var(--text);
+      }
+
+      /* ---------- FAST ring ---------- */
+      #fast .cols {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 3rem;
+        width: 100%;
+      }
+
+      .ring {
+        --c: 3.6rem;
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(7, var(--c));
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+        justify-self: center;
+      }
+
+      .ring span {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: var(--c);
+        height: var(--c);
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: calc(var(--c) * 0.32);
+        transition: outline-color 0.2s, box-shadow 0.2s;
+        outline: 3px solid transparent;
+        outline-offset: -3px;
+      }
+
+      .ring span i {
+        position: absolute;
+        top: 1px;
+        left: 3px;
+        font-style: normal;
+        font-size: calc(var(--c) * 0.22);
+        color: var(--faint);
+      }
+
+      .ring span.on i {
+        color: #fff;
+      }
+
+      .ring span.b {
+        outline-color: #c4b5fd;
+      }
+
+      .ring span.d {
+        outline-color: #22d3ee;
+      }
+
+      .ring span.s {
+        outline-color: rgba(255, 255, 255, 0.25);
+      }
+
+      .ring span.arc {
+        box-shadow: 0 0 16px rgba(236, 72, 153, 0.9);
+        outline-color: #ec4899;
+      }
+
+      .ring span.center {
+        outline-color: #fbbf24;
+      }
+
+      .fastinfo {
+        display: grid;
+        gap: 0.7rem;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.2rem;
+        font-size: 1rem;
+        color: var(--muted);
+      }
+
+      .legend i {
+        display: inline-block;
+        width: 0.8rem;
+        height: 0.8rem;
+        margin-right: 0.35rem;
+        border-radius: 3px;
+        border: 2px solid;
+        vertical-align: -1px;
+      }
+
+      .verdict {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        min-height: 1.6em;
+      }
+
+      /* ---------- Orientation + BRIEF patches ---------- */
+      .patchrow {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 3rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      canvas.patch {
+        width: 19.5rem;
+        height: auto;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.5), 0 20px 50px -12px rgba(0, 0, 0, 0.8);
+      }
+
+      canvas.patch.sq {
+        width: 26rem;
+        border-radius: 10px;
+      }
+
+      .bitstr {
+        font-family: var(--font-mono);
+        font-size: 1.6rem;
+        letter-spacing: 0.08em;
+        word-break: break-all;
+        color: var(--text);
+        min-height: 1.6em;
+      }
+
+      .bitstr .n {
+        color: var(--pink);
+      }
+
+      /* ---------- Keypoints lab ---------- */
+      #kp .lab {
+        display: grid;
+        grid-template-columns: 40rem minmax(0, 1fr);
+        gap: 2rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      #kp canvas.img {
+        width: 100%;
+      }
+
+      #kp .side {
+        display: grid;
+        gap: 1.3rem;
+      }
+
+      #kp .ctl {
+        display: grid;
+        gap: 1rem;
+        justify-content: stretch;
+      }
+
+      #kp .ctl label {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.2rem 0.6rem;
+      }
+
+      #kp .ctl input {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+      }
+
+      #kp .readout,
+      #kp .note {
+        text-align: left;
+        margin: 0;
+      }
+
+      /* ---------- Memory bars ---------- */
+      .mem {
+        display: grid;
+        grid-template-columns: 5rem 1fr;
+        gap: 0.5rem 1rem;
+        align-items: center;
+        width: min(100%, 64rem);
+        font-family: var(--font-mono);
+        font-size: 1.1rem;
+      }
+
+      .mem .bar {
+        height: 2rem;
+        border-radius: 6px;
+        width: 0;
+        display: flex;
+        align-items: center;
+        padding-left: 0.6rem;
+        color: #fff;
+        white-space: nowrap;
+      }
+
+      .mem .orb {
+        background: linear-gradient(90deg, #8b5cf6, #ec4899);
+      }
+
+      .mem .sift {
+        background: linear-gradient(90deg, #0891b2, #22d3ee);
+      }
+
+      #vs .cols {
+        width: min(100%, 64rem);
+      }
+
+      /* ---------- Pyramid ---------- */
+      .pyr {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .pyr figure {
+        gap: 0.25rem;
+      }
+
+      .pyr canvas {
+        border-radius: 6px;
+        box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.8);
+      }
+
+      .pyr figcaption {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <h1>ORB Features</h1>
+      <p>Fast corners, a binary fingerprint and an orientation: features quick enough for a phone.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide" id="what">
+      <h2>What is ORB?</h2>
+      <p class="acro"><b class="hl">O</b>riented <b class="hl">F</b>AST and <b class="hl">R</b>otated <b class="hl">B</b>RIEF</p>
+      <div class="cols top">
+        <div class="card">
+          <h3>A combination</h3>
+          <ul>
+            <li class="step"><strong>FAST:</strong> corner detection</li>
+            <li class="step"><strong>BRIEF:</strong> binary descriptor</li>
+            <li class="step"><strong>Additions:</strong> orientation, scale pyramid</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Advantages</h3>
+          <ul>
+            <li class="step">Very fast (real-time capable)</li>
+            <li class="step">Binary descriptor (fast matching)</li>
+            <li class="step">Free and open source</li>
+            <li class="step">Good performance</li>
+          </ul>
+        </div>
+      </div>
+      <p class="step center"><strong>Use cases:</strong> mobile devices, embedded systems, real-time applications.</p>
+    </section>
+
+    <!-- ================================================================ algorithm -->
+    <section class="slide">
+      <h2>The ORB algorithm</h2>
+      <div class="flow">
+        <div class="step"><p><b>FAST keypoint detection:</b> find corners quickly</p></div>
+        <div class="step"><p><b>Harris corner measure:</b> rank them and keep the top N</p></div>
+        <div class="step"><p><b>Scale pyramid:</b> detect at multiple scales</p></div>
+        <div class="step"><p><b>Orientation assignment:</b> the intensity centroid method</p></div>
+        <div class="step"><p><b>Rotated BRIEF:</b> a binary descriptor aligned with that orientation</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ FAST -->
+    <section class="slide" id="fast">
+      <h2>FAST, the detector inside ORB</h2>
+      <div class="cols">
+        <div class="ring"></div>
+        <div class="fastinfo">
+          <p><strong>FAST</strong> (Features from Accelerated Segment Test) checks the <strong>16 pixels on a circle</strong> around a candidate.</p>
+          <p>If <strong>N consecutive</strong> pixels are all brighter than \(p + t\) or all darker than \(p - t\), it is a corner. ORB uses N = 9.</p>
+          <div class="legend"><span><i style="border-color: #c4b5fd"></i>brighter</span><span><i style="border-color: #22d3ee"></i>darker</span><span><i style="border-color: rgba(255,255,255,.3)"></i>similar</span><span><i style="border-color: #ec4899"></i>longest run</span></div>
+          <div class="verdict"></div>
+          <div class="chips" data-interactive style="justify-content: flex-start">
+            <button class="chip on" data-ex="corner">Corner</button>
+            <button class="chip" data-ex="edge">Edge</button>
+            <button class="chip" data-ex="flat">Flat</button>
+            <button class="chip" data-ex="dot">Bright dot</button>
+          </div>
+          <p class="muted" style="font-size: 1.05rem">Only simple comparisons, so it is very fast. <strong>ORB's improvement:</strong> rank the corners with the Harris measure and keep the best.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ orientation -->
+    <section class="slide" id="orient">
+      <h2>Orientation assignment</h2>
+      <p class="lead"><strong>Problem:</strong> BRIEF is not rotation invariant. <strong>Solution:</strong> compute an orientation, then rotate the BRIEF pattern to match.</p>
+      <div class="patchrow">
+        <figure>
+          <canvas class="patch" width="496" height="496"></canvas>
+          <div class="ctl" data-interactive><label>rotate the image <input type="range" min="-180" max="180" value="0" /><output>0°</output></label></div>
+        </figure>
+        <div>
+          <p><strong>Intensity centroid</strong> of the patch around the keypoint:</p>
+          <ol>
+            <li class="step">Moments: \(m_{pq} = \sum x^p\, y^q\, I(x, y)\)</li>
+            <li class="step">Centroid: \(C = (m_{10}/m_{00},\ m_{01}/m_{00})\)</li>
+            <li class="step">Orientation: \(\theta = \operatorname{atan2}(m_{01}, m_{10})\)</li>
+          </ol>
+          <p class="readout" style="text-align: left"></p>
+          <p class="step"><strong>Result:</strong> turn the image and θ turns with it, so a descriptor measured relative to θ stays the same: rotation invariance.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ BRIEF -->
+    <section class="slide" id="brief">
+      <h2>The BRIEF descriptor</h2>
+      <div class="patchrow">
+        <canvas class="patch sq" width="496" height="496"></canvas>
+        <div>
+          <p><strong>BRIEF:</strong> Binary Robust Independent Elementary Features.</p>
+          <ol>
+            <li>Select pairs of pixels in the patch</li>
+            <li>Compare intensities: \(I(p_1) &lt; I(p_2)\) gives 1, otherwise 0</li>
+            <li>Concatenate the bits into a binary string</li>
+          </ol>
+          <p class="bitstr"></p>
+          <p><strong>256 pixel pairs → 256 comparisons → 256 bits</strong> (32 bytes). Very fast to compute and to match: XOR and a bit count.</p>
+          <div class="chips" data-interactive style="justify-content: flex-start"><button class="chip ghost" data-act="replay">Replay</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ params -->
+    <section class="slide">
+      <h2>ORB parameters</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        # create ORB detector
+        orb = cv2.ORB_create()  # ans:
+        # detailed parameters
+        orb = cv2.ORB_create(nfeatures=500, scaleFactor=1.2, nlevels=8,  # ans:
+                             edgeThreshold=31, firstLevel=0, WTA_K=2,  # ans:
+                             scoreType=cv2.ORB_HARRIS_SCORE,  # ans:
+                             patchSize=31, fastThreshold=20)  # ans:
+        # nfeatures: max keypoints to retain
+        # ans: 500 strongest features
+        # scaleFactor: pyramid scale factor
+        # ans: 1.2 means each level is 1/1.2 = 83% of the previous
+        # nlevels: number of pyramid levels
+        # ans: 8 levels for multi-scale detection
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>ORB detection</h2>
+      <pre class="steps"><code class="language-python">
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        orb = cv2.ORB_create(nfeatures=1000)
+        # detect keypoints only
+        keypoints = orb.detect(gray, None)  # ans:
+        # detect and compute descriptors
+        keypoints, descriptors = orb.detectAndCompute(gray, None)  # ans:
+        # descriptor is binary
+        print(descriptors.shape)  # ans:
+        # ans: (N, 32): 32 bytes = 256 bits
+        print(descriptors.dtype)  # ans:
+        # ans: uint8
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ live keypoints -->
+    <section class="slide top" id="kp">
+      <h2>ORB keypoints, live</h2>
+      <div class="lab">
+        <canvas class="img" width="1280" height="720"></canvas>
+        <div class="side">
+          <div class="ctl" data-interactive>
+            <label>nfeatures <input type="range" name="nfeatures" min="20" max="800" step="10" value="200" /><output></output></label>
+            <label>fastThreshold <input type="range" name="fastThreshold" min="5" max="60" value="20" /><output></output></label>
+            <label>nlevels <input type="range" name="nlevels" min="1" max="6" value="4" /><output></output></label>
+            <label>scaleFactor <input type="range" name="scaleFactor" min="1.1" max="2" step="0.1" value="1.2" /><output></output></label>
+          </div>
+          <p class="readout">computing…</p>
+          <p class="muted note" style="font-size: 1rem">Drawn like <code>DRAW_RICH_KEYPOINTS</code>: circle size = pyramid level, line = orientation. Colour = level.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Drawing ORB keypoints</h2>
+      <pre class="steps"><code class="language-python">
+        orb = cv2.ORB_create()
+        kp, des = orb.detectAndCompute(gray, None)
+        # simple keypoint drawing
+        img_kp = cv2.drawKeypoints(img, kp, None, color=(0, 255, 0))  # ans:
+        # rich keypoints (with size and orientation)
+        img_kp = cv2.drawKeypoints(img, kp, None,  # ans:
+                                   flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)  # ans:
+        # ans: circles show scale, lines show orientation
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ matching -->
+    <section class="slide">
+      <h2>ORB matching</h2>
+      <p class="lead"><strong>Distance metric:</strong> Hamming distance, the count of differing bits. <strong>Fast:</strong> XOR plus a bit count.</p>
+      <pre class="steps"><code class="language-python">
+        # create ORB matcher (Hamming distance)
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)  # ans:
+        # detect in two images
+        orb = cv2.ORB_create()
+        kp1, des1 = orb.detectAndCompute(gray1, None)
+        kp2, des2 = orb.detectAndCompute(gray2, None)
+        # match
+        matches = bf.match(des1, des2)  # ans:
+        matches = sorted(matches, key=lambda x: x.distance)  # ans:
+      </code></pre>
+      <p class="muted center">See it run on a real photo in <a href="keypoint-matching.html#8">Keypoint Matching</a>.</p>
+    </section>
+
+    <!-- ================================================================ ORB vs SIFT -->
+    <section class="slide" id="vs">
+      <h2>ORB vs SIFT</h2>
+      <div class="cols top">
+        <div class="card">
+          <h3>ORB advantages</h3>
+          <ul>
+            <li class="step"><strong>Speed:</strong> 10 to 100× faster</li>
+            <li class="step"><strong>Binary:</strong> fast matching (Hamming)</li>
+            <li class="step"><strong>Free:</strong> no patent issues</li>
+            <li class="step"><strong>Memory:</strong> 32 bytes vs 512 bytes (SIFT)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>SIFT advantages</h3>
+          <ul>
+            <li class="step"><strong>Accuracy:</strong> more distinctive</li>
+            <li class="step"><strong>Robustness:</strong> better invariance</li>
+            <li class="step"><strong>Difficult scenes:</strong> performs better</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mem step" data-anim="fade">
+        <span>ORB</span><div class="bar orb">32 bytes: 256 bits</div>
+        <span>SIFT</span><div class="bar sift">512 bytes: 128 floats × 4 bytes</div>
+      </div>
+      <p class="step center"><strong>Choice:</strong> ORB for speed, SIFT for accuracy.</p>
+    </section>
+
+    <!-- ================================================================ pyramid -->
+    <section class="slide" id="pyramid">
+      <h2>Scale pyramid</h2>
+      <p class="lead"><strong>Why?</strong> The same feature can appear at different sizes, so ORB detects features at several scales. Level <em>k</em> is the image shrunk by \(\text{scaleFactor}^k\).</p>
+      <div class="pyr"></div>
+      <div class="ctl" data-interactive>
+        <label>nlevels <input type="range" name="n" min="2" max="10" value="8" /><output></output></label>
+        <label>scaleFactor <input type="range" name="f" min="1.1" max="2" step="0.1" value="1.2" /><output></output></label>
+      </div>
+      <p class="readout"></p>
+    </section>
+
+    <!-- ================================================================ WTA_K -->
+    <section class="slide">
+      <h2>The WTA_K parameter</h2>
+      <p class="lead"><strong>WTA_K</strong> is the number of points compared in each BRIEF test.</p>
+      <div class="cards" style="width: 100%">
+        <div class="card step"><h3><code>WTA_K=2</code></h3><p>Compare 2 points: one bit per test (the default, 256 bits). Match with <code>NORM_HAMMING</code>.</p></div>
+        <div class="card step"><h3><code>WTA_K=3</code></h3><p>Compare 3 points; the test outputs which is brightest (2 bits). More robust.</p></div>
+        <div class="card step"><h3><code>WTA_K=4</code></h3><p>Compare 4 points (2 bits). Even more robust. For 3 or 4, match with <code>NORM_HAMMING2</code>.</p></div>
+      </div>
+      <p class="step center"><strong>Trade-off:</strong> robustness vs speed.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What does ORB stand for?</p><p class="answer">Oriented FAST and Rotated BRIEF.</p></div>
+        <div class="q"><p>Which detector does ORB use?</p><p class="answer">The FAST corner detector.</p></div>
+        <div class="q"><p>Which descriptor does ORB use?</p><p class="answer">The BRIEF binary descriptor, rotated.</p></div>
+        <div class="q"><p>How many bits in an ORB descriptor?</p><p class="answer">256 bits (32 bytes).</p></div>
+        <div class="q"><p>Which distance metric for ORB?</p><p class="answer">Hamming distance (count of differing bits).</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>Why is ORB fast?</p><p class="answer">A binary descriptor, simple comparisons and fast matching.</p></div>
+        <div class="q"><p>How does ORB handle rotation?</p><p class="answer">It assigns an orientation using the intensity centroid.</p></div>
+        <div class="q"><p>What is <code>scaleFactor</code>?</p><p class="answer">The scale ratio between pyramid levels.</p></div>
+        <div class="q"><p>The advantage of binary descriptors?</p><p class="answer">Fast to compute and to match (XOR + bit count).</p></div>
+        <div class="q"><p>The ORB vs SIFT trade-off?</p><p class="answer">ORB is faster but less accurate; SIFT is slower but more robust.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # create ORB with 2000 features
+        orb = cv2.ORB_create(nfeatures=2000)  # ans:
+        # detect and compute
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        keypoints, descriptors = orb.detectAndCompute(gray, None)  # ans:
+        # check descriptor shape
+        print(descriptors.shape)  # ans:
+        # ans: (N, 32)
+        # create Hamming matcher
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # match ORB features
+        orb = cv2.ORB_create()
+        kp1, des1 = orb.detectAndCompute(gray1, None)
+        kp2, des2 = orb.detectAndCompute(gray2, None)
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        matches = bf.match(des1, des2)  # ans:
+        matches = sorted(matches, key=lambda x: x.distance)  # ans:
+        img_matches = cv2.drawMatches(img1, kp1, img2, kp2, matches[:50], None, flags=2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # ORB with more pyramid levels
+        orb = cv2.ORB_create(nlevels=12, scaleFactor=1.2)  # ans:
+        # ans: 12 levels for a wider scale range
+        # draw rich keypoints
+        orb = cv2.ORB_create()
+        kp, des = orb.detectAndCompute(gray, None)
+        img_kp = cv2.drawKeypoints(img, kp, None,  # ans:
+                                   flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)  # ans:
+        # ORB with WTA_K=3
+        orb = cv2.ORB_create(WTA_K=3)  # ans:
+        # ans: more robust descriptor; match it with NORM_HAMMING2
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      // ------------------------------------------------------------ ORB, small and in JavaScript
+      // FAST-9 corners on an image pyramid, ranked by the Harris measure,
+      // oriented by the intensity centroid, described by 256 rotated BRIEF tests.
+      const ORB = (() => {
+        const CIRCLE = [[0, -3], [1, -3], [2, -2], [3, -1], [3, 0], [3, 1], [2, 2], [1, 3], [0, 3], [-1, 3], [-2, 2], [-3, 1], [-3, 0], [-3, -1], [-2, -2], [-1, -3]];
+        // Fixed, seeded test pattern: 256 point pairs inside the 31x31 patch
+        let seed = 12345;
+        const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+        const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
+        const PAIRS = Array.from({ length: 256 }, () => [0, 0, 0, 0].map(() => Math.max(-13, Math.min(13, Math.round(gauss() * 6.2)))));
+        const POP = new Uint8Array(256).map((_, i) => i.toString(2).replace(/0/g, "").length);
+
+        function resize(g, w, h, nw, nh) {
+          const out = new Float32Array(nw * nh);
+          const sx = w / nw, sy = h / nh;
+          for (let y = 0; y < nh; y++)
+            for (let x = 0; x < nw; x++) {
+              const fx = (x + 0.5) * sx - 0.5, fy = (y + 0.5) * sy - 0.5;
+              const x0 = Math.max(0, Math.floor(fx)), y0 = Math.max(0, Math.floor(fy));
+              const x1 = Math.min(w - 1, x0 + 1), y1 = Math.min(h - 1, y0 + 1);
+              const ax = Math.min(1, Math.max(0, fx - x0)), ay = Math.min(1, Math.max(0, fy - y0));
+              out[y * nw + x] = (g[y0 * w + x0] * (1 - ax) + g[y0 * w + x1] * ax) * (1 - ay) + (g[y1 * w + x0] * (1 - ax) + g[y1 * w + x1] * ax) * ay;
+            }
+          return out;
+        }
+        function smooth(g, w, h) {
+          const k = [1, 4, 6, 4, 1];
+          const t = new Float32Array(w * h), o = new Float32Array(w * h);
+          for (let y = 0; y < h; y++)
+            for (let x = 0; x < w; x++) {
+              let s = 0;
+              for (let i = -2; i <= 2; i++) s += k[i + 2] * g[y * w + Math.min(w - 1, Math.max(0, x + i))];
+              t[y * w + x] = s / 16;
+            }
+          for (let y = 0; y < h; y++)
+            for (let x = 0; x < w; x++) {
+              let s = 0;
+              for (let i = -2; i <= 2; i++) s += k[i + 2] * t[Math.min(h - 1, Math.max(0, y + i)) * w + x];
+              o[y * w + x] = s / 16;
+            }
+          return o;
+        }
+        // FAST: N contiguous circle pixels all brighter than p + t or all darker than p - t
+        function fast(g, w, h, t, border, N = 9) {
+          const out = [];
+          const off = CIRCLE.map(([dx, dy]) => dy * w + dx);
+          const v = new Int8Array(32);
+          for (let y = border; y < h - border; y++)
+            for (let x = border; x < w - border; x++) {
+              const i = y * w + x, p = g[i];
+              for (let k = 0; k < 16; k++) {
+                const q = g[i + off[k]];
+                v[k] = v[k + 16] = q > p + t ? 1 : q < p - t ? -1 : 0;
+              }
+              let run = 0, best = 0, sign = 0;
+              for (let k = 0; k < 32; k++) {
+                if (v[k] !== 0 && v[k] === sign) run++;
+                else (sign = v[k]), (run = v[k] ? 1 : 0);
+                if (run > best) best = run;
+              }
+              if (best >= N) {
+                let score = 0;
+                for (let k = 0; k < 16; k++) score += Math.max(0, Math.abs(g[i + off[k]] - p) - t);
+                out.push({ x, y, score });
+              }
+            }
+          return out;
+        }
+        function harris(g, w, x, y, r = 3) {
+          let a = 0, b = 0, c = 0;
+          for (let j = -r; j <= r; j++)
+            for (let i = -r; i <= r; i++) {
+              const k = (y + j) * w + x + i;
+              const ix = g[k + 1] - g[k - 1], iy = g[k + w] - g[k - w];
+              a += ix * ix;
+              b += iy * iy;
+              c += ix * iy;
+            }
+          return a * b - c * c - 0.04 * (a + b) * (a + b);
+        }
+        // Orientation from the intensity centroid of a circular patch
+        function orientation(g, w, x, y, r = 15) {
+          let m01 = 0, m10 = 0;
+          for (let dy = -r; dy <= r; dy++) {
+            const span = Math.floor(Math.sqrt(r * r - dy * dy));
+            for (let dx = -span; dx <= span; dx++) {
+              const v = g[(y + dy) * w + x + dx];
+              m10 += dx * v;
+              m01 += dy * v;
+            }
+          }
+          return Math.atan2(m01, m10);
+        }
+        function describe(s, w, x, y, ang) {
+          const c = Math.cos(ang), si = Math.sin(ang);
+          const d = new Uint8Array(32);
+          PAIRS.forEach(([ax, ay, bx, by], k) => {
+            const pa = s[Math.round(y + ax * si + ay * c) * w + Math.round(x + ax * c - ay * si)];
+            const pb = s[Math.round(y + bx * si + by * c) * w + Math.round(x + bx * c - by * si)];
+            if (pa < pb) d[k >> 3] |= 1 << (k & 7);
+          });
+          return d;
+        }
+        // detectAndCompute(gray, w, h, opts) -> keypoints with .d descriptors
+        function detectAndCompute(gray, w, h, { nfeatures = 500, scaleFactor = 1.2, nlevels = 4, fastThreshold = 20 } = {}) {
+          const border = 20;
+          const weights = Array.from({ length: nlevels }, (_, l) => Math.pow(scaleFactor, -2 * l));
+          const wsum = weights.reduce((a, b) => a + b, 0);
+          const all = [];
+          for (let l = 0; l < nlevels; l++) {
+            const s = Math.pow(scaleFactor, l);
+            const lw = Math.round(w / s), lh = Math.round(h / s);
+            if (lw < 2 * border + 4 || lh < 2 * border + 4) break;
+            const g = l ? resize(gray, w, h, lw, lh) : gray;
+            let cs = fast(g, lw, lh, fastThreshold, border);
+            // 3x3 non-maximum suppression on the FAST score
+            const grid = new Map(cs.map((p) => [p.y * lw + p.x, p.score]));
+            cs = cs.filter((p) => {
+              for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) if ((i || j) && (grid.get((p.y + j) * lw + p.x + i) || 0) > p.score) return false;
+              return true;
+            });
+            cs.forEach((p) => (p.response = harris(g, lw, p.x, p.y)));
+            cs.sort((a, b) => b.response - a.response);
+            cs = cs.slice(0, Math.round((nfeatures * weights[l]) / wsum));
+            const sm = smooth(g, lw, lh);
+            for (const p of cs) {
+              const angle = orientation(g, lw, p.x, p.y);
+              all.push({ x: p.x * s, y: p.y * s, level: l, size: 31 * s, angle, response: p.response, d: describe(sm, lw, p.x, p.y, angle) });
+            }
+          }
+          return all;
+        }
+        function hamming(a, b) {
+          let n = 0;
+          for (let i = 0; i < 32; i++) n += POP[a[i] ^ b[i]];
+          return n;
+        }
+        // For each query descriptor: the best and second-best train descriptors
+        function knn2(A, B) {
+          return A.map((a, qi) => {
+            let b1 = 1e9, b2 = 1e9, i1 = -1, i2 = -1;
+            B.forEach((b, ti) => {
+              const dd = hamming(a.d, b.d);
+              if (dd < b1) (b2 = b1), (i2 = i1), (b1 = dd), (i1 = ti);
+              else if (dd < b2) (b2 = dd), (i2 = ti);
+            });
+            return [{ queryIdx: qi, trainIdx: i1, distance: b1 }, { queryIdx: qi, trainIdx: i2, distance: b2 }];
+          });
+        }
+        function solve(A, b) {
+          const n = b.length;
+          const M = A.map((r, i) => [...r, b[i]]);
+          for (let c = 0; c < n; c++) {
+            let p = c;
+            for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+            [M[c], M[p]] = [M[p], M[c]];
+            if (Math.abs(M[c][c]) < 1e-12) return null;
+            for (let r = 0; r < n; r++) {
+              if (r === c) continue;
+              const f = M[r][c] / M[c][c];
+              for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k];
+            }
+          }
+          return M.map((r, i) => r[n] / r[i]);
+        }
+        // Homography from 4 point pairs (the getPerspectiveTransform system)
+        function homography(src, dst) {
+          const A = [], b = [];
+          src.forEach(([x, y], i) => {
+            const [u, v] = dst[i];
+            A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]);
+            b.push(u);
+            A.push([0, 0, 0, x, y, 1, -v * x, -v * y]);
+            b.push(v);
+          });
+          const h = solve(A, b);
+          return h && [...h, 1];
+        }
+        const apply = (H, [x, y]) => {
+          const z = H[6] * x + H[7] * y + H[8];
+          return [(H[0] * x + H[1] * y + H[2]) / z, (H[3] * x + H[4] * y + H[5]) / z];
+        };
+        // RANSAC: fit to 4 random pairs, keep the model with the most inliers
+        function ransac(src, dst, thresh = 5, iters = 600) {
+          let best = null, bestMask = src.map(() => 0), bestN = 0;
+          if (src.length < 4) return { H: null, mask: bestMask };
+          for (let it = 0; it < iters; it++) {
+            const idx = new Set();
+            while (idx.size < 4) idx.add(Math.floor(Math.random() * src.length));
+            const ids = [...idx];
+            const H = homography(ids.map((i) => src[i]), ids.map((i) => dst[i]));
+            if (!H) continue;
+            const mask = src.map((p, i) => {
+              const [u, v] = apply(H, p);
+              return Math.hypot(u - dst[i][0], v - dst[i][1]) < thresh ? 1 : 0;
+            });
+            const n = mask.reduce((a, b) => a + b, 0);
+            if (n > bestN) (bestN = n), (best = H), (bestMask = mask);
+          }
+          return { H: best, mask: bestMask };
+        }
+        return { detectAndCompute, hamming, knn2, homography, apply, ransac, PAIRS, CIRCLE, fast, orientation };
+      })();
+      const gsap = await Deck.load("gsap");
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+        },
+      });
+
+      // ------------------------------------------------------------ FAST ring
+      {
+        const sl = document.querySelector("#fast");
+        const ring = sl.querySelector(".ring");
+        const verdict = sl.querySelector(".verdict");
+        const T = 20, P = 100;
+        // Circle pixel k (0..15) -> value, per example
+        const EX = {
+          corner: (k) => (k >= 3 && k <= 13 ? 40 : 150),
+          edge: (k) => (k >= 1 && k <= 7 ? 170 : k === 0 || k === 8 ? 100 : 40),
+          flat: (k) => 95 + ((k * 7) % 12),
+          dot: (k) => 30 + ((k * 5) % 15),
+        };
+        const pos = new Map(ORB.CIRCLE.map(([dx, dy], k) => [(dy + 3) * 7 + dx + 3, k]));
+        let cells = [];
+        function build(name) {
+          const f = EX[name];
+          ring.innerHTML = "";
+          cells = [];
+          for (let i = 0; i < 49; i++) {
+            const r = Math.floor(i / 7), c = i % 7;
+            let v;
+            if (pos.has(i)) v = f(pos.get(i));
+            else if (i === 24) v = name === "dot" ? 200 : P;
+            else {
+              // interior/background: blend of the nearest circle pixels
+              const ang = Math.atan2(r - 3, c - 3);
+              let k = Math.round(((ang + Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI)) / (Math.PI / 8)) % 16;
+              v = Math.hypot(r - 3, c - 3) < 1.5 ? (name === "dot" ? 160 : P) : f(k);
+            }
+            const span = document.createElement("span");
+            span.style.background = `rgb(${v},${v},${Math.min(255, v + 14)})`;
+            span.style.color = v > 120 ? "#05060f" : "#e2e8f0";
+            span.textContent = v;
+            if (pos.has(i)) {
+              span.dataset.k = pos.get(i);
+              span.insertAdjacentHTML("beforeend", `<i>${pos.get(i) + 1}</i>`);
+            }
+            if (i === 24) span.classList.add("center");
+            ring.appendChild(span);
+            cells[pos.has(i) ? pos.get(i) : -1] = span;
+          }
+          return f;
+        }
+        let tl = null;
+        function run(name) {
+          tl?.kill();
+          const f = build(name);
+          const p = name === "dot" ? 200 : P;
+          verdict.textContent = `centre p = ${p}, threshold t = ${T}`;
+          const cls = [];
+          for (let k = 0; k < 16; k++) {
+            const q = f(k);
+            cls.push(q > p + T ? "b" : q < p - T ? "d" : "s");
+          }
+          // longest circular run of one class (b or d)
+          let best = { len: 0, start: 0, cls: "" };
+          for (let s = 0; s < 16; s++) {
+            if (cls[s] === "s") continue;
+            let len = 0;
+            while (len < 16 && cls[(s + len) % 16] === cls[s]) len++;
+            if (len > best.len) best = { len, start: s, cls: cls[s] };
+          }
+          tl = gsap.timeline({ delay: 0.4 });
+          for (let k = 0; k < 16; k++) tl.call(() => cells[k].classList.add(cls[k], "on"), null, k * 0.16);
+          tl.call(() => {
+            for (let j = 0; j < best.len; j++) cells[(best.start + j) % 16].classList.add("arc");
+            const yes = best.len >= 9;
+            const kind = best.cls === "b" ? "brighter" : "darker";
+            verdict.innerHTML = best.len
+              ? `${best.len} consecutive ${kind} → <span style="color:${yes ? "var(--green)" : "var(--red)"}">${yes ? "corner" : "not a corner"}</span> (needs 9)`
+              : `no pixel differs by more than t → <span style="color:var(--red)">not a corner</span>`;
+          }, null, 16 * 0.16 + 0.3);
+        }
+        chipGroup(sl.querySelector(".chips"), "button", (b) => run(b.dataset.ex));
+        Deck.scene("#fast", {
+          enter() {
+            sl.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c.dataset.ex === "corner"));
+            run("corner");
+          },
+          leave: () => tl?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ shared photo
+      const photo = await loadImage("/assets/2025-10-16-19-17-39.png");
+      const W = 640, H = 360;
+      const base = readPixels(photo, W, H);
+      const gray = toGray(base);
+      // A keypoint with a strong orientation: on the first doll's pattern
+      const KX = 180, KY = 222;
+
+      // Sample the gray image at (x, y), bilinear
+      function at(g, x, y) {
+        const x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0;
+        const v = (xx, yy) => g[clamp(yy, 0, H - 1) * W + clamp(xx, 0, W - 1)];
+        return (v(x0, y0) * (1 - fx) + v(x0 + 1, y0) * fx) * (1 - fy) + (v(x0, y0 + 1) * (1 - fx) + v(x0 + 1, y0 + 1) * fx) * fy;
+      }
+      // The 31x31 patch around (KX, KY) as it would look if the image were rotated by phi
+      function patch(phi) {
+        const c = Math.cos(-phi), s = Math.sin(-phi);
+        const out = new Float32Array(31 * 31);
+        for (let j = -15; j <= 15; j++) for (let i = -15; i <= 15; i++) out[(j + 15) * 31 + i + 15] = at(gray, KX + i * c - j * s, KY + i * s + j * c);
+        return out;
+      }
+      function drawPatch(ctx, p, circle) {
+        const S = 8;
+        // drawn in 248-unit coordinates, whatever the backing size
+        ctx.setTransform(ctx.canvas.width / 248, 0, 0, ctx.canvas.height / 248, 0, 0);
+        ctx.clearRect(0, 0, 248, 248);
+        for (let j = 0; j < 31; j++)
+          for (let i = 0; i < 31; i++) {
+            if (circle && Math.hypot(i - 15, j - 15) > 15.5) continue;
+            const v = p[j * 31 + i];
+            ctx.fillStyle = `rgb(${v},${v},${v})`;
+            ctx.fillRect(i * S, j * S, S, S);
+          }
+      }
+
+      // ------------------------------------------------------------ orientation
+      {
+        const sl = document.querySelector("#orient");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const input = sl.querySelector("input");
+        const out = sl.querySelector("output");
+        const read = sl.querySelector(".readout");
+        let theta0 = null;
+        function render() {
+          const phi = (+input.value * Math.PI) / 180;
+          const p = patch(phi);
+          drawPatch(ctx, p, true);
+          let m00 = 0, m10 = 0, m01 = 0;
+          for (let j = -15; j <= 15; j++)
+            for (let i = -15; i <= 15; i++) {
+              if (Math.hypot(i, j) > 15.5) continue;
+              const v = p[(j + 15) * 31 + i + 15];
+              m00 += v;
+              m10 += i * v;
+              m01 += j * v;
+            }
+          const th = Math.atan2(m01, m10);
+          if (theta0 === null) theta0 = th;
+          const cx = 124 + (m10 / m00) * 8 * 6, cy = 124 + (m01 / m00) * 8 * 6;
+          // arrow from the centre through the (exaggerated) centroid
+          ctx.strokeStyle = "#ec4899";
+          ctx.fillStyle = "#ec4899";
+          ctx.lineWidth = 4;
+          const ex = 124 + Math.cos(th) * 100, ey = 124 + Math.sin(th) * 100;
+          ctx.beginPath();
+          ctx.moveTo(124, 124);
+          ctx.lineTo(ex, ey);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(ex + Math.cos(th) * 12, ey + Math.sin(th) * 12);
+          ctx.lineTo(ex + Math.cos(th + 2.3) * 14, ey + Math.sin(th + 2.3) * 14);
+          ctx.lineTo(ex + Math.cos(th - 2.3) * 14, ey + Math.sin(th - 2.3) * 14);
+          ctx.fill();
+          ctx.fillStyle = "#fbbf24";
+          ctx.beginPath();
+          ctx.arc(124, 124, 5, 0, 7);
+          ctx.fill();
+          ctx.fillStyle = "#22d3ee";
+          ctx.beginPath();
+          ctx.arc(cx, cy, 6, 0, 7);
+          ctx.fill();
+          const deg = (r) => ((((r * 180) / Math.PI) % 360) + 540) % 360 - 180;
+          out.textContent = input.value + "°";
+          read.innerHTML = `θ = <b>${deg(th).toFixed(1)}°</b> · image turned ${(+input.value).toFixed(0)}° · θ moved <b>${deg(th - theta0).toFixed(1)}°</b>`;
+        }
+        input.addEventListener("input", render);
+        await Deck.ready;
+        render();
+        let tw = null;
+        Deck.scene("#orient", {
+          enter() {
+            // Turn the image once so the arrow can be seen following it
+            const o = { v: 0 };
+            tw?.kill();
+            tw = gsap.to(o, { v: 60, duration: 2.4, delay: 0.8, ease: "power1.inOut", yoyo: true, repeat: 1, onUpdate: () => ((input.value = Math.round(o.v)), render()) });
+            input.addEventListener("pointerdown", () => tw?.kill(), { once: true });
+          },
+          leave: () => tw?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ BRIEF
+      {
+        const sl = document.querySelector("#brief");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const bits = sl.querySelector(".bitstr");
+        // Smooth the patch first, as BRIEF does
+        const raw = patch(0);
+        const sm = new Float32Array(31 * 31);
+        for (let j = 0; j < 31; j++)
+          for (let i = 0; i < 31; i++) {
+            let s = 0, n = 0;
+            for (let b = -2; b <= 2; b++) for (let a = -2; a <= 2; a++) {
+              const x = i + a, y = j + b;
+              if (x < 0 || y < 0 || x > 30 || y > 30) continue;
+              s += raw[y * 31 + x];
+              n++;
+            }
+            sm[j * 31 + i] = s / n;
+          }
+        const N = 24;
+        let tl = null;
+        const px = (v) => 124 + v * 8;
+        function play() {
+          tl?.kill();
+          drawPatch(ctx, sm, false);
+          bits.innerHTML = "";
+          tl = gsap.timeline({ delay: 0.5 });
+          ORB.PAIRS.slice(0, N).forEach(([ax, ay, bx, by], k) => {
+            tl.call(() => {
+              const b = sm[(ay + 15) * 31 + ax + 15] < sm[(by + 15) * 31 + bx + 15] ? 1 : 0;
+              ctx.strokeStyle = b ? "rgba(236,72,153,0.9)" : "rgba(34,211,238,0.9)";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(px(ax), px(ay));
+              ctx.lineTo(px(bx), px(by));
+              ctx.stroke();
+              ctx.fillStyle = "#fbbf24";
+              [[ax, ay], [bx, by]].forEach(([x, y]) => {
+                ctx.beginPath();
+                ctx.arc(px(x), px(y), 4, 0, 7);
+                ctx.fill();
+              });
+              bits.insertAdjacentHTML("beforeend", (k && k % 8 === 0 ? " " : "") + `<span class="${b ? "n" : ""}">${b}</span>`);
+            }, null, k * 0.28);
+          });
+          tl.call(() => bits.insertAdjacentHTML("beforeend", ` <span class="muted">… ${256 - N} more</span>`), null, N * 0.28 + 0.2);
+        }
+        sl.querySelector("[data-act=replay]").addEventListener("click", play);
+        Deck.scene("#brief", { enter: play, leave: () => tl?.kill() });
+      }
+
+      // ------------------------------------------------------------ live keypoints
+      {
+        const sl = document.querySelector("#kp");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        const read = sl.querySelector(".readout");
+        const inputs = Object.fromEntries([...sl.querySelectorAll("input")].map((i) => [i.name, i]));
+        const COL = ["#86efac", "#67e8f9", "#c4b5fd", "#f0abfc", "#fbbf24", "#f87171"];
+        let pending = 0;
+        function render() {
+          pending = 0;
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          const opts = { nfeatures: +inputs.nfeatures.value, fastThreshold: +inputs.fastThreshold.value, nlevels: +inputs.nlevels.value, scaleFactor: +inputs.scaleFactor.value };
+          const t0 = performance.now();
+          const kps = ORB.detectAndCompute(gray, W, H, opts);
+          const ms = performance.now() - t0;
+          ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+          ctx.drawImage(photo, 0, 0, W, H);
+          ctx.fillStyle = "rgba(5,6,15,0.35)";
+          ctx.fillRect(0, 0, W, H);
+          kps.forEach((k) => {
+            const r = k.size / 2.5;
+            ctx.strokeStyle = COL[k.level % COL.length];
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.arc(k.x, k.y, r, 0, 7);
+            ctx.moveTo(k.x, k.y);
+            ctx.lineTo(k.x + Math.cos(k.angle) * r, k.y + Math.sin(k.angle) * r);
+            ctx.stroke();
+          });
+          const per = Array.from({ length: opts.nlevels }, (_, l) => kps.filter((k) => k.level === l).length);
+          read.innerHTML = `<b>${kps.length}</b> keypoints in ${ms.toFixed(0)} ms · per level: ${per.join(" / ")}`;
+        }
+        sl.addEventListener("input", () => {
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          clearTimeout(pending);
+          pending = setTimeout(render, 60);
+        });
+        let done = false;
+        Deck.scene("#kp", {
+          enter() {
+            if (!done) setTimeout(render, 350), (done = true);
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ memory bars
+      Deck.scene("#vs", {
+        step(slide, n, els, d) {
+          if (!els[0].matches(".mem")) return;
+          const t = { duration: d.dir < 0 ? 0 : 1.2, ease: "power2.out" };
+          gsap.fromTo(slide.querySelector(".mem .orb"), { width: 0 }, { width: "6.25%", ...t });
+          gsap.fromTo(slide.querySelector(".mem .sift"), { width: 0 }, { width: "100%", ...t, delay: d.dir < 0 ? 0 : 0.3 });
+        },
+      });
+
+      // ------------------------------------------------------------ pyramid
+      {
+        const sl = document.querySelector("#pyramid");
+        const box = sl.querySelector(".pyr");
+        const inputs = Object.fromEntries([...sl.querySelectorAll("input")].map((i) => [i.name, i]));
+        const read = sl.querySelector(".readout");
+        function render(animate) {
+          const n = +inputs.n.value, f = +inputs.f.value;
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          let sum = 0;
+          for (let l = 0; l < n; l++) sum += Math.pow(f, -l);
+          const w0 = Math.min(400, ((box.clientWidth || 1300) - n * 22) / sum);
+          box.innerHTML = "";
+          for (let l = 0; l < n; l++) {
+            const s = Math.pow(f, -l);
+            const c = document.createElement("canvas");
+            c.width = Math.max(2, Math.round(w0 * s));
+            c.height = Math.max(2, Math.round(w0 * s * (9 / 16)));
+            c.getContext("2d").drawImage(photo, 0, 0, c.width, c.height);
+            const fig = document.createElement("figure");
+            fig.appendChild(c);
+            fig.insertAdjacentHTML("beforeend", `<figcaption>L${l}<br>${(s * 100).toFixed(0)}%</figcaption>`);
+            box.appendChild(fig);
+          }
+          if (animate) gsap.from(box.querySelectorAll("figure"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.6 });
+          read.innerHTML = `nlevels=${n}, scaleFactor=${f}: ${n} scales from <b>100%</b> down to 1/${f}<sup>${n - 1}</sup> ≈ <b>${(100 * Math.pow(f, -(n - 1))).toFixed(0)}%</b>`;
+        }
+        sl.addEventListener("input", () => render(false));
+        Deck.scene("#pyramid", { enter: () => render(true) });
+      }
+    </script>
+  </body>
+</html>

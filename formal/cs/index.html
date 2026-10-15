@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Computer Science</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .hub {
+        gap: 1.6rem;
+      }
+
+      .hub .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .hub h1 {
+        text-align: center;
+      }
+
+      .hub > p.muted {
+        max-width: 40rem;
+        text-align: center;
+      }
+
+      .hub .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      .hub .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      .hub .group h3 span {
+        margin-right: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .hub .tile {
+        min-height: 5.6rem;
+      }
+
+      .hub .tiles.big .tile {
+        min-height: 9rem;
+        font-size: 1.3rem;
+      }
+
+      .hub .soon {
+        opacity: 0.45;
+      }
+
+      /* Fixed 16:9 canvas: big tiles, centred row by row */
+      .hub h1 {
+        font-size: 4.2rem;
+      }
+
+      .hub > p.muted {
+        font-size: 1.3rem;
+      }
+
+      .hub-cover .contents {
+        gap: 0.8rem;
+      }
+
+      .hub-cover .contents .pill {
+        font-size: 1.15rem;
+      }
+
+      .hub .group {
+        width: 100%;
+        justify-items: center;
+      }
+
+      .hub .group h3 {
+        font-size: 1.3rem;
+      }
+
+      .hub .tiles {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.2rem;
+        width: 100%;
+      }
+
+      .hub .tile,
+      .slide.hub-group .tile {
+        flex: 0 0 12.8rem;
+        min-height: 9rem;
+        font-size: 1.2rem;
+      }
+
+      .hub .tile small {
+        font-size: 0.85rem;
+      }
+
+      .hub .tiles.big .tile {
+        flex-basis: 18rem;
+        min-height: 11rem;
+        font-size: 1.6rem;
+      }
+
+      .hub .tiles.big:has(> :nth-child(4)) .tile {
+        flex-basis: 12.8rem;
+        min-height: 9rem;
+        font-size: 1.4rem;
+      }
+
+      .slide.hub-group .tiles:has(> :nth-child(9)) .tile {
+        flex-basis: 10.2rem;
+        min-height: 7.5rem;
+        font-size: 1.05rem;
+      }
+
+      .slide.hub-group .tiles:not(:has(> :nth-child(5))) .tile {
+        min-height: 11.5rem;
+      }
+
+      .slide.hub-group .tiles:not(:has(> :nth-child(3))) .tile {
+        flex-basis: 18rem;
+        font-size: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide hub hub-cover hub" id="hub">
+      <span class="kicker">Formal science</span>
+      <h1>Computer Science</h1>
+      <nav class="contents">
+        <a class="pill" href="#2">Core topics</a>
+        <a class="pill" href="#3">Systems &amp; networks</a>
+        <a class="pill" href="#4">Theory</a>
+      </nav>
+    </section>
+
+    <section class="slide hub-group hub">
+      <span class="kicker">Core</span>
+      <h2>Core topics</h2>
+      <div class="tiles">
+          <a class="tile" href="programming/index.html" style="--img:url('/assets/2025-09-30-11-29-04.png')"><span>Programming</span></a>
+          <a class="tile" href="algorithms/index.html" style="--img:url('/assets/2025-10-19-23-45-28.png')"><span>Algorithms</span></a>
+          <a class="tile" href="datastructures/index.html" style="--img:url('/assets/2025-10-19-23-45-28.png')"><span>Data Structures</span></a>
+          <a class="tile" href="ops/index.html" style="--img:url('/assets/2025-10-19-09-04-51.png')"><span>Operations<small>Git and tooling</small></span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group hub">
+      <span class="kicker">Systems</span>
+      <h2>Systems &amp; networks</h2>
+      <div class="tiles">
+          <div class="tile soon"><span>Operating Systems<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Computer Networks<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Databases<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Distributed Systems<small>coming soon</small></span></div>
+        </div>
+    </section>
+
+    <section class="slide hub-group hub">
+      <h2>Theory</h2>
+      <div class="tiles">
+          <div class="tile soon"><span>Automata Theory<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Complexity Theory<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Computability<small>coming soon</small></span></div>
+          <div class="tile soon"><span>Formal Languages<small>coming soon</small></span></div>
+        </div>
+    </section>
+  </body>
+</html>

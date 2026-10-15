@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lambda Functions</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Iterator view: a cursor walking over an iterable ---------- */
+      .itv {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        min-width: 0;
+      }
+
+      .itv .src {
+        max-width: 100%;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+
+      .itv .lbl {
+        padding-top: 0.9rem;
+        font: 500 1.1rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .itv .cells {
+        min-width: 0;
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2.6rem 0.4rem;
+        padding-bottom: 2.6rem;
+      }
+
+      .itv .cell.gstart:not(:first-child) {
+        margin-left: 1.1rem;
+      }
+
+      .itv.small .cell {
+        min-width: 2.3rem;
+        height: 2.5rem;
+        padding: 0 0.35rem;
+        font-size: 0.95rem;
+      }
+
+      .itv .outs .build b {
+        color: var(--green);
+      }
+
+      .itv .cell {
+        display: grid;
+        place-items: center;
+        min-width: 3.6rem;
+        height: 3.6rem;
+        padding: 0 0.7rem;
+        border-radius: 10px;
+        border: 1.5px solid rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.14);
+        font: 600 1.5rem var(--font-mono);
+        color: var(--text);
+        transition:
+          opacity 0.35s,
+          border-color 0.35s,
+          background 0.35s;
+      }
+
+      .itv .cell.taken {
+        opacity: 0.35;
+        border-style: dashed;
+        background: transparent;
+      }
+
+      .itv .cell.skip {
+        opacity: 0.4;
+        border-color: var(--red);
+        border-style: dashed;
+        background: transparent;
+        text-decoration: line-through;
+        text-decoration-color: var(--red);
+      }
+
+      .itv .ptr {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 3.6rem;
+        font: 600 1rem var(--font-mono);
+        color: var(--cyan);
+        white-space: nowrap;
+        transition: opacity 0.3s;
+      }
+
+      .itv .ptr::before {
+        content: "";
+        width: 0;
+        height: 0;
+        border: 0.45rem solid transparent;
+        border-bottom: 0.6rem solid var(--cyan);
+        border-top: 0;
+        margin-bottom: 0.15rem;
+      }
+
+      .itv .ptr.end {
+        color: var(--red);
+      }
+
+      .itv .ptr.end::before {
+        border-bottom-color: var(--red);
+      }
+
+      .itv .outs {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: min(100%, 24rem);
+        min-height: 2.4rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 1.3rem/1.5 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .itv .outs b {
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      .itv .outs .err b {
+        color: var(--red);
+      }
+
+      .flyval {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        padding: 0 0.5em;
+        border-radius: 8px;
+        font: 600 1.4rem/1.7 var(--font-mono);
+        color: #fff;
+        background: rgba(34, 211, 238, 0.35);
+        border: 1px solid var(--cyan);
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
+      }
+
+
+      .itv-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .itv-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: center;
+        width: min(100%, 70rem);
+      }
+
+      .itv-cols.stack {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 1.2rem;
+      }
+
+      .itv-cols.stack pre {
+        width: min(100%, 58rem);
+      }
+
+      .itv-cols pre {
+        width: 100%;
+      }
+
+      .slide > pre {
+        width: min(100%, 60rem);
+        font-size: 1.75rem;
+      }
+
+      #sorted > pre {
+        width: min(100%, 66rem);
+        font-size: 1.3rem;
+      }
+
+      .itv-cols.stack pre {
+        font-size: 1.4rem;
+      }
+
+      .hint {
+        font-size: 1.35rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- lambda vs def ---------- */
+      .same {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.8rem;
+        font: 500 2.2rem var(--font-mono);
+        font-variant-ligatures: none;
+        color: var(--text);
+      }
+
+      .same .srow {
+        white-space: pre;
+      }
+
+      .same .tag {
+        display: inline-block;
+        width: 7rem;
+        font: 500 1.1rem var(--font-mono);
+        color: var(--faint);
+        text-align: right;
+      }
+
+      .same .pt {
+        padding: 0.05em 0.25em;
+        border-radius: 8px;
+        transition:
+          background 0.4s,
+          box-shadow 0.4s;
+      }
+
+      .same .pt.lit[data-p="1"] { background: rgba(236, 72, 153, 0.22); box-shadow: 0 0 0 1px var(--pink); }
+      .same .pt.lit[data-p="2"] { background: rgba(34, 211, 238, 0.18); box-shadow: 0 0 0 1px var(--cyan); }
+      .same .pt.lit[data-p="3"] { background: rgba(251, 191, 36, 0.16); box-shadow: 0 0 0 1px var(--amber); }
+
+      .same .notes {
+        display: grid;
+        gap: 0.7rem;
+        margin-top: 1rem;
+        font: 1.3rem var(--font);
+        color: var(--muted);
+      }
+
+      /* ---------- sorted with a key ---------- */
+      .sorter {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .sorter .trow {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .tup {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .tup .box {
+        padding: 0.5rem 0.9rem;
+        border-radius: 12px;
+        border: 1.5px solid rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.14);
+        font: 600 1.4rem var(--font-mono);
+        color: var(--text);
+        white-space: nowrap;
+      }
+
+      .tup .key {
+        min-height: 1.8rem;
+        padding: 0.1rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--amber);
+        background: rgba(251, 191, 36, 0.12);
+        font: 500 1.25rem var(--font-mono);
+        color: #fde68a;
+        opacity: 0;
+      }
+
+      .sorter .note {
+        min-height: 1.6rem;
+        font: 1.2rem var(--font-mono);
+        color: var(--green);
+      }
+
+      .sorter .pick {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.6rem;
+        font-size: 1.15rem;
+        color: var(--faint);
+        align-items: center;
+      }
+
+      .sorter .pick button {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1.15rem var(--font-mono);
+        cursor: pointer;
+      }
+
+      .sorter .pick button:hover,
+      .sorter .pick button.on {
+        color: var(--text);
+        border-color: var(--violet-soft);
+        background: rgba(139, 92, 246, 0.3);
+      }
+
+      #sorted .sorter:not(.shown) {
+        pointer-events: none;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · functions</span>
+      <h1 class="grad-each"><span>Lambda</span> <span>Functions</span></h1>
+      <p>Small, nameless, one-expression functions, written right where you need them.</p>
+    </section>
+
+    <!-- ================================================================ basic -->
+    <section class="slide">
+      <h2>Basic lambda</h2>
+      <pre><code class="language-python">
+        # lambda syntax
+        square = lambda x: x ** 2
+        result = square(5)
+        # ans: 25
+      </code></pre>
+    </section>
+
+    <section class="slide" id="same">
+      <h2>A lambda is a short def</h2>
+      <div class="same">
+        <div class="srow"><span class="tag">lambda</span> square = <span class="pt" data-p="1">lambda</span> <span class="pt" data-p="2">x</span>: <span class="pt" data-p="3">x ** 2</span></div>
+        <div class="srow"><span class="tag">def</span> <span class="pt" data-p="1">def square</span>(<span class="pt" data-p="2">x</span>): <span class="pt" data-p="3">return x ** 2</span></div>
+        <div class="notes">
+          <span class="step">The keyword <code>lambda</code> replaces <code>def</code> and the name.</span>
+          <span class="step">Parameters come before the colon, without brackets.</span>
+          <span class="step">The body is one expression, and its value is returned automatically: no <code>return</code>.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Lambda with multiple parameters</h2>
+      <pre><code class="language-python">
+        # multiple parameters
+        add = lambda x, y: x + y
+        result = add(3, 4)
+        # ans: 7
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ sorted -->
+    <section class="slide" id="sorted">
+      <h2>Lambda in sorted</h2>
+      <pre><code class="language-python">
+        # lambda as key function
+        pairs = [(1, 'one'), (3, 'three'), (2, 'two')]
+        sorted_pairs = sorted(pairs, key=lambda pair: pair[1])
+        # ans: [(1, 'one'), (3, 'three'), (2, 'two')]
+      </code></pre>
+      <div class="sorter step" data-step="1">
+        <div class="trow"></div>
+        <div class="note"></div>
+        <div class="pick" data-interactive>key=lambda pair: <button data-k="1">pair[1]</button><button data-k="0">pair[0]</button><button data-k="len">len(pair[1])</button></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ map filter -->
+    <section class="slide" id="map">
+      <h2>Lambda in map</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          # lambda with map
+          numbers = [1, 2, 3, 4, 5]
+          squared = list(map(lambda x: x ** 2, numbers))
+          # ans: [1, 4, 9, 16, 25]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint"><code>map</code> calls the lambda on every item.</p>
+    </section>
+
+    <section class="slide" id="filter">
+      <h2>Lambda in filter</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          # lambda with filter
+          numbers = [1, 2, 3, 4, 5]
+          evens = list(filter(lambda x: x % 2 == 0, numbers))
+          # ans: [2, 4]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint"><code>filter</code> keeps the items for which the lambda returns True.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the result, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        # what is result?
+        f = lambda x: x * 2
+        f(5)
+        # ans: 10
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # lambda with two parameters?
+        multiply = lambda a, b: a * b
+        multiply(3, 4)
+        # ans: 12
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        # immediate invocation?
+        (lambda x: x + 1)(5)
+        # ans: 6
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # lambda vs def?
+        f = lambda x: x ** 2
+        def g(x):
+            return x ** 2
+        f(3) == g(3)
+        # ans: True
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        # lambda with conditional?
+        abs_val = lambda x: x if x &gt;= 0 else -x
+        abs_val(-5)
+        # ans: 5
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        # can lambda have multiple lines?
+        f = lambda x: x + 1
+                      x + 2
+        # ans: SyntaxError (a lambda is a single expression)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # lambda in list?
+        funcs = [lambda x: x+1, lambda x: x*2]
+        funcs[0](5)
+        # ans: 6
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre><code class="language-python">
+        # lambda with default argument?
+        f = lambda x=5: x * 2
+        f()
+        # ans: 10
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # nested lambda?
+        f = lambda x: (lambda y: x + y)
+        f(5)(3)
+        # ans: 8
+      </code></pre>
+      <p class="hint step"><code>f(5)</code> returns <code>lambda y: 5 + y</code>, which is then called with 3.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # lambda without parameter?
+        f = lambda: 42
+        f()
+        # ans: 42
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>Shape</h3><p><code>lambda params: expression</code>, with the value returned automatically.</p></div>
+        <div class="card step"><h3>One expression</h3><p>No statements, no multiple lines; use <code>def</code> for anything bigger.</p></div>
+        <div class="card step"><h3>Best as arguments</h3><p>Short keys and tests for <code>sorted</code>, <code>map</code> and <code>filter</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ Iterator view
+      // An iterable's items in a row, and an iterator's cursor under the next one.
+      // Each deck step runs some operations: "next", "list" (drain the rest) or
+      // "loop" (a for loop: print each, then StopIteration ends it quietly).
+      const escI = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const BEAT = 0.6;
+      const dur = (e) => (e.build ? 0.25 : e.skip !== undefined || (e.take !== undefined && !e.line && !e.add) ? BEAT / 2 : BEAT);
+
+      function Itv(slide, cfg) {
+        const root = cfg.root || slide.querySelector(".itv");
+        root.classList.toggle("small", !!cfg.small);
+        const items = cfg.items;
+        root.innerHTML = `<div class="src"><span class="lbl">${escI(cfg.name || "")}</span><div class="cells">${items.map((v, i) => `<span class="cell${cfg.groups?.includes(i) ? " gstart" : ""}">${escI(v)}</span>`).join("")}<span class="ptr">${escI(cfg.ptr || "iterator")}</span></div></div><div class="outs"></div>`;
+        const cells = [...root.querySelectorAll(".cell")];
+        const ptr = root.querySelector(".ptr");
+        const outs = root.querySelector(".outs");
+        let tl = null, seen = 0, pending = null, fliers = [];
+
+        // cfg.f maps an item to the value handed out; cfg.keep filters items
+        const F = cfg.f || ((v) => v);
+        const keep = cfg.keep || (() => true);
+        function events(k) {
+          const groups = [];
+          let pos = 0;
+          const skipTo = (ev) => {
+            while (pos < items.length && !keep(items[pos])) ev.push({ skip: pos++ });
+          };
+          for (let s = 0; s < k && s < cfg.steps.length; s++) {
+            const ev = [];
+            for (let op of [].concat(cfg.steps[s])) {
+              if (typeof op === "string") op = { op };
+              const call = op.call || cfg.call || "next(iterator)";
+              if (op.op === "next") {
+                skipTo(ev);
+                if (pos < items.length) ev.push({ take: pos, val: F(items[pos]), line: `${escI(call)} → <b>${escI(op.show ?? F(items[pos]))}</b>` }), pos++;
+                else ev.push({ stop: true, line: `${escI(call)} → <b>StopIteration</b>`, err: true });
+              } else if (op.op === "list") {
+                const got = [];
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos }), got.push(F(items[pos]));
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+                ev.push({ line: `${escI(op.call || "list(" + (cfg.ptrName || "it") + ")")} → <b>${escI(op.show ?? "[" + got.join(", ") + "]")}</b>` });
+              } else if (op.op === "loop") {
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos, val: F(items[pos]), line: `${escI(op.call || "print")} → <b>${escI(F(items[pos]))}</b>` });
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+                ev.push({ stop: true, line: `StopIteration → <b>${escI(op.end || "loop ends")}</b>` });
+              } else if (op.op === "build") {
+                // a comprehension: kept items are transformed and added to a growing list
+                ev.push({ build: op.call || "result" });
+                while (pos < items.length) {
+                  if (keep(items[pos])) ev.push({ take: pos, val: F(items[pos]), add: true });
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+              } else if (op.op === "say") ev.push({ line: op.line, err: op.err });
+            }
+            groups.push(ev);
+          }
+          return groups;
+        }
+
+        function placePtr(pos, anim) {
+          const last = cells[cells.length - 1];
+          const at = pos < cells.length ? cells[pos] : last;
+          const x = pos < cells.length ? at.offsetLeft + at.offsetWidth / 2 : last.offsetLeft + last.offsetWidth + 16;
+          const y = at.offsetTop + at.offsetHeight + 4;
+          ptr.classList.toggle("end", pos >= cells.length);
+          ptr.textContent = pos >= cells.length ? "end" : cfg.ptr || "iterator";
+          const w = ptr.offsetWidth;
+          gsap.killTweensOf(ptr, "x,y");
+          if (anim) gsap.to(ptr, { x: x - w / 2, y, duration: 0.4, ease: "power2.inOut" });
+          else gsap.set(ptr, { x: x - w / 2, y });
+        }
+
+        function clear() {
+          tl?.kill();
+          fliers.forEach((f) => f.remove());
+          fliers = [];
+          cells.forEach((c) => c.classList.remove("taken", "skip"));
+          outs.innerHTML = "";
+          gsap.killTweensOf(ptr);
+          gsap.set(ptr, { rotate: 0 });
+          placePtr(0, false);
+        }
+
+        function apply(e, anim) {
+          if (e.skip !== undefined) {
+            cells[e.skip].classList.add("skip");
+            placePtr(e.skip + 1, anim);
+            if (anim) gsap.fromTo(cells[e.skip], { x: -4 }, { x: 0, duration: 0.3, ease: "elastic.out(1, 0.3)" });
+            return;
+          }
+          let line = null;
+          if (e.build) {
+            line = document.createElement("div");
+            line.className = "build";
+            line.innerHTML = `${escI(e.build)} = [<span class="acc"></span>]`;
+            outs.appendChild(line);
+            if (anim) gsap.fromTo(line, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+            return;
+          }
+          if (e.add) {
+            const acc = [...outs.querySelectorAll(".build .acc")].pop();
+            if (acc.children.length) acc.append(", ");
+            line = document.createElement("b");
+            line.textContent = e.val;
+            acc.appendChild(line);
+          }
+          if (e.line) {
+            line = document.createElement("div");
+            if (e.err) line.className = "err";
+            line.innerHTML = e.line;
+            outs.appendChild(line);
+          }
+          if (e.take !== undefined) {
+            const cell = cells[e.take];
+            if (anim && line) {
+              const from = cell.getBoundingClientRect();
+              const to = (line.matches("b") ? line : line.querySelector("b")).getBoundingClientRect();
+              gsap.set(line, { opacity: 0 });
+              const f = document.createElement("span");
+              f.className = "flyval";
+              f.textContent = e.val ?? cell.textContent;
+              document.body.appendChild(f);
+              fliers.push(f);
+              gsap.set(f, { left: from.left, top: from.top });
+              gsap.to(f, { left: to.left, top: to.top - 4, duration: 0.5, ease: "power2.inOut", onComplete: () => { f.remove(); gsap.to(line, { opacity: 1, duration: 0.2 }); } });
+            }
+            cell.classList.add("taken");
+            if (anim && !line) gsap.fromTo(cell, { y: -10 }, { y: 0, duration: 0.3 });
+            placePtr(e.take + 1, anim);
+          } else if (anim && line) {
+            gsap.fromTo(line, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 });
+            if (e.stop) gsap.fromTo(ptr, { rotate: -12 }, { rotate: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+          }
+          if (e.stop) placePtr(cells.length, anim);
+        }
+
+        function render(k, anim) {
+          clear();
+          const groups = events(k);
+          const lastAnim = anim ? groups.pop() : null;
+          groups.flat().forEach((e) => apply(e, false));
+          if (!lastAnim) return;
+          tl = gsap.timeline();
+          let t = 0;
+          lastAnim.forEach((e) => {
+            tl.call(() => apply(e, true), null, t);
+            t += dur(e);
+          });
+        }
+
+        function sync(dir) {
+          const n = Deck.step - (cfg.offset || 0);
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          render(Math.max(0, n), dir > 0 && jump === 1 && n > 0 && n <= cfg.steps.length);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each step's answer waits for its animation
+        const steps = [...slide.querySelectorAll(".step")];
+        cfg.steps.forEach((ops, i) => {
+          const el = steps[i + (cfg.offset || 0)];
+          const ev = events(i + 1)[i];
+          const t = ev.slice(0, -1).reduce((a, e) => a + dur(e), 0);
+          if (el && ev.length > 1) el.style.setProperty("--ans-delay", t + 0.5 + "s");
+        });
+
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        render(0, false);
+      }
+      const itv = (id, cfg) => Itv(document.getElementById(id), cfg);
+      // ================================================================ map and filter
+      const nums = ["1", "2", "3", "4", "5"];
+      itv("map", { items: nums, name: "numbers", ptr: "x", f: (x) => String(x * x), steps: [{ op: "build", call: "squared" }] });
+      itv("filter", { items: nums, name: "numbers", ptr: "x", keep: (x) => x % 2 === 0, steps: [{ op: "build", call: "evens" }] });
+
+      // ================================================================ lambda vs def
+      {
+        const slide = document.getElementById("same");
+        const show = () => requestAnimationFrame(() => slide.querySelectorAll(".pt").forEach((p) => p.classList.toggle("lit", +p.dataset.p === Deck.step)));
+        Deck.scene(slide, { enter: show, step: show, unstep: show });
+      }
+
+      // ================================================================ sorted with a key
+      {
+        const slide = document.getElementById("sorted");
+        const pairs = [[1, "one"], [3, "three"], [2, "two"]];
+        const row = slide.querySelector(".sorter .trow");
+        const note = slide.querySelector(".sorter .note");
+        row.innerHTML = pairs.map((p, i) => `<div class="tup" data-i="${i}"><span class="box">(${p[0]}, '${p[1]}')</span><span class="key"></span></div>`).join("");
+        const tups = [...row.children];
+        const KEYS = {
+          1: (p) => p[1],
+          0: (p) => p[0],
+          len: (p) => p[1].length,
+        };
+        const show = (k) => (typeof k === "string" ? `'${k}'` : String(k));
+        let tl;
+        const reset = () => {
+          tl?.kill();
+          tups.forEach((t) => { row.appendChild(t); gsap.set(t, { x: 0 }); gsap.set(t.querySelector(".key"), { opacity: 0 }); });
+          note.textContent = "";
+          slide.querySelectorAll(".pick button").forEach((b) => b.classList.remove("on"));
+        };
+        const run = (kname, anim) => {
+          reset();
+          slide.querySelector(`.pick button[data-k="${kname}"]`).classList.add("on");
+          const key = KEYS[kname];
+          tups.forEach((t) => (t.querySelector(".key").textContent = show(key(pairs[t.dataset.i]))));
+          // sorted() is stable: equal keys keep their original order
+          const order = [...tups].sort((a, b) => {
+            const ka = key(pairs[a.dataset.i]), kb = key(pairs[b.dataset.i]);
+            return ka < kb ? -1 : ka > kb ? 1 : 0;
+          });
+          const unchanged = order.every((t, i) => t === tups[i]);
+          const msg = unchanged ? "already in key order: nothing moves" : "reordered by key";
+          const place = () => {
+            const before = new Map(tups.map((t) => [t, t.getBoundingClientRect().left]));
+            order.forEach((t) => row.appendChild(t));
+            if (!anim) return;
+            order.forEach((t) => gsap.fromTo(t, { x: before.get(t) - t.getBoundingClientRect().left }, { x: 0, duration: 0.8, ease: "power2.inOut" }));
+          };
+          if (!anim) {
+            tups.forEach((t) => gsap.set(t.querySelector(".key"), { opacity: 1 }));
+            place();
+            note.textContent = msg;
+            return;
+          }
+          tl = gsap.timeline();
+          tl.to(tups.map((t) => t.querySelector(".key")), { opacity: 1, y: 0, duration: 0.35, stagger: 0.35 });
+          tl.call(place, null, "+=0.4");
+          tl.call(() => (note.textContent = msg), null, "+=0.8");
+        };
+        slide.querySelector(".pick").addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (b) run(b.dataset.k, true);
+        });
+        Deck.scene(slide, {
+          enter: reset,
+          leave: reset,
+          step: (s, n, els, d) => run("1", d.dir > 0),
+          unstep: reset,
+        });
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

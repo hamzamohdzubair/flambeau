@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inheritance</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .mro-cols {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr);
+        gap: 2.5rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      .mro-cols pre {
+        width: auto;
+        min-width: 30rem;
+        font-size: 1.3rem;
+      }
+
+      .mro-cols pre {
+        line-height: 1.42;
+      }
+
+      .mro-cols pre .line {
+        min-height: 1.42em;
+      }
+
+      .mro-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .hint {
+        font-size: 1.2rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- class diagram with a method lookup ---------- */
+      .mro {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+        min-width: 0;
+      }
+
+      .mro svg {
+        width: 100%;
+        max-height: 54cqh;
+        overflow: visible;
+      }
+
+      .mro .node rect {
+        fill: #0d0f20;
+        stroke: rgba(167, 139, 250, 0.6);
+        stroke-width: 2;
+        transition:
+          stroke 0.3s,
+          fill 0.3s;
+      }
+
+      .mro .node.inst rect {
+        stroke: rgba(34, 211, 238, 0.7);
+        stroke-dasharray: 6 4;
+      }
+
+      .mro .node.visit rect {
+        stroke: var(--cyan);
+        fill: rgba(34, 211, 238, 0.12);
+      }
+
+      .mro .node.miss rect {
+        stroke: var(--red);
+      }
+
+      .mro .node.found rect {
+        stroke: var(--green);
+        fill: rgba(134, 239, 172, 0.14);
+      }
+
+      .mro text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 22px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .mro text.cn {
+        font-weight: 600;
+        fill: var(--violet-soft);
+      }
+
+      .mro .node.inst text.cn {
+        fill: var(--cyan);
+      }
+
+      .mro text.m {
+        font-size: 20px;
+        fill: var(--muted);
+        transition: fill 0.3s;
+      }
+
+      .mro text.m.hit {
+        fill: var(--green);
+        font-weight: 600;
+      }
+
+      .mro .edge {
+        stroke: rgba(167, 139, 250, 0.5);
+        stroke-width: 2;
+        fill: none;
+        marker-end: url(#inhArrow);
+      }
+
+      .mro .probe {
+        fill: #f0abfc;
+        filter: drop-shadow(0 0 8px #ec4899);
+      }
+
+      .mro .ord {
+        fill: var(--amber);
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .mro .outs {
+        min-width: min(100%, 22rem);
+        min-height: 2.8rem;
+        padding: 0.45rem 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 1.1rem/1.45 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .mro .outs b {
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      .mro .outs .err b {
+        color: var(--red);
+      }
+
+      .mro .outs:empty {
+        visibility: hidden;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · object-oriented programming</span>
+      <h1 class="grad-each"><span>Inheritance</span></h1>
+      <p>A class can build on another: it gets the parent's methods and attributes, and can override or extend them.</p>
+    </section>
+
+    <section class="slide" id="howto">
+      <h2>How Python finds a method</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3>Start at the object's class</h3><p>For <code>dog.speak()</code>, Python first looks in <code>Dog</code>.</p></div>
+        <div class="card step"><h3>Climb to the parents</h3><p>Not there? It tries the parent class, then its parent, up to <code>object</code>.</p></div>
+        <div class="card step"><h3>First match wins</h3><p>This search order is the <strong>method resolution order</strong> (MRO). Watch the pink probe climb the diagrams.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ basic -->
+    <section class="slide" id="basic">
+      <h2>Basic inheritance</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # base class
+          class Animal:
+              def speak(self):
+                  return "Some sound"
+
+          # derived class
+          class Dog(Animal):
+              def speak(self):
+                  return "Woof!"
+
+          Dog().speak()
+          # ans: "Woof!"
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="attrs">
+      <h2>Inheriting attributes</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # inherit __init__
+          class Animal:
+              def __init__(self, name):
+                  self.name = name
+
+          class Dog(Animal):
+              pass
+
+          Dog("Rex").name
+          # ans: "Rex"
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+      <p class="hint"><code>Dog</code> has no <code>__init__</code> of its own, so <code>Animal</code>'s runs.</p>
+    </section>
+
+    <section class="slide" id="super">
+      <h2>Using super()</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # call parent __init__
+          class Animal:
+              def __init__(self, name):
+                  self.name = name
+
+          class Dog(Animal):
+              def __init__(self, name, breed):
+                  super().__init__(name)
+                  self.breed = breed
+
+          Dog("Rex", "Lab").name
+          # ans: "Rex"
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+      <p class="hint"><code>super()</code> continues the search in the parent, so both <code>__init__</code> methods run.</p>
+    </section>
+
+    <section class="slide" id="override">
+      <h2>Override methods</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # override parent method
+          class Animal:
+              def speak(self):
+                  return "Sound"
+
+          class Dog(Animal):
+              def speak(self):
+                  return "Woof!"
+
+          Dog().speak()
+          # ans: "Woof!"
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+      <p class="hint">The search stops at <code>Dog</code>; <code>Animal.speak</code> is never reached.</p>
+    </section>
+
+    <section class="slide" id="parent">
+      <h2>Call the parent method</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # call parent from child
+          class Animal:
+              def speak(self):
+                  return "Sound"
+
+          class Dog(Animal):
+              def speak(self):
+                  parent = super().speak()
+                  return f"{parent} and Woof!"
+
+          Dog().speak()
+          # ans: "Sound and Woof!"
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then press → to follow the lookup.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # isinstance with inheritance?
+          class Animal:
+              pass
+          class Dog(Animal):
+              pass
+
+          dog = Dog()
+          isinstance(dog, Animal)
+          # ans: True
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # issubclass?
+          class Animal:
+              pass
+          class Dog(Animal):
+              pass
+
+          issubclass(Dog, Animal)
+          # ans: True
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # method resolution order?
+          class Animal:
+              def speak(self):
+                  return "A"
+          class Dog(Animal):
+              pass
+
+          Dog().speak()
+          # ans: "A" (inherited)
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # super() without override?
+          class Base:
+              def method(self):
+                  return 1
+          class Derived(Base):
+              def other(self):
+                  return super().method()
+
+          Derived().other()
+          # ans: 1
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # multiple inheritance?
+          class A:
+              def method(self):
+                  return "A"
+          class B:
+              def method(self):
+                  return "B"
+          class C(A, B):
+              pass
+
+          C().method()
+          # ans: "A" (parents are searched left to right)
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e6">
+      <h2>Exercise 6</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # __mro__?
+          class Animal:
+              pass
+          class Dog(Animal):
+              pass
+
+          Dog.__mro__
+          # ans: (Dog, Animal, object)
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # override __init__ without super?
+          class Base:
+              def __init__(self):
+                  self.x = 1
+          class Derived(Base):
+              def __init__(self):
+                  self.y = 2
+
+          Derived().x
+          # ans: AttributeError (no super call)
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e8">
+      <h2>Exercise 8</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # call grandparent?
+          class A:
+              def method(self):
+                  return "A"
+          class B(A):
+              def method(self):
+                  return "B"
+          class C(B):
+              def method(self):
+                  return super(B, self).method()
+
+          C().method()
+          # ans: "A"
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+      <p class="hint"><code>super(B, self)</code> starts the search <em>after</em> <code>B</code> in the MRO.</p>
+    </section>
+
+    <section class="slide" id="e9">
+      <h2>Exercise 9</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # inherit from object?
+          class MyClass:
+              pass
+          # ans: implicitly inherits from object
+
+          isinstance(MyClass(), object)
+          # ans: True
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e10">
+      <h2>Exercise 10</h2>
+      <div class="mro-cols">
+        <pre><code class="language-python">
+          # diamond problem?
+          class A:
+              def method(self):
+                  return "A"
+          class B(A):
+              pass
+          class C(A):
+              pass
+          class D(B, C):
+              pass
+
+          D().method()
+          # ans: "A" (MRO: D, B, C, A, object)
+        </code></pre>
+        <div class="mro"></div>
+      </div>
+      <p class="hint">Python visits <code>B</code> and <code>C</code> before their shared parent <code>A</code>, so <code>A</code> is checked only once.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3><code>class Child(Parent)</code></h3><p>The child gets everything the parent has.</p></div>
+        <div class="card step"><h3>Override</h3><p>Define a method with the same name to replace the parent's.</p></div>
+        <div class="card step"><h3><code>super()</code></h3><p>Calls the next class in the MRO; use it so parent <code>__init__</code>s still run.</p></div>
+        <div class="card step"><h3>MRO</h3><p>The lookup order: the class, then its parents left to right, ending at <code>object</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      const BEAT = 0.55;
+      const NS = "http://www.w3.org/2000/svg";
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ================================================================ class diagram
+      // nodes: { id, x (centre), y (top), m: [methods or attributes], inst }
+      // a step is a list of lookups { name, path: [node ids], found, out, err }
+      function Mro(slide, cfg) {
+        const root = slide.querySelector(".mro");
+        const K = 1.25, W = cfg.w || 250, RH = 22 * K, H0 = 36 * K;
+        if (!cfg.scaled) { cfg.nodes.forEach((n) => { n.x *= K; n.y *= K; }); cfg.scaled = true; }
+        const hgt = (n) => H0 + Math.max(n.m.length, n.rows ?? 0) * RH + (n.m.length || n.rows ? 6 : 0);
+        const nodes = Object.fromEntries(cfg.nodes.map((n) => [n.id, n]));
+        const maxY = Math.max(...cfg.nodes.map((n) => n.y + hgt(n)));
+        const minX = Math.min(...cfg.nodes.map((n) => n.x)) - W / 2 - 10, maxX = Math.max(...cfg.nodes.map((n) => n.x)) + W / 2 + 10;
+        let svg = `<svg viewBox="${minX} -10 ${maxX - minX} ${maxY + 20}"><defs><marker id="inhArrow-${slide.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0d0f20" stroke="rgba(167,139,250,0.8)" stroke-width="1.2"/></marker></defs>`;
+        for (const [a, b] of cfg.edges) {
+          const c = nodes[a], p = nodes[b];
+          svg += `<path class="edge" style="marker-end:url(#inhArrow-${slide.id})" d="M${c.x} ${c.y} L${p.x + (c.x - p.x) * 0.12} ${p.y + hgt(p) + 2}" />`;
+        }
+        for (const n of cfg.nodes) {
+          svg += `<g class="node${n.inst ? " inst" : ""}" data-id="${n.id}"><rect x="${n.x - W / 2}" y="${n.y}" width="${W}" height="${hgt(n)}" rx="10" /><text class="cn" x="${n.x}" y="${n.y + 18 * K}">${esc(n.label || n.id)}</text>`;
+          n.m.forEach((m, i) => (svg += `<text class="m" data-m="${esc(m)}" x="${n.x}" y="${n.y + H0 + 4 * K + i * RH}">${esc(m)}</text>`));
+          svg += `<text class="ord" x="${n.x + W / 2 - 16}" y="${n.y + 18 * K}"></text></g>`;
+        }
+        svg += `<circle class="probe" r="9" opacity="0" /></svg><div class="outs"></div>`;
+        root.innerHTML = svg;
+        const probe = root.querySelector(".probe"), outs = root.querySelector(".outs");
+        const G = (id) => root.querySelector(`.node[data-id="${id}"]`);
+        let tl = null, seen = 0, pending = null;
+
+        function reset() {
+          tl?.kill();
+          gsap.killTweensOf(probe);
+          gsap.set(probe, { opacity: 0 });
+          root.querySelectorAll(".node").forEach((g) => g.classList.remove("visit", "miss", "found"));
+          root.querySelectorAll("text.m").forEach((t) => t.classList.remove("hit"));
+          root.querySelectorAll("text.ord").forEach((t) => (t.textContent = ""));
+          for (const n of cfg.nodes) n.rowsNow = null;
+          root.querySelectorAll(".node.inst text.m").forEach((t) => (t.textContent = t.dataset.m));
+          outs.innerHTML = "";
+        }
+        const at = (id) => ({ cx: nodes[id].x - W / 2, cy: nodes[id].y + 18 * K });
+
+        // one lookup: returns its duration when animated
+        function run(L, t, anim) {
+          const call = (dt, fn) => (anim ? tl.call(fn, null, t + dt) : fn());
+          if (L.rows) {
+            call(0, () => {
+              const g = G(L.rows);
+              [...g.querySelectorAll("text.m")].forEach((tx, i) => (tx.textContent = L.list[i] ?? ""));
+              if (anim) gsap.fromTo(g.querySelectorAll("text.m"), { opacity: 0 }, { opacity: 1, duration: 0.3 });
+            });
+            return 0.4;
+          }
+          L.path.forEach((id, k) =>
+            call(k * BEAT, () => {
+              root.querySelectorAll(".node.visit").forEach((g) => {
+                g.classList.remove("visit");
+                if (L.miss !== false) g.classList.add("miss");
+              });
+              const g = G(id);
+              const hit = id === L.found;
+              g.classList.add(hit ? "found" : "visit");
+              if (L.order) g.querySelector("text.ord").textContent = k + 1;
+              if (hit && L.name) g.querySelector(`text.m[data-m="${CSS.escape(L.name)}"]`)?.classList.add("hit");
+              if (anim) gsap.to(probe, { attr: at(id), opacity: 1, duration: k ? 0.4 : 0.01, ease: "power2.inOut" });
+              else gsap.set(probe, { attr: at(id), opacity: 1 });
+            })
+          );
+          call(L.path.length * BEAT, () => {
+            root.querySelectorAll(".node.visit").forEach((g) => {
+              g.classList.remove("visit");
+              if (L.miss !== false) g.classList.add("miss");
+            });
+            if (L.out) {
+              const d = document.createElement("div");
+              if (L.err) d.className = "err";
+              d.innerHTML = L.out;
+              outs.appendChild(d);
+              if (anim) gsap.fromTo(d, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.3 });
+            }
+          });
+          return L.path.length * BEAT + 0.3;
+        }
+
+        function render(k, anim) {
+          reset();
+          for (let s = 0; s < k && s < cfg.steps.length; s++) {
+            const last = anim && s === k - 1;
+            if (last) tl = gsap.timeline();
+            let t = 0;
+            for (const L of [].concat(cfg.steps[s])) t += run(L, t, last);
+          }
+        }
+        function sync(dir) {
+          const n = Deck.step, jump = n - seen;
+          seen = n;
+          render(n, dir > 0 && jump === 1 && n <= cfg.steps.length);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+        const steps = [...slide.querySelectorAll(".step")];
+        cfg.steps.forEach((ls, i) => {
+          const t = [].concat(ls).reduce((a, L) => a + (L.rows ? 0.4 : L.path.length * BEAT + 0.3), 0);
+          steps[i]?.style.setProperty("--ans-delay", Math.max(0, t - 0.3) + "s");
+        });
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        render(0, false);
+      }
+      const mro = (id, cfg) => Mro(document.getElementById(id), cfg);
+
+      // a simple chain: object at the top, the instance at the bottom
+      const chain = (classes, inst, rows) => {
+        const nodes = [{ id: "object", x: 0, y: 0, m: [] }];
+        let y = 0;
+        const edges = [];
+        let prev = "object";
+        for (const [id, m] of classes) {
+          y += 36 + (nodes[nodes.length - 1].m.length ? nodes[nodes.length - 1].m.length * 22 + 6 : 0) + 26;
+          nodes.push({ id, x: 0, y, m });
+          edges.push([id, prev]);
+          prev = id;
+        }
+        if (inst) {
+          const last = nodes[nodes.length - 1];
+          y += 36 + (last.m.length ? last.m.length * 22 + 6 : 0) + 26;
+          nodes.push({ id: "inst", label: inst, x: 0, y, m: Array(rows || 0).fill(""), inst: true });
+          edges.push(["inst", prev]);
+        }
+        return { nodes, edges };
+      };
+      const out = (call, v, err) => `${esc(call)} → <b>${esc(v)}</b>`;
+
+      mro("basic", { ...chain([["Animal", ["speak"]], ["Dog", ["speak"]]], "Dog()"), steps: [{ name: "speak", path: ["inst", "Dog"], found: "Dog", out: out("Dog().speak()", '"Woof!"') }] });
+      mro("attrs", {
+        ...chain([["Animal", ["__init__"]], ["Dog", []]], 'Dog("Rex")', 1),
+        steps: [[{ name: "__init__", path: ["Dog", "Animal"], found: "Animal" }, { rows: "inst", list: ["name = 'Rex'"] }, { path: ["inst"], found: "inst", out: out('Dog("Rex").name', '"Rex"') }]],
+      });
+      mro("super", {
+        ...chain([["Animal", ["__init__"]], ["Dog", ["__init__"]]], 'Dog("Rex", "Lab")', 2),
+        steps: [[
+          { name: "__init__", path: ["Dog"], found: "Dog" },
+          { name: "__init__", path: ["Dog", "Animal"], found: "Animal", out: "super().__init__(name) → <b>Animal.__init__</b>" },
+          { rows: "inst", list: ["name = 'Rex'", "breed = 'Lab'"] },
+          { path: ["inst"], found: "inst", out: out('Dog("Rex", "Lab").name', '"Rex"') },
+        ]],
+      });
+      mro("override", { ...chain([["Animal", ["speak"]], ["Dog", ["speak"]]], "Dog()"), steps: [{ name: "speak", path: ["inst", "Dog"], found: "Dog", out: out("Dog().speak()", '"Woof!"') }] });
+      mro("parent", {
+        ...chain([["Animal", ["speak"]], ["Dog", ["speak"]]], "Dog()"),
+        steps: [[
+          { name: "speak", path: ["inst", "Dog"], found: "Dog" },
+          { name: "speak", path: ["Dog", "Animal"], found: "Animal", out: 'super().speak() → <b>"Sound"</b>' },
+          { path: ["Dog"], found: "Dog", out: out("Dog().speak()", '"Sound and Woof!"') },
+        ]],
+      });
+
+      mro("e1", { ...chain([["Animal", []], ["Dog", []]], "dog"), steps: [{ path: ["inst", "Dog", "Animal"], found: "Animal", out: "Animal is in Dog's MRO → <b>True</b>" }] });
+      mro("e2", { ...chain([["Animal", []], ["Dog", []]]), steps: [{ path: ["Dog", "Animal"], found: "Animal", out: out("issubclass(Dog, Animal)", "True") }] });
+      mro("e3", { ...chain([["Animal", ["speak"]], ["Dog", []]], "Dog()"), steps: [{ name: "speak", path: ["inst", "Dog", "Animal"], found: "Animal", out: out("Dog().speak()", '"A"') }] });
+      mro("e4", {
+        ...chain([["Base", ["method"]], ["Derived", ["other"]]], "Derived()"),
+        steps: [[{ name: "other", path: ["inst", "Derived"], found: "Derived" }, { name: "method", path: ["Derived", "Base"], found: "Base", out: out("Derived().other()", "1") }]],
+      });
+      mro("e5", {
+        w: 170,
+        nodes: [
+          { id: "object", x: 0, y: 0, m: [] },
+          { id: "A", x: -100, y: 76, m: ["method"] },
+          { id: "B", x: 100, y: 76, m: ["method"] },
+          { id: "C", x: 0, y: 180, m: [] },
+          { id: "inst", label: "C()", x: 0, y: 254, m: [], inst: true },
+        ],
+        edges: [["A", "object"], ["B", "object"], ["C", "A"], ["C", "B"], ["inst", "C"]],
+        steps: [{ name: "method", path: ["inst", "C", "A"], found: "A", out: out("C().method()", '"A"') }],
+      });
+      mro("e6", { ...chain([["Animal", []], ["Dog", []]]), steps: [{ path: ["Dog", "Animal", "object"], found: null, order: true, miss: false, out: "Dog.__mro__ → <b>(Dog, Animal, object)</b>" }] });
+      mro("e7", {
+        ...chain([["Base", ["__init__"]], ["Derived", ["__init__"]]], "Derived()", 1),
+        steps: [[
+          { name: "__init__", path: ["Derived"], found: "Derived" },
+          { rows: "inst", list: ["y = 2"] },
+          { path: ["inst", "Derived", "Base", "object"], found: null, out: "Derived().x → <b>AttributeError</b>", err: true },
+        ]],
+      });
+      mro("e8", {
+        ...chain([["A", ["method"]], ["B", ["method"]], ["C", ["method"]]], "C()"),
+        steps: [[{ name: "method", path: ["inst", "C"], found: "C" }, { name: "method", path: ["A"], found: "A", out: 'super(B, self).method() → <b>"A"</b>' }]],
+      });
+      mro("e9", { ...chain([["MyClass", []]], "MyClass()"), steps: [[], { path: ["inst", "MyClass", "object"], found: "object", out: out("isinstance(MyClass(), object)", "True") }] });
+      mro("e10", {
+        w: 170,
+        nodes: [
+          { id: "object", x: 0, y: 0, m: [] },
+          { id: "A", x: 0, y: 66, m: ["method"] },
+          { id: "B", x: -100, y: 168, m: [] },
+          { id: "C", x: 100, y: 168, m: [] },
+          { id: "D", x: 0, y: 252, m: [] },
+          { id: "inst", label: "D()", x: 0, y: 326, m: [], inst: true },
+        ],
+        edges: [["A", "object"], ["B", "A"], ["C", "A"], ["D", "B"], ["D", "C"], ["inst", "D"]],
+        steps: [{ name: "method", path: ["inst", "D", "B", "C", "A"], found: "A", order: true, out: out("D().method()", '"A"') }],
+      });
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

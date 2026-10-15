@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Getting Toy Data</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .slide > pre {
+        width: auto;
+        min-width: 44rem;
+        font-size: 1.6rem;
+      }
+
+      #seaborn > pre {
+        font-size: 2rem;
+      }
+
+      .slide > pre,
+      .slide > .cards {
+        flex-shrink: 0;
+      }
+
+      #sklearn > pre {
+        font-size: 1.35rem;
+      }
+
+      .loaders li {
+        margin: 0.15rem 0;
+      }
+
+      .hint {
+        font-size: 1.2rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- how many datasets each source offers (log scale) ---------- */
+      .srcs {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 1.3rem 1.6rem;
+        align-items: center;
+        width: min(100%, 64rem);
+      }
+
+      .srcs .nm {
+        font: 600 1.6rem var(--font-mono);
+        color: var(--text);
+        text-align: right;
+      }
+
+      .srcs .track {
+        position: relative;
+        height: 3.6rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .srcs .bar {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 0;
+        border-radius: 10px;
+        background: var(--gradient);
+        box-shadow: 0 0 22px -6px rgba(139, 92, 246, 0.8);
+      }
+
+      .srcs .n {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 1rem;
+        font: 600 1.5rem var(--font-mono);
+        color: #fff;
+        white-space: nowrap;
+      }
+
+      .axis {
+        grid-column: 2;
+        position: relative;
+        height: 1.8rem;
+        font: 1.1rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .axis span {
+        position: absolute;
+        transform: translateX(-50%);
+      }
+
+      .loaders {
+        width: min(100%, 64rem);
+      }
+
+      .loaders ul {
+        font-family: var(--font-mono);
+        font-size: 1.1rem;
+      }
+
+      .loaders h3 {
+        font-size: 1.3rem;
+      }
+
+      .loaders .card p {
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · tasks</span>
+      <h1 class="grad-each"><span>Getting</span> <span>Toy</span> <span>Data</span></h1>
+      <p>Four places to get a ready-made dataset into a DataFrame in a couple of lines.</p>
+    </section>
+
+    <!-- ================================================================ overview -->
+    <section class="slide" id="overview">
+      <h2>How many datasets?</h2>
+      <div class="srcs">
+        <span class="nm">sklearn</span><div class="track"><div class="bar" data-v="16"></div><span class="n">16</span></div>
+        <span class="nm">seaborn</span><div class="track"><div class="bar" data-v="22"></div><span class="n">22</span></div>
+        <span class="nm">UCI</span><div class="track"><div class="bar" data-v="100"></div><span class="n">100+</span></div>
+        <span class="nm">openml</span><div class="track"><div class="bar" data-v="24000"></div><span class="n">24k+</span></div>
+        <div class="axis"><span style="left: 0%">1</span><span style="left: 22%">10</span><span style="left: 44%">100</span><span style="left: 66%">1k</span><span style="left: 88%">10k</span></div>
+      </div>
+      <p class="hint">Log scale: each tick is ten times the last. Start small with the built-in sets; go to OpenML when you need something specific.</p>
+    </section>
+
+    <!-- ================================================================ sklearn -->
+    <section class="slide" id="sklearn">
+      <h2>sklearn (16)</h2>
+      <pre><code class="language-python">
+        import sklearn.datasets
+        dataset = sklearn.datasets.load_iris(as_frame=True)
+        df = dataset.frame
+      </code></pre>
+      <div class="cards loaders">
+        <div class="card step">
+          <h3>Bundled: <code>load_*</code></h3>
+          <ul>
+            <li>load_iris()</li>
+            <li>load_diabetes()</li>
+            <li>load_digits()</li>
+            <li>load_linnerud()</li>
+            <li>load_wine()</li>
+            <li>load_breast_cancer()</li>
+          </ul>
+        </div>
+        <div class="card step">
+          <h3>Downloaded: <code>fetch_*</code></h3>
+          <ul>
+            <li>fetch_olivetti_faces()</li>
+            <li>fetch_20newsgroups()</li>
+            <li>fetch_california_housing()</li>
+            <li>fetch_lfw_people()</li>
+            <li>fetch_kddcup99()</li>
+          </ul>
+        </div>
+      </div>
+      <p class="hint step"><code>load_*</code> sets ship with scikit-learn; <code>fetch_*</code> sets are downloaded on first use and cached.</p>
+    </section>
+
+    <!-- ================================================================ seaborn -->
+    <section class="slide" id="seaborn">
+      <h2>seaborn (22)</h2>
+      <pre class="steps"><code class="language-python">
+        import seaborn
+        seaborn.get_dataset_names()
+        df = seaborn.load_dataset('titanic')
+      </code></pre>
+      <p class="hint">The datasets used in seaborn's examples, returned straight as pandas DataFrames.</p>
+    </section>
+
+    <!-- ================================================================ UCI -->
+    <section class="slide">
+      <h2>UCI (100+)</h2>
+      <pre class="steps"><code class="language-bash">
+        pip install ucimlrepo
+      </code></pre>
+      <pre class="steps"><code class="language-python">
+        import ucimlrepo as uci
+        uci.list_available_datasets()
+        dataset = uci.fetch_ucirepo(id=45)
+        df = dataset.data.original
+      </code></pre>
+      <p class="hint">The UC Irvine Machine Learning Repository: pick a dataset by its id.</p>
+    </section>
+
+    <!-- ================================================================ openml -->
+    <section class="slide">
+      <h2>openml (24k+)</h2>
+      <pre class="steps"><code class="language-bash">
+        pip install openml
+      </code></pre>
+      <pre class="steps"><code class="language-python">
+        import openml
+        dataset = openml.datasets.get_dataset(61)
+        X, y, categorical, names = dataset.get_data(
+            target=dataset.default_target_attribute)
+      </code></pre>
+      <p class="hint"><code>get_data</code> also tells you which columns are categorical and what they are called.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // bars grow on a log scale: 10^0 at the left edge, 10^4.55 at the right
+      {
+        const slide = document.getElementById("overview");
+        const bars = [...slide.querySelectorAll(".bar")];
+        const w = (v) => (Math.log10(v) / 4.55) * 100 + "%";
+        Deck.scene(slide, {
+          enter() {
+            gsap.set(bars, { width: 0 });
+            gsap.to(bars, { width: (i, el) => w(+el.dataset.v), duration: 1.2, stagger: 0.25, ease: "power3.out", delay: 0.2 });
+          },
+          leave() {
+            gsap.killTweensOf(bars);
+          },
+        });
+      }
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

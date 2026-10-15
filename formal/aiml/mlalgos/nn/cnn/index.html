@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CNN</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #atwork img {
+        height: 68cqh;
+        max-height: 68cqh;
+      }
+
+      #pipe > span.step {
+        position: absolute;
+      }
+
+      #pipe .caption {
+        font-size: 1.35rem;
+      }
+
+      #pipe svg {
+        width: 100%;
+        max-height: 66cqh;
+        height: auto;
+        overflow: visible;
+      }
+
+      #pipe .map {
+        stroke: rgba(255, 255, 255, 0.5);
+        stroke-width: 1;
+      }
+
+      #pipe text {
+        font-family: var(--font);
+        font-size: 18px;
+        fill: var(--muted);
+        text-anchor: middle;
+      }
+
+      #pipe text.big {
+        font-family: var(--font-display);
+        font-size: 21px;
+        fill: var(--text);
+      }
+
+      #pipe .stage:not(.on) {
+        opacity: 0.08;
+      }
+
+      #pipe .win {
+        fill: rgba(236, 72, 153, 0.25);
+        stroke: var(--pink);
+        stroke-width: 2;
+      }
+
+      #pipe .out rect {
+        fill: rgba(34, 211, 238, 0.12);
+        stroke: rgba(34, 211, 238, 0.5);
+      }
+
+      #pipe .out rect.top {
+        fill: rgba(34, 211, 238, 0.5);
+      }
+
+      #contents p {
+        font-size: 1.6rem;
+        max-width: 50rem;
+      }
+
+      #contents .muted a {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · Neural networks</span>
+      <h1>CNN</h1>
+      <p>Convolutional neural networks: networks that look at images through small sliding windows.</p>
+    </section>
+
+    <section class="slide" id="atwork">
+      <h2>A CNN at work</h2>
+      <figure><img src="/assets/2025-10-04-12-02-13.png" alt="3-D visualisation of a CNN classifying a handwritten digit: input pixels, feature maps, then output classes" /></figure>
+    </section>
+
+    <section class="slide" id="pipe">
+      <h2>From pixels to a label</h2>
+      <svg viewBox="0 0 980 372" aria-label="Image, convolution, pooling, convolution, pooling, dense layer, class scores"></svg>
+      <p class="center caption">Press → to move through the network.</p>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <section class="slide" id="contents">
+      <h2>Contents</h2>
+      <p class="center muted">Slides for this chapter are being written. Start with how a single kernel works: <a href="/formal/aiml/vision/kernels-convolution.html">Kernels &amp; Convolution</a>.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent, text) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        if (text) e.textContent = text;
+        parent?.appendChild(e);
+        return e;
+      };
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // Stacks of feature maps drawn as offset squares: more maps, smaller each stage
+      const slide = document.querySelector("#pipe");
+      const svg = slide.querySelector("svg");
+      const caption = slide.querySelector(".caption");
+      const cy = 170;
+      const colours = ["#8b5cf6", "#a78bfa", "#ec4899", "#f0abfc", "#22d3ee"];
+      const stack = (g, x, size, n, colour) => {
+        for (let i = n - 1; i >= 0; i--) el("rect", { class: "map", x: x + i * 7, y: cy - size / 2 - i * 7, width: size, height: size, fill: colour, "fill-opacity": 0.25 + 0.5 * (i === 0) }, g);
+      };
+      const stages = [];
+      const add = (label, sub, draw) => {
+        const g = el("g", { class: "stage" }, svg);
+        const x = draw(g);
+        el("text", { class: "big", x, y: 322 }, g, label);
+        el("text", { x, y: 352 }, g, sub);
+        stages.push(g);
+        return g;
+      };
+      const img = add("Image", "28 × 28", (g) => {
+        stack(g, 30, 120, 1, "#94a3b8");
+        return 90;
+      });
+      const win = el("rect", { class: "win", x: 30, y: cy - 60, width: 30, height: 30 }, img);
+      add("Convolution", "kernels → feature maps", (g) => {
+        stack(g, 200, 104, 6, colours[0]);
+        return 270;
+      });
+      add("Pooling", "shrink", (g) => {
+        stack(g, 360, 60, 6, colours[2]);
+        return 410;
+      });
+      add("Convolution", "more maps", (g) => {
+        stack(g, 490, 48, 10, colours[1]);
+        return 545;
+      });
+      add("Pooling", "shrink", (g) => {
+        stack(g, 630, 28, 10, colours[3]);
+        return 670;
+      });
+      const out = add("Dense", "class scores", (g) => {
+        const og = el("g", { class: "out" }, g);
+        for (let k = 0; k < 10; k++) {
+          el("rect", { class: k === 7 ? "top" : "", x: 800, y: 70 + k * 21, width: 26, height: 16, rx: 3 }, og);
+          el("text", { x: 840, y: 84 + k * 21, style: "font-size:18px;text-anchor:start" }, og, String(k));
+        }
+        return 820;
+      });
+      el("text", { class: "big", x: 920, y: 186, style: "fill:#67e8f9" }, out, "→ 7");
+      const notes = [
+        "Press → to move through the network.",
+        "A small kernel slides over the image; each kernel makes one feature map (edges, corners…).",
+        "Pooling keeps the strongest responses and shrinks each map.",
+        "Deeper kernels combine simple features into bigger shapes.",
+        "Pool again: fewer numbers, more meaning per number.",
+        "A dense layer turns the features into one score per class; the highest wins.",
+      ];
+      let slideTl = null;
+      function show(n) {
+        stages.forEach((g, i) => g.classList.toggle("on", i <= n));
+        caption.textContent = notes[n];
+      }
+      Deck.scene("#pipe", {
+        enter() {
+          show(Deck.step);
+          slideTl?.kill();
+          // The kernel window keeps scanning the input image
+          slideTl = gsap.timeline({ repeat: -1 });
+          for (let r = 0; r < 4; r++) slideTl.set(win, { attr: { x: 30, y: cy - 60 + r * 30 } }).to(win, { attr: { x: 120 }, duration: 1.2, ease: "none" });
+        },
+        leave: () => slideTl?.kill(),
+        step: (s, n) => show(n),
+        unstep: (s, n) => show(n - 1),
+      });
+    </script>
+  </body>
+</html>

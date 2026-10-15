@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Probabilistic Models</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Contents / checkpoints ---------- */
+      .toc {
+        position: relative;
+        display: grid;
+        gap: 0.3rem;
+        width: min(100%, 34rem);
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        counter-reset: c;
+      }
+
+      .toc li {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        padding: 0.45rem 1.2rem;
+        font-family: var(--font-display);
+        font-size: 1.7rem;
+        color: var(--muted);
+        transition: color 0.4s;
+      }
+
+      .toc li::before {
+        counter-increment: c;
+        content: counter(c) ".";
+        display: inline-block;
+        width: 2.6rem;
+        font-family: var(--font-mono);
+        font-size: 1.1rem;
+        color: var(--faint);
+      }
+
+      .toc li.here {
+        color: var(--text);
+      }
+
+      .toc li.done {
+        color: var(--faint);
+        text-decoration: line-through;
+        text-decoration-color: rgba(255, 255, 255, 0.25);
+      }
+
+      .toc .hl {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 0;
+        border-radius: 12px;
+        border: 1px solid var(--violet-soft);
+        background: rgba(139, 92, 246, 0.22);
+        opacity: 0;
+      }
+
+      .maths .katex {
+        font-size: 1.9em;
+      }
+
+      .maths + p {
+        font-size: 1.3rem;
+      }
+
+      .slide.section > h2:only-child {
+        margin: auto 0;
+        font-size: 4rem;
+      }
+
+      /* ---------- Brute force Bayes playground ---------- */
+      #play .stage {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 4rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      #play .ctrls {
+        display: grid;
+        gap: 1.4rem;
+      }
+
+      #play label {
+        display: grid;
+        grid-template-columns: 9.5rem minmax(0, 1fr) 4rem;
+        gap: 1rem;
+        align-items: center;
+        font-size: 1.35rem;
+      }
+
+      #play .ctrls p {
+        font-size: 1.3rem;
+      }
+
+      #play input {
+        width: 100%;
+        accent-color: var(--violet);
+      }
+
+      #play output {
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      #play .bars {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 3.5rem;
+        height: 40cqh;
+        border-bottom: 2px solid var(--faint);
+      }
+
+      #play .bar {
+        position: relative;
+        width: 7rem;
+        border-radius: 10px 10px 0 0;
+        background: rgba(148, 163, 184, 0.35);
+        transition:
+          height 0.3s var(--ease),
+          background 0.3s;
+      }
+
+      #play .bar.win {
+        background: var(--gradient);
+      }
+
+      #play .bar span {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding-bottom: 0.3rem;
+        font-family: var(--font-mono);
+        font-size: 1.25rem;
+      }
+
+      #play .bar small {
+        font-size: 1.1rem;
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        color: var(--muted);
+      }
+
+      #play .verdict {
+        margin-top: 2.6rem;
+        font-size: 1.5rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · ML algorithms</span>
+      <h1>Probabilistic Models</h1>
+      <p>Predict the label that is most probable given what we see.</p>
+    </section>
+
+    <section class="slide toc-slide" data-at="0">
+      <h2>Contents</h2>
+      <ol class="toc">
+        <li>History</li>
+        <li>Inferencing</li>
+        <li>Unbiased Estimation</li>
+        <li>MLE</li>
+        <li>MAP</li>
+        <li>Brute Force Bayes</li>
+        <li>Naive Bayes</li>
+      </ol>
+    </section>
+
+    <section class="slide toc-slide" data-at="6">
+      <h2>Checkpoint</h2>
+      <ol class="toc">
+        <li>History</li>
+        <li>Inferencing</li>
+        <li>Unbiased Estimation</li>
+        <li>MLE</li>
+        <li>MAP</li>
+        <li>Brute Force Bayes</li>
+        <li>Naive Bayes</li>
+      </ol>
+    </section>
+
+    <section class="slide section">
+      <h2>Brute Force Bayes</h2>
+    </section>
+
+    <section class="slide">
+      <h2>Brute Force Bayes</h2>
+      <div class="maths">
+        <p class="step">$$ \hat{y} = \underset{y \in \{0,1\}}{\arg\max} \, P(y \mid x) $$</p>
+        <p class="step">$$ \phantom{\hat{y}} = \underset{y \in \{0,1\}}{\arg\max} \, \frac{P(x \mid y)\,P(y)}{P(x)} $$</p>
+        <p class="step">$$ \phantom{\hat{y}} = \underset{y \in \{0,1\}}{\arg\max} \, P(x \mid y)\,P(y) $$</p>
+      </div>
+      <p class="step center">\(P(x)\) is the same for both labels, so it cannot change which one wins. Revise priors and Bayes with the <a href="/formal/math/probstats/dist/beta.html">Beta distribution</a> deck.</p>
+    </section>
+
+    <section class="slide" id="play">
+      <h2>Brute Force Bayes, by hand</h2>
+      <div class="stage">
+        <div class="ctrls" data-interactive>
+          <label>\(P(x \mid y{=}0)\)<input type="range" min="0.01" max="1" step="0.01" value="0.2" data-k="l0" /><output></output></label>
+          <label>\(P(x \mid y{=}1)\)<input type="range" min="0.01" max="1" step="0.01" value="0.6" data-k="l1" /><output></output></label>
+          <label>\(P(y{=}1)\)<input type="range" min="0.01" max="0.99" step="0.01" value="0.1" data-k="p1" /><output></output></label>
+          <p class="muted">\(P(y{=}0) = 1 - P(y{=}1)\)</p>
+        </div>
+        <div>
+          <div class="bars">
+            <div class="bar b0"><span></span><small>y = 0</small></div>
+            <div class="bar b1"><span></span><small>y = 1</small></div>
+          </div>
+          <p class="verdict"></p>
+        </div>
+      </div>
+      <p class="center muted">Bars: \(P(x \mid y)\,P(y)\). The taller bar is the prediction. A strong likelihood can lose to a small prior.</p>
+    </section>
+
+    <section class="slide toc-slide" data-at="7">
+      <h2>Checkpoint</h2>
+      <ol class="toc">
+        <li>History</li>
+        <li>Inferencing</li>
+        <li>Unbiased Estimation</li>
+        <li>MLE</li>
+        <li>MAP</li>
+        <li>Brute Force Bayes</li>
+        <li>Naive Bayes</li>
+      </ol>
+    </section>
+
+    <section class="slide section">
+      <h2>Naive Bayes</h2>
+    </section>
+
+    <section class="slide">
+      <h2>Naive assumption</h2>
+      <div class="maths">
+        <p class="step">$$ P(\mathbf{x} \mid y) = \prod_{i} P(x_i \mid y) $$</p>
+      </div>
+      <p class="step center">Treat every feature \(x_i\) as independent of the others once the label is known. Rarely true, often good enough.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // Checkpoints: a highlight slides down from the previous section to the current one
+      document.querySelectorAll(".toc-slide").forEach((slide) => {
+        const toc = slide.querySelector(".toc");
+        const hl = document.createElement("span");
+        hl.className = "hl";
+        toc.prepend(hl);
+        const items = [...toc.querySelectorAll("li")];
+        const at = +slide.dataset.at; // 1-based item, 0 = plain contents
+        Deck.scene(slide, {
+          enter() {
+            items.forEach((li, i) => {
+              li.classList.toggle("here", i === at - 1);
+              li.classList.toggle("done", at > 0 && i < at - 1);
+            });
+            if (!at) {
+              gsap.set(hl, { opacity: 0 });
+              gsap.from(items, { x: -30, opacity: 0, stagger: 0.07, duration: 0.5 });
+              return;
+            }
+            const box = (li) => ({ top: li.offsetTop, height: li.offsetHeight });
+            const from = items[Math.max(0, at - 2)];
+            gsap.fromTo(hl, { ...box(from), opacity: 1 }, { ...box(items[at - 1]), duration: 0.9, delay: 0.3, ease: "power3.inOut" });
+          },
+        });
+      });
+
+      // Brute force Bayes playground
+      const play = document.querySelector("#play");
+      const inputs = Object.fromEntries([...play.querySelectorAll("input")].map((i) => [i.dataset.k, i]));
+      const [b0, b1] = play.querySelectorAll(".bar");
+      const verdict = play.querySelector(".verdict");
+      function render() {
+        const l0 = +inputs.l0.value, l1 = +inputs.l1.value, p1 = +inputs.p1.value;
+        play.querySelectorAll("input").forEach((i) => (i.nextElementSibling.textContent = (+i.value).toFixed(2)));
+        const s0 = l0 * (1 - p1), s1 = l1 * p1;
+        const max = Math.max(s0, s1, 1e-6);
+        b0.style.height = (s0 / max) * 100 + "%";
+        b1.style.height = (s1 / max) * 100 + "%";
+        b0.querySelector("span").textContent = s0.toFixed(3);
+        b1.querySelector("span").textContent = s1.toFixed(3);
+        b0.classList.toggle("win", s0 >= s1);
+        b1.classList.toggle("win", s1 > s0);
+        verdict.innerHTML = `Prediction: <strong>ŷ = ${s1 > s0 ? 1 : 0}</strong>`;
+      }
+      play.addEventListener("input", render);
+      render();
+    </script>
+  </body>
+</html>

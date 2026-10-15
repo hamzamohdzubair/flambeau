@@ -1,0 +1,1291 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Noise &amp; Blurring</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.85rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 1.4rem;
+        font-size: 1rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 12rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 60rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 1rem;
+      }
+
+      pre.ex {
+        width: min(100%, 64rem);
+        font-size: 1rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 0.95rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+
+      #title canvas {
+        width: min(26rem, 80cqw);
+        border-radius: 12px;
+      }
+
+      #types .card canvas {
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 0.6rem;
+      }
+
+      #types .cards {
+        width: min(100%, 64rem);
+      }
+
+      /* ---------- Noise lab ---------- */
+      #nlab .play {
+        width: min(100%, 60rem);
+      }
+
+      #nlab svg {
+        width: min(100%, 60rem);
+        height: 6rem;
+      }
+
+      #nlab .plabel {
+        margin: 0 0 -0.6rem;
+        font-size: 0.85rem;
+      }
+
+      #nlab .clean {
+        fill: none;
+        stroke: #a78bfa;
+        stroke-width: 2.5;
+        vector-effect: non-scaling-stroke;
+      }
+
+      #nlab .noisy {
+        fill: none;
+        stroke: #22d3ee;
+        stroke-width: 1.5;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.85;
+      }
+
+      /* ---------- Median animation ---------- */
+      #median .stage {
+        --c: 3.6rem;
+        position: relative;
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 1.4rem 3rem;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .nb {
+        display: grid;
+        grid-template-columns: repeat(3, var(--c));
+        gap: 4px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.75);
+      }
+
+      .nb span,
+      .sorted span {
+        display: grid;
+        place-items: center;
+        width: var(--c);
+        height: var(--c);
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: calc(var(--c) * 0.3);
+      }
+
+      .sorted {
+        display: flex;
+        gap: 4px;
+        min-height: var(--c);
+      }
+
+      .sorted span.mid {
+        outline: 3px solid var(--pink);
+        outline-offset: -3px;
+        box-shadow: 0 0 18px rgba(236, 72, 153, 0.8);
+      }
+
+      .vs {
+        display: grid;
+        gap: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 1.2rem;
+      }
+
+      .vs b {
+        font-size: 1.4rem;
+      }
+
+      .vs .m b {
+        color: var(--green);
+      }
+
+      .vs .a b {
+        color: var(--red);
+      }
+
+      /* ---------- Bilateral weights ---------- */
+      .bw {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.8rem 1.2rem;
+      }
+
+      .bw canvas {
+        width: 7.2rem;
+        image-rendering: pixelated;
+        border-radius: 8px;
+      }
+
+      .bw .op {
+        font-size: 1.3rem;
+        color: var(--faint);
+      }
+
+      #bilateral .cols {
+        width: min(100%, 64rem);
+        grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+      }
+
+      /* ---------- NLM ---------- */
+      #nlm .cols {
+        width: min(100%, 64rem);
+      }
+
+      #nlm .cols {
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+      }
+
+      #nlm canvas.img {
+        width: 28rem;
+        cursor: crosshair;
+      }
+
+      #nlm .hint {
+        margin-top: 1.2rem;
+        font-size: 0.95rem;
+      }
+
+      /* ---------- Denoise lab ---------- */
+      #dlab .play {
+        width: min(100%, 60rem);
+      }
+
+      #dlab .rows {
+        display: grid;
+        gap: 0.55rem;
+        justify-items: center;
+      }
+
+      .psnr b {
+        color: var(--green);
+      }
+
+      #compare .cards {
+        width: min(100%, 64rem);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      #compare .card ul {
+        padding-left: 1.1em;
+        margin: 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas width="480" height="270"></canvas>
+      <h1>Noise &amp; Blurring</h1>
+      <p>Where the grain in an image comes from, and four filters that remove it without losing too much.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide">
+      <h2>What is image noise?</h2>
+      <p class="lead"><strong>Noise</strong> is random variation in pixel intensity: an unwanted signal on top of the real one.</p>
+      <div class="cols top" style="width: min(100%, 56rem)">
+        <div class="card">
+          <h3>Sources</h3>
+          <ul>
+            <li class="step">Sensor imperfections</li>
+            <li class="step">Low-light conditions</li>
+            <li class="step">Electrical interference</li>
+            <li class="step">Transmission errors</li>
+            <li class="step">Compression artifacts</li>
+          </ul>
+        </div>
+        <div class="card step">
+          <h3>Impact</h3>
+          <p>It degrades image quality and affects processing algorithms: edge detectors, thresholds and feature detectors all respond to noise as if it were detail.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ types -->
+    <section class="slide" id="types">
+      <h2>Types of noise</h2>
+      <div class="cards">
+        <div class="card step"><canvas data-n="gauss" width="240" height="135"></canvas><h3>Gaussian</h3><ul><li>Random values from a normal distribution</li><li>The most common type</li><li>Additive: <code>noisy = clean + noise</code></li><li>Looks like a grainy texture</li></ul></div>
+        <div class="card step"><canvas data-n="sp" width="240" height="135"></canvas><h3>Salt-and-pepper</h3><ul><li>Random black and white pixels</li><li>Also called impulse noise</li><li>Pixels are either 0 or 255</li><li>Looks like random dots</li></ul></div>
+        <div class="card step"><canvas data-n="poisson" width="240" height="135"></canvas><h3>Poisson</h3><ul><li>Varies with signal intensity</li><li>Common in low-light imaging</li><li>Variance proportional to intensity</li></ul></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ noise lab -->
+    <section class="slide top" id="nlab">
+      <h2>Noise, live</h2>
+      <div class="play">
+        <figure><canvas class="img clean-c" width="480" height="270"></canvas><figcaption>clean</figcaption></figure>
+        <figure><canvas class="img noisy-c" width="480" height="270"></canvas><figcaption class="nname">noisy</figcaption></figure>
+      </div>
+      <div class="chips" data-interactive>
+        <button class="chip on" data-n="gauss">Gaussian</button>
+        <button class="chip" data-n="sp">Salt-and-pepper</button>
+        <button class="chip" data-n="poisson">Poisson</button>
+      </div>
+      <div class="ctl" data-interactive><label class="lname">sigma <input type="range" min="0" max="60" value="25" /><output></output></label></div>
+      <p class="muted plabel">One row of pixels (dashed line): <span style="color: #a78bfa">clean</span> vs <span style="color: #22d3ee">noisy</span></p>
+      <svg viewBox="0 0 600 110" preserveAspectRatio="none" aria-label="One row of pixel intensities, clean and noisy">
+        <polyline class="noisy" points="" /><polyline class="clean" points="" />
+      </svg>
+    </section>
+
+    <!-- ================================================================ gaussian code -->
+    <section class="slide">
+      <h2>Adding Gaussian noise</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        # generate gaussian noise
+        mean = 0
+        sigma = 25
+        gaussian_noise = np.random.normal(mean, sigma, img.shape)
+        # ans: mean=0, sigma=25 controls noise strength
+        # add noise to image
+        noisy = img + gaussian_noise  # ans:
+        noisy = np.clip(noisy, 0, 255).astype(np.uint8)  # ans:
+        # ans: clip to the valid range [0, 255]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Adding salt-and-pepper noise</h2>
+      <pre class="steps"><code class="language-python">
+        # add salt-and-pepper noise
+        def add_salt_pepper(img, prob=0.01):
+            noisy = img.copy()
+            # salt (white pixels)
+            num_salt = int(prob * img.size * 0.5)
+            coords = [np.random.randint(0, i, num_salt) for i in img.shape[:2]]
+            noisy[coords[0], coords[1]] = 255
+            # pepper (black pixels)
+            num_pepper = int(prob * img.size * 0.5)
+            coords = [np.random.randint(0, i, num_pepper) for i in img.shape[:2]]
+            noisy[coords[0], coords[1]] = 0
+            return noisy
+        # ans: prob controls the fraction of noisy pixels
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ gaussian blur -->
+    <section class="slide">
+      <h2>Gaussian blur for noise reduction</h2>
+      <div class="cols top" style="width: min(100%, 56rem)">
+        <div class="card">
+          <h3>Why Gaussian blur?</h3>
+          <ul>
+            <li class="step">Effective for Gaussian noise</li>
+            <li class="step">Weighted averaging: near pixels count more, so features survive better than with a box blur</li>
+            <li class="step">Smooth, natural-looking results</li>
+          </ul>
+        </div>
+        <div class="card warn step">
+          <h3>Trade-off</h3>
+          <p>It reduces noise but also blurs edges: the filter cannot tell an edge from noise.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Gaussian blur parameters</h2>
+      <pre class="steps"><code class="language-python">
+        # gaussian blur for noise reduction
+        denoised = cv2.GaussianBlur(noisy, (5, 5), 0)  # ans:
+        # ans: 5x5 kernel, sigma computed from the size
+        # larger kernel for more smoothing
+        denoised = cv2.GaussianBlur(noisy, (9, 9), 0)
+        # ans: 9x9 kernel removes more noise, more blur
+        # specific sigma value
+        denoised = cv2.GaussianBlur(noisy, (0, 0), sigmaX=2.0)
+        # ans: kernel size computed from sigma=2.0
+        # different sigma for x and y
+        denoised = cv2.GaussianBlur(noisy, (0, 0), sigmaX=2.0, sigmaY=1.0)
+        # ans: anisotropic blur (different in x and y)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ median -->
+    <section class="slide" id="median">
+      <h2>Median filter for salt-and-pepper</h2>
+      <div class="stage">
+        <div class="nb"></div>
+        <div style="display: grid; gap: 1rem">
+          <div class="sorted"></div>
+          <div class="vs">
+            <span class="m">median → <b>…</b></span>
+            <span class="a">mean → <b>…</b></span>
+          </div>
+        </div>
+      </div>
+      <ul style="width: min(100%, 52rem)">
+        <li class="step">Not affected by outliers: it picks the middle value and ignores the extreme noise.</li>
+        <li class="step">Preserves edges better than averaging.</li>
+        <li class="step"><strong>Algorithm:</strong> sort the neighbourhood, pick the median.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Median blur in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # median blur (best for salt-and-pepper)
+        denoised = cv2.medianBlur(noisy, 5)  # ans:
+        # ans: 5x5 kernel, takes the median of 25 pixels
+        # larger kernel for heavy noise
+        denoised = cv2.medianBlur(noisy, 9)
+        # ans: 9x9 kernel for strong salt-and-pepper noise
+        # why does median work for salt-and-pepper?
+        # ans: the median ignores extreme values (0 or 255)
+        # ans: and keeps original pixel values better
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ bilateral -->
+    <section class="slide" id="bilateral">
+      <h2>Bilateral filter (edge-preserving)</h2>
+      <div class="cols">
+        <div>
+          <p class="lead" style="text-align: left">Smooths noise while keeping edges sharp.</p>
+          <ul>
+            <li class="step">Two weights: <strong>spatial</strong> and <strong>intensity</strong></li>
+            <li class="step">Close pixels with similar intensity → high weight</li>
+            <li class="step">Far pixels <em>or</em> different intensity → low weight</li>
+            <li class="step"><strong>Best for:</strong> natural images, portrait smoothing</li>
+          </ul>
+        </div>
+        <div style="display: grid; gap: 0.8rem; justify-items: center">
+          <div class="bw">
+            <figure><canvas class="patch" width="15" height="15"></canvas><figcaption>patch across an edge</figcaption></figure>
+            <figure><canvas class="ws" width="15" height="15"></canvas><figcaption>spatial</figcaption></figure>
+            <span class="op">×</span>
+            <figure><canvas class="wr" width="15" height="15"></canvas><figcaption>intensity</figcaption></figure>
+            <span class="op">=</span>
+            <figure><canvas class="wb" width="15" height="15"></canvas><figcaption>bilateral</figcaption></figure>
+          </div>
+          <div class="ctl" data-interactive><label>centre pixel <input type="range" min="2" max="12" value="6" /><output></output></label></div>
+          <p class="muted center" style="font-size: 0.95rem">Bright = high weight. The weights stop at the edge, so the two sides are never averaged together.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Bilateral filter in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # bilateral filter (edge-preserving denoising)
+        denoised = cv2.bilateralFilter(noisy, d=9, sigmaColor=75, sigmaSpace=75)  # ans:
+        # d: diameter of pixel neighborhood
+        # ans: larger d = considers more neighbours, slower
+        # sigmaColor: intensity difference threshold
+        # ans: larger value = more colours averaged (more blur)
+        # sigmaSpace: spatial distance threshold
+        # ans: larger value = farther pixels considered
+        # when to use bilateral?
+        # ans: to preserve edges while removing noise
+        # ans: better than Gaussian for natural images
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ NLM -->
+    <section class="slide" id="nlm">
+      <h2>Non-local means denoising</h2>
+      <div class="cols">
+        <figure>
+          <canvas class="img" width="240" height="240"></canvas>
+        </figure>
+        <div>
+          <p><strong>NLM</strong> compares <em>patches</em>, not just neighbourhoods.</p>
+          <ul>
+            <li class="step"><strong>Concept:</strong> similar patches anywhere in the image are averaged.</li>
+            <li class="step" style="color: var(--green)"><strong>Advantage:</strong> better noise reduction, preserves texture.</li>
+            <li class="step" style="color: var(--red)"><strong>Disadvantage:</strong> computationally expensive.</li>
+          </ul>
+          <p class="muted hint">← Click a pixel. Cyan: its 7×7 patch. Yellow brightness: how similar each patch in the 21×21 search window is, which is its weight.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>NLM denoising in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # non-local means denoising (grayscale)
+        gray_noisy = cv2.cvtColor(noisy, cv2.COLOR_BGR2GRAY)
+        denoised = cv2.fastNlMeansDenoising(gray_noisy, None, h=10,  # ans:
+                                            templateWindowSize=7, searchWindowSize=21)  # ans:
+        # for color images
+        denoised = cv2.fastNlMeansDenoisingColored(noisy, None, h=10, hColor=10,  # ans:
+                                                   templateWindowSize=7, searchWindowSize=21)  # ans:
+        # h: filter strength
+        # ans: higher h = more denoising, more blur
+        # templateWindowSize: patch size
+        # ans: usually 7x7
+        # searchWindowSize: search area
+        # ans: usually 21x21
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ denoise lab -->
+    <section class="slide top" id="dlab">
+      <h2>Denoising, live</h2>
+      <div class="play">
+        <figure><canvas class="img noisy" width="480" height="270"></canvas><figcaption class="nname"></figcaption></figure>
+        <figure><canvas class="img out" width="480" height="270"></canvas><figcaption class="fname"></figcaption></figure>
+      </div>
+      <div class="rows">
+        <div class="chips noise" data-interactive>
+          <button class="chip on" data-n="gauss">Gaussian noise</button>
+          <button class="chip" data-n="sp">Salt-and-pepper</button>
+        </div>
+        <div class="chips filt" data-interactive>
+          <button class="chip on" data-f="gauss">GaussianBlur</button>
+          <button class="chip" data-f="median">medianBlur</button>
+          <button class="chip" data-f="bilateral">bilateralFilter</button>
+          <button class="chip" data-f="nlm">fastNlMeans</button>
+        </div>
+        <div class="ctl" data-interactive><label>size <input type="range" min="1" max="4" value="2" /><output></output></label></div>
+        <p class="readout psnr"></p>
+      </div>
+    </section>
+
+    <!-- ================================================================ compare -->
+    <section class="slide" id="compare">
+      <h2>Comparing denoising methods</h2>
+      <div class="cards">
+        <div class="card step"><h3>Gaussian blur</h3><ul><li>Fast, simple</li><li>Blurs edges</li><li>Good for light Gaussian noise</li></ul></div>
+        <div class="card step"><h3>Median filter</h3><ul><li>Excellent for salt-and-pepper</li><li>Preserves edges</li><li>Slower than Gaussian</li></ul></div>
+        <div class="card step"><h3>Bilateral filter</h3><ul><li>Edge-preserving</li><li>Good for natural images</li><li>Moderate speed</li></ul></div>
+        <div class="card step"><h3>NLM denoising</h3><ul><li>Best quality</li><li>Preserves texture</li><li>Slowest</li></ul></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What causes image noise?</p><p class="answer">Sensor issues, low light, interference, compression.</p></div>
+        <div class="q"><p>The most common noise type?</p><p class="answer">Gaussian noise.</p></div>
+        <div class="q"><p>Which noise looks like random dots?</p><p class="answer">Salt-and-pepper (impulse) noise.</p></div>
+        <div class="q"><p>The best filter for salt-and-pepper?</p><p class="answer">The median filter.</p></div>
+        <div class="q"><p>What does bilateral preserve?</p><p class="answer">Edges, while smoothing noise.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>The trade-off of denoising?</p><p class="answer">It removes noise but also blurs details and edges.</p></div>
+        <div class="q"><p>Why does the median ignore salt-and-pepper?</p><p class="answer">The median is not affected by outliers (extreme values).</p></div>
+        <div class="q"><p>What is NLM?</p><p class="answer">Non-local means: it averages similar patches.</p></div>
+        <div class="q"><p>The fastest denoising method?</p><p class="answer">Gaussian blur.</p></div>
+        <div class="q"><p>What is <code>sigmaColor</code> in bilateral?</p><p class="answer">The intensity difference threshold for averaging.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # add gaussian noise (sigma=20)
+        mean = 0
+        sigma = 20
+        noise = np.random.normal(mean, sigma, img.shape)
+        noisy = np.clip(img + noise, 0, 255).astype(np.uint8)  # ans:
+        # denoise with gaussian blur
+        denoised = cv2.GaussianBlur(noisy, (5, 5), 0)  # ans:
+        # denoise with median filter
+        denoised = cv2.medianBlur(noisy, 5)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # bilateral denoising
+        denoised = cv2.bilateralFilter(noisy, 9, 75, 75)  # ans:
+        # NLM denoising on grayscale
+        denoised = cv2.fastNlMeansDenoising(gray_noisy, None, h=10,  # ans:
+                                            templateWindowSize=7, searchWindowSize=21)  # ans:
+        # NLM denoising on color image
+        denoised = cv2.fastNlMeansDenoisingColored(noisy, None, h=10, hColor=10,  # ans:
+                                                   templateWindowSize=7, searchWindowSize=21)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # strong gaussian blur (11x11)
+        denoised = cv2.GaussianBlur(noisy, (11, 11), 0)  # ans:
+        # median with large kernel
+        denoised = cv2.medianBlur(noisy, 11)  # ans:
+        # bilateral with strong smoothing
+        denoised = cv2.bilateralFilter(noisy, 15, 150, 150)  # ans:
+        # compare sizes before and after
+        print(noisy.shape, denoised.shape)
+        # ans: same shape, only pixel values change
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 6 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # apply gaussian blur twice
+        blur1 = cv2.GaussianBlur(noisy, (5, 5), 0)
+        blur2 = cv2.GaussianBlur(blur1, (5, 5), 0)  # ans:
+        # ans: double blur = stronger smoothing
+        # denoise each channel separately
+        b, g, r = cv2.split(noisy)
+        b_denoised = cv2.GaussianBlur(b, (5, 5), 0)  # ans:
+        g_denoised = cv2.GaussianBlur(g, (5, 5), 0)  # ans:
+        r_denoised = cv2.GaussianBlur(r, (5, 5), 0)  # ans:
+        denoised = cv2.merge([b_denoised, g_denoised, r_denoised])  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 7 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # NLM with higher h value
+        denoised = cv2.fastNlMeansDenoising(gray_noisy, None, h=20,  # ans:
+                                            templateWindowSize=7, searchWindowSize=21)  # ans:
+        # ans: h=20 removes more noise, more blur
+        # bilateral with different sigmas
+        denoised = cv2.bilateralFilter(noisy, 9, 50, 100)
+        # ans: sigmaColor=50 (less colour smoothing)
+        # ans: sigmaSpace=100 (larger spatial range)
+        # combine median and gaussian
+        median = cv2.medianBlur(noisy, 5)
+        final = cv2.GaussianBlur(median, (3, 3), 0)  # ans:
+        # ans: median removes salt-and-pepper, gaussian smooths
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 8 · advanced</h2>
+      <pre class="ex"><code class="language-python">
+        # create noisy image with both types
+        gaussian_noise = np.random.normal(0, 15, img.shape)
+        noisy = np.clip(img + gaussian_noise, 0, 255).astype(np.uint8)
+        # add salt-pepper on top
+        prob = 0.02
+        num_salt = int(prob * noisy.size * 0.5)
+        coords = [np.random.randint(0, i, num_salt) for i in noisy.shape[:2]]
+        noisy[coords[0], coords[1]] = 255
+        num_pepper = int(prob * noisy.size * 0.5)
+        coords = [np.random.randint(0, i, num_pepper) for i in noisy.shape[:2]]
+        noisy[coords[0], coords[1]] = 0
+        # ans: combined gaussian and salt-and-pepper noise
+        # denoise strategy
+        median = cv2.medianBlur(noisy, 5)
+        denoised = cv2.bilateralFilter(median, 9, 75, 75)  # ans:
+        # ans: median first removes salt-and-pepper, then bilateral smooths
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      const gsap = await Deck.load("gsap");
+      const photo = await loadImage("/assets/2025-10-09-22-21-33.png");
+      const W = 480, H = 270;
+      const clean = readPixels(photo, W, H);
+      let seed = 1;
+      const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      const randn = () => Math.sqrt(-2 * Math.log(rand() + 1e-12)) * Math.cos(2 * Math.PI * rand());
+
+      // ------------------------------------------------------------ noise models
+      function addNoise(id, kind, amount, s = 1) {
+        seed = s;
+        const out = new ImageData(new Uint8ClampedArray(id.data), id.width, id.height);
+        const d = out.data;
+        if (kind === "gauss") for (let i = 0; i < d.length; i++) if (i % 4 !== 3) d[i] = d[i] + randn() * amount;
+        if (kind === "poisson") {
+          // photon counting: fewer photons per grey level means more noise; variance grows with intensity
+          const k = 1 / Math.max(0.05, amount);
+          for (let i = 0; i < d.length; i++) if (i % 4 !== 3) d[i] = d[i] + randn() * Math.sqrt(d[i] / k);
+        }
+        if (kind === "sp")
+          for (let p = 0; p < d.length; p += 4) {
+            const r = rand();
+            if (r < amount / 2) d[p] = d[p + 1] = d[p + 2] = 255;
+            else if (r < amount) d[p] = d[p + 1] = d[p + 2] = 0;
+          }
+        return out;
+      }
+      const psnr = (a, b) => {
+        let s = 0, n = 0;
+        for (let i = 0; i < a.data.length; i++) if (i % 4 !== 3) (s += (a.data[i] - b.data[i]) ** 2), n++;
+        return 10 * Math.log10((255 * 255) / (s / n));
+      };
+
+      // ------------------------------------------------------------ filters (per channel, reflect-101 borders)
+      const refl = (v, m) => (v < 0 ? -v : v >= m ? 2 * m - v - 2 : v);
+      function gaussianBlur(id, k) {
+        const sigma = 0.3 * ((k - 1) * 0.5 - 1) + 0.8; // OpenCV's sigma for a given ksize
+        const r = (k - 1) / 2;
+        let ker = Array.from({ length: k }, (_, i) => Math.exp(-((i - r) ** 2) / (2 * sigma * sigma)));
+        const sum = ker.reduce((a, b) => a + b, 0);
+        ker = ker.map((v) => v / sum);
+        const { width: w, height: h, data } = id;
+        const tmp = new Float32Array(data.length), out = new ImageData(w, h);
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++)
+            for (let c = 0; c < 3; c++) {
+              let s = 0;
+              for (let i = 0; i < k; i++) s += ker[i] * data[(y * w + refl(x + i - r, w)) * 4 + c];
+              tmp[(y * w + x) * 4 + c] = s;
+            }
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++) {
+            for (let c = 0; c < 3; c++) {
+              let s = 0;
+              for (let i = 0; i < k; i++) s += ker[i] * tmp[(refl(y + i - r, h) * w + x) * 4 + c];
+              out.data[(y * w + x) * 4 + c] = s;
+            }
+            out.data[(y * w + x) * 4 + 3] = 255;
+          }
+        return out;
+      }
+      function medianBlur(id, k) {
+        const { width: w, height: h, data } = id;
+        const r = (k - 1) / 2, out = new ImageData(w, h), buf = new Uint8Array(k * k), mid = (k * k) >> 1;
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++) {
+            for (let c = 0; c < 3; c++) {
+              let n = 0;
+              for (let j = -r; j <= r; j++) {
+                const yy = refl(y + j, h);
+                for (let i = -r; i <= r; i++) buf[n++] = data[(yy * w + refl(x + i, w)) * 4 + c];
+              }
+              buf.sort();
+              out.data[(y * w + x) * 4 + c] = buf[mid];
+            }
+            out.data[(y * w + x) * 4 + 3] = 255;
+          }
+        return out;
+      }
+      function bilateral(id, d, sc, ss) {
+        const { width: w, height: h, data } = id;
+        const r = Math.floor(d / 2), out = new ImageData(w, h);
+        const cw = new Float32Array(3 * 256).map((_, i) => Math.exp(-(i * i) / (2 * sc * sc)));
+        const offs = [];
+        for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) if (i * i + j * j <= r * r) offs.push([i, j, Math.exp(-(i * i + j * j) / (2 * ss * ss))]);
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++) {
+            const o = (y * w + x) * 4;
+            let s0 = 0, s1 = 0, s2 = 0, ws = 0;
+            for (const [i, j, sw] of offs) {
+              const q = (refl(y + j, h) * w + refl(x + i, w)) * 4;
+              const diff = Math.abs(data[q] - data[o]) + Math.abs(data[q + 1] - data[o + 1]) + Math.abs(data[q + 2] - data[o + 2]);
+              const wt = sw * cw[diff];
+              s0 += wt * data[q];
+              s1 += wt * data[q + 1];
+              s2 += wt * data[q + 2];
+              ws += wt;
+            }
+            out.data[o] = s0 / ws;
+            out.data[o + 1] = s1 / ws;
+            out.data[o + 2] = s2 / ws;
+            out.data[o + 3] = 255;
+          }
+        return out;
+      }
+      // Non-local means on colour, with a smaller search window to stay interactive
+      function nlm(id, hh, t = 5, s = 11) {
+        const { width: w, height: h, data } = id;
+        const g = toGray(id);
+        const tr = (t - 1) / 2, sr = (s - 1) / 2, out = new ImageData(w, h);
+        const h2 = hh * hh * t * t;
+        for (let y = 0; y < h; y++)
+          for (let x = 0; x < w; x++) {
+            let s0 = 0, s1 = 0, s2 = 0, ws = 0;
+            for (let dy = -sr; dy <= sr; dy++)
+              for (let dx = -sr; dx <= sr; dx++) {
+                const qx = refl(x + dx, w), qy = refl(y + dy, h);
+                let dist = 0;
+                for (let j = -tr; j <= tr; j++) {
+                  const a = refl(y + j, h) * w, b = refl(qy + j, h) * w;
+                  for (let i = -tr; i <= tr; i++) {
+                    const e = g[a + refl(x + i, w)] - g[b + refl(qx + i, w)];
+                    dist += e * e;
+                  }
+                }
+                const wt = Math.exp(-Math.max(dist - 2 * 25 * t * t, 0) / h2);
+                const q = (qy * w + qx) * 4;
+                s0 += wt * data[q];
+                s1 += wt * data[q + 1];
+                s2 += wt * data[q + 2];
+                ws += wt;
+              }
+            const o = (y * w + x) * 4;
+            out.data[o] = s0 / ws;
+            out.data[o + 1] = s1 / ws;
+            out.data[o + 2] = s2 / ws;
+            out.data[o + 3] = 255;
+          }
+        return out;
+      }
+
+      // ------------------------------------------------------------ cover: live grain
+      {
+        const cv = document.querySelector("#title canvas");
+        let raf = 0, last = 0, running = false, phase = 0;
+        function frame(t) {
+          if (!running) return;
+          if (t - last > 90) {
+            last = t;
+            phase += 0.05;
+            const amt = 30 * (0.5 + 0.5 * Math.sin(phase));
+            show(cv, addNoise(clean, "gauss", amt, (t | 0) + 1));
+          }
+          raf = requestAnimationFrame(frame);
+        }
+        Deck.scene("#title", {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+            running = true;
+            raf = requestAnimationFrame(frame);
+          },
+          leave() {
+            running = false;
+            cancelAnimationFrame(raf);
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ type cards
+      {
+        const small = readPixels(photo, 240, 135, [200, 40, 280, 158]);
+        const A = { gauss: 30, sp: 0.06, poisson: 1.5 };
+        document.querySelectorAll("#types canvas").forEach((c) => show(c, addNoise(small, c.dataset.n, A[c.dataset.n], 5)));
+      }
+
+      // ------------------------------------------------------------ noise lab
+      {
+        const sl = document.querySelector("#nlab");
+        const cc = sl.querySelector(".clean-c"), nc = sl.querySelector(".noisy-c");
+        const input = sl.querySelector("input");
+        const lname = sl.querySelector(".lname");
+        const out = sl.querySelector("output");
+        show(cc, clean);
+        const ROW = 150;
+        const P = {
+          gauss: { label: "sigma", min: 0, max: 60, step: 1, val: 25, code: (v) => `img + np.random.normal(0, ${v}, img.shape)` },
+          sp: { label: "prob", min: 0, max: 0.3, step: 0.01, val: 0.05, code: (v) => `add_salt_pepper(img, prob=${v})` },
+          poisson: { label: "strength", min: 0, max: 4, step: 0.1, val: 1.5, code: () => "variance ∝ intensity" },
+        };
+        let kind = "gauss";
+        const line = (d) => {
+          let s = "";
+          for (let x = 0; x < W; x++) {
+            const p = (ROW * W + x) * 4;
+            s += `${((x / (W - 1)) * 600).toFixed(1)},${(105 - (0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2]) * 0.36).toFixed(1)} `;
+          }
+          return s;
+        };
+        sl.querySelector(".clean").setAttribute("points", line(clean.data));
+        function render() {
+          const v = +input.value;
+          out.textContent = v;
+          const n = addNoise(clean, kind, v, 9);
+          show(nc, n);
+          const ctx = nc.getContext("2d");
+          ctx.strokeStyle = "rgba(34,211,238,0.5)";
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(0, ROW + 0.5);
+          ctx.lineTo(W, ROW + 0.5);
+          ctx.stroke();
+          sl.querySelector(".noisy").setAttribute("points", line(n.data));
+          sl.querySelector(".nname").textContent = `${P[kind].code(v)} · PSNR ${psnr(clean, n).toFixed(1)} dB`;
+        }
+        function setKind(k) {
+          kind = k;
+          const p = P[k];
+          Object.assign(input, { min: p.min, max: p.max, step: p.step });
+          input.value = p.val;
+          lname.firstChild.textContent = p.label + " ";
+          render();
+        }
+        chipGroup(sl.querySelector(".chips"), "button", (b) => setKind(b.dataset.n));
+        input.addEventListener("input", render);
+        setKind("gauss");
+      }
+
+      // ------------------------------------------------------------ median animation
+      {
+        const sl = document.querySelector("#median");
+        const nb = sl.querySelector(".nb"), sorted = sl.querySelector(".sorted");
+        const vals = [112, 108, 115, 110, 255, 109, 0, 113, 111];
+        const shade = (v) => `background: rgb(${v},${v},${Math.min(255, v + 12)}); color: ${v > 130 ? "#05060f" : "#e2e8f0"}`;
+        nb.innerHTML = vals.map((v) => `<span style="${shade(v)}">${v}</span>`).join("");
+        const mOut = sl.querySelector(".m b"), aOut = sl.querySelector(".a b");
+        let tl = null;
+        function play() {
+          tl?.kill();
+          sorted.innerHTML = "";
+          mOut.textContent = aOut.textContent = "…";
+          const order = vals.map((v, i) => [v, i]).sort((a, b) => a[0] - b[0]);
+          order.forEach(([v]) => sorted.insertAdjacentHTML("beforeend", `<span style="${shade(v)}; opacity: 0">${v}</span>`));
+          const targets = [...sorted.children];
+          const src = [...nb.children];
+          tl = gsap.timeline({ delay: 0.6 });
+          order.forEach(([v, i], k) => {
+            tl.call(() => {
+              const a = src[i].getBoundingClientRect(), b = targets[k].getBoundingClientRect();
+              const z = b.width / targets[k].offsetWidth || 1; // screen px per canvas px
+              gsap.fromTo(targets[k], { x: (a.left - b.left) / z, y: (a.top - b.top) / z, opacity: 1 }, { x: 0, y: 0, duration: 0.7, ease: "power2.inOut" });
+            }, null, k * 0.22);
+          });
+          tl.call(() => {
+            targets[4].classList.add("mid");
+            mOut.textContent = order[4][0];
+            aOut.innerHTML = `${Math.round(vals.reduce((a, b) => a + b, 0) / 9)} <small style="font-size:.7em;color:var(--muted)">pulled by 255 and 0</small>`;
+          }, null, 9 * 0.22 + 0.8);
+        }
+        Deck.scene("#median", { enter: play, leave: () => tl?.kill() });
+      }
+
+      // ------------------------------------------------------------ bilateral weights
+      {
+        const sl = document.querySelector("#bilateral");
+        const N = 15;
+        // A patch with a diagonal edge and a little noise
+        seed = 4;
+        const P = Array.from({ length: N * N }, (_, i) => {
+          const x = i % N, y = Math.floor(i / N);
+          return (x + 0.4 * y > 9 ? 200 : 60) + randn() * 8;
+        });
+        const input = sl.querySelector("input");
+        const paintMap = (c, f) => {
+          const id = new ImageData(N, N);
+          for (let i = 0; i < N * N; i++) {
+            const v = f(i);
+            id.data.set([v, v, v, 255], i * 4);
+          }
+          show(c, id);
+        };
+        function render() {
+          const cx = +input.value, cy = 7;
+          sl.querySelector("output").textContent = `(${cx}, ${cy})`;
+          const ci = cy * N + cx;
+          const ss = 3, sc = 30;
+          const ws = (i) => Math.exp(-(((i % N) - cx) ** 2 + (Math.floor(i / N) - cy) ** 2) / (2 * ss * ss));
+          const wr = (i) => Math.exp(-((P[i] - P[ci]) ** 2) / (2 * sc * sc));
+          paintMap(sl.querySelector(".patch"), (i) => (i === ci ? -1 : P[i]));
+          const pc = sl.querySelector(".patch").getContext("2d");
+          pc.fillStyle = "#ec4899";
+          pc.fillRect(cx, cy, 1, 1);
+          paintMap(sl.querySelector(".ws"), (i) => 255 * ws(i));
+          paintMap(sl.querySelector(".wr"), (i) => 255 * wr(i));
+          paintMap(sl.querySelector(".wb"), (i) => 255 * ws(i) * wr(i));
+        }
+        input.addEventListener("input", render);
+        render();
+        let tw = null;
+        Deck.scene("#bilateral", {
+          enter() {
+            const o = { v: 2 };
+            tw?.kill();
+            tw = gsap.to(o, { v: 12, duration: 3, delay: 0.6, ease: "sine.inOut", yoyo: true, repeat: 1, onUpdate: () => ((input.value = Math.round(o.v)), render()) });
+            input.addEventListener("pointerdown", () => tw?.kill(), { once: true });
+          },
+          leave: () => tw?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ NLM weight map
+      {
+        const sl = document.querySelector("#nlm");
+        const cv = sl.querySelector("canvas");
+        const ctx = cv.getContext("2d");
+        // A 60x60 crop of the noisy photo, shown 4x
+        const noisy = addNoise(clean, "gauss", 20, 3);
+        const X0 = 270, Y0 = 120, S = 60, Z = 4;
+        const g = toGray(noisy);
+        let px = 14, py = 16;
+        function render() {
+          ctx.imageSmoothingEnabled = false;
+          const crop = new ImageData(S, S);
+          for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) crop.data.set(noisy.data.subarray(((Y0 + y) * W + X0 + x) * 4, ((Y0 + y) * W + X0 + x) * 4 + 4), (y * S + x) * 4);
+          const tmp = document.createElement("canvas");
+          show(tmp, crop);
+          ctx.drawImage(tmp, 0, 0, S * Z, S * Z);
+          ctx.fillStyle = "rgba(5,6,15,0.55)";
+          ctx.fillRect(0, 0, S * Z, S * Z);
+          // weights over the 21x21 search window
+          const t = 3, sr = 10, hh = 30;
+          const G = (x, y) => g[(Y0 + y) * W + X0 + x];
+          let maxw = 0;
+          const ws = [];
+          for (let dy = -sr; dy <= sr; dy++)
+            for (let dx = -sr; dx <= sr; dx++) {
+              const qx = px + dx, qy = py + dy;
+              if (qx < t || qy < t || qx >= S - t || qy >= S - t) continue;
+              let d = 0;
+              for (let j = -t; j <= t; j++) for (let i = -t; i <= t; i++) d += (G(px + i, py + j) - G(qx + i, qy + j)) ** 2;
+              const w = Math.exp(-Math.max(d / 49 - 2 * 20 * 20, 0) / (hh * hh));
+              ws.push([qx, qy, w]);
+              maxw = Math.max(maxw, w);
+            }
+          ws.forEach(([qx, qy, w]) => {
+            const a = w / maxw;
+            ctx.fillStyle = `rgba(253,224,71,${(a * 0.6).toFixed(3)})`;
+            ctx.fillRect(qx * Z, qy * Z, Z, Z);
+          });
+          ctx.strokeStyle = "rgba(255,255,255,0.6)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect((px - sr) * Z, (py - sr) * Z, 21 * Z, 21 * Z);
+          ctx.strokeStyle = "#22d3ee";
+          ctx.lineWidth = 2;
+          ctx.strokeRect((px - t) * Z, (py - t) * Z, 7 * Z, 7 * Z);
+        }
+        cv.addEventListener("click", (e) => {
+          const [x, y] = canvasPoint(cv, e);
+          px = clamp(Math.floor(x / Z), 3, S - 4);
+          py = clamp(Math.floor(y / Z), 3, S - 4);
+          render();
+        });
+        render();
+      }
+
+      // ------------------------------------------------------------ denoise lab
+      {
+        const sl = document.querySelector("#dlab");
+        const nc = sl.querySelector("canvas.noisy"), oc = sl.querySelector("canvas.out");
+        const input = sl.querySelector("input");
+        const read = sl.querySelector(".psnr");
+        let noise = "gauss", filt = "gauss";
+        const NOISY = { gauss: addNoise(clean, "gauss", 25, 11), sp: addNoise(clean, "sp", 0.06, 12) };
+        const SIZES = { gauss: [3, 5, 9, 15], median: [3, 5, 7, 9], bilateral: [5, 9, 13, 17], nlm: [5, 10, 15, 25] };
+        let busy = 0;
+        function render() {
+          const n = NOISY[noise];
+          show(nc, n);
+          const v = SIZES[filt][+input.value - 1];
+          let out, name;
+          const t0 = performance.now();
+          if (filt === "gauss") (out = gaussianBlur(n, v)), (name = `cv2.GaussianBlur(noisy, (${v}, ${v}), 0)`);
+          if (filt === "median") (out = medianBlur(n, v)), (name = `cv2.medianBlur(noisy, ${v})`);
+          if (filt === "bilateral") (out = bilateral(n, v, 75, 75)), (name = `cv2.bilateralFilter(noisy, ${v}, 75, 75)`);
+          if (filt === "nlm") (out = nlm(n, v)), (name = `fastNlMeansDenoisingColored(noisy, h=${v}), search 11×11 here`);
+          const ms = performance.now() - t0;
+          show(oc, out);
+          sl.querySelector(".ctl output").textContent = filt === "nlm" ? `h=${v}` : v;
+          sl.querySelector(".nname").textContent = `noisy · PSNR ${psnr(clean, n).toFixed(1)} dB`;
+          sl.querySelector(".fname").textContent = name;
+          read.innerHTML = `PSNR against the clean photo: ${psnr(clean, n).toFixed(1)} dB → <b>${psnr(clean, out).toFixed(1)} dB</b> · ${ms.toFixed(0)} ms in JavaScript`;
+        }
+        function schedule() {
+          read.textContent = "computing…";
+          clearTimeout(busy);
+          busy = setTimeout(render, 40);
+        }
+        chipGroup(sl.querySelector(".noise"), "button", (b) => ((noise = b.dataset.n), schedule()));
+        chipGroup(sl.querySelector(".filt"), "button", (b) => ((filt = b.dataset.f), schedule()));
+        input.addEventListener("input", schedule);
+        let first = true;
+        Deck.scene("#dlab", {
+          enter() {
+            if (first) (first = false), schedule();
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

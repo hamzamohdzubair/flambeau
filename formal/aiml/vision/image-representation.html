@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Image Representation</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- shared bits ---------- */
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+      .chip {
+        padding: 0.4rem 1rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.95rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      canvas.photo {
+        display: block; width: 100%; height: auto; border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+      .slide > pre.big { width: min(100%, 64rem); font-size: 1.25rem; }
+      .codeside { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3rem; align-items: center; width: 100%; }
+      .codeside pre { width: 100%; font-size: 1.1rem; }
+      .codeside .side { display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; }
+
+      /* ---------- cover mosaic ---------- */
+      #title canvas { width: 27rem; height: auto; border-radius: 14px; image-rendering: pixelated; box-shadow: 0 30px 70px -20px rgba(139, 92, 246, 0.6); }
+      #title .lbl { font-family: var(--font-mono); font-size: 0.9rem; color: var(--cyan); min-height: 1.3em; }
+
+      /* ---------- array cards ---------- */
+      #slide-what .card { padding: 1.6rem 1.8rem; }
+      #slide-what .card h3 { font-size: 1.6rem; }
+      #slide-what .card p { font-size: 1.15rem; }
+      .shape { font-family: var(--font-mono); font-size: 1.3rem !important; color: var(--cyan); }
+      .planes { position: relative; width: 11rem; height: 8rem; margin: 0.4rem auto 1rem; }
+      .planes i { position: absolute; width: 8rem; height: 5.4rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.25); }
+      .planes i:nth-child(1) { left: 0; top: 0; background: rgba(59, 130, 246, 0.55); }
+      .planes i:nth-child(2) { left: 1.4rem; top: 1.2rem; background: rgba(34, 197, 94, 0.55); }
+      .planes i:nth-child(3) { left: 2.8rem; top: 2.4rem; background: rgba(239, 68, 68, 0.6); }
+      .planes.one i:nth-child(n + 2) { display: none; }
+      .planes.one i:nth-child(1) { left: 1.4rem; top: 1.2rem; background: linear-gradient(90deg, #111, #eee); }
+      .planes.bytes { display: flex; gap: 4px; align-items: center; justify-content: center; }
+      .planes.bytes b { width: 1rem; height: 3rem; border-radius: 3px; background: var(--violet); }
+      .planes.bytes b:nth-child(odd) { background: rgba(139, 92, 246, 0.35); }
+
+      /* ---------- pixel inspector ---------- */
+      .inspect { display: grid; grid-template-columns: 35rem 14rem; gap: 2.4rem; align-items: center; justify-content: center; width: 100%; }
+      .inspect .stage { position: relative; touch-action: none; cursor: crosshair; }
+      .inspect .cross { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 2px solid var(--cyan); border-radius: 4px; box-shadow: 0 0 14px rgba(34, 211, 238, 0.9); pointer-events: none; }
+      .inspect .cross::before, .inspect .cross::after { content: ""; position: absolute; background: rgba(34, 211, 238, 0.6); }
+      .inspect .cross::before { left: -400%; right: -400%; top: 50%; height: 1px; }
+      .inspect .cross::after { top: -400%; bottom: -400%; left: 50%; width: 1px; }
+      .inspect .stage .axis { position: absolute; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text); background: rgba(5, 6, 15, 0.75); padding: 0.1rem 0.5rem; border-radius: 4px; }
+      .mag { display: grid; grid-template-columns: repeat(11, 1fr); gap: 1px; width: 11rem; margin: 0 auto; padding: 4px; border-radius: 10px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); }
+      .mag span { aspect-ratio: 1; border-radius: 2px; }
+      .mag span.mid { outline: 2px solid var(--cyan); outline-offset: -1px; }
+      .readout { margin-top: 1rem; font-family: var(--font-mono); font-size: 1.15rem; text-align: center; line-height: 1.8; }
+      .readout .b { color: #60a5fa; } .readout .g { color: #4ade80; } .readout .r { color: #f87171; }
+      .readout .gl { font-size: 0.95rem; }
+      .hint { font-size: 0.9rem; text-align: center; margin-top: 0.8rem; }
+      .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; width: 100%; }
+      .facts p { margin: 0; padding: 0.5rem 0 0.5rem 1rem; border-left: 3px solid var(--violet); font-size: 1.1rem; }
+
+      /* ---------- intensity / colour mixer ---------- */
+      .ramp { position: relative; width: min(100%, 56rem); height: 3rem; border-radius: 10px; background: linear-gradient(90deg, #000, #fff); border: 1px solid var(--border); }
+      .ramp b { position: absolute; top: 100%; transform: translateX(-50%); padding-top: 0.4rem; font: 500 1rem var(--font-mono); color: var(--muted); white-space: nowrap; }
+      .ramp b::before { content: ""; position: absolute; left: 50%; top: -0.45rem; width: 2px; height: 0.7rem; background: var(--cyan); }
+      .ramp b:first-child::before { left: 0; } .ramp b:last-child::before { left: auto; right: 0; }
+      .mixer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.6rem; align-items: center; width: min(100%, 56rem); margin-top: 1rem; }
+      .swatch { width: 10rem; aspect-ratio: 1; border-radius: 18px; border: 1px solid var(--border); box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.8); transition: background 0.15s; }
+      .sliders { display: grid; gap: 0.7rem; }
+      .sl { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr) 3.2rem; gap: 1rem; align-items: center; font-family: var(--font-mono); font-size: 1.05rem; }
+      .sl input { width: 100%; }
+      .sl.b input { accent-color: #3b82f6; } .sl.g input { accent-color: #22c55e; } .sl.r input { accent-color: #ef4444; }
+      .bgr { font-family: var(--font-mono); font-size: 1.25rem; text-align: center; margin-top: 0.6rem; }
+
+      /* ---------- numbers to pixels ---------- */
+      .n2p { display: grid; grid-template-columns: repeat(3, 5.4rem); gap: 8px; padding: 10px; border-radius: 14px; border: 1px solid var(--border); background: rgba(10, 12, 26, 0.7); }
+      .n2p span { display: grid; place-items: center; height: 5.4rem; border-radius: 8px; font: 500 1.3rem var(--font-mono); color: var(--text); background: rgba(255, 255, 255, 0.05); }
+      .idx { font-family: var(--font-mono); font-size: 1rem; color: var(--muted); }
+      #slide-np .side p.muted { font-size: 1rem; max-width: 18rem; }
+
+      /* ---------- row / column diagram ---------- */
+      #slide-access svg { width: 22rem; overflow: visible; }
+      #slide-access svg text { font-family: var(--font-mono); font-size: 18px; }
+      #slide-access .side p { font-size: 1.1rem; }
+
+      /* ---------- blank images ---------- */
+      #slide-blank .side { gap: 1.2rem; }
+      #slide-blank .sw { display: grid; grid-template-columns: 6rem auto; gap: 1rem; align-items: center; font: 500 1rem var(--font-mono); color: var(--muted); text-align: left; }
+      #slide-blank .sw .swatch { width: 6rem; border-radius: 12px; }
+
+      /* ---------- memory ---------- */
+      .mem { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3rem; align-items: center; width: 100%; }
+      .mem svg { width: 21rem; overflow: visible; }
+      .mem svg text { font-family: var(--font-mono); fill: var(--muted); font-size: 18px; }
+      .mem .formula { font-family: var(--font-mono); font-size: 1.25rem; }
+      .mem .formula .big { font-size: 2.6rem; display: block; margin-top: 0.4rem; }
+      #slide-mem .cards { width: 100%; margin-top: 1rem; }
+      #slide-mem .card p { font-size: 1.1rem; }
+
+      /* ---------- exercises: question on the left, code / answer on the right ---------- */
+      .qa { display: grid; gap: 0.8rem; width: 100%; counter-reset: q; flex-shrink: 0; }
+      .qa .q { display: grid; grid-template-columns: 19rem minmax(0, 1fr); gap: 0.5rem 1.8rem; align-items: center; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+      .qa .q:first-child { border-top: 0; padding-top: 0; }
+      .qa .q > p:first-child { grid-column: 1; color: var(--text); font-size: 1.15rem; margin: 0; }
+      .qa .q:has(> :nth-child(3)) > p:first-child { grid-row: span 2; }
+      .qa .q > :not(:first-child) { grid-column: 2; }
+      .qa .q > p:first-child::before { content: "Q" counter(q); counter-increment: q; display: block; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); margin-bottom: 0.2rem; }
+      .qa pre { width: 100%; font-size: 1rem; line-height: 1.5; padding: 0.6rem 1.1rem; }
+      .qa p.answer { padding: 0.3rem 0.7rem; width: max-content; max-width: 100%; margin: 0; font-size: 1.15rem; }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas width="620" height="349" aria-label="A photo resolving from coarse blocks into fine pixels"></canvas>
+      <span class="lbl"></span>
+      <h1>Image Representation</h1>
+      <p>To a computer an image is just a grid of numbers. Here is how OpenCV and NumPy store, read and change them.</p>
+    </section>
+
+    <!-- ================================================================ what is a digital image -->
+    <section class="slide" id="slide-what">
+      <h2>What is a digital image?</h2>
+      <p class="lead">A digital image is a 2-D array (a matrix) of <strong>pixels</strong>.</p>
+      <div class="cards">
+        <div class="card step center">
+          <div class="planes one"><i></i></div>
+          <h3>Grayscale</h3>
+          <p class="shape">(H, W)</p>
+          <p>A 2-D array: each pixel is one intensity value, 0 to 255.</p>
+        </div>
+        <div class="card step center">
+          <div class="planes"><i></i><i></i><i></i></div>
+          <h3>Colour</h3>
+          <p class="shape">(H, W, 3)</p>
+          <p>A 3-D array with three channels, one each for blue, green and red.</p>
+        </div>
+        <div class="card step center">
+          <div class="planes bytes"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+          <h3>Data type</h3>
+          <p class="shape">uint8</p>
+          <p>Usually an unsigned 8-bit integer, so every value lies in 0 to 255.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ coordinates + inspector -->
+    <section class="slide" id="slide-inspect">
+      <h2>Image coordinates</h2>
+      <div class="inspect">
+        <div class="stage" data-interactive>
+          <canvas class="photo" width="620" height="349"></canvas>
+          <div class="cross"></div>
+          <span class="axis" style="left: 0.5rem; top: 0.5rem">(0, 0)</span>
+        </div>
+        <div>
+          <div class="mag"></div>
+          <div class="readout">
+            <div>img[<span class="yv">0</span>, <span class="xv">0</span>]</div>
+            <div>→ [<span class="b">0</span>, <span class="g">0</span>, <span class="r">0</span>]</div>
+            <div class="muted gl">gray = <span class="gv">0</span></div>
+          </div>
+          <p class="muted hint">Move over the photo to read any pixel, in B, G, R order.</p>
+        </div>
+      </div>
+      <div class="facts">
+        <p class="step">The origin (0, 0) is the <strong>top-left</strong> corner.</p>
+        <p class="step">First index = <strong>row</strong> (y), second = <strong>column</strong> (x).</p>
+        <p class="step">Write it as <code>image[row, col]</code> or <code>image[y, x]</code>.</p>
+      </div>
+    </section>
+
+    <!-- ================================================================ intensity values -->
+    <section class="slide" id="slide-mix">
+      <h2>Pixel intensity values</h2>
+      <p class="lead center">Grayscale: one number per pixel.</p>
+      <div class="ramp">
+        <b style="left: 0%; transform: none">0 black</b>
+        <b style="left: 50.2%">128 middle gray</b>
+        <b style="left: 100%; transform: translateX(-100%)">255 white</b>
+      </div>
+      <p class="lead center step" style="margin-top: 2.6rem">Colour (BGR in OpenCV): three numbers per pixel.</p>
+      <div class="mixer step" data-interactive>
+        <div class="swatch"></div>
+        <div>
+          <div class="sliders">
+            <label class="sl b">B <input type="range" min="0" max="255" value="0" data-c="0" /><span>0</span></label>
+            <label class="sl g">G <input type="range" min="0" max="255" value="0" data-c="1" /><span>0</span></label>
+            <label class="sl r">R <input type="range" min="0" max="255" value="255" data-c="2" /><span>255</span></label>
+          </div>
+          <div class="bgr"></div>
+        </div>
+      </div>
+      <div class="chips step" data-interactive style="margin-top: 1rem">
+        <button class="chip" data-bgr="0,0,0">[0, 0, 0] black</button>
+        <button class="chip" data-bgr="255,255,255">[255, 255, 255] white</button>
+        <button class="chip" data-bgr="255,0,0">[255, 0, 0] blue</button>
+        <button class="chip" data-bgr="0,255,0">[0, 255, 0] green</button>
+        <button class="chip on" data-bgr="0,0,255">[0, 0, 255] red</button>
+      </div>
+    </section>
+
+    <!-- ================================================================ numpy array -->
+    <section class="slide" id="slide-np">
+      <h2>An image is a NumPy array</h2>
+      <div class="codeside">
+        <pre class="steps"><code class="language-python">
+          import cv2
+          import numpy as np
+
+          # images are numpy arrays
+          img = np.array([[0, 50, 100],
+                          [150, 200, 255]], dtype=np.uint8)
+          # ans: a 2x3 grayscale image
+          print(img.shape)
+          # ans: (2, 3): 2 rows, 3 columns
+          print(img.dtype)
+          # ans: uint8: values 0-255
+        </code></pre>
+        <div class="side">
+          <div class="n2p">
+            <span>0</span><span>50</span><span>100</span>
+            <span>150</span><span>200</span><span>255</span>
+          </div>
+          <p class="idx">2 rows × 3 columns</p>
+          <span class="step" data-anim="none"></span>
+          <p class="muted">Press → and the numbers become pixels.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ loading -->
+    <section class="slide">
+      <h2>Loading images</h2>
+      <pre class="steps big"><code class="language-python">
+        # load a colour image
+        img = cv2.imread('image.jpg')
+        # ans: loads in BGR order (not RGB!)
+        print(img.shape)
+        # ans: (height, width, channels)
+
+        height, width, channels = img.shape
+        # ans: height = rows, width = cols, channels = 3
+
+        # load as grayscale
+        gray = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+        # ans: loads a single-channel image
+        print(gray.shape)
+        # ans: (height, width): no channel dimension
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ accessing -->
+    <section class="slide" id="slide-access">
+      <h2>Accessing pixels</h2>
+      <div class="codeside">
+        <pre class="steps"><code class="language-python">
+          # accessing individual pixels
+          img = cv2.imread('image.jpg')
+          pixel = img[100, 50]
+          # ans: the pixel at row 100, col 50
+          print(pixel)
+          # ans: [B, G, R] values (3 numbers)
+
+          # modify a pixel
+          img[100, 50] = [255, 0, 0]
+          # ans: sets the pixel to blue (BGR order)
+        </code></pre>
+        <div class="side">
+          <svg viewBox="0 0 360 300" aria-label="Row 100 counts down, then column 50 counts across">
+            <defs><pattern id="gp" width="18" height="15" patternUnits="userSpaceOnUse"><path d="M18 0H0V15" fill="none" stroke="rgba(255,255,255,0.12)" /></pattern></defs>
+            <rect x="0" y="0" width="360" height="300" rx="8" fill="url(#gp)" stroke="rgba(255,255,255,0.25)" />
+            <text x="0" y="-10" fill="#e2e8f0">(0, 0)</text>
+            <line class="ln-row" x1="9" y1="0" x2="9" y2="202" stroke="#f472b6" stroke-width="3" stroke-dasharray="6 5" />
+            <line class="ln-col" x1="9" y1="202" x2="180" y2="202" stroke="#22d3ee" stroke-width="3" stroke-dasharray="6 5" />
+            <text class="lb-row" x="24" y="110" fill="#f9a8d4">row 100 ↓</text>
+            <text class="lb-col" x="40" y="190" fill="#67e8f9">col 50 →</text>
+            <rect class="px" x="180" y="195" width="18" height="15" fill="#3b82f6" stroke="#fff" stroke-width="2" />
+          </svg>
+          <p>Row first, then column:<br /><code>img[y, x]</code></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ blank images -->
+    <section class="slide" id="slide-blank">
+      <h2>Creating blank images</h2>
+      <div class="codeside">
+        <pre class="steps"><code class="language-python">
+          # create a blank black image
+          black = np.zeros((480, 640, 3), dtype=np.uint8)
+          # ans: 480x640 black image (all zeros)
+
+          # create a white image
+          white = np.ones((480, 640, 3), dtype=np.uint8) * 255
+          # ans: 480x640 white image (all 255s)
+
+          # create a coloured image
+          red = np.zeros((480, 640, 3), dtype=np.uint8)
+          red[:, :, 2] = 255
+          # ans: red image (3rd channel = red in BGR)
+        </code></pre>
+        <div class="side">
+          <div class="sw" data-match="480x640 black"><div class="swatch" style="background: #000"></div>black</div>
+          <div class="sw" data-match="480x640 white"><div class="swatch" style="background: #fff"></div>white</div>
+          <div class="sw" data-match="red image (3rd"><div class="swatch" style="background: #f00"></div>red</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ memory -->
+    <section class="slide" id="slide-mem">
+      <h2>Image memory size</h2>
+      <div class="mem">
+        <svg viewBox="-10 -10 320 240" aria-label="Three 1920 by 1080 planes of one byte each">
+          <g class="pl" transform="translate(0,0)"><rect width="200" height="115" rx="8" fill="rgba(59,130,246,0.45)" stroke="rgba(255,255,255,0.3)" /><text x="10" y="24">B</text></g>
+          <g class="pl" transform="translate(30,35)"><rect width="200" height="115" rx="8" fill="rgba(34,197,94,0.45)" stroke="rgba(255,255,255,0.3)" /><text x="10" y="24">G</text></g>
+          <g class="pl" transform="translate(60,70)"><rect width="200" height="115" rx="8" fill="rgba(239,68,68,0.5)" stroke="rgba(255,255,255,0.3)" /><text x="10" y="24">R</text></g>
+          <text x="160" y="212" text-anchor="middle">1920 wide</text>
+          <text x="282" y="128" transform="rotate(90 282 128)" text-anchor="middle">1080 high</text>
+        </svg>
+        <div>
+          <p class="formula">height × width × channels × bytes per value</p>
+          <p class="formula step" style="margin-top: 1rem">1080 × 1920 × 3 × 1 <span class="big grad">= <span class="count">6,220,800</span> bytes</span></p>
+          <p class="step muted">≈ 6.2 MB for one uncompressed Full-HD frame.</p>
+        </div>
+      </div>
+      <div class="cards step">
+        <div class="card"><h3>Saves memory</h3><p>1 byte per value instead of 4 for <code>int32</code>.</p></div>
+        <div class="card"><h3>Enough levels</h3><p>The eye can't tell apart more than about 256 intensity levels.</p></div>
+        <div class="card"><h3>Standard</h3><p>It is what most image formats (JPEG, PNG) store.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q">
+          <p>What is the shape?</p>
+          <pre><code class="language-python">
+            img = np.zeros((300, 400, 3))
+          </code></pre>
+          <p class="answer">(300, 400, 3): 300 rows, 400 columns, 3 channels.</p>
+        </div>
+        <div class="q"><p>How many pixels in total?</p><p class="answer">300 × 400 = 120,000 pixels.</p></div>
+        <div class="q"><p>How many values in total?</p><p class="answer">300 × 400 × 3 = 360,000 values.</p></div>
+        <div class="q"><p>What colour is the pixel <code>[255, 255, 0]</code> in BGR?</p><p class="answer">Cyan: blue = 255, green = 255, red = 0. (Yellow would be <code>[0, 255, 255]</code>.)</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>Why use <code>uint8</code> instead of <code>int</code>?</p><p class="answer">It saves memory, and 0 to 255 is enough range for images.</p></div>
+        <div class="q">
+          <p>What is the difference?</p>
+          <pre><code class="language-python">
+            gray = np.zeros((100, 100))
+            color = np.zeros((100, 100, 3))
+          </code></pre>
+          <p class="answer"><code>gray</code> is 2-D; <code>color</code> is 3-D with 3 channels.</p>
+        </div>
+        <div class="q"><p><code>img.shape</code> returns <code>(480, 640, 3)</code>. Which number is the height?</p><p class="answer">480: the first dimension is the rows.</p></div>
+        <div class="q">
+          <p>What happens with the value 300 in <code>uint8</code>?</p>
+          <pre><code class="language-python">
+            img = np.array([[300]], dtype=np.uint8)
+          </code></pre>
+          <p class="answer">It overflows: 300 % 256 = 44 (older NumPy wraps it; NumPy 2 raises an OverflowError instead).</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Create a 100×100 grayscale image.</p>
+          <pre><code class="language-python">
+            gray = np.zeros((100, 100), dtype=np.uint8)  # ans:
+            # ans: a black grayscale image
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Create a 100×100 colour image.</p>
+          <pre><code class="language-python">
+            color = np.zeros((100, 100, 3), dtype=np.uint8)  # ans:
+            # ans: a black colour image with 3 channels
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Access the pixel at row 10, column 20.</p>
+          <pre><code class="language-python">
+            img = np.random.randint(0, 256, (50, 50, 3),
+                                    dtype=np.uint8)
+            pixel = img[10, 20]  # ans:
+            # ans: an array of 3 BGR values
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <div class="qa">
+        <div class="q">
+          <p>Create a green image (BGR).</p>
+          <pre><code class="language-python">
+            green = np.zeros((100, 100, 3), dtype=np.uint8)
+            green[:, :, 1] = 255  # ans:
+            # ans: the green channel (index 1) set to 255
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Create a half-white, half-black image.</p>
+          <pre><code class="language-python">
+            img = np.zeros((100, 100), dtype=np.uint8)
+            img[:50, :] = 255  # ans:
+            # ans: top 50 rows white, bottom 50 rows black
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>Create a solid cyan image (blue + green).</p>
+          <pre><code class="language-python">
+            cyan = np.zeros((100, 100, 3), dtype=np.uint8)
+            cyan[:, :, 0] = 255  # ans:
+            cyan[:, :, 1] = 255  # ans:
+            # ans: blue + green: every pixel is [255, 255, 0]
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <div class="qa">
+        <div class="q">
+          <p>How do you get the image dimensions?</p>
+          <pre><code class="language-python">
+            height = img.shape[0]
+            width = img.shape[1]
+            channels = img.shape[2]
+            # ans: shape is (height, width, channels)
+          </code></pre>
+        </div>
+        <div class="q"><p>What is the memory size of a 1024×768 RGB image?</p><p class="answer">1024 × 768 × 3 = 2,359,296 bytes ≈ 2.4 MB.</p></div>
+        <div class="q">
+          <p>What colour is this image?</p>
+          <pre><code class="language-python">
+            img = np.full((100, 100, 3), [255, 0, 0], dtype=np.uint8)
+            # ans: blue: every pixel is [255, 0, 0] in BGR
+          </code></pre>
+        </div>
+        <div class="q">
+          <p>What is <code>img.ndim</code> for a grayscale image?</p>
+          <pre><code class="language-python">
+            gray = np.zeros((100, 100))
+            # ans: 2 (a 2-dimensional array)
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      // ------------------------------------------------------------ shared photo
+      const photo = new Image();
+      photo.src = "/assets/2025-10-09-22-21-33.png";
+      const ready = photo.decode();
+
+      // ------------------------------------------------------------ cover: pixelated photo resolving
+      const cover = document.querySelector("#title canvas");
+      const cctx = cover.getContext("2d");
+      const lbl = document.querySelector("#title .lbl");
+      const tiny = document.createElement("canvas");
+      function pixelate(block) {
+        const w = Math.max(1, Math.round(620 / block)), h = Math.max(1, Math.round(349 / block));
+        tiny.width = w; tiny.height = h;
+        tiny.getContext("2d").drawImage(photo, 0, 0, w, h);
+        cctx.imageSmoothingEnabled = false;
+        cctx.clearRect(0, 0, 620, 349);
+        cctx.drawImage(tiny, 0, 0, w, h, 0, 0, 620, 349);
+        lbl.textContent = `${h} × ${w} pixels`;
+      }
+      let coverTl = null;
+      Deck.scene("#title", {
+        async enter() {
+          await ready;
+          const st = { b: 155 };
+          coverTl?.kill();
+          coverTl = gsap.to(st, { b: 1, duration: 3.2, ease: "power2.in", delay: 0.3, onUpdate: () => pixelate(st.b) });
+          pixelate(155);
+        },
+        leave() { coverTl?.kill(); },
+      });
+
+      // ------------------------------------------------------------ pixel inspector
+      const ins = document.querySelector("#slide-inspect");
+      const icv = ins.querySelector("canvas");
+      const ictx = icv.getContext("2d", { willReadFrequently: true });
+      const stage = ins.querySelector(".stage");
+      const cross = ins.querySelector(".cross");
+      const mag = ins.querySelector(".mag");
+      for (let i = 0; i < 121; i++) mag.insertAdjacentHTML("beforeend", `<span${i === 60 ? ' class="mid"' : ""}></span>`);
+      const magCells = [...mag.children];
+      const q = (s) => ins.querySelector(s);
+      let pix = null;
+      ready.then(() => {
+        ictx.drawImage(photo, 0, 0);
+        pix = ictx.getImageData(0, 0, 620, 349).data;
+        inspect(310, 175);
+      });
+      function inspect(x, y) {
+        if (!pix) return;
+        x = Math.max(0, Math.min(619, Math.round(x)));
+        y = Math.max(0, Math.min(348, Math.round(y)));
+        // percentages of the stage, so the marker stays put whatever the canvas scale
+        cross.style.left = (x / 620) * 100 + "%";
+        cross.style.top = (y / 349) * 100 + "%";
+        const at = (xx, yy) => {
+          xx = Math.max(0, Math.min(619, xx)); yy = Math.max(0, Math.min(348, yy));
+          const o = (yy * 620 + xx) * 4;
+          return [pix[o], pix[o + 1], pix[o + 2]];
+        };
+        let k = 0;
+        for (let dy = -5; dy <= 5; dy++) for (let dx = -5; dx <= 5; dx++) {
+          const [R, G, B] = at(x + dx, y + dy);
+          magCells[k++].style.background = `rgb(${R},${G},${B})`;
+        }
+        const [R, G, B] = at(x, y);
+        q(".yv").textContent = y; q(".xv").textContent = x;
+        q(".b").textContent = B; q(".g").textContent = G; q(".r").textContent = R;
+        q(".gv").textContent = Math.round(0.299 * R + 0.587 * G + 0.114 * B);
+      }
+      let tour = null, userDriven = false;
+      stage.addEventListener("pointermove", (e) => {
+        userDriven = true; tour?.kill();
+        const r = icv.getBoundingClientRect();
+        inspect(((e.clientX - r.left) / r.width) * 620, ((e.clientY - r.top) / r.height) * 349);
+      });
+      Deck.scene("#slide-inspect", {
+        enter() {
+          if (userDriven) return;
+          const t = { a: 0 };
+          tour = gsap.to(t, { a: Math.PI * 2, duration: 14, repeat: -1, ease: "none", onUpdate: () => inspect(310 - 230 * Math.sin(t.a), 175 - 110 * Math.sin(2 * t.a)) });
+        },
+        leave() { tour?.kill(); },
+      });
+
+      // ------------------------------------------------------------ BGR mixer
+      const mix = document.querySelector("#slide-mix");
+      const inputs = [...mix.querySelectorAll(".sl input")];
+      const sw = mix.querySelector(".swatch");
+      const bgrEl = mix.querySelector(".bgr");
+      function paintMix() {
+        const [b, g, r] = inputs.map((i) => +i.value);
+        inputs.forEach((i) => (i.nextElementSibling.textContent = i.value));
+        sw.style.background = `rgb(${r},${g},${b})`;
+        bgrEl.innerHTML = `img[y, x] = [<span style="color:#60a5fa">${b}</span>, <span style="color:#4ade80">${g}</span>, <span style="color:#f87171">${r}</span>]`;
+      }
+      inputs.forEach((i) => i.addEventListener("input", () => { mix.querySelectorAll(".chip").forEach((c) => c.classList.remove("on")); paintMix(); }));
+      mix.querySelector(".chips").addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        mix.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === b));
+        const v = b.dataset.bgr.split(",").map(Number);
+        const st = { b: +inputs[0].value, g: +inputs[1].value, r: +inputs[2].value };
+        gsap.to(st, { b: v[0], g: v[1], r: v[2], duration: 0.5, onUpdate: () => { inputs[0].value = st.b; inputs[1].value = st.g; inputs[2].value = st.r; paintMix(); } });
+      });
+      paintMix();
+
+      // ------------------------------------------------------------ numbers become pixels
+      const n2p = [...document.querySelectorAll("#slide-np .n2p span")];
+      function asPixels(on, animate) {
+        n2p.forEach((s, i) => {
+          const v = +s.textContent;
+          const to = on ? { backgroundColor: `rgb(${v},${v},${v})`, color: v > 120 ? "#05060f" : "#e2e8f0" } : { backgroundColor: "rgba(255,255,255,0.05)", color: "#f1f5f9" };
+          animate ? gsap.to(s, { ...to, duration: 0.5, delay: i * 0.12 }) : gsap.set(s, to);
+        });
+      }
+      Deck.scene("#slide-np", {
+        enter() { asPixels(false, false); },
+        step(slide, n, els, detail) { if (els.some((e) => e.dataset.anim === "none")) asPixels(true, !(detail && detail.dir < 0)); },
+        unstep(slide, n, els) { if (els.some((e) => e.dataset.anim === "none")) asPixels(false, false); },
+      });
+
+      // ------------------------------------------------------------ row first, then column
+      let accTl = null;
+      Deck.scene("#slide-access", {
+        enter(slide) {
+          const q = (c) => slide.querySelector(c);
+          accTl?.kill();
+          accTl = gsap.timeline({ delay: 0.4 })
+            .fromTo(q(".ln-row"), { attr: { y2: 0 } }, { attr: { y2: 202 }, duration: 1.1, ease: "power1.inOut" })
+            .fromTo(q(".lb-row"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.3)
+            .fromTo(q(".ln-col"), { attr: { x2: 9 } }, { attr: { x2: 180 }, duration: 0.9, ease: "power1.inOut" })
+            .fromTo(q(".lb-col"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, "<0.2")
+            .fromTo(q(".px"), { opacity: 0, scale: 0.2, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(3)" });
+        },
+        leave() { accTl?.progress(1).kill(); },
+      });
+
+      // ------------------------------------------------------------ blank images appear with their answer lines
+      const blank = document.querySelector("#slide-blank");
+      function syncBlank() {
+        const shown = [...blank.querySelectorAll("pre .line.answer.shown")].map((l) => l.textContent).join("\n");
+        blank.querySelectorAll(".sw").forEach((sw) => gsap.to(sw, { opacity: shown.includes(sw.dataset.match) ? 1 : 0.12, duration: 0.35 }));
+      }
+      Deck.scene("#slide-blank", { enter: syncBlank, step: syncBlank, unstep: syncBlank });
+
+      // ------------------------------------------------------------ memory planes
+      Deck.scene("#slide-mem", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".pl"), { x: -40, y: -40, opacity: 0, stagger: 0.25, duration: 0.7, ease: "power3.out" });
+        },
+        step(slide, n, els) {
+          const c = slide.querySelector(".count");
+          if (!els.some((e) => e.contains(c))) return;
+          const st = { v: 0 };
+          gsap.to(st, { v: 6220800, duration: 1.2, ease: "power2.out", onUpdate: () => (c.textContent = Math.round(st.v).toLocaleString("en-US")) });
+        },
+      });
+    </script>
+  </body>
+</html>

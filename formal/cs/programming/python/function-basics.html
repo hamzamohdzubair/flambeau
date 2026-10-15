@@ -1,0 +1,1206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Function Basics</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tracer: code lines light up in the order Python runs them ---------- */
+      pre code,
+      .mem,
+      .viz text {
+        font-variant-ligatures: none;
+      }
+
+      .tracer {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(14rem, 22rem);
+        gap: 1.5rem;
+        align-items: start;
+        justify-content: center;
+        width: min(100%, 64rem);
+      }
+
+      .tracer pre {
+        width: auto;
+        min-width: min(100%, 26rem);
+        max-width: 100%;
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.42;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.3;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.boom {
+        background: linear-gradient(90deg, rgba(248, 113, 113, 0.32), rgba(248, 113, 113, 0.05));
+        box-shadow: inset 3px 0 0 var(--red);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        white-space: nowrap;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border: 1px solid rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f,
+      .tb.x {
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb.n {
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      /* ---------- Memory panel beside traced code ---------- */
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem 1.1rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-size: 0.95rem;
+      }
+
+      .mem h4 {
+        margin: 0 0 0.35rem;
+        font: 600 0.72rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .mem .slots {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .slot {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font-mono);
+      }
+
+      .mem .slot b {
+        min-width: 3.2rem;
+        font-weight: 500;
+        color: var(--violet-soft);
+        text-align: right;
+      }
+
+      .mem .slot span {
+        flex: 1;
+        padding: 0.12rem 0.55rem;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        background: rgba(139, 92, 246, 0.12);
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console {
+        min-height: 1.9rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.35);
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        color: var(--green);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console div.err {
+        color: var(--red);
+      }
+
+      .mem .frames {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.3rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .frame {
+        padding: 0.25rem 0.6rem;
+        border-radius: 8px;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.08);
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .mem .frame.top {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.18);
+      }
+
+      .mem .frame.hurt {
+        border-color: var(--red);
+        background: rgba(248, 113, 113, 0.16);
+      }
+
+      .mem .frame em {
+        display: block;
+        font-style: normal;
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+
+      .mem .exc {
+        align-self: flex-start;
+        padding: 0.15rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--red);
+        background: rgba(248, 113, 113, 0.18);
+        color: #fecaca;
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+
+      .mem .exc.caught {
+        border-color: var(--green);
+        background: rgba(134, 239, 172, 0.14);
+        color: var(--green);
+      }
+
+      .replay {
+        align-self: flex-end;
+        padding: 0.25rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.8rem var(--font);
+        cursor: pointer;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      /* ---------- Value chips ---------- */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .try.step:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 0.95rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+
+      /* ---------- The function machine: arguments in, return value out ---------- */
+      .machine {
+        position: relative;
+        display: grid;
+        grid-template-columns: auto auto auto;
+        align-items: center;
+        gap: 2.5rem;
+        font-family: var(--font-mono);
+      }
+
+      .machine .args,
+      .machine .result {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .machine .call {
+        font-size: 1.25rem;
+        color: var(--text);
+      }
+
+      .val {
+        display: inline-block;
+        min-width: 2.4rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 10px;
+        border: 1px solid rgba(240, 171, 252, 0.6);
+        background: rgba(236, 72, 153, 0.18);
+        color: #fbcfe8;
+        text-align: center;
+      }
+
+      .val.empty {
+        border-style: dashed;
+        border-color: rgba(167, 139, 250, 0.4);
+        background: transparent;
+        color: transparent;
+      }
+
+      .machine .box {
+        padding: 1.2rem 1.5rem;
+        border-radius: var(--radius);
+        border: 2px solid rgba(167, 139, 250, 0.6);
+        background: rgba(15, 18, 35, 0.85);
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .machine .box.busy {
+        border-color: var(--cyan);
+        box-shadow: 0 0 40px -6px rgba(34, 211, 238, 0.6);
+      }
+
+      .machine .sig {
+        font-size: 1.15rem;
+        color: var(--violet-soft);
+      }
+
+      .machine .params {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .machine .body {
+        padding-left: 1.5rem;
+        font-size: 1.1rem;
+        transition: color 0.3s;
+      }
+
+      .machine .box.busy .body {
+        color: var(--cyan);
+      }
+
+      .machine .ghost {
+        position: absolute;
+        left: 0;
+        top: 0;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .arrow {
+        color: var(--faint);
+        font-size: 1.6rem;
+      }
+
+      /* ---------- 1600x900 canvas sizing ---------- */
+      .tracer {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) 20rem;
+        gap: 2rem;
+      }
+      .tracer pre {
+        width: 100%;
+        min-width: 0;
+        font-size: 1.25rem;
+      }
+      .slide.ex .tracer pre {
+        font-size: 1.4rem;
+      }
+      /* many variables / frames: smaller type so the panel fits */
+      .slide .tracer.dense pre {
+        font-size: 1.2rem;
+      }
+      .tracer.dense .mem {
+        font-size: 1rem;
+        gap: 0.7rem;
+      }
+      /* long code lines: memory panel goes under the code, sections side by side */
+      .tracer.wide {
+        grid-template-columns: minmax(0, 1fr);
+        width: min(100%, 54rem);
+        gap: 1.2rem;
+      }
+      .tracer.wide .mem {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+      .tracer.wide .mem > div {
+        flex: 1;
+      }
+      .mem {
+        font-size: 1.2rem;
+        gap: 1rem;
+        padding: 1.2rem 1.4rem;
+      }
+      .mem h4 {
+        font-size: 0.8rem;
+      }
+      .mem .slot {
+        flex-wrap: wrap;
+        gap: 0.2rem 0.6rem;
+      }
+      .mem .slot b {
+        min-width: 3rem;
+      }
+      .mem .slot span {
+        flex: 1 1 7rem;
+        font-size: 0.88em;
+        overflow-wrap: normal;
+      }
+      .replay {
+        font-size: 0.9rem;
+        padding: 0.3rem 1rem;
+      }
+      .hint {
+        font-size: 1.2rem;
+      }
+      .try,
+      .chip {
+        font-size: 1.15rem;
+      }
+      #ex3 .tracer pre,
+      #ex10 .tracer pre {
+        font-size: 1.3rem;
+      }
+      /* the function machine, sized for the canvas */
+      .machine {
+        gap: 4rem;
+      }
+      .machine .args,
+      .machine .result {
+        font-size: 1.3rem;
+        gap: 0.9rem;
+      }
+      .machine .call {
+        font-size: 2rem;
+      }
+      .machine .val {
+        min-width: 3.4rem;
+        padding: 0.3rem 0.9rem;
+        font-size: 1.6rem;
+      }
+      .machine .box {
+        padding: 1.8rem 2.4rem;
+        gap: 1.2rem;
+      }
+      .machine .sig {
+        font-size: 1.8rem;
+      }
+      .machine .params {
+        font-size: 1.5rem;
+        gap: 1.5rem;
+        align-items: center;
+      }
+      .machine .body {
+        font-size: 1.7rem;
+      }
+      #machine .try code {
+        font-size: 1.1rem;
+      }
+      #machine .chip {
+        font-size: 1.4rem;
+      }
+      #machine ol {
+        font-size: 1.3rem;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 62rem);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · functions</span>
+      <h1 class="grad-each"><span>Function</span> <span>Basics</span></h1>
+      <p>Name a block of code once, call it whenever you need it, pass values in and get a value back.</p>
+    </section>
+
+    <!-- ================================================================ simple -->
+    <section class="slide" id="simple">
+      <h2>Simple function</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # define and call function
+          def greet():
+              print("Hello!")
+          greet()
+          # ans: Hello!
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint"><code>def</code> only stores the function; its body runs when the function is <strong>called</strong> with <code>()</code>.</p>
+    </section>
+
+    <!-- ================================================================ one parameter -->
+    <section class="slide" id="param">
+      <h2>Function with a parameter</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # function with one parameter
+          def greet_person(name):
+              print(f"Hello, {name}!")
+          greet_person("Alice")
+          # ans: Hello, Alice!
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint">The call creates a new frame on the stack, where the parameter <code>name</code> holds the argument <code>"Alice"</code>.</p>
+    </section>
+
+    <!-- ================================================================ machine -->
+    <section class="slide" id="machine">
+      <h2>Arguments in, return value out</h2>
+      <div class="machine">
+        <div class="args"><span class="call">add(<span class="a1">5</span>, <span class="a2">3</span>)</span><span class="val arg" data-k="0">5</span><span class="val arg" data-k="1">3</span></div>
+        <div class="box">
+          <span class="sig">def add(a, b):</span>
+          <div class="params">a = <span class="val empty p" data-k="0">5</span> b = <span class="val empty p" data-k="1">3</span></div>
+          <span class="body">return a + b</span>
+        </div>
+        <div class="result"><span>result =</span><span class="val empty out">8</span></div>
+      </div>
+      <div class="try step" data-step="1" data-interactive><code>call add with</code></div>
+      <ol style="width: min(100%, 40rem)">
+        <li class="step" data-step="1">The arguments are copied into the parameters <code>a</code> and <code>b</code>.</li>
+        <li class="step" data-step="2">The body runs using those names.</li>
+        <li class="step" data-step="3"><code>return</code> sends the value back to where the call was made.</li>
+      </ol>
+    </section>
+
+    <!-- ================================================================ multiple parameters -->
+    <section class="slide" id="multi">
+      <h2>Function with multiple parameters</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # multiple parameters
+          def add(a, b):
+              return a + b
+          result = add(5, 3)
+          # ans: result is 8
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ return -->
+    <section class="slide" id="ret">
+      <h2>Function with return</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # return value
+          def square(x):
+              return x ** 2
+          result = square(5)
+          # ans: result is 25
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ no return -->
+    <section class="slide" id="noret">
+      <h2>Function without return</h2>
+      <div class="tracer dense">
+        <pre class="trace"><code class="language-python">
+          # no return (returns None)
+          def print_message(msg):
+              print(msg)
+          result = print_message("Hi")
+          # ans: Hi (printed)
+          # ans: result is None
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint">Printing shows a value on screen; it does not give the value back to the caller.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then press → to trace the code and check.</p>
+    </section>
+
+    <section class="slide ex" id="ex1">
+      <h2>Exercise 1</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what is returned?
+          def func():
+              x = 5
+          func()
+          # ans: None (no return statement)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide ex" id="ex2">
+      <h2>Exercise 2</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what is result?
+          def add(a, b):
+              return a + b
+          result = add(10, 20)
+          # ans: 30
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide ex" id="ex3">
+      <h2>Exercise 3</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # function call without ()?
+          def greet():
+              return "Hello"
+          x = greet
+          # ans: x is the function object, not "Hello"
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide ex" id="ex4">
+      <h2>Exercise 4</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what happens?
+          def multiply(x, y):
+              return x * y
+          multiply(5, 3)
+          # ans: 15 (but not stored)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide ex" id="ex5">
+      <h2>Exercise 5</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # can you call before defining?
+          result = add(1, 2)
+          def add(a, b):
+              return a + b
+          # ans: NameError (function not defined yet)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide ex" id="ex6">
+      <h2>Exercise 6</h2>
+      <div class="tracer dense">
+        <pre class="trace"><code class="language-python">
+          # function with print vs return?
+          def func1():
+              print(5)
+          def func2():
+              return 5
+          x = func1()
+          y = func2()
+          # ans: 5 (printed)
+          # ans: x is None, y is 5
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide ex" id="ex7">
+      <h2>Exercise 7</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # nested function call?
+          def double(x):
+              return x * 2
+          result = double(double(5))
+          # ans: 20
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide ex" id="ex8">
+      <h2>Exercise 8</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # what is printed?
+          def test():
+              return 5
+              print("After return")
+          test()
+          # ans: 5 (return exits the function,
+          # ans: so the print never runs)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <p class="hint">At the interactive prompt the returned 5 is echoed; nothing is printed by the function itself.</p>
+    </section>
+
+    <section class="slide ex" id="ex9">
+      <h2>Exercise 9</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # function name case?
+          def MyFunction():
+              return 1
+          myfunction()
+          # ans: NameError (names are case-sensitive)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <section class="slide ex" id="ex10">
+      <h2>Exercise 10</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # redefining function?
+          def func():
+              return 1
+          def func():
+              return 2
+          func()
+          # ans: 2 (second definition overwrites first)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards">
+        <div class="card step"><h3>Define, then call</h3><p><code>def</code> stores the function under its name; <code>name()</code> runs it. Calling before the <code>def</code> line is a <code>NameError</code>.</p></div>
+        <div class="card step"><h3>Each call gets a frame</h3><p>Parameters are local names in that frame, filled from the arguments.</p></div>
+        <div class="card step"><h3><code>return</code> ends the call</h3><p>It hands one value back; code after it never runs. No <code>return</code> means <code>None</code>.</p></div>
+        <div class="card step"><h3>Functions are values</h3><p><code>x = greet</code> copies the function; <code>x = greet()</code> stores its result.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ tracer
+      // tracer(slide, frames, opts) replays a list of frames over the slide's
+      // <pre class="trace">, lighting lines in the order Python runs them and
+      // filling the slide's .mem panel. A frame is
+      //   { l: line (1-based), n: "note badge", c: true/false (condition badge),
+      //     v: { name: "repr" or null to delete }, o: "printed" or [...],
+      //     e: "error text for the output", s: ["<module>", "f(x=1)"] (call stack),
+      //     x: "ExceptionName" (raised; "" clears), k: true (exception caught) }
+      // It plays when the slide's .step.go (or its first answer line) is revealed.
+      const STEP = 0.55; // seconds per frame (opts.step overrides)
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function tracer(sel, frames, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        if (opts.chips && !frames.length) frames = opts.chips.frames(opts.chips.values[0]);
+        const pre = slide.querySelector("pre.trace");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const T = { slide, pre, lines, frames, tl: null };
+        const dt = opts.step || STEP;
+        const mem = slide.querySelector(".mem");
+        if (mem) {
+          const all = opts.chips ? opts.chips.values.flatMap((v) => opts.chips.frames(v)) : frames;
+          const has = (key) => all.some((f) => key.split(" ").some((q) => f[q] !== undefined));
+          const secs = opts.sections || [...(has("v") ? ["vars"] : []), ...(has("s") ? ["stack"] : []), ...(has("o e") || opts.chips ? ["out"] : [])];
+          const box = { vars: "slots", stack: "frames", out: "console" };
+          const title = { vars: opts.varsTitle || "Variables", stack: "Call stack", out: "Output" };
+          mem.innerHTML =
+            secs.map((s) => `<div class="sec-${s}"><h4>${title[s]}</h4><div class="${box[s]}"></div></div>`).join("") +
+            `<button class="replay" type="button" data-interactive>Replay</button>`;
+          mem.querySelector(".replay").addEventListener("click", () => T.play(false));
+        }
+        const $ = (q) => mem?.querySelector(q);
+
+        function stateAt(k) {
+          const st = { v: {}, o: [], s: null, x: "", caught: false };
+          for (let i = 0; i <= k; i++) {
+            const f = T.frames[i];
+            for (const [name, val] of Object.entries(f.v || {})) {
+              if (val === null) delete st.v[name];
+              else st.v[name] = val;
+            }
+            for (const o of [].concat(f.o ?? [])) st.o.push({ t: o });
+            if (f.e) st.o.push({ t: f.e, err: true });
+            if (f.s) st.s = f.s;
+            if (f.x !== undefined) {
+              st.x = f.x;
+              st.caught = false;
+            }
+            if (f.k) st.caught = true;
+          }
+          return st;
+        }
+
+        function render(k, anim) {
+          if (!mem) return;
+          const st = stateAt(k);
+          const slots = $(".slots");
+          if (slots) {
+            const have = new Map([...slots.children].map((el) => [el.dataset.name, el]));
+            for (const [name, el] of have) if (!(name in st.v)) el.remove();
+            for (const [name, val] of Object.entries(st.v)) {
+              let el = have.get(name);
+              if (!el) {
+                el = document.createElement("div");
+                el.className = "slot";
+                el.dataset.name = name;
+                el.innerHTML = `<b>${esc(name)}</b><span></span>`;
+                slots.appendChild(el);
+                if (anim) gsap.from(el, { opacity: 0, x: -14, duration: 0.35 });
+              }
+              const span = el.querySelector("span");
+              if (span.textContent !== val) {
+                span.textContent = val;
+                if (anim) gsap.fromTo(span, { backgroundColor: "rgba(34,211,238,0.5)" }, { backgroundColor: "rgba(139,92,246,0.12)", duration: 0.9 });
+              }
+            }
+          }
+          const con = $(".console");
+          if (con) {
+            if (con.children.length > st.o.length) con.innerHTML = "";
+            for (let i = con.children.length; i < st.o.length; i++) {
+              const d = document.createElement("div");
+              d.textContent = st.o[i].t;
+              if (st.o[i].err) d.className = "err";
+              con.appendChild(d);
+              if (anim) gsap.from(d, { opacity: 0, y: 8, duration: 0.3 });
+            }
+          }
+          const fr = $(".frames");
+          if (fr) {
+            const want = st.s || [];
+            if (!anim) fr.querySelectorAll(".gone").forEach((el) => el.remove());
+            const have = [...fr.children].filter((el) => !el.classList.contains("gone"));
+            let same = 0;
+            while (same < want.length && same < have.length && have[same].dataset.key === want[same]) same++;
+            // popped frames slide away (in red while an exception unwinds them)
+            have.slice(same).forEach((el) => {
+              if (!anim) return el.remove();
+              el.classList.add("gone");
+              el.classList.toggle("hurt", !!st.x && !st.caught);
+              gsap.to(el, { opacity: 0, x: 40, duration: 0.4, ease: "power1.in", onComplete: () => el.remove() });
+            });
+            want.slice(same).forEach((name) => {
+              const el = document.createElement("div");
+              el.className = "frame";
+              el.dataset.key = name;
+              const [head, sub] = name.split("|");
+              el.innerHTML = esc(head) + (sub ? `<em>${esc(sub)}</em>` : "");
+              fr.appendChild(el);
+              if (anim) gsap.from(el, { opacity: 0, y: -16, duration: 0.35, ease: "back.out(1.6)" });
+            });
+            [...fr.children].filter((el) => !el.classList.contains("gone")).forEach((el, i, all) => {
+              el.classList.toggle("top", i === all.length - 1);
+              el.classList.toggle("hurt", i === all.length - 1 && !!st.x && !st.caught);
+            });
+          }
+          let exc = $(".exc");
+          if (st.x) {
+            if (!exc) {
+              exc = document.createElement("div");
+              exc.className = "exc";
+              const at = (fr || slots || con)?.parentElement;
+              at ? at.after(exc) : mem.prepend(exc);
+              if (anim) gsap.from(exc, { scale: 0.4, opacity: 0, duration: 0.35, ease: "back.out(2)" });
+            }
+            exc.textContent = (st.caught ? "caught: " : "raised: ") + st.x;
+            exc.classList.toggle("caught", st.caught);
+          } else exc?.remove();
+        }
+
+        function mark(k, anim) {
+          const f = T.frames[k];
+          lines.forEach((l) => l.classList.remove("now", "boom"));
+          const el = lines[f.l - 1];
+          if (!el) return;
+          el.classList.add("run", f.x ? "boom" : "now");
+          el.querySelector(".tb")?.remove();
+          const text = f.c !== undefined ? (f.n ? `${f.n} → ` : "") + (f.c ? "True" : "False") : f.x ? f.x.split(":")[0] : f.n;
+          if (text) {
+            const b = document.createElement("span");
+            b.className = "tb " + (f.c !== undefined ? (f.c ? "t" : "f") : f.x ? "x" : "n");
+            b.textContent = text;
+            el.appendChild(b);
+            if (anim) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+        }
+
+        T.reset = () => {
+          T.tl?.kill();
+          pre.classList.remove("tracing", "traced");
+          lines.forEach((l) => {
+            l.classList.remove("run", "now", "boom");
+            l.querySelector(".tb")?.remove();
+          });
+          if (mem) {
+            mem.querySelectorAll(".slots, .console, .frames").forEach((b) => (b.innerHTML = ""));
+            mem.querySelector(".exc")?.remove();
+            if (opts.init) render(-1, false);
+          }
+          opts.onReset?.(T);
+        };
+
+        T.play = (instant) => {
+          T.reset();
+          pre.classList.add("tracing");
+          const done = () => {
+            lines.forEach((l) => l.classList.remove("now"));
+            pre.classList.replace("tracing", "traced");
+          };
+          if (instant) {
+            T.frames.forEach((f, k) => mark(k, false));
+            render(T.frames.length - 1, false);
+            opts.onFrame?.(T, T.frames.length - 1, true);
+            done();
+            const last = T.frames[T.frames.length - 1];
+            if (last?.x) lines[last.l - 1]?.classList.add("boom");
+            return;
+          }
+          const tl = gsap.timeline();
+          T.frames.forEach((f, k) =>
+            tl.call(() => {
+              mark(k, true);
+              render(k, true);
+              opts.onFrame?.(T, k, false);
+            }, null, k * dt)
+          );
+          tl.call(done, null, T.frames.length * dt);
+          T.tl = tl;
+        };
+
+        const go = slide.querySelector(".step.go") || pre.querySelector(".line.answer");
+        if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+
+        if (opts.chips) {
+          const C = opts.chips;
+          const box = slide.querySelector(".try");
+          box.insertAdjacentHTML("beforeend", C.values.map((v, i) => `<button class="chip" type="button" data-i="${i}">${esc(C.show ? C.show(v) : v)}</button>`).join(""));
+          T.choose = (i, run) => {
+            const v = C.values[i];
+            T.frames = C.frames(v);
+            C.patch?.(T, v);
+            box.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.i === i));
+            if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+            if (run) T.play(run === "instant");
+          };
+          box.addEventListener("click", (e) => {
+            const b = e.target.closest(".chip");
+            if (b) T.choose(+b.dataset.i, true);
+          });
+        }
+
+        Deck.scene(slide, {
+          enter() {
+            if (opts.chips) T.choose(0, false);
+            T.reset();
+            if (!go && opts.auto !== false) T.play(false);
+          },
+          leave: () => T.reset(),
+          step(s, n, els, d) {
+            // several steps at once (a ↓ jump) or going back: show the end state
+            if (go && els.includes(go)) queueMicrotask(() => T.play(d?.dir < 0 || Deck.step > n));
+          },
+          unstep(s, n, els) {
+            if (go && els.includes(go)) T.reset();
+          },
+        });
+        return T;
+      }
+
+      const M = "<module>";
+      const fn = (name) => `<function ${name}>`;
+
+      tracer("#simple", [
+        { l: 2, n: "store greet", v: { greet: fn("greet") }, s: [M] },
+        { l: 4, n: "call", s: [M, "greet()"] },
+        { l: 3, o: "Hello!" },
+        { l: 4, n: "returned None", s: [M] },
+      ]);
+
+      tracer("#param", [
+        { l: 2, n: "store greet_person", v: { greet_person: fn("greet_person") }, s: [M] },
+        { l: 4, n: "call", s: [M, "greet_person()|name = 'Alice'"] },
+        { l: 3, o: "Hello, Alice!" },
+        { l: 4, n: "returned None", s: [M] },
+      ]);
+
+      tracer("#multi", [
+        { l: 2, n: "store add", v: { add: fn("add") }, s: [M] },
+        { l: 4, n: "call add(5, 3)", s: [M, "add()|a = 5, b = 3"] },
+        { l: 3, n: "return 8" },
+        { l: 4, n: "result = 8", v: { result: "8" }, s: [M] },
+      ]);
+
+      tracer("#ret", [
+        { l: 2, n: "store square", v: { square: fn("square") }, s: [M] },
+        { l: 4, n: "call square(5)", s: [M, "square()|x = 5"] },
+        { l: 3, n: "return 25" },
+        { l: 4, n: "result = 25", v: { result: "25" }, s: [M] },
+      ]);
+
+      tracer("#noret", [
+        { l: 2, n: "store print_message", v: { print_message: fn("print_message") }, s: [M] },
+        { l: 4, n: "call", s: [M, "print_message()|msg = 'Hi'"] },
+        { l: 3, o: "Hi" },
+        { l: 4, n: "result = None", v: { result: "None" }, s: [M] },
+      ]);
+
+      // ------------------------------------------------------------ exercises
+      tracer("#ex1", [
+        { l: 2, v: { func: fn("func") }, s: [M] },
+        { l: 4, n: "call", s: [M, "func()"] },
+        { l: 3, s: [M, "func()|x = 5"] },
+        { l: 4, n: "returned None", s: [M] },
+      ]);
+      tracer("#ex2", [
+        { l: 2, v: { add: fn("add") }, s: [M] },
+        { l: 4, n: "call add(10, 20)", s: [M, "add()|a = 10, b = 20"] },
+        { l: 3, n: "return 30" },
+        { l: 4, n: "result = 30", v: { result: "30" }, s: [M] },
+      ]);
+      tracer("#ex3", [
+        { l: 2, v: { greet: fn("greet") }, s: [M] },
+        { l: 4, n: "no (): nothing is called", v: { x: fn("greet") } },
+      ]);
+      tracer("#ex4", [
+        { l: 2, v: { multiply: fn("multiply") }, s: [M] },
+        { l: 4, n: "call multiply(5, 3)", s: [M, "multiply()|x = 5, y = 3"] },
+        { l: 3, n: "return 15" },
+        { l: 4, n: "15 is not stored anywhere", s: [M] },
+      ]);
+      tracer("#ex5", [{ l: 2, x: "NameError", e: "NameError: name 'add' is not defined", s: [M] }]);
+      tracer("#ex6", [
+        { l: 2, v: { func1: fn("func1") }, s: [M] },
+        { l: 4, v: { func2: fn("func2") } },
+        { l: 6, n: "call func1()", s: [M, "func1()"] },
+        { l: 3, o: "5" },
+        { l: 6, n: "x = None", v: { x: "None" }, s: [M] },
+        { l: 7, n: "call func2()", s: [M, "func2()"] },
+        { l: 5, n: "return 5" },
+        { l: 7, n: "y = 5", v: { y: "5" }, s: [M] },
+      ]);
+      tracer("#ex7", [
+        { l: 2, v: { double: fn("double") }, s: [M] },
+        { l: 4, n: "inner call first: double(5)", s: [M, "double()|x = 5"] },
+        { l: 3, n: "return 10" },
+        { l: 4, n: "then double(10)", s: [M, "double()|x = 10"] },
+        { l: 3, n: "return 20" },
+        { l: 4, n: "result = 20", v: { result: "20" }, s: [M] },
+      ]);
+      tracer("#ex8", [
+        { l: 2, v: { test: fn("test") }, s: [M] },
+        { l: 5, n: "call", s: [M, "test()"] },
+        { l: 3, n: "return 5: leave now" },
+        { l: 5, n: "returned 5", s: [M] },
+      ]);
+      tracer("#ex9", [
+        { l: 2, v: { MyFunction: fn("MyFunction") }, s: [M] },
+        { l: 4, x: "NameError", e: "NameError: name 'myfunction' is not defined" },
+      ]);
+      tracer("#ex10", [
+        { l: 2, n: "func → first version", v: { func: fn("func") + " #1" }, s: [M] },
+        { l: 4, n: "func → second version", v: { func: fn("func") + " #2" } },
+        { l: 6, n: "call", s: [M, "func()"] },
+        { l: 5, n: "return 2" },
+        { l: 6, n: "returned 2", s: [M] },
+      ]);
+
+      // ------------------------------------------------------------ the function machine
+      {
+        const slide = document.querySelector("#machine");
+        const mach = slide.querySelector(".machine");
+        const args = [...slide.querySelectorAll(".arg")];
+        const params = [...slide.querySelectorAll(".p")];
+        const out = slide.querySelector(".out");
+        const box = slide.querySelector(".box");
+        const CALLS = [[5, 3], [10, 20], [2, -7]];
+        const tray = slide.querySelector(".try");
+        tray.insertAdjacentHTML("beforeend", CALLS.map(([a, b], i) => `<button class="chip" type="button" data-i="${i}">(${a}, ${b})</button>`).join(""));
+        let cur = 0;
+                let tl;
+
+        // Animate a copy of `from` flying onto `to`
+        function fly(t, from, to, at) {
+          const m = mach.getBoundingClientRect();
+          const a = from.getBoundingClientRect();
+          const b = to.getBoundingClientRect();
+          const k = m.width / mach.offsetWidth || 1; // the canvas is scaled to the window
+          const g = from.cloneNode(true);
+          g.classList.add("ghost");
+          g.classList.remove("empty");
+          mach.appendChild(g);
+          t.fromTo(g, { x: (a.left - m.left) / k, y: (a.top - m.top) / k, opacity: 1 }, { x: (b.left - m.left) / k, y: (b.top - m.top) / k, duration: 0.7, ease: "power2.inOut", onComplete: () => g.remove() }, at);
+        }
+
+        function render(n, animate) {
+          tl?.kill();
+          mach.querySelectorAll(".ghost").forEach((g) => g.remove());
+          gsap.set(box, { clearProps: "transform" });
+          const [a, b] = CALLS[cur];
+          slide.querySelector(".a1").textContent = a;
+          slide.querySelector(".a2").textContent = b;
+          args[0].textContent = params[0].textContent = a;
+          args[1].textContent = params[1].textContent = b;
+          out.textContent = a + b;
+          tray.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.i === cur));
+          const set = (k) => {
+            params.forEach((p) => p.classList.toggle("empty", k < 1));
+            box.classList.toggle("busy", k === 2);
+            out.classList.toggle("empty", k < 3);
+          };
+          if (!animate) return set(n);
+          set(Math.max(0, n - 1));
+          tl = gsap.timeline();
+          if (n === 1) {
+            fly(tl, args[0], params[0], 0);
+            fly(tl, args[1], params[1], 0.15);
+            tl.call(() => set(1));
+          } else if (n === 2) {
+            tl.call(() => set(2));
+            tl.fromTo(box, { scale: 1 }, { scale: 1.04, yoyo: true, repeat: 1, duration: 0.25 });
+          } else if (n === 3) {
+            tl.call(() => box.classList.remove("busy"));
+            const m = mach.getBoundingClientRect();
+            const s = box.querySelector(".body").getBoundingClientRect();
+            const d = out.getBoundingClientRect();
+            const k = m.width / mach.offsetWidth || 1;
+            const g = out.cloneNode(true);
+            g.classList.add("ghost");
+            g.classList.remove("empty");
+            mach.appendChild(g);
+            tl.fromTo(g, { x: (s.left - m.left) / k + 60, y: (s.top - m.top) / k, scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 });
+            tl.to(g, { x: (d.left - m.left) / k, y: (d.top - m.top) / k, duration: 0.7, ease: "power2.inOut", onComplete: () => g.remove() });
+            tl.call(() => set(3));
+          } else set(n);
+        }
+
+        tray.addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (!c) return;
+          cur = +c.dataset.i;
+          // play the whole call with the new arguments
+          render(0, false);
+          let k = 0;
+          const run = () => {
+            if (++k > 3) return;
+            render(k, true);
+            tl.call(run, null, "+=0.4");
+          };
+          run();
+        });
+
+        Deck.scene(slide, {
+          enter: () => {
+            cur = 0;
+            render(0, false);
+          },
+          leave: () => tl?.kill(),
+          step: (s, n, els, d) => queueMicrotask(() => render(Deck.step, d.dir > 0 && Deck.step === n)),
+          unstep: () => render(Deck.step, false),
+        });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

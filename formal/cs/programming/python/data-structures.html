@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data Structures</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Memory view: variables drawn as boxes that move when the code changes them ---------- */
+      .mv {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        min-width: min(100%, 22rem);
+        padding: 1.1rem 1.2rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-family: var(--font-mono);
+        font-variant-ligatures: none;
+      }
+
+      .mv-var {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+
+      .mv-name {
+        min-width: 4.5rem;
+        text-align: right;
+        color: var(--violet-soft);
+      }
+
+      .mv-eq {
+        color: var(--faint);
+      }
+
+      .mv-items {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+        padding-bottom: 0.2rem;
+      }
+
+      .mv-items::before,
+      .mv-items::after {
+        color: var(--faint);
+        font-size: 1.3rem;
+      }
+
+      .mv-items.list::before {
+        content: "[";
+      }
+
+      .mv-items.list::after {
+        content: "]";
+      }
+
+      .mv-items.tuple::before {
+        content: "(";
+      }
+
+      .mv-items.tuple::after {
+        content: ")";
+      }
+
+      .mv-items.dict::before,
+      .mv-items.set::before {
+        content: "{";
+      }
+
+      .mv-items.dict::after,
+      .mv-items.set::after {
+        content: "}";
+      }
+
+      .mv-items.val::before,
+      .mv-items.val::after {
+        content: none;
+      }
+
+      .mv-cell {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.65rem;
+        border-radius: 10px;
+        border: 1px solid rgba(167, 139, 250, 0.45);
+        background: rgba(139, 92, 246, 0.13);
+        white-space: nowrap;
+        transition:
+          border-color 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1rem;
+      }
+
+      .mv-items.set .mv-cell {
+        border-radius: 999px;
+        border-color: rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .mv-items.tuple .mv-cell {
+        border-style: dashed;
+      }
+
+      .mv-cell .k {
+        color: #a5f3fc;
+      }
+
+      .mv-cell .k::after {
+        content: ":";
+        color: var(--faint);
+      }
+
+      .mv-cell small {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1.15rem;
+        font-size: 0.68rem;
+        text-align: center;
+        color: var(--faint);
+      }
+
+      .mv-cell small.nx {
+        bottom: -2.1rem;
+        color: #c27a92;
+      }
+
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2rem;
+      }
+
+      .mv-cell.hl {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.24);
+        box-shadow: 0 0 18px -4px rgba(34, 211, 238, 0.8);
+      }
+
+      .mv-cell.ghost {
+        position: absolute;
+        margin: 0;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .mv-empty {
+        color: var(--faint);
+        font-size: 0.85rem;
+      }
+
+      .mv-note {
+        min-height: 1.4em;
+        margin: 0;
+        font-family: var(--font);
+        font-size: 0.95rem;
+        color: var(--cyan);
+        text-align: center;
+      }
+
+      .duo {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: center;
+        width: min(100%, 72rem);
+      }
+
+      .duo pre {
+        width: auto;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: min(100%, 60rem);
+      }
+
+      .stack pre {
+        width: auto;
+        max-width: 100%;
+      }
+
+
+      .slide pre {
+        font-size: 0.95rem;
+      }
+
+      /* ---------- Venn diagram for set operations ---------- */
+      .venn {
+        width: min(100%, 26rem);
+        height: auto;
+        overflow: visible;
+      }
+
+      .venn .region {
+        fill: rgba(139, 92, 246, 0.06);
+        stroke: none;
+        transition: fill 0.4s;
+      }
+
+      .venn .region.on {
+        fill: rgba(34, 211, 238, 0.32);
+      }
+
+      .venn circle {
+        fill: none;
+        stroke: rgba(167, 139, 250, 0.75);
+        stroke-width: 2.5;
+      }
+
+      .venn text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 24px;
+        text-anchor: middle;
+        dominant-baseline: central;
+        transition:
+          fill 0.4s,
+          opacity 0.4s;
+      }
+
+      .venn text.name {
+        fill: var(--violet-soft);
+        font-size: 22px;
+      }
+
+      .venn text.off {
+        opacity: 0.35;
+      }
+
+      .venn-side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .venn-out {
+        min-height: 1.6em;
+        font: 1.1rem var(--font-mono);
+        color: var(--cyan);
+        text-align: center;
+      }
+
+      .chip {
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        color: var(--text);
+        border-color: rgba(167, 139, 250, 0.7);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      /* ---------- 1600x900 canvas sizing (memory view) ---------- */
+      .mv {
+        font-size: 1.35rem;
+        gap: 1.1rem;
+        padding: 1.4rem 1.6rem;
+        min-width: min(100%, 26rem);
+      }
+      .mv-name {
+        min-width: 5.5rem;
+      }
+      .mv-items::before,
+      .mv-items::after {
+        font-size: 1.6rem;
+      }
+      .mv-cell {
+        padding: 0.35rem 0.8rem;
+      }
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1.3rem;
+      }
+      .mv-cell small {
+        bottom: -1.4rem;
+        font-size: 0.8rem;
+      }
+      .mv-cell small.nx {
+        bottom: -2.5rem;
+      }
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2.5rem;
+      }
+      .mv-empty {
+        font-size: 1rem;
+      }
+      .mv-note {
+        font-size: 1.2rem;
+      }
+      .duo {
+        width: 100%;
+        gap: 2.5rem;
+      }
+      .duo pre,
+      .stack pre {
+        min-width: 0;
+        flex-shrink: 0;
+      }
+      .stack {
+        width: 100%;
+      }
+      .slide pre {
+        flex-shrink: 0;
+      }
+      .hint {
+        font-size: 1.2rem;
+      }
+      /* dense slides: many variables beside the code */
+      .mv {
+        font-size: 1rem;
+        gap: 0.45rem;
+        padding: 0.9rem 1.2rem;
+      }
+      .mv-name {
+        min-width: 4.2rem;
+      }
+      .mv-var,
+      .mv-items {
+        flex-wrap: nowrap;
+      }
+      .mv-cell {
+        padding: 0.2rem 0.55rem;
+      }
+      .mv-items.list .mv-cell,
+      .mv-items.tuple .mv-cell {
+        margin-bottom: 1.1rem;
+      }
+      .mv-cell small {
+        bottom: -1.2rem;
+        font-size: 0.75rem;
+      }
+      .mv-cell small.nx {
+        bottom: -2.1rem;
+      }
+      .mv.neg .mv-items.list .mv-cell,
+      .mv.neg .mv-items.tuple .mv-cell {
+        margin-bottom: 2rem;
+      }
+      .duo pre,
+      .stack pre {
+        font-size: 1.05rem;
+      }
+      #l-mod .mv-items {
+        flex-wrap: wrap;
+      }
+      #d-access .stack pre {
+        font-size: 0.95rem;
+      }
+      #d-access .stack {
+        gap: 0.7rem;
+      }
+      pre.tall {
+        line-height: 1.45;
+      }
+      pre.tall .line {
+        min-height: 1.45em;
+      }
+      #t-basic .mv {
+        display: grid;
+        grid-template-columns: auto auto;
+        column-gap: 2.2rem;
+        align-items: center;
+      }
+      #t-basic .mv-note {
+        grid-column: 1 / -1;
+      }
+      #t-basic .mv {
+        column-gap: 1.4rem;
+      }
+      #t-basic .duo pre {
+        font-size: 1rem;
+      }
+      #l-ops .duo pre {
+        font-size: 0.98rem;
+      }
+      #l-sort .mv-var {
+        flex-wrap: wrap;
+      }
+      .mv-name {
+        white-space: nowrap;
+      }
+      #d-access .mv {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        column-gap: 2.5rem;
+      }
+      #d-access .mv-note {
+        flex-basis: 100%;
+      }
+      #d-access .mv {
+        padding: 0.6rem 1.2rem;
+        row-gap: 0.3rem;
+      }
+      /* set operations */
+      .venn {
+        width: min(100%, 34rem);
+      }
+      .venn-out {
+        font-size: 1.3rem;
+      }
+      #s-ops .chip {
+        font-size: 1.2rem;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 62rem);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · collections</span>
+      <h1 class="grad-each"><span>Data</span> <span>Structures</span></h1>
+      <p>Lists, tuples, dictionaries and sets: four ways to hold many values, and what each one is good at.</p>
+    </section>
+
+    <!-- ================================================================ lists: create and access -->
+    <section class="slide" id="l-access">
+      <h2>Lists: creation and access</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # creating lists
+          fruits = ["apple", "banana", "cherry"]
+          numbers = [1, 2, 3, 4, 5]
+          mixed = [1, "two", 3.0, True]
+          empty = []
+          # accessing elements
+          fruits[0]     # "apple"
+          fruits[-1]    # "cherry" (last element)
+          fruits[1:3]   # ["banana", "cherry"]
+          # length
+          len(fruits)   # 3
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ lists: modify -->
+    <section class="slide" id="l-mod">
+      <h2>Lists: modification</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # modifying elements
+          fruits = ["apple", "banana", "cherry"]
+          fruits[1] = "blueberry"
+          # adding elements
+          fruits.append("date")            # add to end
+          fruits.insert(1, "apricot")      # insert at index
+          fruits.extend(["fig", "grape"])  # add multiple
+          # removing elements
+          fruits.remove("apple")    # remove by value
+          popped = fruits.pop()     # remove and return last
+          popped = fruits.pop(0)    # remove at index
+          del fruits[1]             # delete at index
+          fruits.clear()            # remove all
+        </code></pre>
+        <div class="mv" style="width: min(100%, 52rem)"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ lists: operations -->
+    <section class="slide" id="l-ops">
+      <h2>Lists: operations</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # concatenation
+          list1 = [1, 2, 3]
+          list2 = [4, 5, 6]
+          combined = list1 + list2  # [1, 2, 3, 4, 5, 6]
+          # repetition
+          repeated = [0] * 5        # [0, 0, 0, 0, 0]
+          # membership
+          "apple" in fruits         # True
+          "mango" not in fruits     # True
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ lists: sorting -->
+    <section class="slide" id="l-sort">
+      <h2>Lists: sorting and reversing</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # sorting
+          numbers = [3, 1, 4, 1, 5]
+          numbers.sort()                 # sort in place
+          sorted_nums = sorted(numbers)  # return sorted copy
+          numbers.sort(reverse=True)     # descending
+          # reversing
+          numbers.reverse()              # reverse in place
+          reversed_nums = numbers[::-1]  # return reversed copy
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+      <p class="hint step">In place changes the list itself (and returns <code>None</code>); a copy leaves the original alone.</p>
+    </section>
+
+    <!-- ================================================================ lists: methods -->
+    <section class="slide" id="l-methods">
+      <h2>Lists: methods</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          numbers = [1, 2, 3, 2, 4, 2, 5]
+          # count occurrences
+          numbers.count(2)       # 3
+          # find index
+          numbers.index(3)       # 2
+          numbers.index(2, 2)    # start search from index 2
+          # copy
+          new_list = numbers.copy()
+          new_list = numbers[:]  # alternative
+          # min, max, sum
+          min(numbers)           # 1
+          max(numbers)           # 5
+          sum(numbers)           # 19
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ tuples -->
+    <section class="slide" id="t-basic">
+      <h2>Tuples: creation and unpacking</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # creating tuples
+          point = (3, 5)
+          rgb = (255, 128, 0)
+          single = (42,)   # single element tuple
+          empty = ()
+          # unpacking
+          x, y = point
+          r, g, b = rgb
+          # accessing (like lists)
+          point[0]         # 3
+          rgb[-1]          # 0
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="t-ops">
+      <h2>Tuples: immutable, but still useful</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # tuples are immutable
+          # point[0] = 5               # Error!
+          # operations
+          tuple1 = (1, 2)
+          tuple2 = (3, 4)
+          combined = tuple1 + tuple2   # (1, 2, 3, 4)
+          repeated = tuple1 * 3        # (1, 2, 1, 2, 1, 2)
+          # methods
+          numbers = (1, 2, 3, 2, 4)
+          numbers.count(2)             # 2
+          numbers.index(3)             # 2
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+      <p class="hint step"><code>+</code> and <code>*</code> build <em>new</em> tuples; the originals never change.</p>
+    </section>
+
+    <!-- ================================================================ dicts: create and access -->
+    <section class="slide" id="d-access">
+      <h2>Dictionaries: creation and access</h2>
+      <div class="stack">
+        <pre class="steps"><code class="language-python">
+          # creating dictionaries
+          person = {"name": "Alice", "age": 25, "city": "NYC"}
+          empty = {}
+          from_keys = dict.fromkeys(["a", "b"], 0)  # {'a': 0, 'b': 0}
+          # accessing values
+          person["name"]                    # "Alice"
+          person.get("age")                 # 25
+          person.get("country", "Unknown")  # "Unknown" (default)
+          # keys and values
+          person.keys()    # dict_keys(['name', 'age', 'city'])
+          person.values()  # dict_values(['Alice', 25, 'NYC'])
+          person.items()   # dict_items([...])
+        </code></pre>
+        <div class="mv" style="width: min(100%, 44rem)"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ dicts: modify -->
+    <section class="slide" id="d-mod">
+      <h2>Dictionaries: modification</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          person = {"name": "Alice", "age": 25}
+          # adding/updating
+          person["city"] = "NYC"    # add new key
+          person["age"] = 26        # update existing
+          person.update({"country": "USA", "age": 27})
+          # removing
+          del person["city"]        # delete key
+          age = person.pop("age")   # remove and return
+          last = person.popitem()   # remove and return last item
+          person.clear()            # remove all
+          # setdefault
+          person.setdefault("age", 0)  # returns value or sets default
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ dicts: operations -->
+    <section class="slide" id="d-ops">
+      <h2>Dictionaries: operations</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # membership (checks keys)
+          "name" in person          # True
+          "salary" not in person    # True
+          # length
+          len(person)               # number of keys
+          # copying
+          new_dict = person.copy()
+          # merging (Python 3.9+)
+          dict1 = {"a": 1, "b": 2}
+          dict2 = {"c": 3, "d": 4}
+          merged = dict1 | dict2
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Nested dictionaries</h2>
+      <pre class="steps" style="width: auto; font-size: 2.05rem"><code class="language-python">
+        # nested dictionaries
+        users = {
+            "user1": {"name": "Alice", "age": 25},
+            "user2": {"name": "Bob", "age": 30}
+        }
+        users["user1"]["name"]   # "Alice"
+      </code></pre>
+      <p class="hint step">Read it left to right: <code>users["user1"]</code> is a dictionary, and <code>["name"]</code> looks up a key inside it.</p>
+    </section>
+
+    <!-- ================================================================ sets -->
+    <section class="slide" id="s-basic">
+      <h2>Sets: creation and changes</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          # creating sets
+          fruits = {"apple", "banana", "cherry"}
+          numbers = {1, 2, 3, 4, 5}
+          empty = set()                  # NOT {}
+          # from list (removes duplicates)
+          numbers = set([1, 2, 2, 3, 3, 3])  # {1, 2, 3}
+          # adding and removing
+          fruits.add("date")
+          fruits.remove("apple")    # raises error if not found
+          fruits.discard("mango")   # no error if not found
+          popped = fruits.pop()     # remove arbitrary element
+          fruits.clear()
+          # membership
+          "apple" in fruits         # True when "apple" is in the set
+        </code></pre>
+        <div class="mv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="s-ops">
+      <h2>Sets: set operations</h2>
+      <div class="duo">
+        <pre class="steps"><code class="language-python">
+          a = {1, 2, 3, 4}
+          b = {3, 4, 5, 6}
+          # union
+          a | b    # {1, 2, 3, 4, 5, 6}
+          a.union(b)
+          # intersection
+          a &amp; b    # {3, 4}
+          a.intersection(b)
+          # difference
+          a - b    # {1, 2}
+          a.difference(b)
+          # symmetric difference
+          a ^ b    # {1, 2, 5, 6}
+          a.symmetric_difference(b)
+        </code></pre>
+        <div class="venn-side">
+          <svg class="venn" viewBox="0 0 600 360" aria-label="Venn diagram of a = {1, 2, 3, 4} and b = {3, 4, 5, 6}; the regions in the result are filled">
+            <path class="region" data-r="A" d="M300 60.5 A130 130 0 1 0 300 279.5 A130 130 0 0 1 300 60.5 Z" />
+            <path class="region" data-r="AB" d="M300 60.5 A130 130 0 0 1 300 279.5 A130 130 0 0 1 300 60.5 Z" />
+            <path class="region" data-r="B" d="M300 60.5 A130 130 0 1 1 300 279.5 A130 130 0 0 0 300 60.5 Z" />
+            <circle cx="230" cy="170" r="130" />
+            <circle cx="370" cy="170" r="130" />
+            <text class="name" x="140" y="28">a</text>
+            <text class="name" x="460" y="28">b</text>
+            <text data-r="A" x="180" y="135">1</text>
+            <text data-r="A" x="180" y="205">2</text>
+            <text data-r="AB" x="300" y="135">3</text>
+            <text data-r="AB" x="300" y="205">4</text>
+            <text data-r="B" x="420" y="135">5</text>
+            <text data-r="B" x="420" y="205">6</text>
+          </svg>
+          <div class="venn-out"></div>
+          <div class="try" data-interactive>
+            <button class="chip" type="button" data-op="|">a | b</button>
+            <button class="chip" type="button" data-op="&amp;">a &amp; b</button>
+            <button class="chip" type="button" data-op="-">a - b</button>
+            <button class="chip" type="button" data-op="^">a ^ b</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Sets: comparing sets</h2>
+      <pre class="steps" style="width: auto; font-size: 1.4rem"><code class="language-python">
+        # subset and superset
+        {1, 2}.issubset({1, 2, 3})       # True
+        {1, 2, 3}.issuperset({1, 2})     # True
+        # disjoint
+        {1, 2}.isdisjoint({3, 4})        # True
+      </code></pre>
+      <div class="cards" style="width: min(100%, 50rem)">
+        <div class="card step"><h3>Subset</h3><p>Every item of the first set is also in the second.</p></div>
+        <div class="card step"><h3>Superset</h3><p>The first set contains every item of the second.</p></div>
+        <div class="card step"><h3>Disjoint</h3><p>The two sets share no items at all.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ frozenset -->
+    <section class="slide">
+      <h2>Frozen sets</h2>
+      <pre class="steps" style="width: auto; font-size: 1.30rem"><code class="language-python">
+        # immutable sets
+        fs = frozenset([1, 2, 3])
+        # can be used as dict keys
+        lookup = {
+            frozenset([1, 2]): "A",
+            frozenset([3, 4]): "B"
+        }
+        # set operations work
+        fs1 = frozenset([1, 2, 3])
+        fs2 = frozenset([2, 3, 4])
+        fs1 | fs2      # frozenset({1, 2, 3, 4})
+        # but cannot modify
+        # fs.add(4)    # Error!
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Which one to use?</h2>
+      <div class="cards">
+        <div class="card step"><h3>List <code>[ ]</code></h3><p>Ordered, changeable, duplicates allowed. Access by position.</p></div>
+        <div class="card step"><h3>Tuple <code>( )</code></h3><p>Ordered but immutable. Good for fixed records like a point; unpacks neatly.</p></div>
+        <div class="card step"><h3>Dictionary <code>{k: v}</code></h3><p>Look values up by key. Keys are unique; <code>in</code> checks keys.</p></div>
+        <div class="card step"><h3>Set <code>{ }</code></h3><p>Unique items, no order. Fast membership and set algebra. Empty set is <code>set()</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ memory view
+      // memview(slide, ops, opts) draws variables as boxes in the slide's .mv and
+      // replays ops as the lines of its <pre class="steps"> are revealed:
+      // ops[n](S) runs once line n is showing. Boxes keep their identity, so
+      // inserting, removing and sorting animate (FLIP).
+      // S.list(name, ["'a'", ...]) / S.tuple / S.set / S.dict(name, [["'k'", "v"], ...]) / S.val(name, "v")
+      // S.items(name) the mutable item array; S.item(v, k) a new item; S.del(name)
+      // S.hl(name, i or key, ...) highlight; S.note("text") caption under the boxes
+      function memview(sel, ops, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        const box = slide.querySelector(".mv");
+        box.classList.toggle("neg", !!opts.neg);
+        const pre = slide.querySelector("pre.steps");
+        const lines = pre ? [...pre.querySelectorAll(".line")] : [];
+        const escH = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        function compute(n) {
+          let uid = 0;
+          const vars = new Map();
+          const S = {
+            hlIds: new Set(),
+            text: "",
+            item: (v, k) => ({ id: "c" + uid++, v: String(v), k }),
+            make(t, name, vals) {
+              vars.set(name, { t, items: vals.map((v) => (t === "dict" ? S.item(v[1], v[0]) : S.item(v))) });
+              return vars.get(name).items;
+            },
+            list: (name, vals) => S.make("list", name, vals),
+            tuple: (name, vals) => S.make("tuple", name, vals),
+            set: (name, vals) => S.make("set", name, vals),
+            dict: (name, pairs) => S.make("dict", name, pairs),
+            val: (name, v) => S.make("val", name, [v]),
+            items: (name) => vars.get(name).items,
+            del: (name) => vars.delete(name),
+            has: (name) => vars.has(name),
+            hl(name, ...which) {
+              const its = vars.get(name).items;
+              for (const w of which) {
+                const it = typeof w === "number" ? its[w < 0 ? its.length + w : w] : its.find((x) => x.k === w);
+                if (it) S.hlIds.add(it.id);
+              }
+            },
+            note: (t) => (S.text = t),
+          };
+          for (let i = 0; i <= n; i++) {
+            if (!ops[i]) continue;
+            // highlights and notes describe only the newest line
+            S.hlIds = new Set();
+            S.text = "";
+            ops[i](S);
+          }
+          return { vars, hl: S.hlIds, note: S.text };
+        }
+
+        function render(n, anim) {
+          const st = compute(n);
+          const oldRects = new Map();
+          const oldNodes = new Map();
+          const oldVals = new Map();
+          box.querySelectorAll(".ghost").forEach((g) => g.remove());
+          box.querySelectorAll("[data-id]").forEach((e) => {
+            oldRects.set(e.dataset.id, e.getBoundingClientRect());
+            oldNodes.set(e.dataset.id, e);
+            oldVals.set(e.dataset.id, e.querySelector(".v")?.textContent);
+          });
+          let html = "";
+          for (const [name, { t, items }] of st.vars) {
+            const cells = items
+              .map((it, i) => {
+                const hl = st.hl.has(it.id) ? " hl" : "";
+                if (t === "dict") return `<div class="mv-cell kv${hl}" data-id="${it.id}"><span class="k">${escH(it.k)}</span><span class="v">${escH(it.v)}</span></div>`;
+                const ix = t === "list" || t === "tuple" ? `<small class="ix">${i}</small>` + (opts.neg ? `<small class="nx">${i - items.length}</small>` : "") : "";
+                return `<div class="mv-cell${hl}" data-id="${it.id}"><span class="v">${escH(it.v)}</span>${ix}</div>`;
+              })
+              .join("");
+            html += `<div class="mv-var"><span class="mv-name">${escH(name)}</span><span class="mv-eq">=</span><div class="mv-items ${t}">${cells || (t === "set" ? "" : "")}</div></div>`;
+          }
+          if (!st.vars.size) html = `<span class="mv-empty">${opts.empty || "no variables yet"}</span>`;
+          html += `<p class="mv-note">${escH(st.note)}</p>`;
+          box.innerHTML = html;
+          if (!anim) return;
+          const base = box.getBoundingClientRect();
+          const k = base.width / box.offsetWidth || 1; // the canvas is scaled to the window
+          box.querySelectorAll("[data-id]").forEach((e) => {
+            const r0 = oldRects.get(e.dataset.id);
+            if (!r0) return gsap.from(e, { scale: 0.3, opacity: 0, duration: 0.45, ease: "back.out(2)" });
+            const r1 = e.getBoundingClientRect();
+            if (Math.abs(r0.left - r1.left) + Math.abs(r0.top - r1.top) > 1) gsap.from(e, { x: (r0.left - r1.left) / k, y: (r0.top - r1.top) / k, duration: 0.6, ease: "power2.inOut" });
+            if (oldVals.get(e.dataset.id) !== e.querySelector(".v")?.textContent) gsap.fromTo(e, { backgroundColor: "rgba(236,72,153,0.5)" }, { backgroundColor: "rgba(139,92,246,0.13)", duration: 0.9, clearProps: "backgroundColor" });
+          });
+          for (const [id, node] of oldNodes) {
+            if (box.querySelector(`[data-id="${id}"]`)) continue;
+            const r = oldRects.get(id);
+            node.classList.add("ghost");
+            node.classList.remove("hl");
+            Object.assign(node.style, { left: (r.left - base.left) / k + "px", top: (r.top - base.top) / k + "px", width: r.width / k + "px" });
+            box.appendChild(node);
+            gsap.to(node, { opacity: 0, y: 28, scale: 0.7, duration: 0.55, ease: "power1.in", onComplete: () => node.remove() });
+          }
+          const note = box.querySelector(".mv-note");
+          if (st.note) gsap.from(note, { opacity: 0, y: 6, duration: 0.3 });
+        }
+
+        const shown = () => {
+          let n = 0;
+          lines.forEach((l, i) => l.classList.contains("shown") && (n = i + 1));
+          return n;
+        };
+        const M = { render, refresh: (anim) => render(shown(), anim) };
+        Deck.scene(slide, {
+          enter: () => render(0, false),
+          step: (s, n, els, d) => queueMicrotask(() => M.refresh(d?.dir > 0 && Deck.step === n)),
+          unstep: () => queueMicrotask(() => M.refresh(false)),
+        });
+        return M;
+      }
+
+      const q = (s) => `'${s}'`;
+
+      // ------------------------------------------------------------ lists
+      memview(
+        "#l-access",
+        {
+          2: (S) => S.list("fruits", ["apple", "banana", "cherry"].map(q)),
+          3: (S) => S.list("numbers", ["1", "2", "3", "4", "5"]),
+          4: (S) => S.list("mixed", ["1", "'two'", "3.0", "True"]),
+          5: (S) => S.list("empty", []),
+          7: (S) => (S.hl("fruits", 0), S.note("index 0 is the first item → 'apple'")),
+          8: (S) => (S.hl("fruits", -1), S.note("negative indexes count from the end → 'cherry'")),
+          9: (S) => (S.hl("fruits", 1, 2), S.note("slice [1:3] takes indexes 1 and 2, stopping before 3")),
+          11: (S) => (S.hl("fruits", 0, 1, 2), S.note("3 items")),
+        },
+        { neg: true }
+      );
+
+      memview("#l-mod", {
+        2: (S) => S.list("fruits", ["apple", "banana", "cherry"].map(q)),
+        3: (S) => {
+          S.items("fruits")[1] = S.item(q("blueberry"));
+          S.hl("fruits", 1);
+          S.note("replace the item at index 1");
+        },
+        5: (S) => (S.items("fruits").push(S.item(q("date"))), S.hl("fruits", -1)),
+        6: (S) => (S.items("fruits").splice(1, 0, S.item(q("apricot"))), S.hl("fruits", 1), S.note("everything after index 1 shifts right")),
+        7: (S) => (S.items("fruits").push(S.item(q("fig")), S.item(q("grape"))), S.hl("fruits", -2, -1)),
+        9: (S) => (S.items("fruits").splice(0, 1), S.note("the first 'apple' is found and removed")),
+        10: (S) => {
+          S.items("fruits").pop();
+          S.val("popped", q("grape"));
+          S.note("pop() returns the item it removes");
+        },
+        11: (S) => {
+          S.items("fruits").shift();
+          S.items("popped")[0] = S.item(q("apricot"));
+        },
+        12: (S) => (S.items("fruits").splice(1, 1), S.note("del removes 'cherry' and returns nothing")),
+        13: (S) => (S.items("fruits").length = 0),
+      });
+
+      memview("#l-ops", {
+        0: (S) => (S.list("fruits", ["apple", "banana", "cherry"].map(q)), S.note("fruits from before")),
+        2: (S) => S.list("list1", ["1", "2", "3"]),
+        3: (S) => S.list("list2", ["4", "5", "6"]),
+        4: (S) => (S.list("combined", ["1", "2", "3", "4", "5", "6"]), S.note("+ builds a new list; list1 and list2 are unchanged")),
+        6: (S) => S.list("repeated", ["0", "0", "0", "0", "0"]),
+        8: (S) => (S.hl("fruits", 0), S.note("'apple' is in fruits → True")),
+        9: (S) => S.note("'mango' is not in fruits → True"),
+      });
+
+      memview("#l-sort", {
+        2: (S) => S.list("numbers", ["3", "1", "4", "1", "5"]),
+        3: (S) => (S.items("numbers").sort((a, b) => a.v - b.v), S.note("the same boxes, rearranged")),
+        4: (S) => (S.list("sorted_nums", S.items("numbers").map((it) => it.v)), S.note("a brand-new list")),
+        5: (S) => S.items("numbers").sort((a, b) => b.v - a.v),
+        7: (S) => S.items("numbers").reverse(),
+        8: (S) => (S.list("reversed_nums", [...S.items("numbers")].reverse().map((it) => it.v)), S.note("[::-1] slices backwards into a new list")),
+      });
+
+      memview("#l-methods", {
+        1: (S) => S.list("numbers", ["1", "2", "3", "2", "4", "2", "5"]),
+        3: (S) => (S.hl("numbers", 1, 3, 5), S.note("three 2s → 3")),
+        5: (S) => (S.hl("numbers", 2), S.note("3 first appears at index 2 → 2")),
+        6: (S) => (S.hl("numbers", 3), S.note("searching from index 2, the next 2 is at index 3 → 3")),
+        8: (S) => (S.list("new_list", S.items("numbers").map((it) => it.v)), S.note("a separate list with the same items")),
+        9: (S) => (S.list("new_list", S.items("numbers").map((it) => it.v)), S.note("slicing the whole list also makes a copy")),
+        11: (S) => (S.hl("numbers", 0), S.note("→ 1")),
+        12: (S) => (S.hl("numbers", 6), S.note("→ 5")),
+        13: (S) => (S.hl("numbers", 0, 1, 2, 3, 4, 5, 6), S.note("1 + 2 + 3 + 2 + 4 + 2 + 5 → 19")),
+      });
+
+      // ------------------------------------------------------------ tuples
+      memview(
+        "#t-basic",
+        {
+          2: (S) => S.tuple("point", ["3", "5"]),
+          3: (S) => S.tuple("rgb", ["255", "128", "0"]),
+          4: (S) => (S.tuple("single", ["42"]), S.note("the comma makes the tuple; (42) is just 42")),
+          5: (S) => S.tuple("empty", []),
+          7: (S) => (S.hl("point", 0, 1), S.val("x", "3"), S.val("y", "5"), S.note("one name per item")),
+          8: (S) => (S.hl("rgb", 0, 1, 2), S.val("r", "255"), S.val("g", "128"), S.val("b", "0")),
+          10: (S) => (S.hl("point", 0), S.note("→ 3")),
+          11: (S) => (S.hl("rgb", -1), S.note("→ 0")),
+        },
+        { neg: true }
+      );
+
+      memview("#t-ops", {
+        2: (S) => S.note("tuples have no item assignment: TypeError"),
+        4: (S) => S.tuple("tuple1", ["1", "2"]),
+        5: (S) => S.tuple("tuple2", ["3", "4"]),
+        6: (S) => S.tuple("combined", ["1", "2", "3", "4"]),
+        7: (S) => S.tuple("repeated", ["1", "2", "1", "2", "1", "2"]),
+        9: (S) => S.tuple("numbers", ["1", "2", "3", "2", "4"]),
+        10: (S) => (S.hl("numbers", 1, 3), S.note("two 2s → 2")),
+        11: (S) => (S.hl("numbers", 2), S.note("3 is at index 2 → 2")),
+      });
+
+      // ------------------------------------------------------------ dictionaries
+      const find = (S, name, k) => S.items(name).find((it) => it.k === k);
+      memview("#d-access", {
+        2: (S) => S.dict("person", [["'name'", "'Alice'"], ["'age'", "25"], ["'city'", "'NYC'"]]),
+        3: (S) => S.dict("empty", []),
+        4: (S) => (S.dict("from_keys", [["'a'", "0"], ["'b'", "0"]]), S.note("every key gets the same value, 0")),
+        6: (S) => (S.hl("person", "'name'"), S.note("look up by key → 'Alice'")),
+        7: (S) => (S.hl("person", "'age'"), S.note("→ 25")),
+        8: (S) => S.note("no 'country' key, so get() returns the default 'Unknown'"),
+        10: (S) => (S.hl("person", "'name'", "'age'", "'city'"), S.note("a live view of the keys")),
+        11: (S) => (S.hl("person", "'name'", "'age'", "'city'"), S.note("a view of the values")),
+        12: (S) => (S.hl("person", "'name'", "'age'", "'city'"), S.note("(key, value) pairs")),
+      });
+
+      memview("#d-mod", {
+        1: (S) => S.dict("person", [["'name'", "'Alice'"], ["'age'", "25"]]),
+        3: (S) => (S.items("person").push(S.item("'NYC'", "'city'")), S.hl("person", "'city'"), S.note("new key: added at the end")),
+        4: (S) => ((find(S, "person", "'age'").v = "26"), S.hl("person", "'age'"), S.note("existing key: value replaced")),
+        5: (S) => {
+          find(S, "person", "'age'").v = "27";
+          S.items("person").push(S.item("'USA'", "'country'"));
+          S.hl("person", "'age'", "'country'");
+          S.note("update() adds new keys and overwrites existing ones");
+        },
+        7: (S) => {
+          const its = S.items("person");
+          its.splice(its.indexOf(find(S, "person", "'city'")), 1);
+        },
+        8: (S) => {
+          const its = S.items("person");
+          its.splice(its.indexOf(find(S, "person", "'age'")), 1);
+          S.val("age", "27");
+        },
+        9: (S) => {
+          S.items("person").pop();
+          S.val("last", "('country', 'USA')");
+          S.note("popitem() removes the most recently added pair");
+        },
+        10: (S) => (S.items("person").length = 0),
+        12: (S) => (S.items("person").push(S.item("0", "'age'")), S.note("'age' was missing, so it is set to 0 and 0 is returned")),
+      });
+
+      memview("#d-ops", {
+        0: (S) => (S.dict("person", [["'name'", "'Alice'"], ["'age'", "25"]]), S.note("person from before")),
+        2: (S) => (S.hl("person", "'name'"), S.note("'name' is a key → True")),
+        3: (S) => S.note("'salary' is not a key → True"),
+        5: (S) => (S.hl("person", "'name'", "'age'"), S.note("2 keys → 2")),
+        7: (S) => (S.dict("new_dict", S.items("person").map((it) => [it.k, it.v])), S.note("a new dictionary with the same pairs")),
+        9: (S) => S.dict("dict1", [["'a'", "1"], ["'b'", "2"]]),
+        10: (S) => S.dict("dict2", [["'c'", "3"], ["'d'", "4"]]),
+        11: (S) => (S.dict("merged", [["'a'", "1"], ["'b'", "2"], ["'c'", "3"], ["'d'", "4"]]), S.note("| makes a new dict; on a clash the right side wins")),
+      });
+
+      // ------------------------------------------------------------ sets
+      memview("#s-basic", {
+        2: (S) => S.set("fruits", ["apple", "banana", "cherry"].map(q)),
+        3: (S) => S.set("numbers", ["1", "2", "3", "4", "5"]),
+        4: (S) => (S.set("empty", []), S.note("{} would be an empty dict")),
+        6: (S) => (S.set("numbers", ["1", "2", "3"]), S.note("[1, 2, 2, 3, 3, 3] → duplicates dropped")),
+        8: (S) => (S.items("fruits").push(S.item(q("date"))), S.hl("fruits", -1)),
+        9: (S) => S.items("fruits").shift(),
+        10: (S) => S.note("'mango' is not there: nothing happens, no error"),
+        11: (S) => {
+          S.items("fruits").shift();
+          S.val("popped", q("banana"));
+          S.note("sets have no order, so pop() could return any item");
+        },
+        12: (S) => S.items("fruits").splice(0),
+        14: (S) => S.note("fruits is empty now, so here it is False"),
+      });
+
+      // ------------------------------------------------------------ Venn diagram
+      {
+        const slide = document.querySelector("#s-ops");
+        const OPS = {
+          "|": { on: ["A", "AB", "B"], out: "{1, 2, 3, 4, 5, 6}", say: "union: in a or b" },
+          "&": { on: ["AB"], out: "{3, 4}", say: "intersection: in both" },
+          "-": { on: ["A"], out: "{1, 2}", say: "difference: in a but not b" },
+          "^": { on: ["A", "B"], out: "{1, 2, 5, 6}", say: "symmetric difference: in exactly one" },
+        };
+        const LINE_OP = { 4: "|", 5: "|", 7: "&", 8: "&", 10: "-", 11: "-", 13: "^", 14: "^" };
+        const out = slide.querySelector(".venn-out");
+        function show(op, anim) {
+          const o = OPS[op];
+          slide.querySelectorAll(".venn [data-r]").forEach((el) => {
+            const on = !o || o.on.includes(el.dataset.r);
+            el.classList.toggle("on", !!o && on);
+            el.classList.toggle("off", !!o && !on);
+          });
+          slide.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c.dataset.op === op));
+          out.textContent = o ? `${o.out}   ${o.say}` : "";
+          if (o && anim) gsap.from(slide.querySelectorAll(`.venn text[data-r]:not(.off)`), { scale: 1.6, transformOrigin: "center", duration: 0.5, stagger: 0.05, ease: "back.out(2)" });
+        }
+        const lines = [...slide.querySelectorAll("pre .line")];
+        const fromLines = (anim) => {
+          let op = null;
+          lines.forEach((l, i) => l.classList.contains("shown") && LINE_OP[i + 1] && (op = LINE_OP[i + 1]));
+          show(op, anim);
+        };
+        slide.querySelector(".try").addEventListener("click", (e) => {
+          const c = e.target.closest(".chip");
+          if (c) show(c.dataset.op, true);
+        });
+        Deck.scene(slide, {
+          enter: () => show(null),
+          step: (s, n, els, d) => queueMicrotask(() => fromLines(d?.dir > 0 && Deck.step === n)),
+          unstep: () => queueMicrotask(() => fromLines(false)),
+        });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

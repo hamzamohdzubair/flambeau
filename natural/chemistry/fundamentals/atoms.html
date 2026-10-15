@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Atoms</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Atom drawings ---------- */
+      .atom {
+        width: min(100%, 32rem, 62cqh);
+        height: auto;
+        overflow: visible;
+      }
+
+      .atom .shell {
+        fill: none;
+        stroke: rgba(167, 139, 250, 0.28);
+        stroke-width: 1.5;
+        stroke-dasharray: 3 6;
+      }
+
+      .atom .cloud {
+        fill: url(#cloudGrad);
+      }
+
+      .atom .p {
+        fill: #f472b6;
+        stroke: #fbcfe8;
+        stroke-width: 1;
+      }
+
+      .atom .n {
+        fill: #64748b;
+        stroke: #cbd5e1;
+        stroke-width: 1;
+      }
+
+      .atom .e {
+        fill: #22d3ee;
+        filter: drop-shadow(0 0 6px #22d3ee);
+      }
+
+      .atom text {
+        font: 600 11px var(--font);
+        fill: #fff;
+        text-anchor: middle;
+        dominant-baseline: central;
+        pointer-events: none;
+      }
+
+      #what .cols,
+      #builder .cols {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+        align-items: center;
+        width: 100%;
+      }
+
+      #what .lead {
+        text-align: left;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.2rem;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: var(--muted);
+      }
+
+      .legend i {
+        display: inline-block;
+        width: 0.8rem;
+        height: 0.8rem;
+        margin-right: 0.4rem;
+        border-radius: 50%;
+        vertical-align: -0.05rem;
+      }
+
+      .particles td:first-child {
+        font-weight: 600;
+      }
+
+      .particles {
+        width: 100%;
+        font-size: 1.4rem;
+      }
+
+      .notation {
+        font-size: 1.6rem;
+        text-align: center;
+      }
+
+      .tag {
+        font: 500 0.95rem var(--font-mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .cards .card ul {
+        margin: 0.4rem 0 0;
+      }
+
+      /* ---------- Builder ---------- */
+      .panel {
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .counter {
+        display: grid;
+        grid-template-columns: 8rem 2.6rem 3.4rem 2.6rem;
+        justify-content: start;
+        align-items: center;
+        gap: 0.7rem;
+        font-size: 1.25rem;
+      }
+
+      .counter b {
+        text-align: center;
+        font: 600 1.5rem var(--font-mono);
+      }
+
+      .pm {
+        width: 2.6rem;
+        height: 2.6rem;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--text);
+        font: 600 1.1rem var(--font-mono);
+        cursor: pointer;
+      }
+
+      .pm:hover {
+        border-color: var(--violet-soft);
+        background: rgba(139, 92, 246, 0.3);
+      }
+
+      .idcard {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 1.2rem;
+        padding: 1rem 1.2rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      .idcard .sym {
+        font-size: 2.6rem;
+        min-width: 6rem;
+        text-align: center;
+      }
+
+      .idcard p {
+        margin: 0.1rem 0;
+        font-size: 1.15rem;
+      }
+
+      .idcard .kind {
+        font-weight: 600;
+      }
+
+      .presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      .chip {
+        padding: 0.25rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1.05rem var(--font-mono);
+        cursor: pointer;
+      }
+
+      .chip:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      /* ---------- Exercises ---------- */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: 60rem;
+      }
+
+      .qa > div {
+        display: grid;
+        gap: 0.3rem;
+      }
+
+      .qa .q {
+        margin: 0;
+        font-size: 1.4rem;
+      }
+
+      .qa .answer {
+        margin: 0 0 0 1.2rem;
+        font-size: 1.3rem;
+        color: var(--green);
+      }
+
+      #builder .atom {
+        width: min(100%, 30rem, 62cqh);
+      }
+
+      #what .cols {
+        width: 100%;
+      }
+
+      #what ul {
+        font-size: 1.3rem;
+      }
+
+      .cards .card li {
+        font-size: 1.3rem;
+      }
+
+      #neutral ul {
+        display: grid;
+        gap: 1rem;
+        width: 56rem;
+        padding: 0;
+        list-style: none;
+        font-size: 1.45rem;
+      }
+
+      #neutral li {
+        margin: 0;
+        padding: 1.1rem 1.6rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--violet-soft);
+        background: var(--glass);
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <radialGradient id="cloudGrad">
+          <stop offset="0" stop-color="#22d3ee" stop-opacity="0.16" />
+          <stop offset="0.7" stop-color="#8b5cf6" stop-opacity="0.08" />
+          <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+    </svg>
+
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Chemistry · fundamentals</span>
+      <h1 class="grad-each"><span>Atoms</span></h1>
+      <p>What atoms are made of, how we count their particles, and how they become ions.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide" id="what">
+      <h2>What is an atom?</h2>
+      <div class="cols">
+        <svg class="atom" viewBox="-200 -200 400 400" aria-label="A carbon atom: six protons and six neutrons in a tiny nucleus, six electrons orbiting in two shells"></svg>
+        <div>
+          <p class="lead"><strong>Atom</strong>: the smallest unit of an element that keeps the element's properties.</p>
+          <ul>
+            <li class="step"><strong>Nucleus</strong>: at the centre, contains protons and neutrons</li>
+            <li class="step"><strong>Electron cloud</strong>: electrons around the nucleus</li>
+            <li class="step">Mostly <strong>empty space</strong></li>
+            <li class="step"><strong>Size</strong>: about \(10^{-10}\) m (1 ångström)</li>
+          </ul>
+        </div>
+      </div>
+      <p class="muted center step">Not to scale: if the atom were a stadium, the nucleus would be a marble at the centre.</p>
+    </section>
+
+    <!-- ================================================================ particles -->
+    <section class="slide">
+      <h2>Subatomic particles</h2>
+      <table class="particles">
+        <thead><tr><th>Particle</th><th>Charge</th><th>Mass</th><th>Location</th></tr></thead>
+        <tbody>
+          <tr class="step"><td style="color: #f472b6">Proton</td><td>+1</td><td>1 amu (atomic mass unit)</td><td>Nucleus</td></tr>
+          <tr class="step"><td style="color: #cbd5e1">Neutron</td><td>0 (neutral)</td><td>1 amu</td><td>Nucleus</td></tr>
+          <tr class="step"><td style="color: #22d3ee">Electron</td><td>−1</td><td>~0.0005 amu (negligible)</td><td>Electron cloud / orbitals</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================================================================ Z and A -->
+    <section class="slide">
+      <h2>Atomic number and mass number</h2>
+      <div class="cards">
+        <div class="card step">
+          <span class="tag">Atomic number · Z</span>
+          <ul>
+            <li>Number of protons</li>
+            <li>Defines the element</li>
+            <li>Never changes for an element</li>
+          </ul>
+        </div>
+        <div class="card step">
+          <span class="tag">Mass number · A</span>
+          <ul>
+            <li>Protons + neutrons</li>
+            <li>\(A = Z + N\), where \(N\) = neutrons</li>
+          </ul>
+        </div>
+      </div>
+      <p class="notation step">Notation: \( {}^{A}_{Z}\mathrm{X} \), e.g. \( {}^{12}_{\;6}\mathrm{C} \) for carbon-12</p>
+    </section>
+
+    <!-- ================================================================ neutral -->
+    <section class="slide" id="neutral">
+      <h2>Neutral atoms</h2>
+      <p class="lead"><strong>Neutral atom</strong>: number of protons = number of electrons.</p>
+      <ul>
+        <li class="step">Total positive charge = total negative charge</li>
+        <li class="step">\( (+Z) + (-Z) = 0 \)</li>
+        <li class="step"><strong>Example</strong>: carbon has 6 protons and 6 electrons in its neutral state</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ ions -->
+    <section class="slide">
+      <h2>Ions</h2>
+      <p class="lead"><strong>Ion</strong>: an atom that has gained or lost electrons.</p>
+      <div class="cards">
+        <div class="card step">
+          <h3>Cation: positive ion</h3>
+          <ul>
+            <li>Lost electrons</li>
+            <li>More protons than electrons</li>
+            <li>Example: Na⁺ (11 protons, 10 electrons)</li>
+          </ul>
+        </div>
+        <div class="card step">
+          <h3>Anion: negative ion</h3>
+          <ul>
+            <li>Gained electrons</li>
+            <li>More electrons than protons</li>
+            <li>Example: Cl⁻ (17 protons, 18 electrons)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ builder -->
+    <section class="slide" id="builder">
+      <h2>Build an atom</h2>
+      <div class="cols">
+        <div>
+          <svg class="atom" viewBox="-200 -200 400 400" aria-label="The atom you are building"></svg>
+          <div class="legend"><span><i style="background: #f472b6"></i>proton</span><span><i style="background: #64748b"></i>neutron</span><span><i style="background: #22d3ee"></i>electron</span></div>
+        </div>
+        <div class="panel" data-interactive>
+          <div class="counter"><span>Protons</span><button class="pm" data-k="p" data-d="-1">−</button><b class="cp"></b><button class="pm" data-k="p" data-d="1">+</button></div>
+          <div class="counter"><span>Neutrons</span><button class="pm" data-k="n" data-d="-1">−</button><b class="cn"></b><button class="pm" data-k="n" data-d="1">+</button></div>
+          <div class="counter"><span>Electrons</span><button class="pm" data-k="e" data-d="-1">−</button><b class="ce"></b><button class="pm" data-k="e" data-d="1">+</button></div>
+          <div class="idcard">
+            <div class="sym"></div>
+            <div>
+              <p class="name"></p>
+              <p class="nums"></p>
+              <p class="kind"></p>
+            </div>
+          </div>
+          <div class="presets">
+            <button class="chip" data-p="6" data-n="6" data-e="6">carbon-12</button>
+            <button class="chip" data-p="11" data-n="12" data-e="10">Na⁺</button>
+            <button class="chip" data-p="17" data-n="18" data-e="18">Cl⁻</button>
+            <button class="chip" data-p="8" data-n="8" data-e="10">O²⁻</button>
+            <button class="chip" data-p="12" data-n="12" data-e="10">Mg²⁺</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer each question before revealing it. The atom builder can check many of them.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 1</h2>
+      <div class="qa">
+        <div><p class="q step">What is an atom?</p><p class="answer">The smallest unit of an element that retains its properties</p></div>
+        <div><p class="q step">What are the three main subatomic particles?</p><p class="answer">Protons, neutrons, electrons</p></div>
+        <div><p class="q step">Where are protons located?</p><p class="answer">In the nucleus</p></div>
+        <div><p class="q step">What is the charge of a neutron?</p><p class="answer">Zero (neutral)</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 2</h2>
+      <div class="qa">
+        <div><p class="q step">What is atomic number?</p><p class="answer">The number of protons in the nucleus; it defines the element</p></div>
+        <div><p class="q step">What is mass number?</p><p class="answer">Total protons plus neutrons, A = Z + N</p></div>
+        <div><p class="q step">Carbon has 6 protons and 6 neutrons. What is its mass number?</p><p class="answer">A = 6 + 6 = 12 (carbon-12)</p></div>
+        <div><p class="q step">Does atomic number change in chemical reactions?</p><p class="answer">No: atomic number defines the element's identity</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 3</h2>
+      <div class="qa">
+        <div><p class="q step">What makes an atom neutral?</p><p class="answer">Number of protons equals number of electrons</p></div>
+        <div><p class="q step">Sodium has 11 protons. How many electrons does neutral sodium have?</p><p class="answer">11 electrons</p></div>
+        <div><p class="q step">What is a cation?</p><p class="answer">A positive ion: an atom that lost electrons</p></div>
+        <div><p class="q step">What is an anion?</p><p class="answer">A negative ion: an atom that gained electrons</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 4</h2>
+      <div class="qa">
+        <div><p class="q step">An oxygen atom gains 2 electrons. What is the ion?</p><p class="answer">O²⁻ (oxide ion, an anion)</p></div>
+        <div><p class="q step">Magnesium loses 2 electrons. What is the ion?</p><p class="answer">Mg²⁺ (magnesium ion, a cation)</p></div>
+        <div><p class="q step">An ion has 12 protons and 10 electrons. What is its charge?</p><p class="answer">+2 (12 − 10 = +2)</p></div>
+        <div><p class="q step">Which particle determines element identity?</p><p class="answer">The proton (atomic number)</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 5</h2>
+      <div class="qa">
+        <div><p class="q step">Aluminium has atomic number 13 and mass number 27. How many neutrons?</p><p class="answer">N = A − Z = 27 − 13 = 14 neutrons</p></div>
+        <div><p class="q step">An atom has 8 protons, 8 neutrons and 8 electrons. What element is it?</p><p class="answer">Oxygen (atomic number 8)</p></div>
+        <div><p class="q step">What is its mass number?</p><p class="answer">A = 8 + 8 = 16 (oxygen-16)</p></div>
+        <div><p class="q step">Is this atom neutral or charged?</p><p class="answer">Neutral (protons = electrons)</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 6</h2>
+      <div class="qa">
+        <div><p class="q step">Why is atomic mass not exactly a whole number?</p><p class="answer">It is a weighted average over the element's isotopes, so it includes fractional contributions</p></div>
+        <div><p class="q step">Which particle has negligible mass?</p><p class="answer">The electron (about 1/2000 of a proton's mass)</p></div>
+        <div><p class="q step">Iron loses 3 electrons. Write the ion symbol.</p><p class="answer">Fe³⁺ (iron(III) cation)</p></div>
+        <div><p class="q step">Chlorine gains 1 electron. Write the ion symbol.</p><p class="answer">Cl⁻ (chloride anion)</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 7</h2>
+      <div class="qa">
+        <div><p class="q step">What is mostly empty in an atom?</p><p class="answer">The space between the nucleus and the electron cloud</p></div>
+        <div><p class="q step">What is a typical atomic diameter?</p><p class="answer">About 10⁻¹⁰ m (1 ångström)</p></div>
+        <div><p class="q step">What holds electrons around the nucleus?</p><p class="answer">Electrostatic attraction (opposite charges attract)</p></div>
+        <div><p class="q step">Can the number of neutrons change without changing the element?</p><p class="answer">Yes: that creates isotopes (same element, different mass)</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        parent?.appendChild(e);
+        return e;
+      };
+
+      const ELEMENTS = ["", "H Hydrogen", "He Helium", "Li Lithium", "Be Beryllium", "B Boron", "C Carbon", "N Nitrogen", "O Oxygen", "F Fluorine", "Ne Neon", "Na Sodium", "Mg Magnesium", "Al Aluminium", "Si Silicon", "P Phosphorus", "S Sulfur", "Cl Chlorine", "Ar Argon", "K Potassium", "Ca Calcium"].map((s) => s.split(" "));
+      const SHELLS = [2, 8, 8, 8];
+      const RADII = [78, 112, 146, 180];
+      const SPEED = [9, 14, 20, 26]; // seconds per revolution, outer shells slower
+
+      // Draws protons/neutrons in a packed nucleus and electrons on shells.
+      // Returns the shell groups so a caller can spin them.
+      function drawAtom(svg, p, n, e) {
+        svg.replaceChildren();
+        el("circle", { class: "cloud", r: 196 }, svg);
+        const used = [];
+        let left = e;
+        SHELLS.forEach((cap, i) => {
+          const k = Math.min(cap, left);
+          left -= k;
+          used.push(k);
+        });
+        const shells = [];
+        used.forEach((k, i) => {
+          if (!k && i > 0 && !used.slice(i).some(Boolean)) return;
+          el("circle", { class: "shell", r: RADII[i] }, svg);
+          const g = el("g", { class: "orbit" }, svg);
+          for (let j = 0; j < k; j++) {
+            const ang = (j / k) * 2 * Math.PI + i * 0.4;
+            el("circle", { class: "e", r: 7, cx: RADII[i] * Math.cos(ang), cy: RADII[i] * Math.sin(ang) }, g);
+          }
+          shells.push(g);
+        });
+        // Nucleus: a sunflower spiral, protons and neutrons interleaved
+        const nuc = el("g", { class: "nucleus" }, svg);
+        const total = p + n;
+        const parts = [];
+        let pi = 0, ni = 0;
+        for (let i = 0; i < total; i++) {
+          const wantP = pi < p && (ni >= n || pi * n <= ni * p);
+          parts.push(wantP ? "p" : "n");
+          wantP ? pi++ : ni++;
+        }
+        const r = 9;
+        parts.forEach((kind, i) => {
+          const rad = r * 1.05 * Math.sqrt(i);
+          const ang = i * 2.39996;
+          el("circle", { class: kind, r, cx: rad * Math.cos(ang), cy: rad * Math.sin(ang) }, nuc);
+        });
+        return shells;
+      }
+
+      function spin(shells) {
+        return shells.map((g, i) => gsap.to(g, { rotation: 360, svgOrigin: "0 0", duration: SPEED[i], ease: "none", repeat: -1 }));
+      }
+
+      // ================================================================ intro atom
+      {
+        const svg = document.querySelector("#what .atom");
+        let tws = [];
+        const shells = drawAtom(svg, 6, 6, 6);
+        Deck.scene("#what", {
+          enter() {
+            tws.forEach((t) => t.kill());
+            tws = spin(shells);
+            gsap.from(svg.querySelector(".nucleus"), { scale: 0, svgOrigin: "0 0", duration: 0.9, ease: "back.out(2)" });
+          },
+          leave() {
+            tws.forEach((t) => t.kill());
+            tws = [];
+          },
+        });
+      }
+
+      // ================================================================ builder
+      {
+        const slide = document.querySelector("#builder");
+        const svg = slide.querySelector(".atom");
+        const st = { p: 6, n: 6, e: 6 };
+        let tws = [];
+        let active = false;
+        function render(pop) {
+          tws.forEach((t) => t.kill());
+          const shells = drawAtom(svg, st.p, st.n, st.e);
+          if (active) tws = spin(shells);
+          if (pop) gsap.from(svg.querySelectorAll(`.${pop}`), { scale: 0.4, opacity: 0.3, transformOrigin: "center", duration: 0.35, stagger: 0.01 });
+          slide.querySelector(".cp").textContent = st.p;
+          slide.querySelector(".cn").textContent = st.n;
+          slide.querySelector(".ce").textContent = st.e;
+          const [sym, name] = ELEMENTS[st.p] || ["?", "?"];
+          const A = st.p + st.n, q = st.p - st.e;
+          const qs = q === 0 ? "" : (Math.abs(q) > 1 ? Math.abs(q) : "") + (q > 0 ? "+" : "-");
+          slide.querySelector(".sym").innerHTML = `<sup>${A}</sup>${sym}<sup>${qs.replace("-", "−")}</sup>`;
+          slide.querySelector(".name").textContent = `${name}-${A}: Z = ${st.p}, A = ${A}, N = ${st.n}`;
+          slide.querySelector(".nums").textContent = `Charge: (+${st.p}) + (−${st.e}) = ${q > 0 ? "+" : ""}${q === 0 ? 0 : q}`;
+          const kind = slide.querySelector(".kind");
+          kind.textContent = q === 0 ? "Neutral atom" : q > 0 ? `Cation: lost ${q} electron${q > 1 ? "s" : ""}` : `Anion: gained ${-q} electron${q < -1 ? "s" : ""}`;
+          kind.style.color = q === 0 ? "var(--green)" : q > 0 ? "var(--pink)" : "var(--cyan)";
+        }
+        const LIMITS = { p: [1, 20], n: [0, 24], e: [0, 26] };
+        slide.querySelectorAll(".pm").forEach((b) =>
+          b.addEventListener("click", () => {
+            const k = b.dataset.k;
+            const v = st[k] + +b.dataset.d;
+            if (v < LIMITS[k][0] || v > LIMITS[k][1]) return;
+            st[k] = v;
+            render(+b.dataset.d > 0 ? k : null);
+          })
+        );
+        slide.querySelectorAll(".chip").forEach((b) =>
+          b.addEventListener("click", () => {
+            Object.assign(st, { p: +b.dataset.p, n: +b.dataset.n, e: +b.dataset.e });
+            render("e");
+          })
+        );
+        render();
+        Deck.scene("#builder", {
+          enter() {
+            active = true;
+            render();
+          },
+          leave() {
+            active = false;
+            tws.forEach((t) => t.kill());
+            tws = [];
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

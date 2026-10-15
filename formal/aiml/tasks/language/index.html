@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Language tasks</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #index {
+        gap: 1.6rem;
+      }
+
+      #index .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      #index h1 {
+        text-align: center;
+      }
+
+      #index .intro {
+        max-width: 40rem;
+        text-align: center;
+      }
+
+      #index .group {
+        display: grid;
+        gap: 0.7rem;
+        width: 100%;
+      }
+
+      #index .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      #index .tiles {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 19rem);
+        justify-content: center;
+        gap: 1.4rem;
+        width: 100%;
+      }
+
+      #index .tile {
+        min-height: 11rem;
+        font-size: 1.45rem;
+      }
+
+      #index .tile small {
+        font-size: 0.85rem;
+      }
+
+      #index .intro {
+        font-size: 1.3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide" id="index">
+      <span class="kicker">AI/ML · Tasks</span>
+      <h1>Language tasks</h1>
+      <p class="intro">Language tasks for machine learning.</p>
+      <div class="group">
+        <div class="tiles">
+          <a class="tile" href="llm.html" style="--img: url('/assets/2025-10-09-22-22-22.png')"><span>Large Language Models</span></a>
+          <a class="tile" href="../../language/embeddings.html" style="--img: url('/assets/2025-10-16-19-03-03.png')"><span>Embeddings</span></a>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feature Extraction</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+      .chip {
+        padding: 0.4rem 1.1rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.95rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
+      figure figcaption { font-family: var(--font-mono); font-size: 0.85rem; }
+      /* code: big and wide, the slide is a stage */
+      .slide > pre { width: 100%; max-width: 100%; font-size: 1.3rem; }
+      .slide > pre.tall { font-size: 1.15rem; }
+      .codeside { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: 100%; }
+      .codeside pre { width: 100%; font-size: 1.05rem; }
+      .twocol { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.4rem; align-items: center; width: 100%; }
+      svg text { font-family: var(--font-mono); }
+
+      /* HOG cell */
+      #slide-hog .twocol { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+      .hogcell svg { width: 100%; overflow: visible; }
+      /* block sliding */
+      .blocks { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3rem; align-items: center; width: 100%; }
+      .blocks svg { height: 25rem; overflow: visible; }
+      .blocks .calc { font-family: var(--font-mono); font-size: 1.05rem; margin-top: 1.2rem; display: grid; gap: 0.35rem; }
+      .blocks .calc p { margin: 0; }
+      .blocks .calc .big { font-size: 2.6rem; }
+
+      /* LBP */
+      .lbp { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3.2rem; align-items: center; width: 100%; }
+      .lgrid { --lc: 6.4rem; display: grid; grid-template-columns: repeat(3, var(--lc)); gap: 8px; }
+      .lgrid span { position: relative; display: grid; place-items: center; height: var(--lc); border-radius: 12px; font: 500 calc(var(--lc) * 0.3) var(--font-mono); }
+      .lgrid span i { position: absolute; right: 8px; bottom: 4px; font-style: normal; font-size: calc(var(--lc) * 0.26); color: var(--pink); font-weight: 700; opacity: 0; }
+      .lgrid span.c { outline: 4px solid var(--cyan); outline-offset: -4px; }
+      .lgrid span.now { outline: 4px solid var(--pink); outline-offset: -4px; }
+      .lbits { font-family: var(--font-mono); font-size: 2rem; letter-spacing: 0.2em; min-height: 1.5em; margin: 0; }
+      .lbits b { color: var(--pink); }
+      .ldec { font-family: var(--font-mono); font-size: 1.2rem; color: var(--muted); min-height: 1.5em; margin: 0; }
+
+      /* histograms */
+      #slide-hist .twocol { grid-template-columns: minmax(0, 1fr) 26rem; }
+      canvas.plot { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(10, 12, 26, 0.75); border: 1px solid var(--border); }
+      #slide-hs .codeside { grid-template-columns: minmax(0, 1fr) 21rem; }
+      #slide-hs pre { font-size: 1rem; }
+
+      /* Haar */
+      .haar { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
+      .haar svg { width: 100%; overflow: visible; }
+      .haar text { font-size: 22px; fill: var(--muted); }
+
+      /* template */
+      .tm { display: grid; grid-template-columns: 30rem minmax(0, 1fr); gap: 2.2rem; align-items: center; width: 100%; }
+      .tm .stage { position: relative; cursor: crosshair; }
+      .tm .box { position: absolute; border: 3px solid #4ade80; border-radius: 3px; box-shadow: 0 0 12px rgba(74, 222, 128, 0.8); pointer-events: none; }
+      .tm .tpl { position: absolute; border: 3px dashed #fbbf24; border-radius: 3px; pointer-events: none; }
+      .tm .score { font-family: var(--font-mono); font-size: 0.85rem; text-align: center; margin: 0.5rem 0 0; }
+      .tm .resrow { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 1.2rem; align-items: center; margin-top: 1rem; }
+      .tm .resrow p { font-size: 0.85rem; margin: 0; color: var(--muted); }
+
+      /* quiz: question left, answer right */
+      .qa { display: grid; width: 100%; counter-reset: q; }
+      .qa .q { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 2rem; align-items: center; padding: 0.85rem 0; border-bottom: 1px solid var(--border); }
+      .qa .q:last-child { border-bottom: 0; }
+      .qa .q > p { margin: 0; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.3rem; }
+      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
+      .qa p.answer { font-size: 1.2rem; padding: 0.3rem 0.8rem; }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84cqw)" aria-label="A photo with its histogram-of-gradients glyphs fading in"></canvas>
+      <h1>Feature Extraction</h1>
+      <p>Turn raw pixels into a handful of meaningful measurements: gradients, textures, colours and patterns.</p>
+    </section>
+
+    <!-- ================================================================ overview -->
+    <section class="slide">
+      <h2>Feature extraction overview</h2>
+      <p class="lead"><strong>Feature extraction:</strong> converting a raw image into meaningful measurements.</p>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3>Low-level</h3><p>Edges, corners, colours, textures.</p></div>
+        <div class="card step"><h3>Mid-level</h3><p>SIFT, SURF, ORB descriptors.</p></div>
+        <div class="card step"><h3>High-level</h3><p>Object parts, semantic concepts (CNNs).</p></div>
+      </div>
+      <p class="step center lead"><strong>Purpose:</strong> reduce dimensionality while keeping the important information.</p>
+    </section>
+
+    <!-- ================================================================ HOG -->
+    <section class="slide" id="slide-hog">
+      <h2>Histogram of Oriented Gradients (HOG)</h2>
+      <div class="twocol">
+        <div>
+          <p><strong>HOG</strong> describes local object appearance with gradient orientations.</p>
+          <ol>
+            <li class="step">Compute gradients (magnitude + direction)</li>
+            <li class="step">Divide the image into cells (e.g. 8×8 pixels)</li>
+            <li class="step">Compute a histogram of gradients per cell (9 bins)</li>
+            <li class="step">Group cells into blocks (e.g. 2×2 cells)</li>
+            <li class="step">Normalise the histograms within each block</li>
+            <li class="step">Concatenate all histograms → the feature vector</li>
+          </ol>
+          <p class="step"><strong>Use case:</strong> pedestrian detection, object recognition.</p>
+        </div>
+        <div class="hogcell">
+          <svg viewBox="0 0 790 480" aria-label="The gradients of one 8 by 8 cell voting into a 9-bin orientation histogram"></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ HOG params -->
+    <section class="slide" id="slide-blocks">
+      <h2>HOG parameters</h2>
+      <div class="blocks">
+        <div>
+          <ul>
+            <li><strong>Cell size:</strong> 8×8 or 16×16 pixels</li>
+            <li><strong>Block size:</strong> 2×2 or 3×3 cells</li>
+            <li><strong>Orientations:</strong> 9 bins (0–180° for unsigned gradients)</li>
+            <li><strong>Block stride:</strong> the overlap between blocks</li>
+          </ul>
+          <div class="calc">
+            <p>Example: 64×128 window, 8×8 cells, 2×2 blocks, 9 bins</p>
+            <p class="pos muted">&nbsp;</p>
+            <p class="step">8×16 cells, stride 1 cell → (8−1) × (16−1) = 7 × 15 blocks</p>
+            <p class="step">7 × 15 blocks × 4 cells × 9 bins</p>
+            <p class="step"><span class="big grad">= 3780</span> dimensions</p>
+          </div>
+        </div>
+        <svg viewBox="-2 -2 68 132" aria-label="A 2 by 2 cell block sliding one cell at a time over a 64 by 128 window of 8 by 16 cells"></svg>
+      </div>
+    </section>
+
+    <!-- ================================================================ HOG code -->
+    <section class="slide">
+      <h2>HOG in Python</h2>
+      <pre class="steps tall"><code class="language-python">
+        from skimage.feature import hog
+        from skimage import exposure
+        import cv2
+        # load image
+        img = cv2.imread('person.jpg')
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # compute HOG features
+        features, hog_image = hog(gray, orientations=9, pixels_per_cell=(8, 8),  # ans:
+                                  cells_per_block=(2, 2), visualize=True)  # ans:
+        # features: the HOG descriptor vector
+        print(features.shape)  # (N,) 1-D array  # ans:
+        # hog_image: a visualisation of the gradients
+        hog_image = exposure.rescale_intensity(hog_image, out_range=(0, 255))  # ans:
+        hog_image = np.uint8(hog_image)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ HOG live -->
+    <section class="slide" id="slide-hoglive">
+      <h2>What <code>hog_image</code> looks like</h2>
+      <div class="twocol">
+        <figure><canvas class="photo a" width="400" height="225"></canvas><figcaption>gray</figcaption></figure>
+        <figure><canvas class="photo b" width="400" height="225"></canvas><figcaption class="nb">hog_image</figcaption></figure>
+      </div>
+      <div class="chips" data-interactive>
+        <button class="chip" data-c="4">pixels_per_cell=(4, 4)</button>
+        <button class="chip on" data-c="8">(8, 8)</button>
+        <button class="chip" data-c="16">(16, 16)</button>
+      </div>
+      <p class="muted center" style="font-size: 0.9rem">Each cell draws its 9 bins as lines along the edge direction, brighter for stronger bins.</p>
+    </section>
+
+    <!-- ================================================================ LBP -->
+    <section class="slide" id="slide-lbp">
+      <h2>Local Binary Patterns (LBP)</h2>
+      <div class="lbp">
+        <div style="display: grid; justify-items: center; gap: 0.7rem">
+          <div class="lgrid"></div>
+          <p class="lbits"></p>
+          <p class="ldec"></p>
+        </div>
+        <div>
+          <p><strong>LBP</strong> is a texture descriptor.</p>
+          <ol>
+            <li>For each pixel, compare it with its 8 neighbours</li>
+            <li>If neighbour ≥ centre: 1, else: 0</li>
+            <li>Read the bits clockwise → an 8-bit binary number</li>
+            <li>Convert to decimal (0–255)</li>
+          </ol>
+          <p class="step"><strong>Properties:</strong> rotation invariant (optionally) · grayscale invariant · fast to compute</p>
+          <p class="step"><strong>Use case:</strong> texture classification, face recognition.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ LBP code -->
+    <section class="slide" id="slide-lbpcode">
+      <h2>LBP implementation</h2>
+      <pre class="steps tall"><code class="language-python">
+        from skimage.feature import local_binary_pattern
+        # compute LBP
+        radius = 3
+        n_points = 8 * radius
+        lbp = local_binary_pattern(gray, n_points, radius, method='uniform')  # ans:
+        # method options:
+        # ans: 'default': the original LBP
+        # ans: 'uniform': rotation invariant (most common)
+        # ans: 'var': variance-based
+        # create a histogram
+        hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, n_points + 3),  # ans:
+                               range=(0, n_points + 2))  # ans:
+        hist = hist.astype('float')  # ans:
+        hist /= (hist.sum() + 1e-7)  # normalise  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ LBP live -->
+    <section class="slide" id="slide-lbplive">
+      <h2>What an LBP image looks like</h2>
+      <div class="twocol">
+        <figure><canvas class="photo a" width="400" height="225"></canvas><figcaption>gray</figcaption></figure>
+        <figure><canvas class="photo b" width="400" height="225"></canvas><figcaption>LBP code (0–255) of every pixel</figcaption></figure>
+      </div>
+      <div class="chips" data-interactive>
+        <button class="chip on" data-img="lens">Lens</button>
+        <button class="chip" data-img="dolls">Dolls</button>
+        <button class="chip" data-img="dice">Dice</button>
+      </div>
+      <p class="muted center" style="font-size: 0.95rem">Flat regions give noisy codes; edges and textures give stable patterns. The histogram of these codes is the texture descriptor.</p>
+    </section>
+
+    <!-- ================================================================ colour histograms -->
+    <section class="slide" id="slide-hist">
+      <h2>Colour histograms</h2>
+      <div class="twocol">
+        <div>
+          <p><strong>Colour histogram:</strong> the distribution of colours in an image.</p>
+          <ol>
+            <li class="step">Choose a colour space (RGB, HSV, LAB)</li>
+            <li class="step">Divide each channel into bins</li>
+            <li class="step">Count the pixels in each bin</li>
+            <li class="step">Normalise (make the sum = 1)</li>
+          </ol>
+          <p class="step"><strong>Use case:</strong> image retrieval, colour-based matching.</p>
+        </div>
+        <div style="display: grid; gap: 0.8rem">
+          <canvas class="photo src" width="400" height="225"></canvas>
+          <canvas class="plot" width="624" height="190"></canvas>
+          <div class="chips" data-interactive>
+            <button class="chip on" data-img="lens">Lens</button>
+            <button class="chip" data-img="dolls">Dolls</button>
+            <button class="chip" data-img="dice">Dice</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ hist code -->
+    <section class="slide">
+      <h2>Colour histogram in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # compute a histogram for each channel
+        hist_b = cv2.calcHist([img], [0], None, [256], [0, 256])  # ans:
+        hist_g = cv2.calcHist([img], [1], None, [256], [0, 256])  # ans:
+        hist_r = cv2.calcHist([img], [2], None, [256], [0, 256])  # ans:
+        # parameters:
+        # ans: [img]: the source image
+        # ans: [0]: the channel index (0=B, 1=G, 2=R)
+        # ans: None: no mask
+        # ans: [256]: the number of bins
+        # ans: [0, 256]: the range
+        # normalise
+        hist_b = cv2.normalize(hist_b, hist_b).flatten()  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ HSV histogram -->
+    <section class="slide" id="slide-hs">
+      <h2>HSV histogram</h2>
+      <div class="codeside">
+        <pre class="steps"><code class="language-python">
+          # convert to HSV
+          hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+          # compute a 2-D histogram (Hue vs Saturation)
+          hist = cv2.calcHist([hsv], [0, 1], None, [180, 256],  # ans:
+                              [0, 180, 0, 256])  # ans:
+          # ans: channels [0, 1] = Hue and Saturation
+          # ans: bins [180, 256] = 180 for H, 256 for S
+          # normalise
+          cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)  # ans:
+        </code></pre>
+        <figure>
+          <canvas class="photo hs" width="180" height="138" style="image-rendering: pixelated"></canvas>
+          <figcaption>The dolls photo: hue (0–179) across, saturation (0–255) down; brighter = more pixels</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ================================================================ Haar -->
+    <section class="slide" id="slide-haar">
+      <h2>Haar cascades</h2>
+      <div class="twocol haar">
+        <div>
+          <p><strong>Haar cascades:</strong> pre-trained classifiers for object detection.</p>
+          <ul>
+            <li class="step"><strong>Haar-like features:</strong> rectangular patterns: sum of the white area minus sum of the black area</li>
+            <li class="step"><strong>Cascade</strong> of weak classifiers: most windows are rejected by the first cheap stages</li>
+            <li class="step"><strong>AdaBoost</strong> training picks the useful features</li>
+          </ul>
+          <p class="step"><strong>Pre-trained models:</strong> face, eyes, smile, full body… <strong>Advantage:</strong> fast, real-time detection.</p>
+        </div>
+        <svg viewBox="0 0 770 520" aria-label="Haar-like feature types, and windows flowing through a cascade of stages, most rejected early"></svg>
+      </div>
+    </section>
+
+    <!-- ================================================================ Haar code -->
+    <section class="slide">
+      <h2>Haar cascade in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # load the pre-trained face detector
+        face_cascade = cv2.CascadeClassifier(  # ans:
+            cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')  # ans:
+        # detect faces
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1,  # ans:
+                                              minNeighbors=5, minSize=(30, 30))  # ans:
+        # faces: an array of [x, y, w, h]
+        for (x, y, w, h) in faces:  # ans:
+            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ template matching -->
+    <section class="slide" id="slide-tm">
+      <h2>Template matching</h2>
+      <div class="tm">
+        <div>
+          <div class="stage" data-interactive>
+            <canvas class="photo img" width="400" height="225"></canvas>
+            <div class="tpl"></div>
+            <div class="box"></div>
+          </div>
+          <p class="score"></p>
+          <div class="resrow">
+            <canvas class="photo res" width="183" height="96"></canvas>
+            <p><code>result</code>: bright = good match. Click the photo to pick a new template (dashed).</p>
+          </div>
+        </div>
+        <div>
+          <p><strong>Template matching:</strong> find a template image inside a larger image.</p>
+          <ul>
+            <li class="step"><code>TM_CCOEFF_NORMED</code>: correlation coefficient (best)</li>
+            <li class="step"><code>TM_SQDIFF_NORMED</code>: squared difference</li>
+            <li class="step"><code>TM_CCORR_NORMED</code>: cross-correlation</li>
+          </ul>
+          <p class="step"><strong>Limitation:</strong> not scale- or rotation-invariant.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ template code -->
+    <section class="slide">
+      <h2>Template matching in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # load the template
+        template = cv2.imread('template.jpg', 0)
+        w, h = template.shape[::-1]
+        # template matching
+        result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)  # ans:
+        # find the location of the best match
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)  # ans:
+        # for CCOEFF_NORMED, higher is better
+        top_left = max_loc  # ans:
+        bottom_right = (top_left[0] + w, top_left[1] + h)  # ans:
+        cv2.rectangle(img, top_left, bottom_right, (0, 255, 0), 2)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is HOG?</p><p class="answer">Histogram of Oriented Gradients: it describes object appearance.</p></div>
+        <div class="q"><p>What does LBP encode?</p><p class="answer">A texture pattern, by comparing a pixel with its neighbours.</p></div>
+        <div class="q"><p>What is a colour histogram?</p><p class="answer">The distribution of colours in an image.</p></div>
+        <div class="q"><p>What are Haar cascades?</p><p class="answer">Pre-trained classifiers built on Haar-like features.</p></div>
+        <div class="q"><p>What is the limitation of template matching?</p><p class="answer">It is not scale- or rotation-invariant.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is a typical HOG cell size?</p><p class="answer">8×8 or 16×16 pixels.</p></div>
+        <div class="q"><p>What is the LBP output range?</p><p class="answer">0–255 (8-bit patterns from 8 neighbours).</p></div>
+        <div class="q"><p>Why normalise histograms?</p><p class="answer">To make them independent of image size: they sum to 1.</p></div>
+        <div class="q"><p>What is the "cascade" in Haar cascades?</p><p class="answer">A series of weak classifiers that reject non-objects quickly.</p></div>
+        <div class="q"><p>What is the best template matching method?</p><p class="answer"><code>TM_CCOEFF_NORMED</code> (normalised correlation coefficient).</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # compute HOG features
+        from skimage.feature import hog
+        features, hog_img = hog(gray, orientations=9, pixels_per_cell=(8, 8),  # ans:
+                                cells_per_block=(2, 2), visualize=True)  # ans:
+        # compute LBP
+        from skimage.feature import local_binary_pattern
+        lbp = local_binary_pattern(gray, 24, 3, method='uniform')  # ans:
+        # colour histogram
+        hist_b = cv2.calcHist([img], [0], None, [256], [0, 256])  # ans:
+        hist_b = cv2.normalize(hist_b, hist_b).flatten()  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # face detection with a Haar cascade
+        face_cascade = cv2.CascadeClassifier(  # ans:
+            cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')  # ans:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.1, 5, minSize=(30, 30))  # ans:
+        for (x, y, w, h) in faces:  # ans:
+            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="steps"><code class="language-python">
+        # template matching
+        template = cv2.imread('template.jpg', 0)
+        w, h = template.shape[::-1]
+        result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)  # ans:
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)  # ans:
+        top_left = max_loc  # ans:
+        cv2.rectangle(img, top_left, (top_left[0]+w, top_left[1]+h),  # ans:
+                      (0, 255, 0), 2)  # ans:
+        # HSV histogram
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hist = cv2.calcHist([hsv], [0, 1], None, [180, 256],  # ans:
+                            [0, 180, 0, 256])  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      function rng(seed) { return () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+      async function loadPixels(src, w) {
+        const im = new Image();
+        im.src = src;
+        await im.decode();
+        // centre-crop to 16:9 so every photo fits the same layout
+        const h = Math.round((w * 9) / 16), iw = im.naturalWidth, ih = im.naturalHeight;
+        const sw = Math.min(iw, (ih * 16) / 9), sh = (sw * 9) / 16;
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const x = c.getContext("2d", { willReadFrequently: true });
+        x.drawImage(im, (iw - sw) / 2, (ih - sh) / 2, sw, sh, 0, 0, w, h);
+        return x.getImageData(0, 0, w, h);
+      }
+      const gray = (d) => { const g = new Float32Array(d.width * d.height); for (let i = 0; i < g.length; i++) g[i] = 0.299 * d.data[i * 4] + 0.587 * d.data[i * 4 + 1] + 0.114 * d.data[i * 4 + 2]; return g; };
+      const IMGS = {
+        lens: loadPixels("/assets/2025-10-09-22-21-33.png", 400),
+        dolls: loadPixels("/assets/2025-10-16-19-17-39.png", 400),
+        dice: loadPixels("/assets/2025-09-30-23-10-12.png", 400),
+      };
+
+      // ------------------------------------------------------------ HOG
+      function hogCells(g, W, H, cell) {
+        const cw = Math.floor(W / cell), ch = Math.floor(H / cell), hist = new Float32Array(cw * ch * 9);
+        for (let y = 1; y < ch * cell - 1; y++) for (let x = 1; x < cw * cell - 1; x++) {
+          const gx = g[y * W + x + 1] - g[y * W + x - 1], gy = g[(y + 1) * W + x] - g[(y - 1) * W + x];
+          const m = Math.hypot(gx, gy);
+          let a = (Math.atan2(gy, gx) * 180) / Math.PI;
+          if (a < 0) a += 180;
+          const b = Math.min(8, Math.floor(a / 20));
+          hist[(Math.floor(y / cell) * cw + Math.floor(x / cell)) * 9 + b] += m;
+        }
+        return { cw, ch, hist };
+      }
+      function drawHog(ctx, W, H, cell, { cw, ch, hist }, alpha = 1) {
+        let max = 0; for (const v of hist) max = Math.max(max, v);
+        ctx.lineWidth = Math.max(1, cell / 8);
+        for (let cy = 0; cy < ch; cy++) for (let cx = 0; cx < cw; cx++) for (let b = 0; b < 9; b++) {
+          const v = hist[(cy * cw + cx) * 9 + b] / max;
+          if (v < 0.02) continue;
+          // draw along the edge: perpendicular to the gradient angle
+          const a = ((b * 20 + 10 + 90) * Math.PI) / 180, r = cell / 2 - 0.5;
+          const mx = cx * cell + cell / 2, my = cy * cell + cell / 2;
+          ctx.strokeStyle = `rgba(255,255,255,${Math.min(1, v * 2.2) * alpha})`;
+          ctx.beginPath(); ctx.moveTo(mx - r * Math.cos(a), my - r * Math.sin(a)); ctx.lineTo(mx + r * Math.cos(a), my + r * Math.sin(a)); ctx.stroke();
+        }
+      }
+
+      // cover: photo, then HOG glyphs fade over it
+      (async function () {
+        const cv = document.querySelector("#title canvas"), ctx = cv.getContext("2d");
+        const img = await IMGS.lens, g = gray(img), H = hogCells(g, 400, 225, 8);
+        const st = { f: 0 };
+        function paint() {
+          ctx.putImageData(img, 0, 0);
+          ctx.fillStyle = `rgba(5,6,15,${0.8 * st.f})`; ctx.fillRect(0, 0, 400, 225);
+          drawHog(ctx, 400, 225, 8, H, st.f);
+        }
+        paint();
+        let tl = null;
+        Deck.scene("#title", { enter() { tl?.kill(); st.f = 0; tl = gsap.to(st, { f: 1, duration: 2, delay: 0.6, yoyo: true, repeat: -1, repeatDelay: 1.5, ease: "sine.inOut", onUpdate: paint }); }, leave() { tl?.kill(); } });
+      })();
+
+      // one cell voting into 9 bins
+      (function () {
+        const hs = document.querySelector("#slide-hog");
+        const svg = hs.querySelector("svg");
+        const r = rng(8);
+        const arrows = [];
+        for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) {
+          // mostly ~50° (an edge), some noise
+          const a = r() < 0.75 ? 40 + r() * 30 : r() * 180, m = 0.4 + r() * 0.6;
+          arrows.push({ i, j, a, m, b: Math.min(8, Math.floor(a / 20)) });
+        }
+        const S = 46, T = 50, B = 418, HX = 400, BW = 43, HMAX = 340;
+        svg.innerHTML =
+          `<rect x="0" y="${T}" width="${8 * S}" height="${8 * S}" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.2)"/>` +
+          arrows.map((A, k) => { const cx = A.i * S + S / 2, cy = T + A.j * S + S / 2, L = 19 * A.m, t = (-A.a * Math.PI) / 180; return `<line class="ar" data-k="${k}" x1="${cx - L * Math.cos(t)}" y1="${cy - L * Math.sin(t)}" x2="${cx + L * Math.cos(t)}" y2="${cy + L * Math.sin(t)}" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/>`; }).join("") +
+          `<text x="${4 * S}" y="28" text-anchor="middle" font-size="26" fill="#a8b3c7">8×8 cell: gradients</text>` +
+          Array.from({ length: 9 }, (_, b) => `<rect class="hb" data-b="${b}" x="${HX + b * BW + 4}" y="${B}" width="${BW - 8}" height="0" rx="4" fill="#8b5cf6"/><text x="${HX + b * BW + BW / 2}" y="${B + 30}" text-anchor="middle" font-size="22" fill="#a8b3c7">${b % 2 ? "" : b * 20}</text>`).join("") +
+          `<line x1="${HX}" y1="${B}" x2="${HX + 9 * BW}" y2="${B}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/><text x="${HX + 4.5 * BW}" y="28" text-anchor="middle" font-size="26" fill="#a8b3c7">9-bin histogram (0–180°)</text>` +
+          `<text x="${HX + 4.5 * BW}" y="${B + 60}" text-anchor="middle" font-size="22" fill="#a8b3c7">angle (degrees)</text>`;
+        const totals = Array(9).fill(0);
+        arrows.forEach((A) => (totals[A.b] += A.m));
+        const max = Math.max(...totals);
+        let tl = null;
+        function run() {
+          tl?.kill();
+          const acc = Array(9).fill(0);
+          svg.querySelectorAll(".hb").forEach((b) => { b.setAttribute("height", 0); b.setAttribute("y", B); });
+          gsap.set(svg.querySelectorAll(".ar"), { opacity: 1 });
+          tl = gsap.timeline({ delay: 0.5, repeat: -1, repeatDelay: 2.5, onRepeat: () => { acc.fill(0); svg.querySelectorAll(".hb").forEach((b) => { b.setAttribute("height", 0); b.setAttribute("y", B); }); gsap.set(svg.querySelectorAll(".ar"), { opacity: 1 }); } });
+          arrows.forEach((A, k) => {
+            tl.call(() => {
+              acc[A.b] += A.m;
+              const h = (acc[A.b] / max) * HMAX, bar = svg.querySelector(`.hb[data-b="${A.b}"]`);
+              bar.setAttribute("height", h); bar.setAttribute("y", B - h);
+              svg.querySelector(`.ar[data-k="${k}"]`).style.opacity = 0.25;
+            }, null, k * 0.05);
+          });
+        }
+        Deck.scene("#slide-hog", { enter: run, leave() { tl?.kill(); } });
+      })();
+
+      // block sliding over a 64x128 window
+      (function () {
+        const bs = document.querySelector("#slide-blocks");
+        const svg = bs.querySelector("svg");
+        svg.innerHTML = Array.from({ length: 128 }, (_, i) => `<rect x="${(i % 8) * 8}" y="${Math.floor(i / 8) * 8}" width="8" height="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.18)" stroke-width="0.4"/>`).join("") +
+          `<rect class="blk" width="16" height="16" fill="rgba(139,92,246,0.35)" stroke="#a78bfa" stroke-width="1.2" rx="1"/>`;
+        const blk = svg.querySelector(".blk"), pos = bs.querySelector(".pos");
+        let tl = null;
+        Deck.scene("#slide-blocks", {
+          enter() {
+            tl?.kill();
+            tl = gsap.timeline({ repeat: -1, repeatDelay: 1 });
+            let n = 0;
+            for (let y = 0; y < 15; y++) for (let x = 0; x < 7; x++) {
+              const k = ++n;
+              tl.call(() => { blk.setAttribute("x", x * 8); blk.setAttribute("y", y * 8); pos.textContent = `block ${k} of 105 (${x + 1} across, ${y + 1} down)`; }, null, k * 0.07);
+            }
+          },
+          leave() { tl?.kill(); },
+        });
+      })();
+
+      // HOG live
+      (async function () {
+        const ls = document.querySelector("#slide-hoglive");
+        const img = await IMGS.lens, g = gray(img);
+        const a = ls.querySelector(".a"), b = ls.querySelector(".b");
+        const ga = a.getContext("2d"), gb = b.getContext("2d");
+        const gi = new ImageData(400, 225);
+        for (let i = 0; i < g.length; i++) { gi.data[i * 4] = gi.data[i * 4 + 1] = gi.data[i * 4 + 2] = g[i]; gi.data[i * 4 + 3] = 255; }
+        ga.putImageData(gi, 0, 0);
+        function paint(cell) {
+          gb.fillStyle = "#000"; gb.fillRect(0, 0, 400, 225);
+          drawHog(gb, 400, 225, cell, hogCells(g, 400, 225, cell));
+          ls.querySelector(".nb").textContent = `hog_image, pixels_per_cell=(${cell}, ${cell})`;
+        }
+        paint(8);
+        ls.querySelector(".chips").addEventListener("click", (e) => { const btn = e.target.closest("button"); if (!btn) return; ls.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === btn)); paint(+btn.dataset.c); });
+      })();
+
+      // ------------------------------------------------------------ LBP
+      (function () {
+        const ls = document.querySelector("#slide-lbp");
+        const grid = ls.querySelector(".lgrid"), bitsEl = ls.querySelector(".lbits"), dec = ls.querySelector(".ldec");
+        const V = [90, 110, 60, 140, 100, 45, 120, 80, 160];
+        const cells = V.map((v, i) => { const s = document.createElement("span"); s.innerHTML = `${v}<i></i>`; s.style.background = `rgb(${v},${v},${v + 15})`; s.style.color = v > 120 ? "#05060f" : "#f1f5f9"; if (i === 4) s.classList.add("c"); grid.appendChild(s); return s; });
+        const ORDER = [0, 1, 2, 5, 8, 7, 6, 3]; // clockwise from the top-left
+        let tl = null;
+        function run() {
+          tl?.kill();
+          const bits = [];
+          cells.forEach((c) => { c.classList.remove("now"); c.querySelector("i").style.opacity = 0; });
+          bitsEl.textContent = ""; dec.textContent = "centre = 100";
+          tl = gsap.timeline({ delay: 0.6, repeat: -1, repeatDelay: 2.5, onRepeat: () => { bits.length = 0; cells.forEach((c) => (c.querySelector("i").style.opacity = 0)); bitsEl.textContent = ""; dec.textContent = "centre = 100"; } });
+          ORDER.forEach((idx, k) => {
+            tl.call(() => {
+              cells.forEach((c) => c.classList.remove("now"));
+              cells[idx].classList.add("now");
+              const bit = V[idx] >= V[4] ? 1 : 0;
+              bits.push(bit);
+              const i = cells[idx].querySelector("i"); i.textContent = bit; i.style.opacity = 1;
+              bitsEl.innerHTML = bits.map((b) => (b ? `<b>1</b>` : "0")).join("");
+              dec.textContent = `${V[idx]} ≥ 100 ? → ${bit}`;
+            }, null, k * 0.7);
+          });
+          tl.call(() => {
+            cells.forEach((c) => c.classList.remove("now"));
+            const val = parseInt(bits.join(""), 2);
+            dec.innerHTML = `${bits.join("")}<sub>2</sub> = <b style="color:var(--cyan)">${val}</b>`;
+          }, null, 8 * 0.7);
+        }
+        Deck.scene("#slide-lbp", { enter: run, leave() { tl?.kill(); } });
+      })();
+
+      // LBP image of a real photo
+      (function () {
+        const ls = document.querySelector("#slide-lbplive");
+        const ca = ls.querySelector(".a").getContext("2d"), cb = ls.querySelector(".b").getContext("2d");
+        const N = [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]];
+        async function show(name) {
+          const img = await IMGS[name], g = gray(img), W = img.width, H = img.height;
+          for (const c of [ca.canvas, cb.canvas]) { c.width = W; c.height = H; }
+          const gi = new ImageData(W, H), out = new ImageData(W, H);
+          for (let i = 0; i < g.length; i++) { gi.data[i * 4] = gi.data[i * 4 + 1] = gi.data[i * 4 + 2] = g[i]; gi.data[i * 4 + 3] = 255; out.data[i * 4 + 3] = 255; }
+          for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+            const c = g[y * W + x];
+            let v = 0;
+            N.forEach(([dx, dy], k) => { if (g[(y + dy) * W + x + dx] >= c) v |= 1 << (7 - k); });
+            const o = (y * W + x) * 4;
+            out.data[o] = out.data[o + 1] = out.data[o + 2] = v;
+          }
+          ca.putImageData(gi, 0, 0); cb.putImageData(out, 0, 0);
+        }
+        show("lens");
+        ls.querySelector(".chips").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; ls.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === b)); show(b.dataset.img); });
+      })();
+
+      // ------------------------------------------------------------ colour histograms
+      (function () {
+        const hs = document.querySelector("#slide-hist");
+        const src = hs.querySelector(".src"), plot = hs.querySelector(".plot"), pc = plot.getContext("2d");
+        let tl = null;
+        async function show(name) {
+          const img = await IMGS[name];
+          src.width = img.width; src.height = img.height;
+          src.getContext("2d").putImageData(img, 0, 0);
+          const h = [new Float32Array(256), new Float32Array(256), new Float32Array(256)];
+          for (let p = 0; p < img.data.length; p += 4) { h[2][img.data[p]]++; h[1][img.data[p + 1]]++; h[0][img.data[p + 2]]++; }
+          const max = Math.max(...h.map((a) => Math.max(...a)));
+          const cols = ["#3b82f6", "#22c55e", "#ef4444"];
+          const st = { f: 0 };
+          tl?.kill();
+          const draw = () => {
+            const W = plot.width, H = plot.height;
+            pc.clearRect(0, 0, W, H);
+            pc.globalCompositeOperation = "lighter";
+            h.forEach((a, c) => {
+              pc.beginPath(); pc.moveTo(0, H);
+              for (let i = 0; i < 256; i++) pc.lineTo((i / 255) * W, H - (a[i] / max) * (H - 40) * st.f);
+              pc.lineTo(W, H); pc.closePath();
+              pc.fillStyle = cols[c] + "55"; pc.fill();
+              pc.strokeStyle = cols[c]; pc.lineWidth = 2; pc.stroke();
+            });
+            pc.globalCompositeOperation = "source-over";
+            pc.fillStyle = "#a8b3c7"; pc.font = "20px JetBrains Mono, monospace";
+            pc.textAlign = "left"; pc.fillText("0", 8, 24);
+            pc.textAlign = "right"; pc.fillText("255", W - 8, 24);
+            pc.textAlign = "center"; pc.fillText("B, G, R counts (256 bins)", W / 2, 24); pc.textAlign = "left";
+          };
+          tl = gsap.to(st, { f: 1, duration: 0.8, ease: "power2.out", onUpdate: draw });
+        }
+        hs.querySelector(".chips").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; hs.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === b)); show(b.dataset.img); });
+        Deck.scene("#slide-hist", { enter() { show(hs.querySelector(".chip.on").dataset.img); } });
+      })();
+
+      // ------------------------------------------------------------ H-S histogram of the dolls
+      (async function () {
+        const cv = document.querySelector("#slide-hs canvas.hs"), ctx = cv.getContext("2d");
+        const img = await IMGS.dolls;
+        const H = new Float32Array(180 * 128);
+        for (let p = 0; p < img.data.length; p += 4) {
+          const r = img.data[p], g = img.data[p + 1], b = img.data[p + 2], v = Math.max(r, g, b), d = v - Math.min(r, g, b);
+          const s = v ? (d * 255) / v : 0;
+          let h = 0;
+          if (d) h = v === r ? (60 * (g - b)) / d : v === g ? 120 + (60 * (b - r)) / d : 240 + (60 * (r - g)) / d;
+          if (h < 0) h += 360;
+          H[Math.floor(s / 2) * 180 + (Math.round(h / 2) % 180)]++;
+        }
+        // colour each bin by its own hue and saturation, brightness = log(count)
+        const hsv2rgb = (h, s, v) => { const f = (n) => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); }; return [f(5) * 255, f(3) * 255, f(1) * 255]; };
+        const max = Math.max(...H), out = ctx.createImageData(180, 138);
+        for (let x = 0; x < 180; x++) for (let y = 0; y < 138; y++) {
+          const o = (y * 180 + x) * 4;
+          let c = [8, 10, 22];
+          if (y < 7) c = hsv2rgb(x * 2, 1, 1); // hue strip
+          else if (y >= 10) { const t = Math.log1p(H[(y - 10) * 180 + x]) / Math.log1p(max); c = hsv2rgb(x * 2, 0.15 + (0.85 * (y - 10)) / 127, 0.06 + 0.94 * t); }
+          out.data[o] = c[0]; out.data[o + 1] = c[1]; out.data[o + 2] = c[2]; out.data[o + 3] = 255;
+        }
+        ctx.putImageData(out, 0, 0);
+      })();
+
+      // ------------------------------------------------------------ Haar features + cascade
+      (function () {
+        const svg = document.querySelector("#slide-haar svg");
+        const f = (x, y, parts) => parts.map(([dx, dy, w, h, c]) => `<rect x="${x + dx}" y="${y + dy}" width="${w}" height="${h}" fill="${c ? "#0f172a" : "#e2e8f0"}" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>`).join("");
+        const types = [
+          ["edge", [[0, 0, 60, 84, 0], [60, 0, 60, 84, 1]]],
+          ["line", [[0, 0, 40, 84, 0], [40, 0, 40, 84, 1], [80, 0, 40, 84, 0]]],
+          ["four-rect", [[0, 0, 60, 42, 0], [60, 0, 60, 42, 1], [0, 42, 60, 42, 1], [60, 42, 60, 42, 0]]],
+          ["edge (h)", [[0, 0, 120, 42, 1], [0, 42, 120, 42, 0]]],
+        ];
+        svg.innerHTML =
+          types.map(([name, parts], k) => f(25 + k * 190, 0, parts) + `<text x="${85 + k * 190}" y="118" text-anchor="middle">${name}</text>`).join("") +
+          [0, 1, 2].map((k) => `<rect x="${120 + k * 210}" y="230" width="130" height="90" rx="14" fill="rgba(139,92,246,0.25)" stroke="#a78bfa" stroke-width="2"/><text x="${185 + k * 210}" y="261" text-anchor="middle" fill="#e2e8f0">stage ${k + 1}</text>`).join("") +
+          `<text x="10" y="215" fill="#22d3ee">windows →</text><text x="700" y="282" fill="#4ade80" font-size="22">face</text><text x="395" y="430" text-anchor="middle" fill="#f87171">rejected</text><text x="385" y="500" text-anchor="middle" fill="#a8b3c7">most windows never reach the later stages</text>` +
+          `<g class="wins"></g>`;
+        const g = svg.querySelector(".wins");
+        let tl = null;
+        function spawn(t) {
+          // each window passes stage k with probability ~ 0.35, 0.5, 0.6
+          const r = Math.random();
+          const stop = r < 0.65 ? 0 : r < 0.85 ? 1 : r < 0.95 ? 2 : 3;
+          const el = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          el.setAttribute("width", 20); el.setAttribute("height", 20); el.setAttribute("rx", 4); el.setAttribute("opacity", 0);
+          el.setAttribute("fill", stop === 3 ? "#4ade80" : "#22d3ee");
+          g.appendChild(el);
+          const s = gsap.timeline({ onComplete: () => el.remove() });
+          s.set(el, { x: 10, y: 290, opacity: 1 });
+          const stopX = [150, 360, 570][stop] ?? 680;
+          s.to(el, { x: stopX, duration: 0.5 + 0.35 * stop, ease: "none" });
+          if (stop < 3) s.to(el, { y: 390, fill: "#f87171", duration: 0.35, ease: "power1.in" }).to(el, { opacity: 0, duration: 0.3 });
+          else s.to(el, { opacity: 0, duration: 0.4, delay: 0.4 });
+          tl.add(s, t);
+        }
+        Deck.scene("#slide-haar", {
+          enter() { tl?.kill(); g.innerHTML = ""; tl = gsap.timeline({ repeat: -1 }); for (let i = 0; i < 24; i++) spawn(i * 0.25); },
+          leave() { tl?.kill(); g.innerHTML = ""; },
+        });
+      })();
+
+      // ------------------------------------------------------------ template matching
+      (async function () {
+        const ts = document.querySelector("#slide-tm");
+        const cv = ts.querySelector(".img"), res = ts.querySelector(".res");
+        const img = await IMGS.lens;
+        cv.getContext("2d").putImageData(img, 0, 0);
+        // work at half size for speed
+        const W = 200, H = 113, small = document.createElement("canvas");
+        small.width = W; small.height = H;
+        const sx = small.getContext("2d", { willReadFrequently: true });
+        sx.drawImage(cv, 0, 0, W, H);
+        const g = gray(sx.getImageData(0, 0, W, H));
+        const T = 18;
+        let R = null, best = null, tx = 92, ty = 48, tl = null;
+        function match() {
+          let tm = 0;
+          for (let j = 0; j < T; j++) for (let i = 0; i < T; i++) tm += g[(ty + j) * W + tx + i];
+          tm /= T * T;
+          let tv = 0;
+          const t = new Float32Array(T * T);
+          for (let j = 0; j < T; j++) for (let i = 0; i < T; i++) { const v = g[(ty + j) * W + tx + i] - tm; t[j * T + i] = v; tv += v * v; }
+          const RW = W - T + 1, RH = H - T + 1;
+          R = new Float32Array(RW * RH);
+          best = { v: -2, x: 0, y: 0 };
+          for (let y = 0; y < RH; y++) for (let x = 0; x < RW; x++) {
+            let m = 0;
+            for (let j = 0; j < T; j++) for (let i = 0; i < T; i++) m += g[(y + j) * W + x + i];
+            m /= T * T;
+            let num = 0, iv = 0;
+            for (let j = 0; j < T; j++) for (let i = 0; i < T; i++) { const v = g[(y + j) * W + x + i] - m; num += v * t[j * T + i]; iv += v * v; }
+            const c = num / Math.sqrt(iv * tv + 1e-9);
+            R[y * RW + x] = c;
+            if (c > best.v) best = { v: c, x, y };
+          }
+          return { RW, RH };
+        }
+        const place = (el, x, y) => { const k = cv.clientWidth / W; Object.assign(el.style, { left: x * k + "px", top: y * k + "px", width: T * k + "px", height: T * k + "px" }); };
+        function render(progress = 1) {
+          const { RW, RH } = { RW: W - T + 1, RH: H - T + 1 };
+          res.width = RW; res.height = RH;
+          const rc = res.getContext("2d"), im = rc.createImageData(RW, RH), upto = Math.floor(RH * progress);
+          for (let y = 0; y < RH; y++) for (let x = 0; x < RW; x++) {
+            const o = (y * RW + x) * 4, v = y < upto ? Math.max(0, R[y * RW + x]) : 0;
+            im.data[o] = 30 + 200 * v; im.data[o + 1] = 20 + 230 * v * v; im.data[o + 2] = 60 + 190 * v; im.data[o + 3] = 255;
+          }
+          rc.putImageData(im, 0, 0);
+          const box = ts.querySelector(".box");
+          if (progress >= 1) { place(box, best.x, best.y); box.style.opacity = 1; ts.querySelector(".score").textContent = `cv2.minMaxLoc → max_val = ${best.v.toFixed(3)} at (${best.x * 2}, ${best.y * 2})`; }
+          else { place(box, Math.min(W - T, Math.round(progress * 7 * W) % (W - T)), Math.min(H - T, upto)); box.style.opacity = 0.6; ts.querySelector(".score").textContent = "sliding the template over every position…"; }
+        }
+        function run() {
+          match();
+          place(ts.querySelector(".tpl"), tx, ty);
+          tl?.kill();
+          const st = { p: 0 };
+          tl = gsap.to(st, { p: 1, duration: 1.6, ease: "none", onUpdate: () => render(st.p), onComplete: () => render(1) });
+        }
+        ts.querySelector(".stage").addEventListener("click", (e) => {
+          const r = cv.getBoundingClientRect();
+          tx = Math.max(0, Math.min(W - T, Math.round(((e.clientX - r.left) / r.width) * W - T / 2)));
+          ty = Math.max(0, Math.min(H - T, Math.round(((e.clientY - r.top) / r.height) * H - T / 2)));
+          run();
+        });
+        window.addEventListener("resize", () => { if (best) { place(ts.querySelector(".tpl"), tx, ty); place(ts.querySelector(".box"), best.x, best.y); } });
+        Deck.scene("#slide-tm", { enter: run, leave() { tl?.kill(); } });
+      })();
+    </script>
+  </body>
+</html>

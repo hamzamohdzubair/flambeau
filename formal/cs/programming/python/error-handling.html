@@ -1,0 +1,1234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Error Handling</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tracer: code lines light up in the order Python runs them ---------- */
+      pre code,
+      .mem,
+      .viz text {
+        font-variant-ligatures: none;
+      }
+
+      .tracer {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 21rem;
+        gap: 2rem;
+        align-items: start;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .tracer pre {
+        width: 100%;
+        min-width: 0;
+        font-size: 1.5rem;
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.42;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.3;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.boom {
+        background: linear-gradient(90deg, rgba(248, 113, 113, 0.32), rgba(248, 113, 113, 0.05));
+        box-shadow: inset 3px 0 0 var(--red);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        white-space: nowrap;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border: 1px solid rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f,
+      .tb.x {
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb.n {
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      /* ---------- Memory panel beside traced code ---------- */
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem 1.1rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-size: 1.15rem;
+      }
+
+      .mem h4 {
+        margin: 0 0 0.35rem;
+        font: 600 0.8rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .mem .slots {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .slot {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font-mono);
+      }
+
+      .mem .slot b {
+        min-width: 3.2rem;
+        font-weight: 500;
+        color: var(--violet-soft);
+        text-align: right;
+      }
+
+      .mem .slot span {
+        flex: 1;
+        padding: 0.12rem 0.55rem;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        background: rgba(139, 92, 246, 0.12);
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console {
+        min-height: 1.9rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.35);
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        color: var(--green);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console div.err {
+        color: var(--red);
+      }
+
+      .mem .frames {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.3rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .frame {
+        padding: 0.25rem 0.6rem;
+        border-radius: 8px;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.08);
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .mem .frame.top {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.18);
+      }
+
+      .mem .frame.hurt {
+        border-color: var(--red);
+        background: rgba(248, 113, 113, 0.16);
+      }
+
+      .mem .frame em {
+        display: block;
+        font-style: normal;
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+
+      .mem .exc {
+        align-self: flex-start;
+        padding: 0.15rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--red);
+        background: rgba(248, 113, 113, 0.18);
+        color: #fecaca;
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+
+      .mem .exc.caught {
+        border-color: var(--green);
+        background: rgba(134, 239, 172, 0.14);
+        color: var(--green);
+      }
+
+      .replay {
+        align-self: flex-end;
+        padding: 0.25rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.95rem var(--font);
+        cursor: pointer;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      /* ---------- Value chips ---------- */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        font-size: 1.2rem;
+        color: var(--muted);
+      }
+
+      .try.step:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1.25rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 1.25rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 44rem);
+        max-width: 100%;
+      }
+
+      #multi .tracer pre {
+        font-size: 1.2rem;
+      }
+
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: min(100%, 70rem) !important;
+      }
+
+      #recap .card p {
+        font-size: 1.3rem;
+      }
+
+      /* ---------- try / except / else / finally flowchart ---------- */
+      #full {
+        gap: 0.8rem;
+      }
+
+      #full .tracer {
+        grid-template-columns: minmax(0, 1fr) 24rem;
+      }
+
+      #full .tracer pre {
+        font-size: 1.2rem;
+      }
+
+      #full .flow {
+        max-height: 30cqh;
+      }
+
+      #obj .tracer pre {
+        font-size: 1.4rem;
+      }
+
+      #full .mem {
+        min-height: 13rem;
+        font-size: 1rem;
+        gap: 0.6rem;
+      }
+
+      .side {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+
+      .flow {
+        width: 100%;
+        height: auto;
+        max-height: 34cqh;
+        overflow: visible;
+      }
+
+      .flow .node {
+        fill: rgba(15, 18, 35, 0.9);
+        stroke: rgba(167, 139, 250, 0.55);
+        stroke-width: 2;
+        transition:
+          fill 0.35s,
+          stroke 0.35s;
+      }
+
+      .flow .node.on[data-n="try"] {
+        fill: rgba(34, 211, 238, 0.18);
+        stroke: var(--cyan);
+      }
+
+      .flow .node.on[data-n="except"] {
+        fill: rgba(248, 113, 113, 0.2);
+        stroke: var(--red);
+      }
+
+      .flow .node.on[data-n="else"] {
+        fill: rgba(134, 239, 172, 0.18);
+        stroke: var(--green);
+      }
+
+      .flow .node.on[data-n="finally"] {
+        fill: rgba(139, 92, 246, 0.3);
+        stroke: var(--violet-soft);
+      }
+
+      .flow .edge {
+        stroke: rgba(167, 139, 250, 0.4);
+        stroke-width: 2;
+        fill: none;
+        marker-end: url(#fh);
+        transition: stroke 0.35s;
+      }
+
+      .flow .edge.on {
+        stroke: #f0abfc;
+        stroke-width: 3;
+      }
+
+      .flow text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 24px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .flow text.lbl {
+        fill: var(--muted);
+        font-family: var(--font);
+        font-size: 25px;
+      }
+
+      .flow .token {
+        fill: #f0abfc;
+        filter: drop-shadow(0 0 8px #ec4899);
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · errors</span>
+      <h1 class="grad-each"><span>Error</span> <span>Handling</span></h1>
+      <p>Catch exceptions with try and except, clean up with finally, raise your own, and follow the good habits that keep bugs visible.</p>
+    </section>
+
+    <!-- ================================================================ basics -->
+    <section class="slide">
+      <h2>Try-except basics</h2>
+      <pre class="steps" style="font-size: 1.45rem"><code class="language-python">
+        # basic try-except
+        try:
+            result = 10 / 0
+        except:
+            print("An error occurred")
+        # catch specific exception
+        try:
+            result = 10 / 0
+        except ZeroDivisionError:
+            print("Cannot divide by zero")
+      </code></pre>
+      <p class="hint step">Prefer naming the exception: a bare <code>except:</code> also hides typos and bugs you did not expect.</p>
+    </section>
+
+    <section class="slide" id="obj">
+      <h2>The exception object</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # access exception object
+          try:
+              result = 10 / 0
+          except ZeroDivisionError as e:
+              print(f"Error: {e}")
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step go" data-anim="none"></span>
+      <p class="hint"><code>as e</code> names the exception, so you can read its message.</p>
+    </section>
+
+    <!-- ================================================================ multiple -->
+    <section class="slide" id="multi">
+      <h2>Multiple except blocks</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # multiple except blocks
+          try:
+              value = int(input("Enter a number: "))
+              result = 10 / value
+          except ValueError:
+              print("Invalid number")
+          except ZeroDivisionError:
+              print("Cannot divide by zero")
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <div class="try" data-interactive><code>user types</code></div>
+      <p class="hint">The except clauses are checked top to bottom; the first match handles it.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Catching several types</h2>
+      <pre class="steps" style="font-size: 1.25rem"><code class="language-python">
+        # catch multiple exceptions
+        try:
+            # some operation
+            pass
+        except (ValueError, TypeError, KeyError):
+            print("One of multiple errors occurred")
+        # catch multiple with different handling
+        try:
+            # some operation
+            pass
+        except ValueError as e:
+            print(f"Value error: {e}")
+        except TypeError as e:
+            print(f"Type error: {e}")
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ else / finally -->
+    <section class="slide">
+      <h2>else: only when nothing failed</h2>
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
+        # else - runs if no exception
+        try:
+            result = 10 / 2
+        except ZeroDivisionError:
+            print("Error")
+        else:
+            print(f"Success! Result: {result}")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>finally: always runs</h2>
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
+        # finally - always runs
+        try:
+            file = open("data.txt", "r")
+            data = file.read()
+        except FileNotFoundError:
+            print("File not found")
+        finally:
+            file.close()  # always close file
+      </code></pre>
+      <p class="hint step">Careful: if <code>open</code> itself fails, <code>file</code> was never assigned and <code>file.close()</code> raises a new error. The best-practices slide shows the fix.</p>
+    </section>
+
+    <section class="slide" id="full">
+      <h2>The complete structure</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # complete structure
+          try:
+              # risky code
+              result = 10 / 2
+          except ZeroDivisionError:
+              # handle error
+              print("Error")
+          else:
+              # runs if no error
+              print("Success")
+          finally:
+              # always runs
+              print("Cleanup")
+        </code></pre>
+        <div class="side">
+          <svg class="flow" viewBox="0 0 360 330" aria-label="Flowchart: try leads to except on an error or to else without one; both lead to finally">
+            <defs>
+              <marker id="fh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="rgba(240,171,252,0.8)" />
+              </marker>
+            </defs>
+            <path class="edge" data-e="try-except" d="M150 62 L95 138" />
+            <path class="edge" data-e="try-else" d="M210 62 L265 138" />
+            <path class="edge" data-e="except-finally" d="M95 182 L150 258" />
+            <path class="edge" data-e="else-finally" d="M265 182 L210 258" />
+            <text class="lbl" x="80" y="92">error</text>
+            <text class="lbl" x="298" y="92">no error</text>
+            <rect class="node" data-n="try" x="120" y="18" width="120" height="44" rx="12" />
+            <text x="180" y="40">try</text>
+            <rect class="node" data-n="except" x="25" y="138" width="140" height="44" rx="12" />
+            <text x="95" y="160">except</text>
+            <rect class="node" data-n="else" x="195" y="138" width="140" height="44" rx="12" />
+            <text x="265" y="160">else</text>
+            <rect class="node" data-n="finally" x="95" y="260" width="170" height="44" rx="12" />
+            <text x="180" y="282">finally</text>
+            <circle class="token" r="8" cx="180" cy="18" opacity="0" />
+          </svg>
+          <div class="mem"></div>
+        </div>
+      </div>
+      <div class="try" data-interactive><code>risky code</code></div>
+    </section>
+
+    <!-- ================================================================ common -->
+    <section class="slide">
+      <h2>Common exceptions (1)</h2>
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
+        # ValueError - invalid value
+        try:
+            int("abc")
+        except ValueError:
+            print("Invalid integer")
+        # TypeError - wrong type
+        try:
+            "2" + 2
+        except TypeError:
+            print("Type mismatch")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Common exceptions (2)</h2>
+      <pre class="steps" style="font-size: 1.45rem"><code class="language-python">
+        # KeyError - missing dictionary key
+        try:
+            d = {"a": 1}
+            value = d["b"]
+        except KeyError:
+            print("Key not found")
+        # IndexError - invalid index
+        try:
+            lst = [1, 2, 3]
+            value = lst[10]
+        except IndexError:
+            print("Index out of range")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Common exceptions (3)</h2>
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
+        # AttributeError - missing attribute
+        try:
+            x = 5
+            x.append(1)
+        except AttributeError:
+            print("Attribute not found")
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ file errors -->
+    <section class="slide">
+      <h2>File and I/O exceptions (1)</h2>
+      <pre class="steps" style="font-size: 1.45rem"><code class="language-python">
+        # FileNotFoundError
+        try:
+            with open("missing.txt", "r") as file:
+                data = file.read()
+        except FileNotFoundError:
+            print("File does not exist")
+        # PermissionError
+        try:
+            with open("/root/file.txt", "w") as file:
+                file.write("data")
+        except PermissionError:
+            print("Permission denied")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>File and I/O exceptions (2)</h2>
+      <pre class="steps" style="font-size: 1.40rem"><code class="language-python">
+        # IsADirectoryError
+        try:
+            with open("folder", "r") as file:
+                data = file.read()
+        except IsADirectoryError:
+            print("Expected file, got directory")
+        # OSError - general OS error
+        try:
+            os.remove("file.txt")
+        except OSError as e:
+            print(f"OS error: {e}")
+      </code></pre>
+      <p class="hint step"><code>FileNotFoundError</code>, <code>PermissionError</code> and <code>IsADirectoryError</code> are all kinds of <code>OSError</code>.</p>
+    </section>
+
+    <!-- ================================================================ raising -->
+    <section class="slide">
+      <h2>Raising exceptions</h2>
+      <pre class="steps" style="font-size: 1.60rem"><code class="language-python">
+        # raise exception
+        def divide(a, b):
+            if b == 0:
+                raise ValueError("Cannot divide by zero")
+            return a / b
+        # raise with custom message
+        def validate_age(age):
+            if age &lt; 0:
+                raise ValueError(f"Age cannot be negative: {age}")
+            if age &gt; 150:
+                raise ValueError(f"Invalid age: {age}")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Re-raising and translating</h2>
+      <pre class="steps" style="font-size: 1.60rem"><code class="language-python">
+        # re-raise exception
+        try:
+            result = 10 / 0
+        except ZeroDivisionError:
+            print("Logging error...")
+            raise  # re-raise the same exception
+        # raise different exception
+        try:
+            value = int("abc")
+        except ValueError:
+            raise TypeError("Expected valid integer")
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ custom -->
+    <section class="slide">
+      <h2>Custom exceptions</h2>
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
+        # simple custom exception
+        class CustomError(Exception):
+            pass
+        raise CustomError("Something went wrong")
+        # exception with attributes
+        class ValidationError(Exception):
+            def __init__(self, field, message):
+                self.field = field
+                self.message = message
+                super().__init__(f"{field}: {message}")
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Using custom exceptions</h2>
+      <pre class="steps" style="font-size: 1.25rem"><code class="language-python">
+        try:
+            raise ValidationError("email", "Invalid format")
+        except ValidationError as e:
+            print(e.field)    # "email"
+            print(e.message)  # "Invalid format"
+        # exception hierarchy
+        class DatabaseError(Exception):
+            pass
+        class ConnectionError(DatabaseError):
+            pass
+        class QueryError(DatabaseError):
+            pass
+      </code></pre>
+      <p class="hint step">More in the <a href="custom-exceptions.html">Custom Exceptions</a> deck.</p>
+    </section>
+
+    <!-- ================================================================ chaining -->
+    <section class="slide">
+      <h2>Exception chaining</h2>
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
+        # implicit chaining (Python 3)
+        try:
+            try:
+                result = 10 / 0
+            except ZeroDivisionError:
+                raise ValueError("Invalid operation")
+        except ValueError as e:
+            print(e.__context__)  # original exception
+      </code></pre>
+      <p class="hint step">Raising inside an <code>except</code> chains implicitly: the new exception's <code>__context__</code> holds the original.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Explicit and suppressed chaining</h2>
+      <pre class="steps" style="font-size: 1.55rem"><code class="language-python">
+        # explicit chaining
+        try:
+            result = 10 / 0
+        except ZeroDivisionError as e:
+            raise ValueError("Invalid operation") from e
+        # suppress chaining
+        try:
+            result = 10 / 0
+        except ZeroDivisionError:
+            raise ValueError("Invalid operation") from None
+      </code></pre>
+      <p class="hint step"><code>raise ... from e</code> also sets <code>__cause__</code>; <code>from None</code> hides the original in the traceback.</p>
+    </section>
+
+    <!-- ================================================================ assert -->
+    <section class="slide">
+      <h2>Assertions</h2>
+      <pre class="steps" style="font-size: 1.10rem"><code class="language-python">
+        # basic assertion
+        x = 5
+        assert x &gt; 0
+        assert x &gt; 0, "x must be positive"
+        # assertions for debugging
+        def calculate_average(numbers):
+            assert len(numbers) &gt; 0, "List cannot be empty"
+            return sum(numbers) / len(numbers)
+        # disable assertions with -O flag
+        # python -O script.py
+        # checking types
+        def process(value):
+            assert isinstance(value, int), "Value must be integer"
+            return value * 2
+      </code></pre>
+      <p class="hint step">Failing raises <code>AssertionError</code>. <code>-O</code> strips asserts: never use them to validate input.</p>
+    </section>
+
+    <!-- ================================================================ context managers -->
+    <section class="slide">
+      <h2>Context managers for error handling</h2>
+      <pre class="steps" style="font-size: 1.10rem"><code class="language-python">
+        # custom context manager
+        class FileHandler:
+            def __init__(self, filename):
+                self.filename = filename
+                self.file = None
+            def __enter__(self):
+                self.file = open(self.filename, "r")
+                return self.file
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                if self.file:
+                    self.file.close()
+                if exc_type is not None:
+                    print(f"Error occurred: {exc_val}")
+                return False  # don't suppress exception
+        with FileHandler("data.txt") as file:
+            data = file.read()
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>contextlib</h2>
+      <pre class="steps" style="font-size: 1.25rem"><code class="language-python">
+        # contextlib
+        from contextlib import contextmanager
+        @contextmanager
+        def managed_resource():
+            # setup
+            resource = acquire_resource()
+            try:
+                yield resource
+            finally:
+                # cleanup
+                release_resource(resource)
+      </code></pre>
+      <p class="hint step">Everything before <code>yield</code> runs on entering the <code>with</code> block; the <code>finally</code> runs on leaving it, even after an error.</p>
+    </section>
+
+    <!-- ================================================================ best practices -->
+    <section class="slide">
+      <h2>Best practices (1)</h2>
+      <pre class="steps" style="font-size: 1.70rem"><code class="language-python">
+        # specific exceptions first
+        try:
+            # code
+            pass
+        except ValueError:
+            # handle ValueError
+            pass
+        except Exception:
+            # handle all other exceptions
+            pass
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Best practices (2)</h2>
+      <pre class="steps" style="font-size: 2.00rem"><code class="language-python">
+        # don't catch everything silently
+        try:
+            # code
+            pass
+        except Exception:
+            pass  # BAD: silent failure
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Best practices (3)</h2>
+      <pre class="steps" style="font-size: 1.35rem"><code class="language-python">
+        # use finally for cleanup
+        file = None
+        try:
+            file = open("data.txt", "r")
+            data = file.read()
+        except FileNotFoundError:
+            print("File not found")
+        finally:
+            if file:
+                file.close()
+        # or use context managers
+        with open("data.txt", "r") as file:
+            data = file.read()
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ warnings -->
+    <section class="slide">
+      <h2>Warnings</h2>
+      <pre class="steps" style="font-size: 1.70rem"><code class="language-python">
+        import warnings
+        # issue warning
+        warnings.warn("This is deprecated", DeprecationWarning)
+        # filter warnings
+        warnings.filterwarnings("ignore")
+        warnings.filterwarnings("error")  # treat as errors
+        warnings.filterwarnings("default")
+      </code></pre>
+      <p class="hint step">A warning prints a message but lets the program carry on, unlike an exception.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Custom warnings and catch_warnings</h2>
+      <pre class="steps" style="font-size: 1.75rem"><code class="language-python">
+        import warnings
+        # custom warning
+        class CustomWarning(UserWarning):
+            pass
+        warnings.warn("Custom message", CustomWarning)
+        # context manager for warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            # warnings suppressed in this block
+            pass
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3><code>try</code> / <code>except</code></h3><p>Catch specific exceptions, most specific first; use <code>as e</code> to read the error.</p></div>
+        <div class="card step"><h3><code>else</code> / <code>finally</code></h3><p><code>else</code> runs only without an error; <code>finally</code> always runs.</p></div>
+        <div class="card step"><h3><code>raise</code></h3><p>Signal problems yourself; re-raise with a bare <code>raise</code>; chain with <code>from</code>.</p></div>
+        <div class="card step"><h3>Clean up</h3><p>Prefer <code>with</code> blocks; never silence <code>Exception</code> with <code>pass</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ tracer
+      // tracer(slide, frames, opts) replays a list of frames over the slide's
+      // <pre class="trace">, lighting lines in the order Python runs them and
+      // filling the slide's .mem panel. A frame is
+      //   { l: line (1-based), n: "note badge", c: true/false (condition badge),
+      //     v: { name: "repr" or null to delete }, o: "printed" or [...],
+      //     e: "error text for the output", s: ["<module>", "f(x=1)"] (call stack),
+      //     x: "ExceptionName" (raised; "" clears), k: true (exception caught) }
+      // It plays when the slide's .step.go (or its first answer line) is revealed.
+      const STEP = 0.55; // seconds per frame (opts.step overrides)
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function tracer(sel, frames, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        if (opts.chips && !frames.length) frames = opts.chips.frames(opts.chips.values[0]);
+        const pre = slide.querySelector("pre.trace");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const T = { slide, pre, lines, frames, tl: null };
+        const dt = opts.step || STEP;
+        const mem = slide.querySelector(".mem");
+        if (mem) {
+          const all = opts.chips ? opts.chips.values.flatMap((v) => opts.chips.frames(v)) : frames;
+          const has = (key) => all.some((f) => key.split(" ").some((q) => f[q] !== undefined));
+          const secs = opts.sections || [...(has("v") ? ["vars"] : []), ...(has("s") ? ["stack"] : []), ...(has("o e") || opts.chips ? ["out"] : [])];
+          const box = { vars: "slots", stack: "frames", out: "console" };
+          const title = { vars: opts.varsTitle || "Variables", stack: "Call stack", out: "Output" };
+          mem.innerHTML =
+            secs.map((s) => `<div class="sec-${s}"><h4>${title[s]}</h4><div class="${box[s]}"></div></div>`).join("") +
+            `<button class="replay" type="button" data-interactive>Replay</button>`;
+          mem.querySelector(".replay").addEventListener("click", () => T.play(false));
+        }
+        const $ = (q) => mem?.querySelector(q);
+
+        function stateAt(k) {
+          const st = { v: {}, o: [], s: null, x: "", caught: false };
+          for (let i = 0; i <= k; i++) {
+            const f = T.frames[i];
+            for (const [name, val] of Object.entries(f.v || {})) {
+              if (val === null) delete st.v[name];
+              else st.v[name] = val;
+            }
+            for (const o of [].concat(f.o ?? [])) st.o.push({ t: o });
+            if (f.e) st.o.push({ t: f.e, err: true });
+            if (f.s) st.s = f.s;
+            if (f.x !== undefined) {
+              st.x = f.x;
+              st.caught = false;
+            }
+            if (f.k) st.caught = true;
+          }
+          return st;
+        }
+
+        function render(k, anim) {
+          if (!mem) return;
+          const st = stateAt(k);
+          const slots = $(".slots");
+          if (slots) {
+            const have = new Map([...slots.children].map((el) => [el.dataset.name, el]));
+            for (const [name, el] of have) if (!(name in st.v)) el.remove();
+            for (const [name, val] of Object.entries(st.v)) {
+              let el = have.get(name);
+              if (!el) {
+                el = document.createElement("div");
+                el.className = "slot";
+                el.dataset.name = name;
+                el.innerHTML = `<b>${esc(name)}</b><span></span>`;
+                slots.appendChild(el);
+                if (anim) gsap.from(el, { opacity: 0, x: -14, duration: 0.35 });
+              }
+              const span = el.querySelector("span");
+              if (span.textContent !== val) {
+                span.textContent = val;
+                if (anim) gsap.fromTo(span, { backgroundColor: "rgba(34,211,238,0.5)" }, { backgroundColor: "rgba(139,92,246,0.12)", duration: 0.9 });
+              }
+            }
+          }
+          const con = $(".console");
+          if (con) {
+            if (con.children.length > st.o.length) con.innerHTML = "";
+            for (let i = con.children.length; i < st.o.length; i++) {
+              const d = document.createElement("div");
+              d.textContent = st.o[i].t;
+              if (st.o[i].err) d.className = "err";
+              con.appendChild(d);
+              if (anim) gsap.from(d, { opacity: 0, y: 8, duration: 0.3 });
+            }
+          }
+          const fr = $(".frames");
+          if (fr) {
+            const want = st.s || [];
+            if (!anim) fr.querySelectorAll(".gone").forEach((el) => el.remove());
+            const have = [...fr.children].filter((el) => !el.classList.contains("gone"));
+            let same = 0;
+            while (same < want.length && same < have.length && have[same].dataset.key === want[same]) same++;
+            // popped frames slide away (in red while an exception unwinds them)
+            have.slice(same).forEach((el) => {
+              if (!anim) return el.remove();
+              el.classList.add("gone");
+              el.classList.toggle("hurt", !!st.x && !st.caught);
+              gsap.to(el, { opacity: 0, x: 40, duration: 0.4, ease: "power1.in", onComplete: () => el.remove() });
+            });
+            want.slice(same).forEach((name) => {
+              const el = document.createElement("div");
+              el.className = "frame";
+              el.dataset.key = name;
+              const [head, sub] = name.split("|");
+              el.innerHTML = esc(head) + (sub ? `<em>${esc(sub)}</em>` : "");
+              fr.appendChild(el);
+              if (anim) gsap.from(el, { opacity: 0, y: -16, duration: 0.35, ease: "back.out(1.6)" });
+            });
+            [...fr.children].filter((el) => !el.classList.contains("gone")).forEach((el, i, all) => {
+              el.classList.toggle("top", i === all.length - 1);
+              el.classList.toggle("hurt", i === all.length - 1 && !!st.x && !st.caught);
+            });
+          }
+          let exc = $(".exc");
+          if (st.x) {
+            if (!exc) {
+              exc = document.createElement("div");
+              exc.className = "exc";
+              const at = (fr || slots || con)?.parentElement;
+              at ? at.after(exc) : mem.prepend(exc);
+              if (anim) gsap.from(exc, { scale: 0.4, opacity: 0, duration: 0.35, ease: "back.out(2)" });
+            }
+            exc.textContent = (st.caught ? "caught: " : "raised: ") + st.x;
+            exc.classList.toggle("caught", st.caught);
+          } else exc?.remove();
+        }
+
+        function mark(k, anim) {
+          const f = T.frames[k];
+          lines.forEach((l) => l.classList.remove("now", "boom"));
+          const el = lines[f.l - 1];
+          if (!el) return;
+          el.classList.add("run", f.x ? "boom" : "now");
+          el.querySelector(".tb")?.remove();
+          const text = f.c !== undefined ? (f.n ? `${f.n} → ` : "") + (f.c ? "True" : "False") : f.x ? f.x.split(":")[0] : f.n;
+          if (text) {
+            const b = document.createElement("span");
+            b.className = "tb " + (f.c !== undefined ? (f.c ? "t" : "f") : f.x ? "x" : "n");
+            b.textContent = text;
+            el.appendChild(b);
+            if (anim) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+        }
+
+        T.reset = () => {
+          T.tl?.kill();
+          pre.classList.remove("tracing", "traced");
+          lines.forEach((l) => {
+            l.classList.remove("run", "now", "boom");
+            l.querySelector(".tb")?.remove();
+          });
+          if (mem) {
+            mem.querySelectorAll(".slots, .console, .frames").forEach((b) => (b.innerHTML = ""));
+            mem.querySelector(".exc")?.remove();
+            if (opts.init) render(-1, false);
+          }
+          opts.onReset?.(T);
+        };
+
+        T.play = (instant) => {
+          T.reset();
+          pre.classList.add("tracing");
+          const done = () => {
+            lines.forEach((l) => l.classList.remove("now"));
+            pre.classList.replace("tracing", "traced");
+          };
+          if (instant) {
+            T.frames.forEach((f, k) => mark(k, false));
+            render(T.frames.length - 1, false);
+            opts.onFrame?.(T, T.frames.length - 1, true);
+            done();
+            const last = T.frames[T.frames.length - 1];
+            if (last?.x) lines[last.l - 1]?.classList.add("boom");
+            return;
+          }
+          const tl = gsap.timeline();
+          T.frames.forEach((f, k) =>
+            tl.call(() => {
+              mark(k, true);
+              render(k, true);
+              opts.onFrame?.(T, k, false);
+            }, null, k * dt)
+          );
+          tl.call(done, null, T.frames.length * dt);
+          T.tl = tl;
+        };
+
+        const go = slide.querySelector(".step.go") || pre.querySelector(".line.answer");
+        if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+
+        if (opts.chips) {
+          const C = opts.chips;
+          const box = slide.querySelector(".try");
+          box.insertAdjacentHTML("beforeend", C.values.map((v, i) => `<button class="chip" type="button" data-i="${i}">${esc(C.show ? C.show(v) : v)}</button>`).join(""));
+          T.choose = (i, run) => {
+            const v = C.values[i];
+            T.frames = C.frames(v);
+            C.patch?.(T, v);
+            box.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.i === i));
+            if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+            if (run) T.play(run === "instant");
+          };
+          box.addEventListener("click", (e) => {
+            const b = e.target.closest(".chip");
+            if (b) T.choose(+b.dataset.i, true);
+          });
+        }
+
+        Deck.scene(slide, {
+          enter() {
+            if (opts.chips) T.choose(0, false);
+            T.reset();
+            if (!go && opts.auto !== false) T.play(false);
+          },
+          leave: () => T.reset(),
+          step(s, n, els, d) {
+            // several steps at once (a ↓ jump) or going back: show the end state
+            if (go && els.includes(go)) queueMicrotask(() => T.play(d?.dir < 0 || Deck.step > n));
+          },
+          unstep(s, n, els) {
+            if (go && els.includes(go)) T.reset();
+          },
+        });
+        return T;
+      }
+
+      tracer("#obj", [
+        { l: 2, n: "try" },
+        { l: 3, x: "ZeroDivisionError: division by zero" },
+        { l: 4, k: true, n: "matches", v: { e: "ZeroDivisionError('division by zero')" } },
+        { l: 5, o: "Error: division by zero" },
+      ]);
+
+      tracer("#multi", [], {
+        chips: {
+          values: ["abc", "0", "5"],
+          show: (v) => `"${v}"`,
+          frames(v) {
+            const head = [
+              { l: 2, n: "try" },
+              { l: 3, o: `Enter a number: ${v}` },
+            ];
+            if (v === "abc") return [...head, { l: 3, x: "ValueError: invalid literal for int() with base 10: 'abc'" }, { l: 5, k: true, n: "matches" }, { l: 6, o: "Invalid number" }];
+            if (v === "0")
+              return [...head, { l: 3, v: { value: "0" } }, { l: 4, x: "ZeroDivisionError: division by zero" }, { l: 5, c: false, n: "ValueError?" }, { l: 7, k: true, n: "matches" }, { l: 8, o: "Cannot divide by zero" }];
+            return [...head, { l: 3, v: { value: "5" } }, { l: 4, v: { result: "2.0" } }, { l: 5, n: "no exception" }];
+          },
+        },
+      });
+
+      // ------------------------------------------------------------ complete structure + flowchart
+      {
+        const slide = document.querySelector("#full");
+        const flow = slide.querySelector(".flow");
+        const token = flow.querySelector(".token");
+        const BLOCK = (l) => (l <= 4 ? "try" : l <= 7 ? "except" : l <= 10 ? "else" : "finally");
+        const box = (n) => flow.querySelector(`[data-n="${n}"]`);
+        const centre = (n) => {
+          const b = box(n).getBBox();
+          return { cx: b.x + b.width - 14, cy: b.y + b.height / 2 };
+        };
+        function paint(T, k, instant) {
+          const seen = [];
+          for (let i = 0; i <= k; i++) {
+            if (T.frames[i].skip) continue;
+            const b = BLOCK(T.frames[i].l);
+            if (seen[seen.length - 1] !== b) seen.push(b);
+          }
+          flow.querySelectorAll(".node").forEach((n) => n.classList.toggle("on", seen.includes(n.dataset.n)));
+          flow.querySelectorAll(".edge").forEach((e) => {
+            const [a, b] = e.dataset.e.split("-");
+            e.classList.toggle("on", seen.includes(a) && seen.includes(b) && seen.indexOf(b) === seen.indexOf(a) + 1);
+          });
+          const cur = seen[seen.length - 1];
+          if (!cur) return gsap.set(token, { opacity: 0 });
+          if (instant) gsap.set(token, { attr: centre(cur), opacity: 1 });
+          else gsap.to(token, { attr: centre(cur), opacity: 1, duration: 0.4, ease: "power2.inOut" });
+        }
+        tracer(slide, [], {
+          step: 0.6,
+          sections: ["out"],
+          onFrame: paint,
+          onReset: () => {
+            gsap.killTweensOf(token);
+            gsap.set(token, { opacity: 0 });
+            flow.querySelectorAll(".on").forEach((e) => e.classList.remove("on"));
+          },
+          chips: {
+            values: [2, 0],
+            show: (d) => `10 / ${d}`,
+            patch(T, d) {
+              T.lines[3].innerHTML = `    result = <span class="hljs-number">10</span> / <span class="hljs-number">${d}</span>`;
+            },
+            frames(d) {
+              if (d)
+                return [
+                  { l: 2, n: "try" },
+                  { l: 4, v: { result: "5.0" } },
+                  { l: 5, n: "no error: skip except", skip: true },
+                  { l: 8, n: "else runs" },
+                  { l: 10, o: "Success" },
+                  { l: 11, n: "finally always runs" },
+                  { l: 13, o: "Cleanup" },
+                ];
+              return [
+                { l: 2, n: "try" },
+                { l: 4, x: "ZeroDivisionError: division by zero" },
+                { l: 5, k: true, n: "matches" },
+                { l: 7, o: "Error" },
+                { l: 8, n: "error happened: skip else", skip: true },
+                { l: 11, n: "finally always runs" },
+                { l: 13, o: "Cleanup" },
+              ];
+            },
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

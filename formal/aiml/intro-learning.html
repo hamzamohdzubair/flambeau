@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Learning Patterns</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Glassdoor case study ---------- */
+      #glassdoor .cols {
+        grid-template-columns: 20rem minmax(0, 1fr);
+        gap: 3rem;
+        width: 100%;
+      }
+
+      #glassdoor .side {
+        display: grid;
+        gap: 1rem;
+        justify-items: start;
+      }
+
+      #glassdoor table {
+        width: 100%;
+        font-size: 1.2rem;
+      }
+
+      #glassdoor .side p {
+        font-size: 1.1rem;
+      }
+
+      #glassdoor .plot {
+        max-height: 50cqh;
+      }
+
+      #glassdoor table td:last-child,
+      #glassdoor table th:last-child {
+        text-align: right;
+      }
+
+      #glassdoor tr.new td {
+        color: var(--pink);
+      }
+
+      #glassdoor tr.new:not(.shown) {
+        opacity: 0;
+      }
+
+      .plot {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+      }
+
+      .plot .axis {
+        stroke: var(--faint);
+        stroke-width: 1.5;
+      }
+
+      .plot .grid {
+        stroke: rgba(255, 255, 255, 0.06);
+      }
+
+      .plot text {
+        font-family: var(--font-mono);
+        font-size: 18px;
+        fill: var(--muted);
+      }
+
+      .plot .lbl {
+        font-family: var(--font);
+        font-size: 20px;
+      }
+
+      .plot .pt {
+        fill: var(--cyan);
+        stroke: #05060f;
+        stroke-width: 2;
+      }
+
+      .plot .fit {
+        stroke: var(--pink);
+        stroke-width: 3;
+        fill: none;
+      }
+
+      .plot .eq {
+        font-family: var(--font-display);
+        font-size: 22px;
+        fill: #f9a8d4;
+      }
+
+      .plot .guess {
+        fill: var(--pink);
+      }
+
+      .plot .guide {
+        stroke: rgba(236, 72, 153, 0.6);
+        stroke-dasharray: 4 4;
+      }
+
+      .predict {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.6rem 1.2rem;
+        font-size: 1.15rem;
+      }
+
+      .predict:not(.shown) {
+        pointer-events: none;
+      }
+
+      .predict input {
+        width: 100%;
+        accent-color: var(--pink);
+      }
+
+      .predict output {
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      .sketches img {
+        background: #fff;
+      }
+
+      .figs.stack {
+        grid-template-columns: 1fr;
+        gap: 1.4rem;
+      }
+
+      .figs.stack img {
+        width: auto;
+        max-height: 29cqh;
+      }
+
+      .figs.stack figcaption {
+        font-size: 1.05rem;
+      }
+
+      #model img {
+        max-height: 70cqh;
+      }
+
+      #puzzles .figs img {
+        aspect-ratio: auto;
+        height: 58cqh;
+        max-height: 58cqh;
+      }
+
+      #known .figs img {
+        aspect-ratio: auto;
+        max-height: 54cqh;
+      }
+
+      #unknown .figs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      #unknown .figs img {
+        max-height: 27cqh;
+      }
+
+      /* ---------- Types of learning ---------- */
+      .types {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+        width: min(100%, 66rem);
+        counter-reset: t;
+      }
+
+      .types > span {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.9rem 1.1rem;
+        font-size: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--text);
+      }
+
+      .types > span::before {
+        counter-increment: t;
+        content: counter(t);
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 50%;
+        background: var(--gradient);
+        font: 600 1rem var(--font-mono);
+      }
+
+      .types.core {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: 100%;
+      }
+
+      .types.core > span {
+        flex-direction: column;
+        gap: 1.4rem;
+        padding: 3.5rem 1.2rem;
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        text-align: center;
+      }
+
+      /* ---------- Four tasks on the same canvas ---------- */
+      #tasks .stage {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 24rem;
+        gap: 2rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      #tasks > span.step {
+        position: absolute;
+      }
+
+      #tasks svg {
+        width: 100%;
+        height: auto;
+        max-height: 70cqh;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.6);
+      }
+
+      #tasks ol {
+        display: grid;
+        gap: 0.8rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: k;
+      }
+
+      #tasks li {
+        padding: 0.6rem 0.9rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        color: var(--faint);
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        transition: all 0.4s;
+      }
+
+      #tasks li small {
+        display: block;
+        font-family: var(--font);
+        font-size: 1rem;
+        color: var(--faint);
+      }
+
+      #tasks li.on {
+        color: var(--text);
+        border-color: var(--violet-soft);
+        background: rgba(139, 92, 246, 0.2);
+      }
+
+      #tasks li.on small {
+        color: var(--muted);
+      }
+
+      #tasks .tline {
+        stroke: var(--pink);
+        stroke-width: 3;
+        fill: none;
+      }
+
+      #tasks .centroid {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 2.5;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Introduction to AI/ML</span>
+      <h1>Learning Patterns</h1>
+      <p>Machine learning finds a pattern from examples of inputs and outputs, then uses it on new inputs.</p>
+    </section>
+
+    <section class="slide" id="glassdoor">
+      <h2>Glassdoor case study</h2>
+      <div class="cols">
+        <div class="side">
+        <table>
+          <thead>
+            <tr><th>YOE</th><th>Salary</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>30,000</td></tr>
+            <tr><td>2</td><td>40,000</td></tr>
+            <tr><td>4</td><td>60,000</td></tr>
+            <tr class="new step" data-step="3" data-anim="none"><td class="yoe">3</td><td class="sal">?</td></tr>
+          </tbody>
+        </table>
+        <div class="predict step" data-step="3" data-interactive>
+          <label for="yoe">New input: YOE</label>
+          <input id="yoe" type="range" min="0" max="6" step="0.5" value="3" />
+          <output>3 years → 50,000</output>
+        </div>
+        </div>
+        <div class="side">
+        <svg class="plot" viewBox="0 0 560 340" aria-label="Salary against years of experience, with a fitted straight line"></svg>
+        <p class="step" data-step="1">Plot the examples: years of experience (input) against salary (output).</p>
+        <p class="step" data-step="2">The pattern: a straight line, \(y = mx + c\), with \(m = 10{,}000\) and \(c = 20{,}000\).</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Programming vs machine learning</h2>
+      <div class="figs contain stack sketches">
+        <figure class="step"><img src="/assets/2025-10-24-16-22-07.png" alt="Sketch: input and output go into an ML program, a pattern comes out" /><figcaption>Machine learning: input + output give the pattern</figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-24-16-14-41.png" alt="Sketch: input and pattern go into a normal program, output comes out" /><figcaption>Programming: input + pattern give the output</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Finding, then using, the pattern</h2>
+      <div class="figs contain stack sketches">
+        <figure class="step"><img src="/assets/2025-10-24-21-30-22.png" alt="Sketch: YOE and salary go into finding a pattern, which gives y = mx + c" /><figcaption>Training: find the pattern from YOE and salary</figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-24-21-31-01.png" alt="Sketch: a new YOE and the pattern go into using the pattern, which gives a salary" /><figcaption>Inference: use the pattern on a new YOE</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide" id="model">
+      <h2>Machine learning model</h2>
+      <figure class="step sketches"><img src="/assets/2025-10-24-21-43-22.png" alt="Training: input and output go into an ML algorithm that produces a model; inference: a new input goes through the model to give a prediction" /></figure>
+    </section>
+
+    <section class="slide" id="unknown">
+      <h2>Problems with unknown models</h2>
+      <p class="center step">Nobody knows the formula for a car's price, a flat's value or whether an email is spam. We learn it from data.</p>
+      <div class="figs contain">
+        <figure class="step landscape"><img src="/assets/2025-10-24-23-06-06.png" alt="Website: sell your car for the best price" /></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-24-23-06-29.png" alt="Factors in a car's price: age, mileage, brand, fuel type, location and more" /></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-25-07-22-41.png" alt="A table of used-car data: year, selling price, kilometres driven, fuel type" /></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-24-23-44-38.png" alt="App ad: check property value with PropWorth" /></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-24-23-31-25.png" alt="Email filter sorting messages into inbox and spam" /></figure>
+      </div>
+    </section>
+
+    <section class="slide" id="known">
+      <h2>Problems with known models</h2>
+      <p class="center step">Here the pattern is already known, so there is nothing to learn: just compute.</p>
+      <div class="figs contain">
+        <figure class="step landscape"><img src="/assets/2025-10-24-23-18-20.png" alt="Ohm's law: I = V / R" /><figcaption>Ohm's law</figcaption></figure>
+        <figure class="step landscape"><img src="/assets/2025-10-24-23-12-40.png" alt="Newton's law of gravitation between the Earth and the Moon" /><figcaption>Newton's law of gravitation</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Core types of learning</h2>
+      <div class="types core">
+        <span class="step">Supervised learning</span>
+        <span class="step">Unsupervised learning</span>
+        <span class="step">Reinforcement learning</span>
+        <span class="step">Self-supervised learning</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Advanced types of learning</h2>
+      <div class="types">
+        <span class="step">Semi-supervised learning</span>
+        <span class="step">Weakly supervised learning</span>
+        <span class="step">Active learning</span>
+        <span class="step">Meta-learning</span>
+        <span class="step">Transfer learning</span>
+        <span class="step">Zero-shot, one-shot, few-shot learning</span>
+        <span class="step">Continual learning</span>
+        <span class="step">Online learning</span>
+        <span class="step">Multi-task learning</span>
+        <span class="step">Federated learning</span>
+        <span class="step">Representation learning</span>
+      </div>
+    </section>
+
+    <section class="slide" id="tasks">
+      <h2>Tasks</h2>
+      <div class="stage">
+        <svg viewBox="0 0 500 360" aria-label="The same points rearranged for classification, regression, clustering and dimensionality reduction"></svg>
+        <ol>
+          <li data-k="1">Classification<small>Which class? A boundary splits the labels.</small></li>
+          <li data-k="2">Regression<small>How much? A line through the numbers.</small></li>
+          <li data-k="3">Clustering / density estimation<small>Which group? No labels given.</small></li>
+          <li data-k="4">Dimensionality reduction<small>Fewer numbers per point, little lost.</small></li>
+        </ol>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        parent?.appendChild(e);
+        return e;
+      };
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // ---------- Glassdoor: points, then the line, then predictions ----------
+      {
+        const slide = document.querySelector("#glassdoor");
+        const svg = slide.querySelector(".plot");
+        const X = (v) => 60 + v * 80; // YOE 0..6
+        const Y = (v) => 300 - v / 1000 * 3.4; // salary 0..80k
+        for (let s = 0; s <= 80000; s += 20000) {
+          el("line", { class: "grid", x1: X(0), x2: X(6), y1: Y(s), y2: Y(s) }, svg);
+          el("text", { x: 52, y: Y(s) + 4, "text-anchor": "end" }, svg).textContent = s / 1000 + "k";
+        }
+        for (let x = 0; x <= 6; x++) el("text", { x: X(x), y: 320, "text-anchor": "middle" }, svg).textContent = x;
+        el("line", { class: "axis", x1: X(0), x2: X(6), y1: Y(0), y2: Y(0) }, svg);
+        el("line", { class: "axis", x1: X(0), x2: X(0), y1: Y(0), y2: Y(80000) }, svg);
+        el("text", { class: "lbl", x: X(6), y: 338, "text-anchor": "end" }, svg).textContent = "Years of experience";
+        el("text", { class: "lbl", x: X(0) + 8, y: Y(80000) - 6 }, svg).textContent = "Salary";
+        const fitLine = el("line", { class: "fit", x1: X(0), y1: Y(20000), x2: X(6), y2: Y(80000) }, svg);
+        const eq = el("text", { class: "eq", x: X(6), y: Y(12000), "text-anchor": "end" }, svg);
+        eq.textContent = "salary = 10,000 × YOE + 20,000";
+        const pts = [[1, 30000], [2, 40000], [4, 60000]].map(([x, y]) => el("circle", { class: "pt", cx: X(x), cy: Y(y), r: 8 }, svg));
+        const guideV = el("line", { class: "guide" }, svg);
+        const guideH = el("line", { class: "guide" }, svg);
+        const guess = el("circle", { class: "guess", r: 9 }, svg);
+        const len = Math.hypot(X(6) - X(0), Y(80000) - Y(20000));
+        fitLine.style.strokeDasharray = len;
+
+        const range = slide.querySelector("#yoe");
+        const out = slide.querySelector("output");
+        const yoeCell = slide.querySelector("tr.new .yoe");
+        const salCell = slide.querySelector("tr.new .sal");
+        const predict = (v) => {
+          const s = 10000 * v + 20000;
+          for (const [k, val] of Object.entries({ cx: X(v), cy: Y(s) })) guess.setAttribute(k, val);
+          Object.entries({ x1: X(v), x2: X(v), y1: Y(0), y2: Y(s) }).forEach(([k, val]) => guideV.setAttribute(k, val));
+          Object.entries({ x1: X(0), x2: X(v), y1: Y(s), y2: Y(s) }).forEach(([k, val]) => guideH.setAttribute(k, val));
+          out.textContent = `${v} years → ${s.toLocaleString("en-IN")}`;
+          yoeCell.textContent = v;
+          salCell.textContent = s.toLocaleString("en-IN");
+        };
+        range.addEventListener("input", () => predict(+range.value));
+
+        function show(n, animate) {
+          const d = animate ? 1 : 0;
+          gsap.killTweensOf([...pts, fitLine, eq, guess, guideV, guideH]);
+          gsap.to(pts, { opacity: n >= 1 ? 1 : 0, scale: n >= 1 ? 1 : 0, transformOrigin: "center", duration: d * 0.5, stagger: d * 0.15, ease: "back.out(2)" });
+          gsap.to(fitLine, { strokeDashoffset: n >= 2 ? 0 : len, duration: d * 1.2, ease: "power2.inOut" });
+          gsap.to(eq, { opacity: n >= 2 ? 1 : 0, duration: d * 0.6, delay: n >= 2 ? d : 0 });
+          gsap.to([guess, guideV, guideH], { opacity: n >= 3 ? 1 : 0, duration: d * 0.5 });
+          if (n < 3) {
+            range.value = 3;
+            predict(3);
+            salCell.textContent = "?";
+          } else predict(+range.value);
+        }
+        show(0, false);
+        Deck.scene("#glassdoor", {
+          enter: () => show(Deck.step, false),
+          step: (s, n, els, d) => show(n, d.dir > 0),
+          unstep: (s, n) => show(n - 1, false),
+        });
+      }
+
+      // ---------- Tasks: one set of points, four jobs ----------
+      {
+        const slide = document.querySelector("#tasks");
+        const svg = slide.querySelector("svg");
+        const N = 42;
+        let seed = 7;
+        const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+        const gauss = () => Math.max(-2.2, Math.min(2.2, Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd())));
+        const COLORS = ["#22d3ee", "#ec4899", "#fbbf24"];
+        const GREY = "#94a3b8";
+
+        // Layouts for each task (positions + colours)
+        const base = Array.from({ length: N }, () => [250 + gauss() * 90, 180 + gauss() * 70]);
+        const cls = Array.from({ length: N }, (_, i) => {
+          const c = i % 2;
+          return { x: (c ? 330 : 165) + gauss() * 45, y: (c ? 130 : 230) + gauss() * 40, fill: COLORS[c] };
+        });
+        const reg = Array.from({ length: N }, (_, i) => {
+          const x = 60 + (i / (N - 1)) * 380;
+          return { x, y: 300 - (x - 60) * 0.6 + gauss() * 22, fill: COLORS[0] };
+        });
+        const centres = [[140, 110], [370, 120], [250, 270]];
+        const clu = Array.from({ length: N }, (_, i) => {
+          const c = i % 3;
+          return { x: centres[c][0] + gauss() * 30, y: centres[c][1] + gauss() * 28, fill: COLORS[c] };
+        });
+        // Dim. reduction: an elongated cloud along a diagonal, then squashed onto it
+        const dir = [Math.cos(-0.5), Math.sin(-0.5)];
+        const along = Array.from({ length: N }, () => gauss() * 85);
+        const across = Array.from({ length: N }, () => gauss() * 22);
+        const dimA = along.map((a, i) => ({ x: 250 + a * dir[0] - across[i] * dir[1], y: 185 + a * dir[1] + across[i] * dir[0], fill: COLORS[1] }));
+        const dimB = along.map((a) => ({ x: 250 + a * dir[0], y: 185 + a * dir[1], fill: COLORS[1] }));
+
+        const lines = el("g", {}, svg);
+        const boundary = el("line", { class: "tline", x1: 147, y1: 15, x2: 347, y2: 345 }, lines);
+        const fit = el("line", { class: "tline", x1: 60, y1: 300, x2: 440, y2: 72 }, lines);
+        const axis = el("line", { class: "tline", x1: 250 - 220 * dir[0], y1: 185 - 220 * dir[1], x2: 250 + 220 * dir[0], y2: 185 + 220 * dir[1] }, lines);
+        const cents = centres.map(([x, y]) => el("circle", { class: "centroid", cx: x, cy: y, r: 14 }, lines));
+        const dots = base.map(([x, y]) => el("circle", { cx: x, cy: y, r: 7, fill: GREY, opacity: 0.85 }, svg));
+        const extras = [boundary, fit, axis, ...cents];
+
+        let state = -1;
+        let tl = null;
+        function go(k, animate) {
+          if (k === state && animate) return;
+          state = k;
+          tl?.kill();
+          slide.querySelectorAll("li").forEach((li) => li.classList.toggle("on", +li.dataset.k === k));
+          const d = animate ? 1 : 0;
+          tl = gsap.timeline();
+          tl.to(extras, { opacity: 0, duration: d * 0.25 }, 0);
+          const move = (layout, colour = true) =>
+            dots.forEach((c, i) => tl.to(c, { attr: { cx: layout[i].x, cy: layout[i].y, fill: colour ? layout[i].fill : GREY }, duration: d * 1.0, ease: "power3.inOut" }, d * 0.15 + (i % 10) * 0.012 * d));
+          if (k === 0) move(base.map(([x, y]) => ({ x, y })), false);
+          if (k === 1) {
+            move(cls);
+            tl.to(boundary, { opacity: 1, duration: d * 0.5 });
+          }
+          if (k === 2) {
+            move(reg);
+            tl.to(fit, { opacity: 1, duration: d * 0.5 });
+          }
+          if (k === 3) {
+            move(clu, false);
+            tl.addLabel("colour", ">+" + d * 0.3);
+            dots.forEach((c, i) => tl.to(c, { attr: { fill: clu[i].fill }, duration: d * 0.5 }, "colour"));
+            tl.to(cents, { opacity: 1, duration: d * 0.4 }, "colour");
+          }
+          if (k === 4) {
+            move(dimA);
+            tl.to(axis, { opacity: 1, duration: d * 0.5 });
+            tl.addLabel("proj", ">+" + d * 0.3);
+            dots.forEach((c, i) => tl.to(c, { attr: { cx: dimB[i].x, cy: dimB[i].y }, duration: d * 0.9, ease: "power2.inOut" }, "proj"));
+          }
+          if (!animate) tl.progress(1);
+        }
+        go(0, false);
+        Deck.scene("#tasks", {
+          enter: () => go(Deck.step, false),
+          step: (s, n, els, d) => go(n, d.dir > 0),
+          unstep: (s, n) => go(n - 1, false),
+          leave: () => tl?.progress(1),
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -2,28 +2,31 @@
 
 @import "default";
 @import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
+@import "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap";
 
 /* ============================================
-   CSS VARIABLES - Light Purple Theme
+   CSS VARIABLES - Aurora (dark) Theme, matches hzubair.com
    ============================================ */
 
 :root {
-  /* Light Purple Color Palette */
-  --bg-start: #f3e8ff;
-  --bg-mid: #ede9fe;
-  --bg-end: #e9d5ff;
-  --text-color: #2d1b4e;
-  --text-secondary: #5b4c7a;
-  --accent-color: #667eea;
+  /* Aurora Colour Palette */
+  --bg: #05060f;
+  --text-color: #f1f5f9;
+  --text-secondary: #a8b3c7;
+  --accent-color: #a78bfa;
+  --accent-2: #22d3ee;
+  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  --gradient-text: linear-gradient(100deg, #c4b5fd 0%, #f0abfc 40%, #67e8f9 100%);
 
   /* Glassmorphism Colors */
-  --glass-white: rgba(255, 255, 255, 0.4);
-  --glass-border: rgba(102, 126, 234, 0.25);
-  --glass-blur: 10px;
+  --glass-white: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: 16px;
 
   /* Font Family */
   --font-family:
-    "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", var(--font-family);
   --font-code: "Fira Code", "Courier New", monospace;
 }
 
@@ -32,13 +35,14 @@
    ============================================ */
 
 section {
-  /* Light purple gradient background */
-  background: linear-gradient(
-    135deg,
-    var(--bg-start) 0%,
-    var(--bg-mid) 50%,
-    var(--bg-end) 100%
-  );
+  /* Aurora glows over a faint grid on near-black */
+  background:
+    radial-gradient(45% 55% at 8% 0%, rgba(124, 58, 237, 0.55), transparent 70%),
+    radial-gradient(40% 50% at 100% 100%, rgba(6, 182, 212, 0.4), transparent 70%),
+    radial-gradient(35% 40% at 70% 45%, rgba(236, 72, 153, 0.14), transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 64px 64px,
+    var(--bg);
   color: var(--text-color);
   font-family: var(--font-family);
   padding: 60px;
@@ -53,9 +57,18 @@ section h4,
 section h5,
 section h6 {
   color: var(--text-color);
-  font-family: var(--font-family);
+  font-family: var(--font-display);
   font-weight: 600;
+  letter-spacing: -0.02em;
   margin: 0.8em 0 0.4em 0;
+}
+
+section h1,
+section h2 {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 section h1 {
@@ -82,8 +95,12 @@ section a {
   font-weight: 500;
 }
 
-section a:hover {
+section strong {
   color: var(--text-color);
+}
+
+section a:hover {
+  color: var(--accent-2);
   text-decoration: none;
 }
 
@@ -96,17 +113,18 @@ marp-pre {
 }
 
 section pre {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(10, 12, 26, 0.72);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border: 1.5px solid var(--glass-border);
-  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
   padding: 1.5em;
   margin: 1em 0;
   overflow: hidden;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 0 20px rgba(102, 126, 234, 0.1);
+    0 24px 60px -12px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(139, 92, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   font-size: 1.25em;
   width: 80%;
   text-align: left;
@@ -120,7 +138,8 @@ section code {
 
 section p code,
 section li code {
-  background: var(--glass-white);
+  color: #f0abfc;
+  background: rgba(139, 92, 246, 0.12);
   padding: 0.3em 0.6em;
   border-radius: 4px;
   border: 1px solid var(--glass-border);
@@ -142,17 +161,18 @@ h3:nth-of-type(1) {
   padding: 0.4em 0.5em;
 
   /* Glassmorphism styling */
-  background: var(--glass-white);
+  background: rgba(10, 12, 26, 0.55);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-bottom: 1.5px solid var(--glass-border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.6), rgba(34, 211, 238, 0.6), transparent) 1;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 
   color: var(--text-color);
   text-align: center;
   line-height: 1.2em;
   font-size: 1.2em;
-  font-weight: 600;
+  font-weight: 500;
   z-index: 10;
 }
 
@@ -165,7 +185,7 @@ section::after {
   right: 10px;
 
   font-size: 0.7em;
-  color: var(--text-color);
+  color: var(--text-secondary);
   height: 40px;
   line-height: 40px;
   z-index: 3;
@@ -177,11 +197,11 @@ section::after {
 /* Footer element (Marp special element) */
 footer {
   border-radius: 12px;
-  background: var(--glass-white);
+  background: rgba(10, 12, 26, 0.55);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-top: 1.5px solid var(--glass-border);
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.25);
   color: var(--text-color);
   height: 40px;
   line-height: 40px;
@@ -199,7 +219,7 @@ footer a {
 }
 
 footer a:hover {
-  color: var(--text-color);
+  color: var(--accent-2);
   text-decoration: underline;
 }
 
@@ -218,7 +238,7 @@ footer a:hover {
 }
 
 .breadcrumb a:hover {
-  color: var(--text-color);
+  color: var(--accent-2);
   text-decoration: none;
 }
 
@@ -229,7 +249,7 @@ footer a:hover {
 @property --overlay-alpha {
   syntax: "<number>";
   inherits: false;
-  initial-value: 0.3;
+  initial-value: 0.45;
 }
 
 .tiles {
@@ -241,12 +261,13 @@ footer a:hover {
 }
 
 .tile-link {
-  width: 160px;
-  height: 100px;
-  border-radius: 12px;
+  width: 180px;
+  height: 116px;
+  border-radius: 16px;
   text-decoration: none;
   color: white !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-display);
   font-size: 18px;
   font-weight: 600;
   display: flex;
@@ -261,17 +282,18 @@ footer a:hover {
   background: var(--glass-white);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1.5px solid var(--glass-border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
 
-  /* Image background */
-  background-color: #e9d5ff;
+  /* Image background under a violet-to-black wash */
+  background-color: #141530;
   background-image:
     linear-gradient(
-      rgba(102, 126, 234, var(--overlay-alpha)),
-      rgba(102, 126, 234, var(--overlay-alpha))
+      160deg,
+      rgba(76, 29, 149, var(--overlay-alpha)),
+      rgba(5, 6, 15, calc(var(--overlay-alpha) + 0.3))
     ),
-    var(--tile-bg-img, linear-gradient(#ddd6fe, #e9d5ff));
+    var(--tile-bg-img, linear-gradient(135deg, #4c1d95, #0e7490));
   background-position: center, center;
   background-size: cover, cover;
   background-repeat: no-repeat, no-repeat;
@@ -284,9 +306,10 @@ footer a:hover {
 
 .tile-link:hover {
   text-decoration: none;
-  --overlay-alpha: 0.5;
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  --overlay-alpha: 0.15;
+  transform: translateY(-5px);
+  border-color: rgba(167, 139, 250, 0.6);
+  box-shadow: 0 18px 50px -10px rgba(139, 92, 246, 0.7);
 }
 
 /* ============================================
@@ -298,7 +321,8 @@ figure iframe {
   height: 500px;
   border: none;
   border-radius: 5px;
-  box-shadow: inset 0 0px 5px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 figure:has(iframe) figcaption {
@@ -309,8 +333,8 @@ figure:has(iframe) figcaption {
 
 .underlined-link {
   text-decoration: none;
-  color: #456;
-  border-bottom: 2px dashed #456;
+  color: var(--accent-color);
+  border-bottom: 2px dashed var(--accent-color);
   text-decoration-skip-ink: auto; /* prevents underline through descenders */
 }
 
@@ -337,8 +361,8 @@ figure:has(iframe) figcaption {
   object-fit: cover;
   display: block;
   width: 100%;
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.15));
-  border-radius: 8px;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5));
+  border-radius: 12px;
 }
 
 .figrow figcaption {
@@ -389,8 +413,10 @@ section ol li::marker {
    ============================================ */
 
 section blockquote {
-  border-left: 4px solid var(--accent-color);
-  padding-left: 1.5em;
+  border-left: 3px solid var(--accent-color);
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.12), transparent);
+  border-radius: 0 12px 12px 0;
+  padding: 0.6em 1.5em;
   margin: 1em 0;
   color: var(--text-secondary);
   font-style: italic;
@@ -457,7 +483,7 @@ section ol li::marker {
   margin-left: -3em;
   padding-right: 0.5em;
   text-align: right;
-  color: #999;
+  color: #4b5574;
   font-size: 0.8em;
   font-family: var(--font-code);
 }
@@ -489,7 +515,7 @@ figure[data-bespoke-marp-fragment="inactive"]::after {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  background: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(10, 12, 26, 0.6) !important;
   backdrop-filter: blur(90px) !important;
   -webkit-backdrop-filter: blur(90px) !important;
   border-radius: 8px !important;
@@ -502,7 +528,7 @@ figure[data-bespoke-marp-fragment="inactive"]::after {
 li[data-answer="true"][data-bespoke-marp-fragment="inactive"] {
   filter: blur(7px) !important;
   opacity: 0.15 !important;
-  background-color: rgba(250, 160, 160, 0.95);
+  background-color: rgba(236, 72, 153, 0.35);
 }
 
 li[data-answer="true"][data-bespoke-marp-fragment="active"] {
@@ -599,4 +625,100 @@ iconify-icon {
     height: 90px;
     font-size: 14px;
   }
+}
+
+/* ============================================
+   SYNTAX HIGHLIGHTING - dark palette for the aurora theme
+   ============================================ */
+
+section pre code {
+  color: #e2e8f0;
+}
+
+section pre .hljs-comment,
+section pre .hljs-quote {
+  color: #6b7699;
+  font-style: italic;
+}
+
+section pre .hljs-keyword,
+section pre .hljs-selector-tag,
+section pre .hljs-meta .hljs-keyword,
+section pre .hljs-doctag {
+  color: #c4b5fd;
+}
+
+section pre .hljs-string,
+section pre .hljs-regexp,
+section pre .hljs-meta .hljs-string {
+  color: #86efac;
+}
+
+section pre .hljs-number,
+section pre .hljs-literal,
+section pre .hljs-symbol,
+section pre .hljs-variable.language_ {
+  color: #fdba74;
+}
+
+section pre .hljs-title,
+section pre .hljs-title.function_,
+section pre .hljs-section {
+  color: #67e8f9;
+}
+
+section pre .hljs-built_in,
+section pre .hljs-type,
+section pre .hljs-title.class_ {
+  color: #f0abfc;
+}
+
+section pre .hljs-attr,
+section pre .hljs-attribute,
+section pre .hljs-variable,
+section pre .hljs-template-variable,
+section pre .hljs-params {
+  color: #e2e8f0;
+}
+
+section pre .hljs-operator,
+section pre .hljs-punctuation {
+  color: #94a3b8;
+}
+
+/* Tables */
+section table {
+  border-collapse: collapse;
+  background: rgba(10, 12, 26, 0.55);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+section th,
+section td {
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-color);
+}
+
+section th {
+  background: rgba(139, 92, 246, 0.18);
+  font-family: var(--font-display);
+}
+
+section tr:nth-child(2n) td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+section hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.5), transparent);
+}
+
+section mark {
+  background: rgba(236, 72, 153, 0.3);
+  color: var(--text-color);
+  border-radius: 4px;
+  padding: 0 0.2em;
 }

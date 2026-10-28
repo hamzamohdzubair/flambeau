@@ -8,7 +8,8 @@
      Deck.on(event, fn)        'enter' | 'leave' | 'step' | 'unstep'
                                fn(slideEl, index, detail)
      Deck.load(name)           Promise for a library: 'gsap', 'three',
-                               'katex', 'hljs', 'd3', 'chart', 'anime'
+                               'katex', 'hljs', 'd3', 'chart', 'anime',
+                               'qrcode'
      Deck.go(slide, step)      jump (0-based slide, steps shown)
      Deck.next() / Deck.prev()
      Deck.slides, Deck.index, Deck.step
@@ -36,6 +37,7 @@
       script: "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",
       global: "katex",
     },
+    qrcode: { script: "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js", global: "qrcode" },
     katexAuto: { script: "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js", global: "renderMathInElement", after: ["katex"] },
   };
 
@@ -562,6 +564,15 @@
 
     // Run code and maths preparation before steps are collected
     await prepareCode();
+    // Live quizzes (deck/live.js) can add steps, so they load before steps are collected
+    if ($("ol.poll", stage)) {
+      try {
+        await loadScript("/deck/live.js");
+        window.DeckLive.prepare(slides);
+      } catch (e) {
+        console.error(e);
+      }
+    }
     groups = slides.map(collectSteps);
     prepareMath().then(fitAll);
 

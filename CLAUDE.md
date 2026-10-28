@@ -120,6 +120,27 @@ never reflow and **never scroll**: design each slide to fit the canvas, like a K
 
 Click any figure image to zoom it.
 
+## Live quiz
+
+`<ol class="poll">` on a slide lets the audience answer its questions on their phones (deck/live.js):
+
+```html
+<ol class="poll" data-options="10 20 30" data-context="one = np.array([10, 20, 30])">
+  <li data-answer="30">one[2]</li>
+  <li data-answer="10">one[0]</li>
+</ol>
+```
+
+- One `<li>` per question; `data-options` (on the list or an item) are the choices, without them
+  phones get a free-text box. Question n is revealed by the slide's step n (`data-reveal` overrides).
+- The presenter turns live mode on with the slide's "Live quiz" button (remembered per browser). The
+  slide then shows a QR code and the votes; extra invisible steps open each question after the
+  previous reveal and show a leaderboard after the last. With live mode off the slide is unchanged.
+- `data-pos="tl|tr|bl|br"` picks the panel's corner (default top right).
+- Phones use `/live/`; the relay is the Cloudflare Worker in `live/worker/` (deploy with
+  `npx wrangler deploy` there; it is not published with the site). `?liveapi=ws://localhost:8787`
+  points a deck at `wrangler dev`.
+
 ## Code
 
 ```html

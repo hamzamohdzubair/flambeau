@@ -203,7 +203,10 @@
           connect();
         };
         go.onclick = submit;
-        app.onkeydown = (e) => e.key === "Enter" && submit();
+        // A handler that returns false cancels the key, so these return nothing
+        app.onkeydown = (e) => {
+          if (e.key === "Enter") submit();
+        };
       }
 
       function connect() {
@@ -289,7 +292,9 @@
           free.value = typed;
           if (shownQ !== q.id) free.focus();
           document.getElementById("send").onclick = () => vote(free.value.trim());
-          free.onkeydown = (e) => e.key === "Enter" && vote(free.value.trim());
+          free.onkeydown = (e) => {
+            if (e.key === "Enter") vote(free.value.trim());
+          };
         }
         shownQ = q.id;
       }

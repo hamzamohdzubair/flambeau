@@ -12,7 +12,11 @@
    phone asks for free text. A question's answer is revealed with the slide's
    step number data-reveal (default: its position, so the first question is
    revealed by the first step). data-pos="tr|tl|br|bl" puts the panel in a
-   corner (default top right).
+   corner (default top right). data-layout="slide" leaves the drawing to
+   the slide: it gets no panel, live.js fills the slide's own .live-join with
+   the QR code, and the slide hears "live:update" events (detail: open,
+   revealed[], board, questions, view, mine) to draw the votes itself.
+   Poll slides get the class "live-on" while live mode is on.
 
    Live mode is off until the presenter clicks the panel's button (it is
    remembered on that browser). Then each poll slide shows a QR code and
@@ -60,12 +64,12 @@
     return [...byKey.entries()].sort((a, b) => a[0] - b[0]);
   }
 
-  function beat(panel, key) {
+  function beat(parent, key) {
     const b = document.createElement("span");
     b.className = "step";
     b.dataset.anim = "none";
     b.dataset.step = String(key);
-    panel.appendChild(b);
+    parent.appendChild(b);
     return b;
   }
 
@@ -84,26 +88,40 @@
         reveal: parseInt(li.dataset.reveal || qi + 1, 10),
       }));
       if (!questions.length) return;
+      slide.classList.toggle("live-on", live);
 
-      const panel = document.createElement("aside");
-      panel.className = `live live-${list.dataset.pos || "tr"}`;
-      panel.setAttribute("data-interactive", "");
-      slide.appendChild(panel);
-      const poll = { slide, panel, questions, markers: { reveal: [], open: [], board: null } };
+      // data-layout="slide": the slide draws the votes itself (from live:update events)
+      // and gives the QR code a place of its own, .live-join
+      const own = list.dataset.layout === "slide";
+      let panel = null;
+      let join = slide.querySelector(".live-join");
+      if (!own) {
+        panel = document.createElement("aside");
+        panel.className = `live live-${list.dataset.pos || "tr"}`;
+        panel.setAttribute("data-interactive", "");
+        slide.appendChild(panel);
+        join = null;
+      }
+      const poll = { slide, panel, join, own, questions, markers: { reveal: [], open: [], board: null } };
       polls.push(poll);
+      const host = panel || join;
 
       if (!live) {
-        panel.innerHTML = `<button class="live-start" title="Let the audience answer on their phones">${PHONE} Live quiz</button>`;
-        panel.querySelector("button").addEventListener("click", () => {
+        if (!host) return;
+        host.innerHTML = `<button class="live-start" title="Let the audience answer on their phones">${PHONE} Live quiz</button>`;
+        host.querySelector("button").addEventListener("click", () => {
           store(localStorage, "deck-live", "1");
           location.reload();
         });
         return;
       }
 
-      buildPanel(poll);
+      if (panel) panel.innerHTML = `<div class="live-main"><div class="live-head"><span class="live-q"></span><span class="live-n"></span></div><div class="live-body"></div><div class="live-foot"></div></div><div class="live-join"></div>`;
+      poll.join = slide.querySelector(".live-join");
+      buildJoin(poll.join);
       // Reveal markers are the slide's own steps; beats between them open the
       // next question, and one after the last reveal shows the leaderboard
+      const beats = panel || list;
       const keys = stepKeys(slide);
       const keyAfter = (k) => {
         const i = keys.findIndex((x) => x[0] === k);
@@ -113,8 +131,8 @@
         const entry = keys[q.reveal - 1];
         poll.markers.reveal[qi] = entry ? entry[1][0] : null;
         if (!entry) return;
-        if (qi + 1 < questions.length) poll.markers.open[qi + 1] = beat(panel, keyAfter(entry[0]));
-        else if (questions.length > 1) poll.markers.board = beat(panel, keyAfter(entry[0]));
+        if (qi + 1 < questions.length) poll.markers.open[qi + 1] = beat(beats, keyAfter(entry[0]));
+        else if (questions.length > 1) poll.markers.board = beat(beats, keyAfter(entry[0]));
       });
     });
 
@@ -129,19 +147,14 @@
 
   const PHONE = '<svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>';
 
-  function buildPanel(poll) {
-    poll.panel.innerHTML = `
-      <div class="live-main">
-        <div class="live-head"><span class="live-q"></span><span class="live-n"></span></div>
-        <div class="live-body"></div>
-        <div class="live-foot"></div>
-      </div>
-      <div class="live-join">
-        <div class="live-qr"></div>
-        <div class="live-code"><small>slides.hzubair.com/live</small><b>····</b></div>
-        <button class="live-stop" title="Turn off live quiz">×</button>
-      </div>`;
-    poll.panel.querySelector(".live-stop").addEventListener("click", () => {
+  function buildJoin(join) {
+    join.setAttribute("data-interactive", "");
+    join.innerHTML = `
+      <div class="live-qr"></div>
+      <div class="live-code"><small>slides.hzubair.com/live</small><b>····</b></div>
+      <div class="live-online"></div>
+      <button class="live-stop" title="Turn off live quiz">×</button>`;
+    join.querySelector(".live-stop").addEventListener("click", () => {
       store(localStorage, "deck-live", null);
       store(sessionStorage, "deck-live-room", null);
       location.reload();
@@ -210,8 +223,8 @@
     qr.make();
     const svg = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
     for (const p of polls) {
-      p.panel.querySelector(".live-qr").innerHTML = svg;
-      p.panel.querySelector(".live-code b").textContent = room.code;
+      p.join.querySelector(".live-qr").innerHTML = svg;
+      p.join.querySelector(".live-code b").textContent = room.code;
     }
   }
 
@@ -275,8 +288,12 @@
 
   function render() {
     const poll = current();
-    if (!poll || !poll.panel.querySelector(".live-main")) return;
+    if (!poll || !poll.join) return;
     const ph = phase(poll);
+    poll.join.querySelector(".live-online").textContent = view ? `${view.online} joined` : "connecting…";
+    const mine = !!view && view.current === poll.questions[ph.open].id && !ph.board;
+    poll.slide.dispatchEvent(new CustomEvent("live:update", { detail: { ...ph, questions: poll.questions, view, mine } }));
+    if (poll.own) return;
     const q = poll.questions[ph.open];
     const $ = (s) => poll.panel.querySelector(s);
     const online = view ? `${view.online} joined` : "connecting…";
@@ -296,7 +313,6 @@
     }
     poll.panel.classList.remove("board");
 
-    const mine = view && view.current === q.id;
     const counts = mine ? view.counts : (q.options || []).map((label) => ({ label, n: 0 }));
     const revealed = ph.revealed[ph.open];
     const max = Math.max(1, ...counts.map((c) => c.n));

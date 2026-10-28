@@ -618,6 +618,308 @@
         background: rgba(236, 72, 153, 0.18);
       }
 
+      /* ---------- Basic indexing: a quiz the room answers on their phones (deck/live.js) ---------- */
+      #index-quiz {
+        gap: 1rem;
+      }
+
+      #index-quiz .qz-top {
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        gap: 1.2rem;
+        width: 100%;
+      }
+
+      #index-quiz .qz-qs {
+        position: relative;
+        display: flex;
+        gap: 1.2rem;
+      }
+
+      #index-quiz .qz-card {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        grid-template-areas: "n code slot" "status status status";
+        align-items: center;
+        column-gap: 1.1rem;
+        row-gap: 0.5rem;
+        padding: 1rem 1.4rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--glass);
+        transition: border-color 0.4s, box-shadow 0.4s, opacity 0.4s;
+      }
+
+      #index-quiz .qz-n {
+        grid-area: n;
+        font: 600 1rem var(--font-display);
+        letter-spacing: 0.08em;
+        color: var(--faint);
+      }
+
+      #index-quiz .qz-code {
+        grid-area: code;
+        font: 500 2.4rem var(--font-mono);
+        color: var(--text);
+        background: none;
+        border: 0;
+        padding: 0;
+      }
+
+      /* the answer sits on a "?" until its step reveals it */
+      #index-quiz .qz-slot {
+        grid-area: slot;
+        display: grid;
+        place-items: center;
+        min-width: 4.6rem;
+        height: 3.4rem;
+        border-radius: 12px;
+        border: 1px dashed rgba(167, 139, 250, 0.45);
+        font: 500 2.2rem var(--font-mono);
+        transition: background 0.4s, border-color 0.4s;
+      }
+
+      #index-quiz .qz-slot::before,
+      #index-quiz .qz-slot > * {
+        grid-area: 1 / 1;
+      }
+
+      #index-quiz .qz-slot::before {
+        content: "?";
+        color: var(--faint);
+      }
+
+      #index-quiz .qz-slot:has(.shown) {
+        border: 1px solid var(--green);
+        background: rgba(134, 239, 172, 0.12);
+        color: var(--green);
+      }
+
+      #index-quiz .qz-slot:has(.shown)::before {
+        visibility: hidden;
+      }
+
+      #index-quiz .qz-status {
+        grid-area: status;
+        min-height: 1.5em;
+        font-size: 0.9rem;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #index-quiz:not(.live-on) .qz-status {
+        display: none;
+      }
+
+      #index-quiz .qz-status b {
+        color: var(--text);
+      }
+
+      #index-quiz .qz-status .win {
+        color: var(--amber);
+      }
+
+      #index-quiz .qz-status .dot {
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        margin-right: 0.45rem;
+        border-radius: 50%;
+        background: var(--cyan);
+        box-shadow: 0 0 10px var(--cyan);
+        animation: qz-pulse 1.4s ease-in-out infinite;
+      }
+
+      @keyframes qz-pulse {
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      /* the question being answered glows; the next one waits, dimmed */
+      #index-quiz .qz-card.now {
+        border-color: rgba(34, 211, 238, 0.6);
+        box-shadow: 0 0 28px rgba(34, 211, 238, 0.18);
+      }
+
+      #index-quiz .qz-card.later {
+        opacity: 0.45;
+      }
+
+      /* leaderboard: takes the cards' place after the last answer */
+      #index-quiz .qz-board {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s;
+      }
+
+      #index-quiz.board .qz-board {
+        opacity: 1;
+      }
+
+      #index-quiz.board .qz-card {
+        opacity: 0;
+      }
+
+      #index-quiz .qz-board li {
+        display: grid;
+        justify-items: center;
+        gap: 0.1rem;
+        min-width: 9rem;
+        padding: 0.8rem 1.2rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--glass);
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      #index-quiz .qz-board li b {
+        max-width: 11rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font: 600 1.4rem var(--font-display);
+        color: var(--text);
+      }
+
+      #index-quiz .qz-board li:first-child {
+        border-color: var(--amber);
+        box-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
+        padding: 1.1rem 1.8rem;
+      }
+
+      #index-quiz .qz-board li:first-child b {
+        font-size: 1.9rem;
+        color: var(--amber);
+      }
+
+      #index-quiz .qz-board .rk {
+        font: 600 1rem var(--font-display);
+        color: var(--faint);
+      }
+
+      #index-quiz .qz-board .empty {
+        color: var(--faint);
+        font-size: 1.1rem;
+      }
+
+      /* QR code to join */
+      #index-quiz .live-join {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        width: auto;
+        padding: 0.6rem 0.8rem;
+        line-height: 1.15;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--glass);
+      }
+
+      #index-quiz .live-join:has(.live-start) {
+        font-size: 0.9rem;
+        padding: 0;
+        border: 0;
+        background: none;
+      }
+
+      #index-quiz .live-qr {
+        width: 6.8rem;
+        height: 6.8rem;
+        margin-bottom: 0.25rem;
+      }
+
+      #index-quiz .live-stop {
+        top: -0.6rem;
+        right: -0.6rem;
+      }
+
+      /* the array: big cells, a vote bar over each while the room answers */
+      #index-quiz .strip {
+        --cw: 5.2rem;
+        gap: 0;
+      }
+
+      #index-quiz .strip .ch {
+        height: 4.4rem;
+        font-size: 2.4rem;
+      }
+
+      #index-quiz .strip .cells {
+        gap: 0.7rem;
+      }
+
+      #index-quiz .strip .ord,
+      #index-quiz .strip .res {
+        display: none;
+      }
+
+      #index-quiz .qz-bar {
+        display: none;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        height: 5rem;
+        width: 100%;
+      }
+
+      #index-quiz.live-on .qz-bar {
+        display: flex;
+      }
+
+      #index-quiz .qz-bar i {
+        font: 600 1.15rem var(--font-display);
+        font-style: normal;
+        color: var(--text);
+        min-height: 1.4em;
+      }
+
+      #index-quiz .qz-bar span {
+        width: 72%;
+        height: calc(var(--h, 0) * 3.4rem + 4px);
+        border-radius: 8px 8px 2px 2px;
+        background: var(--gradient);
+        transition: height 0.5s var(--ease), background 0.4s, opacity 0.4s;
+      }
+
+      #index-quiz .qz-bar.right span {
+        background: var(--green);
+        box-shadow: 0 0 22px rgba(134, 239, 172, 0.5);
+      }
+
+      #index-quiz .qz-bar.right i {
+        color: var(--green);
+      }
+
+      #index-quiz .qz-bar.wrong {
+        opacity: 0.3;
+      }
+
+      /* while a question is open, the previous answer's highlight steps aside */
+      #index-quiz.voting .strip .cell .ch {
+        opacity: 1;
+        background: rgba(15, 18, 35, 0.85);
+        border-color: rgba(167, 139, 250, 0.35);
+      }
+
+      #index-quiz.voting .strip .cell .ix {
+        color: var(--faint);
+      }
     </style>
   </head>
   <body>
@@ -637,19 +939,29 @@
     </section>
 
     <!-- ================================================================ basic -->
-    <section class="slide">
+    <section class="slide" id="index-quiz">
       <h2>Basic indexing</h2>
-      <div class="pair">
-        <pre><code class="language-python">
-          one[2]
-          # ans: 30
-          one[-1]
-          # ans: 80
-        </code></pre>
-        <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="2;-1"></div>
+      <div class="qz-top">
+        <div class="qz-qs">
+          <div class="qz-card">
+            <span class="qz-n">Q1</span>
+            <code class="qz-code">one[2]</code>
+            <span class="qz-slot"><span class="sel step" data-anim="hidden">30</span></span>
+            <span class="qz-status"></span>
+          </div>
+          <div class="qz-card">
+            <span class="qz-n">Q2</span>
+            <code class="qz-code">one[-1]</code>
+            <span class="qz-slot"><span class="sel step" data-anim="hidden">80</span></span>
+            <span class="qz-status"></span>
+          </div>
+          <ol class="qz-board"></ol>
+        </div>
+        <div class="live-join"></div>
       </div>
+      <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="2;-1"></div>
       <p class="hint">One integer picks one element, counting from 0, or from -1 at the end, exactly like a list.</p>
-      <ol class="poll" data-options="10 20 30 40 50 60 70 80" data-context="one = np.array([10, 20, 30, 40, 50, 60, 70, 80])">
+      <ol class="poll" data-layout="slide" data-options="10 20 30 40 50 60 70 80" data-context="one = np.array([10, 20, 30, 40, 50, 60, 70, 80])">
         <li data-answer="30">one[2]</li>
         <li data-answer="80">one[-1]</li>
       </ol>
@@ -1238,6 +1550,73 @@
       );
 
       // ================= end shared widgets =================
+
+      // ------------------------------------------------------------ basic indexing quiz
+      // The question cards and the vote bars over the array follow the steps; with live
+      // mode on (deck/live.js) they also show the room's votes, winners and leaderboard
+      {
+        const slide = document.getElementById("index-quiz");
+        const cards = [...slide.querySelectorAll(".qz-card")];
+        const values = JSON.parse(slide.querySelector(".strip").dataset.items).map(String);
+        const bars = [...slide.querySelectorAll(".strip .cell")].map((cell) => {
+          const bar = document.createElement("div");
+          bar.className = "qz-bar";
+          bar.innerHTML = "<i></i><span></span>";
+          cell.prepend(bar);
+          return bar;
+        });
+        const board = slide.querySelector(".qz-board");
+        const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+        const secs = (ms) => (ms / 1000).toFixed(1) + " s";
+        const seen = {}; // what the room said about each question: {votes, counts, winner}
+        let live = null;
+
+        const draw = () => {
+          const revealed = cards.map((c) => !!c.querySelector(".sel.shown"));
+          const open = live ? live.open : Math.max(0, revealed.indexOf(false));
+          const isBoard = !!live?.board;
+          const q = live?.questions[open];
+          if (live?.mine) seen[q.id] = { votes: live.view.votes, counts: live.view.counts, winner: live.view.winner };
+          slide.classList.toggle("board", isBoard);
+          slide.classList.toggle("voting", !!live && !isBoard && !revealed[open]);
+
+          cards.forEach((card, i) => {
+            card.classList.toggle("now", !isBoard && i === open && !revealed[i]);
+            card.classList.toggle("later", !isBoard && i > open);
+            const st = card.querySelector(".qz-status");
+            const info = live && seen[live.questions[i].id];
+            if (!live) st.innerHTML = "";
+            else if (revealed[i] && info?.winner) st.innerHTML = `<span class="win">🏆 <b>${esc(info.winner.name)}</b> was fastest · ${secs(info.winner.ms)}</span>`;
+            else if (revealed[i]) st.textContent = info?.votes ? "Nobody got this one" : "No votes";
+            else if (i === open) st.innerHTML = `<span class="dot"></span><b>${info?.votes || 0}</b> vote${info?.votes === 1 ? "" : "s"} so far`;
+            else if (i > open) st.textContent = "Up next";
+            else st.textContent = "";
+          });
+
+          const info = q && !isBoard ? seen[q.id] : null;
+          const counts = values.map((v) => info?.counts.find((c) => c.label === v)?.n || 0);
+          const max = Math.max(1, ...counts);
+          bars.forEach((bar, i) => {
+            bar.style.setProperty("--h", counts[i] / max);
+            bar.querySelector("i").textContent = counts[i] || "";
+            const shownAns = q && revealed[open] && !isBoard;
+            bar.classList.toggle("right", !!shownAns && values[i] === q.answer);
+            bar.classList.toggle("wrong", !!shownAns && values[i] !== q.answer);
+          });
+
+          if (isBoard) {
+            const rows = live.view?.leaderboard?.slice(0, 3) || [];
+            board.innerHTML = rows.length
+              ? rows.map((r, i) => `<li><span class="rk">${i ? "#" + (i + 1) : "🏆 winner"}</span><b>${esc(r.name)}</b><span>${r.right}/${cards.length} right · ${secs(r.ms)}</span></li>`).join("")
+              : `<li class="empty">No answers yet</li>`;
+          }
+        };
+        slide.addEventListener("live:update", (e) => {
+          live = e.detail;
+          draw();
+        });
+        Deck.scene(slide, { enter: draw, step: draw, unstep: draw });
+      }
 
       // ------------------------------------------------------------ masks: colour T/F and fill the combined row per answer
       {

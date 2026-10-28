@@ -137,6 +137,9 @@ Click any figure image to zoom it.
   slide then shows a QR code and the votes; extra invisible steps open each question after the
   previous reveal and show a leaderboard after the last. With live mode off the slide is unchanged.
 - `data-pos="tl|tr|bl|br"` picks the panel's corner (default top right).
+- A slide designed around its quiz uses `data-layout="slide"`: no panel; the slide holds a
+  `<div class="live-join">` for the QR code and draws the votes itself from `live:update` events
+  (see `#index-quiz` in numpy/fundamentals.html, which puts vote bars over the array's cells).
 - Phones use `/live/`; the relay is the Cloudflare Worker in `live/worker/` (deploy with
   `npx wrangler deploy` there; it is not published with the site). `?liveapi=ws://localhost:8787`
   points a deck at `wrangler dev`.

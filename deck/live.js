@@ -11,7 +11,9 @@
    data-options (on the list or an item) are the choices; without them the
    phone asks for free text. A question's answer is revealed with the slide's
    step number data-reveal (default: its position, so the first question is
-   revealed by the first step). data-pos="tr|tl|br|bl" puts the panel in a
+   revealed by the first step). data-open="n" on a question makes the slide's
+   own step n open it (otherwise live mode adds a step after the previous
+   question's reveal). data-pos="tr|tl|br|bl" puts the panel in a
    corner (default top right). data-layout="slide" leaves the drawing to
    the slide: it gets no panel, live.js fills the slide's own .live-join with
    the QR code, and the slide hears "live:update" events (detail: open,
@@ -46,7 +48,8 @@
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const norm = (s) => String(s ?? "").trim().replace(/\s+/g, " ").toLowerCase();
-  const split = (s) => (s ? s.trim().split(/\s+/) : null);
+  // Options are separated by spaces, or by "|" when they contain spaces themselves
+  const split = (s) => (s ? (s.includes("|") ? s.split("|") : s.trim().split(/\s+/)).map((o) => o.trim()).filter(Boolean) : null);
 
   const polls = []; // {slide, panel, questions, markers: {reveal[], open[], board}}
 
@@ -84,8 +87,10 @@
         text: li.textContent.trim(),
         options: split(li.dataset.options) || shared,
         answer: li.dataset.answer ?? "",
-        context: li.dataset.context || list.dataset.context || "",
+        // a question's own prompt reaches the phones as a comment under the context
+        context: [li.dataset.context || list.dataset.context, li.dataset.ask && "# " + li.dataset.ask].filter(Boolean).join("\n"),
         reveal: parseInt(li.dataset.reveal || qi + 1, 10),
+        open: li.dataset.open ? parseInt(li.dataset.open, 10) : null,
       }));
       if (!questions.length) return;
       slide.classList.toggle("live-on", live);
@@ -131,7 +136,9 @@
         const entry = keys[q.reveal - 1];
         poll.markers.reveal[qi] = entry ? entry[1][0] : null;
         if (!entry) return;
-        if (qi + 1 < questions.length) poll.markers.open[qi + 1] = beat(beats, keyAfter(entry[0]));
+        const next = questions[qi + 1];
+        if (next?.open) poll.markers.open[qi + 1] = keys[next.open - 1]?.[1][0] || null;
+        else if (next) poll.markers.open[qi + 1] = beat(beats, keyAfter(entry[0]));
         else if (questions.length > 1) poll.markers.board = beat(beats, keyAfter(entry[0]));
       });
     });

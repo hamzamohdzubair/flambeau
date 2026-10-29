@@ -125,6 +125,13 @@
         transition: transform 0.1s, background 0.2s, opacity 0.3s;
       }
       .options button:active { transform: scale(0.96); }
+      /* long options (whole arrays) get a row each */
+      .options.long { grid-template-columns: 1fr; }
+      .options.long button { display: flex; align-items: center; gap: 12px; padding: 12px 14px; font-size: 17px; text-align: left; }
+      .options.long button i {
+        flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1); font: 600 14px "Space Grotesk", sans-serif; font-style: normal; color: var(--muted);
+      }
       .options button.mine { background: var(--gradient); border-color: transparent; }
       .options.locked button:not(.mine) { opacity: 0.35; }
       .options button.right { background: rgba(134, 239, 172, 0.2); border-color: var(--green); color: var(--green); opacity: 1; }
@@ -260,10 +267,13 @@
         const typed = document.getElementById("free")?.value || "";
         let answer;
         if (q.options) {
-          answer = `<div class="options ${s.mine != null || r ? "locked" : ""}">${q.options
-            .map((o) => {
+          const long = q.options.some((o) => o.length > 7);
+          answer = `<div class="options ${long ? "long" : ""} ${s.mine != null || r ? "locked" : ""}">${q.options
+            .map((o, i) => {
               const cls = [o === s.mine && "mine", r && norm(o) === norm(r.answer) && "right", r && o === s.mine && !r.correct && "wrong"].filter(Boolean).join(" ");
-              return `<button class="${cls}" data-o="${esc(o)}">${esc(o)}</button>`;
+              // long options carry the slide's A–D letters
+              const letter = long && q.options.length <= 6 ? `<i>${"ABCDEF"[i]}</i>` : "";
+              return `<button class="${cls}" data-o="${esc(o)}">${letter}${esc(o)}</button>`;
             })
             .join("")}</div>`;
         } else if (s.mine == null && !r) {

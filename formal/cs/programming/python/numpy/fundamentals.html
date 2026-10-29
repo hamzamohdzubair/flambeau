@@ -618,12 +618,12 @@
         background: rgba(236, 72, 153, 0.18);
       }
 
-      /* ---------- Basic indexing: a quiz the room answers on their phones (deck/live.js) ---------- */
-      #index-quiz {
+      /* ---------- Quiz slides: questions the room answers on their phones (deck/live.js) ---------- */
+      .quiz {
         gap: 1rem;
       }
 
-      #index-quiz .qz-top {
+      .quiz .qz-top {
         display: flex;
         align-items: stretch;
         justify-content: center;
@@ -631,13 +631,13 @@
         width: 100%;
       }
 
-      #index-quiz .qz-qs {
+      .quiz .qz-qs {
         position: relative;
         display: flex;
         gap: 1.2rem;
       }
 
-      #index-quiz .qz-card {
+      .quiz .qz-card {
         display: grid;
         grid-template-columns: auto auto auto;
         grid-template-areas: "n code slot" "status status status";
@@ -651,14 +651,14 @@
         transition: border-color 0.4s, box-shadow 0.4s, opacity 0.4s;
       }
 
-      #index-quiz .qz-n {
+      .quiz .qz-n {
         grid-area: n;
         font: 600 1rem var(--font-display);
         letter-spacing: 0.08em;
         color: var(--faint);
       }
 
-      #index-quiz .qz-code {
+      .quiz .qz-code {
         grid-area: code;
         font: 500 2.4rem var(--font-mono);
         color: var(--text);
@@ -668,7 +668,7 @@
       }
 
       /* the answer sits on a "?" until its step reveals it */
-      #index-quiz .qz-slot {
+      .quiz .qz-slot {
         grid-area: slot;
         display: grid;
         place-items: center;
@@ -680,27 +680,27 @@
         transition: background 0.4s, border-color 0.4s;
       }
 
-      #index-quiz .qz-slot::before,
-      #index-quiz .qz-slot > * {
+      .quiz .qz-slot::before,
+      .quiz .qz-slot > * {
         grid-area: 1 / 1;
       }
 
-      #index-quiz .qz-slot::before {
+      .quiz .qz-slot::before {
         content: "?";
         color: var(--faint);
       }
 
-      #index-quiz .qz-slot:has(.shown) {
+      .quiz .qz-slot:has(.shown) {
         border: 1px solid var(--green);
         background: rgba(134, 239, 172, 0.12);
         color: var(--green);
       }
 
-      #index-quiz .qz-slot:has(.shown)::before {
+      .quiz .qz-slot:has(.shown)::before {
         visibility: hidden;
       }
 
-      #index-quiz .qz-status {
+      .quiz .qz-status {
         grid-area: status;
         min-height: 1.5em;
         font-size: 0.9rem;
@@ -710,19 +710,19 @@
         text-overflow: ellipsis;
       }
 
-      #index-quiz:not(.live-on) .qz-status {
+      .quiz:not(.live-on) .qz-status {
         display: none;
       }
 
-      #index-quiz .qz-status b {
+      .quiz .qz-status b {
         color: var(--text);
       }
 
-      #index-quiz .qz-status .win {
+      .quiz .qz-status .win {
         color: var(--amber);
       }
 
-      #index-quiz .qz-status .dot {
+      .quiz .qz-status .dot {
         display: inline-block;
         width: 0.5rem;
         height: 0.5rem;
@@ -740,17 +740,17 @@
       }
 
       /* the question being answered glows; the next one waits, dimmed */
-      #index-quiz .qz-card.now {
+      .quiz .qz-card.now {
         border-color: rgba(34, 211, 238, 0.6);
         box-shadow: 0 0 28px rgba(34, 211, 238, 0.18);
       }
 
-      #index-quiz .qz-card.later {
+      .quiz .qz-card.later {
         opacity: 0.45;
       }
 
       /* leaderboard: takes the cards' place after the last answer */
-      #index-quiz .qz-board {
+      .quiz .qz-board {
         position: absolute;
         inset: 0;
         display: flex;
@@ -765,15 +765,15 @@
         transition: opacity 0.5s;
       }
 
-      #index-quiz.board .qz-board {
+      .quiz.board .qz-board {
         opacity: 1;
       }
 
-      #index-quiz.board .qz-card {
+      .quiz.board .qz-card {
         opacity: 0;
       }
 
-      #index-quiz .qz-board li {
+      .quiz .qz-board li {
         display: grid;
         justify-items: center;
         gap: 0.1rem;
@@ -786,7 +786,7 @@
         font-size: 0.9rem;
       }
 
-      #index-quiz .qz-board li b {
+      .quiz .qz-board li b {
         max-width: 11rem;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -795,29 +795,29 @@
         color: var(--text);
       }
 
-      #index-quiz .qz-board li:first-child {
+      .quiz .qz-board li:first-child {
         border-color: var(--amber);
         box-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
         padding: 1.1rem 1.8rem;
       }
 
-      #index-quiz .qz-board li:first-child b {
+      .quiz .qz-board li:first-child b {
         font-size: 1.9rem;
         color: var(--amber);
       }
 
-      #index-quiz .qz-board .rk {
+      .quiz .qz-board .rk {
         font: 600 1rem var(--font-display);
         color: var(--faint);
       }
 
-      #index-quiz .qz-board .empty {
+      .quiz .qz-board .empty {
         color: var(--faint);
         font-size: 1.1rem;
       }
 
       /* QR code to join */
-      #index-quiz .live-join {
+      .quiz .live-join {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -831,65 +831,67 @@
         background: var(--glass);
       }
 
-      #index-quiz .live-join:has(.live-start) {
+      .quiz .live-join:has(.live-start) {
         font-size: 0.9rem;
         padding: 0;
         border: 0;
         background: none;
       }
 
-      #index-quiz .live-qr {
+      .quiz .live-qr {
         width: 6.8rem;
         height: 6.8rem;
         margin-bottom: 0.25rem;
       }
 
-      #index-quiz .live-stop {
+      .quiz .live-stop {
         top: -0.6rem;
         right: -0.6rem;
       }
 
       /* the array: big cells, a vote bar over each while the room answers */
-      #index-quiz .strip {
+      .quiz > .strip {
         --cw: 5.2rem;
         gap: 0;
       }
 
-      #index-quiz .strip .ch {
+      .quiz > .strip .ch {
         height: 4.4rem;
         font-size: 2.4rem;
       }
 
-      #index-quiz .strip .cells {
+      .quiz > .strip .cells {
         gap: 0.7rem;
       }
 
       #index-quiz .strip .ord,
-      #index-quiz .strip .res {
+      .quiz > .strip .ix,
+      .quiz > .strip .res {
         display: none;
       }
 
-      #index-quiz .qz-bar {
+      .quiz .qz-bar {
         display: none;
         flex-direction: column;
         justify-content: flex-end;
         align-items: center;
         height: 5rem;
         width: 100%;
+        margin-bottom: 0.5rem;
       }
 
-      #index-quiz.live-on .qz-bar {
+      .quiz.live-on .qz-bar {
         display: flex;
       }
 
-      #index-quiz .qz-bar i {
+      .quiz .qz-bar i {
         font: 600 1.15rem var(--font-display);
         font-style: normal;
         color: var(--text);
         min-height: 1.4em;
       }
 
-      #index-quiz .qz-bar span {
+      .quiz .qz-bar span {
         width: 72%;
         height: calc(var(--h, 0) * 3.4rem + 4px);
         border-radius: 8px 8px 2px 2px;
@@ -897,28 +899,312 @@
         transition: height 0.5s var(--ease), background 0.4s, opacity 0.4s;
       }
 
-      #index-quiz .qz-bar.right span {
+      .quiz .qz-bar.right span {
         background: var(--green);
         box-shadow: 0 0 22px rgba(134, 239, 172, 0.5);
       }
 
-      #index-quiz .qz-bar.right i {
+      .quiz .qz-bar.right i {
         color: var(--green);
       }
 
-      #index-quiz .qz-bar.wrong {
+      .quiz .qz-bar.wrong {
         opacity: 0.3;
       }
 
       /* while a question is open, the previous answer's highlight steps aside */
-      #index-quiz.voting .strip .cell .ch {
+      .quiz.voting > .strip .cell .ch {
         opacity: 1;
         background: rgba(15, 18, 35, 0.85);
         border-color: rgba(167, 139, 250, 0.35);
       }
 
-      #index-quiz.voting .strip .cell .ix {
+      .quiz.voting > .strip .cell .ix {
         color: var(--faint);
+      }
+      /* ---------- Multiple-choice quiz card (.mcq slides): question, A–D answers with vote bars ---------- */
+      .quiz .qz-mc {
+        position: relative;
+        flex: 0 1 48rem;
+        min-width: 0;
+        padding: 1rem 1.3rem;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        border-radius: var(--radius);
+        background: var(--glass);
+        box-shadow: 0 0 28px rgba(34, 211, 238, 0.12);
+      }
+
+      .quiz .qz-body {
+        display: grid;
+        gap: 0.7rem;
+        transition: opacity 0.4s;
+      }
+
+      .quiz .qz-head {
+        display: flex;
+        align-items: baseline;
+        gap: 0.9rem;
+        min-width: 0;
+      }
+
+      .quiz .qz-head .qz-code {
+        font-size: 2rem;
+        white-space: nowrap;
+      }
+
+      .quiz .qz-ask {
+        color: var(--muted);
+        font-size: 1.1rem;
+        white-space: nowrap;
+      }
+
+      .quiz .qz-tabs {
+        display: flex;
+        gap: 0.35rem;
+        margin-left: auto;
+        align-self: center;
+      }
+
+      .quiz .qz-tabs span {
+        padding: 0.1rem 0.55rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        font: 600 0.8rem var(--font-display);
+        color: var(--faint);
+      }
+
+      .quiz .qz-tabs .now {
+        border-color: var(--cyan);
+        color: var(--cyan);
+      }
+
+      .quiz .qz-tabs .done {
+        border-color: rgba(134, 239, 172, 0.5);
+        color: var(--green);
+      }
+
+      .quiz .qz-opts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.55rem;
+      }
+
+      .quiz .qz-opt {
+        position: relative;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.5rem 0.9rem 0.5rem 0.6rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(15, 18, 35, 0.7);
+        overflow: hidden;
+        transition: opacity 0.4s, border-color 0.4s;
+      }
+
+      .quiz .qz-opt > * {
+        position: relative;
+      }
+
+      .quiz .qz-opt .fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: calc(var(--w, 0) * 100%);
+        background: linear-gradient(90deg, rgba(139, 92, 246, 0.45), rgba(6, 182, 212, 0.35));
+        transition: width 0.5s var(--ease), background 0.4s;
+      }
+
+      .quiz .qz-opt .L {
+        display: grid;
+        place-items: center;
+        width: 1.7rem;
+        height: 1.7rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        font: 600 0.9rem var(--font-display);
+        color: var(--muted);
+      }
+
+      .quiz .qz-opt code {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 0;
+        border: 0;
+        background: none;
+        font: 500 1.1rem var(--font-mono);
+        color: var(--text);
+      }
+
+      .quiz .qz-opt .n {
+        font: 600 1.1rem var(--font-display);
+        font-style: normal;
+        color: var(--text);
+      }
+
+      .quiz .qz-opt.right {
+        border-color: var(--green);
+        box-shadow: 0 0 20px rgba(134, 239, 172, 0.25);
+      }
+
+      .quiz .qz-opt.right .fill {
+        background: rgba(134, 239, 172, 0.3);
+      }
+
+      .quiz .qz-opt.right .L {
+        background: var(--green);
+        color: var(--bg);
+      }
+
+      .quiz .qz-opt.right code,
+      .quiz .qz-opt.right .n {
+        color: var(--green);
+      }
+
+      .quiz .qz-opt.wrong {
+        opacity: 0.35;
+      }
+
+      .quiz .qz-foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        min-height: 1.4em;
+        font-size: 0.9rem;
+      }
+
+      .quiz .qz-foot .qz-status {
+        min-height: 0;
+      }
+
+      .quiz .qz-note {
+        color: var(--muted);
+        opacity: 0;
+        transition: opacity 0.4s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .quiz .qz-note.on {
+        opacity: 1;
+      }
+
+      .quiz:not(.live-on) .qz-foot:not(:has(.qz-note.on)) {
+        display: none;
+      }
+
+      .quiz .qz-mc .qz-board {
+        position: absolute;
+        inset: 0;
+      }
+
+      .quiz.board .qz-body {
+        opacity: 0;
+      }
+
+      /* a hint that would give the answer away waits for the last reveal */
+      .quiz .qz-after {
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .quiz.solved .qz-after {
+        opacity: 1;
+      }
+
+      /* question column beside a visual */
+      .quiz .qz-side {
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: center;
+        justify-content: center;
+        gap: 3rem;
+        width: 100%;
+      }
+
+      .quiz .qz-col {
+        display: grid;
+        justify-items: start;
+        gap: 1rem;
+        width: 34rem;
+      }
+
+      .quiz .qz-col .qz-mc {
+        width: 100%;
+      }
+
+      .quiz .qz-col .qz-head {
+        flex-wrap: wrap;
+        row-gap: 0.4rem;
+      }
+
+      .quiz .qz-col .qz-head .qz-code {
+        font-size: 1.7rem;
+      }
+
+      #newaxis .qz-side {
+        gap: 2rem;
+      }
+
+      #newaxis .axis {
+        width: calc(8 * 2.5rem);
+        height: calc(8 * 2.5rem);
+      }
+
+      #newaxis .axis .c {
+        width: 2.2rem;
+        height: 2.2rem;
+        font-size: 1rem;
+      }
+
+      #cube .layer {
+        gap: 0.2rem;
+      }
+
+      #cube .layer small {
+        font-size: 1rem;
+      }
+
+      #cube .layer .g {
+        grid-template-columns: repeat(3, 2.5rem);
+      }
+
+      #cube .layer .g span {
+        height: 2.5rem;
+        font-size: 1.15rem;
+      }
+
+      /* beside a visual the QR card lies on its side: code and count next to the QR */
+      .quiz .qz-col .live-join:has(.live-qr) {
+        display: grid;
+        grid-template-columns: auto auto;
+        align-content: center;
+        justify-items: start;
+        column-gap: 1rem;
+      }
+
+      .quiz .qz-col .live-join .live-qr {
+        grid-row: span 2;
+        margin-bottom: 0;
+      }
+
+      .quiz .qz-col .live-code {
+        align-items: flex-start;
+        align-self: end;
+      }
+
+      .quiz .qz-col .live-online {
+        align-self: start;
+      }
+
+      #mask .masks {
+        gap: 0.35rem 1.2rem;
+      }
+
+      #mask .masks .strip .ch {
+        height: 2.3rem;
       }
     </style>
   </head>
@@ -939,7 +1225,7 @@
     </section>
 
     <!-- ================================================================ basic -->
-    <section class="slide" id="index-quiz">
+    <section class="slide quiz" id="index-quiz">
       <h2>Basic indexing</h2>
       <div class="qz-top">
         <div class="qz-qs">
@@ -967,83 +1253,100 @@
       </ol>
     </section>
 
-    <section class="slide">
+    <section class="slide quiz mcq" id="slice">
       <h2>Slicing</h2>
-      <div class="pair">
-        <pre><code class="language-python">
-          # start 1, stop before 6, step 2
-          one[1:6:2]
-          # ans: array([20, 40, 60])
-        </code></pre>
-        <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="1:6:2"></div>
+      <div class="qz-top">
+        <div class="qz-mc">
+          <span class="sel step" data-anim="none"></span>
+        </div>
+        <div class="live-join"></div>
       </div>
+      <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="1:6:2"></div>
       <p class="hint">A slice of an array is a <em>view</em>: it shares memory with <code>one</code>, so changing it changes <code>one</code>.</p>
+      <ol class="poll" data-layout="slide" data-context="one = np.array([10, 20, 30, 40, 50, 60, 70, 80])">
+        <li data-answer="array([20, 40, 60])" data-options="array([30, 50, 70]) | array([20, 40, 60]) | array([20, 30, 40, 50, 60]) | array([20, 40, 60, 80])" data-note="start 1, stop before 6, step 2">one[1:6:2]</li>
+      </ol>
     </section>
 
-    <section class="slide">
+    <section class="slide quiz mcq" id="fancy">
       <h2>Fancy indexing</h2>
-      <div class="pair">
-        <pre><code class="language-python">
-          # a list of positions, in any order, repeats allowed
-          one[[4, 0, 3, 0]]
-          # ans: array([50, 10, 40, 10])
-        </code></pre>
-        <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="[4,0,3,0]"></div>
+      <div class="qz-top">
+        <div class="qz-mc">
+          <span class="sel step" data-anim="none"></span>
+        </div>
+        <div class="live-join"></div>
       </div>
-      <p class="hint">The small numbers show the order of the result: position 0 is used twice. Fancy indexing returns a copy.</p>
+      <div class="strip" data-items="[10,20,30,40,50,60,70,80]" data-kind="array" data-sel="[4,0,3,0]"></div>
+      <p class="hint qz-after">The small numbers show the order of the result: position 0 is used twice. Fancy indexing returns a copy.</p>
+      <ol class="poll" data-layout="slide" data-context="one = np.array([10, 20, 30, 40, 50, 60, 70, 80])">
+        <li data-answer="array([50, 10, 40, 10])" data-options="array([10, 40, 50]) | array([50, 10, 40, 10]) | IndexError | array([40, 10, 30, 10])" data-note="a list of positions, in any order, repeats allowed">one[[4, 0, 3, 0]]</li>
+      </ol>
     </section>
 
     <!-- ================================================================ masking -->
-    <section class="slide" id="mask">
+    <section class="slide quiz mcq" id="mask">
       <h2>Masking</h2>
-      <div class="pair">
-        <pre><code class="language-python">
-          one[(one &lt; 30) &amp; (one &gt; 60)]
-          # ans: array([], dtype=int64): nothing is both below 30 and above 60
-          one[(one &lt; 30) | (one &gt; 60)]
-          # ans: array([10, 20, 70, 80])
-        </code></pre>
-        <div class="masks">
-          <span>one</span><div class="strip" data-chars data-neg="off" data-items='["10","20","30","40","50","60","70","80"]'></div>
-          <span>one &lt; 30</span><div class="strip m" data-chars data-items='["T","T","F","F","F","F","F","F"]'></div>
-          <span>one &gt; 60</span><div class="strip m" data-chars data-items='["F","F","F","F","F","F","T","T"]'></div>
-          <span class="op">&amp;</span><div class="strip m comb" data-chars data-items='["F","F","F","F","F","F","F","F"]'></div>
+      <div class="qz-top">
+        <div class="qz-mc">
+          <span class="sel step" data-anim="none"></span>
+          <span class="qz-open step" data-anim="none"></span>
+          <span class="sel step" data-anim="none"></span>
         </div>
+        <div class="live-join"></div>
       </div>
-      <p class="hint">A comparison gives one True/False per element; <code>&amp;</code> (and) / <code>|</code> (or) combine them, and the array keeps the True positions.</p>
+      <div class="masks">
+        <span>one</span><div class="strip" data-chars data-neg="off" data-items='["10","20","30","40","50","60","70","80"]'></div>
+        <span>one &lt; 30</span><div class="strip m" data-chars data-items='["T","T","F","F","F","F","F","F"]'></div>
+        <span>one &gt; 60</span><div class="strip m" data-chars data-items='["F","F","F","F","F","F","T","T"]'></div>
+        <span class="op">&amp;</span><div class="strip m comb" data-chars data-items='["F","F","F","F","F","F","F","F"]'></div>
+      </div>
+      <p class="hint">A comparison gives one True/False per element; <code>&amp;</code> (and) and <code>|</code> (or) combine them.</p>
+      <ol class="poll" data-layout="slide" data-context="one = np.array([10, 20, 30, 40, 50, 60, 70, 80])">
+        <li data-answer="array([], dtype=int64)" data-options="array([10, 20, 70, 80]) | array([30, 40, 50, 60]) | array([], dtype=int64) | False" data-note="nothing is both below 30 and above 60">one[(one &lt; 30) &amp; (one &gt; 60)]</li>
+        <li data-answer="array([10, 20, 70, 80])" data-options="array([], dtype=int64) | array([10, 20, 70, 80]) | array([10, 20]) | array([30, 40, 50, 60])" data-note="the array keeps the True positions" data-open="2" data-reveal="3">one[(one &lt; 30) | (one &gt; 60)]</li>
+      </ol>
     </section>
 
     <!-- ================================================================ newaxis -->
-    <section class="slide" id="newaxis">
+    <section class="slide quiz mcq" id="newaxis">
       <h2>newaxis / None indexing</h2>
-      <div class="duo">
-        <pre><code class="language-python">
-          one.shape
-          # ans: (8,)
-          one[:, np.newaxis]
-          # ans: shape (8, 1): a column
-          one[:, None]
-          # ans: the same: None is np.newaxis
-        </code></pre>
+      <div class="qz-side">
+        <div class="qz-col">
+          <div class="qz-mc">
+          <span class="sel step" data-anim="none"></span>
+          <span class="qz-open step" data-anim="none"></span>
+          <span class="sel step" data-anim="none"></span>
+          <span class="qz-open step" data-anim="none"></span>
+          <span class="sel step" data-anim="none"></span>
+        </div>
+          <div class="live-join"></div>
+        </div>
         <div>
           <div class="axis"></div>
-          <p class="axis-cap">shape (8,)</p>
+          <p class="axis-cap"></p>
         </div>
       </div>
+      <ol class="poll" data-layout="slide" data-context="one = np.array([10, 20, 30, 40, 50, 60, 70, 80])">
+        <li data-answer="(8,)" data-options="(8,) | (1, 8) | (8, 1) | 8" data-note="one axis of length 8">one.shape</li>
+        <li data-answer="(8, 1)" data-options="(1, 8) | (8, 1) | (8,) | (8, 8)" data-note="a new axis of length 1: a column" data-open="2" data-reveal="3">one[:, np.newaxis].shape</li>
+        <li data-answer="(8, 1)" data-options="(8,) | (1, 8) | TypeError | (8, 1)" data-note="the same: None is np.newaxis" data-open="4" data-reveal="5">one[:, None].shape</li>
+      </ol>
     </section>
 
     <!-- ================================================================ 3d + ellipsis -->
-    <section class="slide" id="cube">
+    <section class="slide quiz mcq" id="cube">
       <h2>Higher dimensions and the ellipsis</h2>
-      <div class="pair">
-        <pre><code class="language-python">
-          two = np.arange(27).reshape(3, 3, 3)
-          two[1, ...]
-          # ans: array([[ 9, 10, 11], [12, 13, 14], [15, 16, 17]])
-        </code></pre>
-        <div class="cube"></div>
+      <div class="qz-top">
+        <div class="qz-mc">
+          <span class="sel step" data-anim="none"></span>
+        </div>
+        <div class="live-join"></div>
       </div>
-      <p class="hint"><code>...</code> means "all the remaining axes", so <code>two[1, ...]</code> is <code>two[1, :, :]</code>: the middle 3×3 block.</p>
+      <div class="cube"></div>
+      <p class="hint qz-after"><code>...</code> means "all the remaining axes", so <code>two[1, ...]</code> is <code>two[1, :, :]</code>: the middle 3×3 block.</p>
+      <ol class="poll" data-layout="slide" data-context="two = np.arange(27).reshape(3, 3, 3)">
+        <li data-answer="two[1, :, :]" data-options="two[:, :, 1] | two[1, :, :] | two[1, 1, 1] | two[:, 1, :]" data-ask="is the same as" data-note="... stands for all the remaining axes">two[1, ...]</li>
+      </ol>
     </section>
 
     <section class="slide" id="recap">
@@ -1607,7 +1910,87 @@
           if (isBoard) {
             const rows = live.view?.leaderboard?.slice(0, 3) || [];
             board.innerHTML = rows.length
-              ? rows.map((r, i) => `<li><span class="rk">${i ? "#" + (i + 1) : "🏆 winner"}</span><b>${esc(r.name)}</b><span>${r.right}/${cards.length} right · ${secs(r.ms)}</span></li>`).join("")
+              ? rows.map((r, i) => `<li><span class="rk">${i ? "#" + (i + 1) : "🏆 winner"}</span><b>${esc(r.name)}</b><span>${r.right}/${cards.length} right${r.right ? " · " + secs(r.ms) : ""}</span></li>`).join("")
+              : `<li class="empty">No answers yet</li>`;
+          }
+        };
+        slide.addEventListener("live:update", (e) => {
+          live = e.detail;
+          draw();
+        });
+        Deck.scene(slide, { enter: draw, step: draw, unstep: draw });
+      }
+
+      // ------------------------------------------------------------ multiple-choice quiz cards
+      // .mcq slides: the card shows the open question (from the slide's ol.poll) with its
+      // answers A–D. The card's own steps reveal each answer (.sel) and open the next
+      // question (.qz-open); with live mode on, the answers fill with the room's votes.
+      for (const slide of document.querySelectorAll(".slide.mcq")) {
+        const card = slide.querySelector(".qz-mc");
+        const split = (t) => (t.includes("|") ? t.split("|") : t.trim().split(/\s+/)).map((o) => o.trim()).filter(Boolean);
+        const qs = [...slide.querySelectorAll("ol.poll > li")].map((li) => ({
+          text: li.textContent.trim(),
+          ask: li.dataset.ask || "",
+          note: li.dataset.note || "",
+          answer: li.dataset.answer,
+          options: split(li.dataset.options || li.parentElement.dataset.options || ""),
+        }));
+        const reveals = [...card.querySelectorAll(".sel")];
+        const opens = [null, ...card.querySelectorAll(".qz-open")];
+        const body = document.createElement("div");
+        body.className = "qz-body";
+        body.innerHTML = `<div class="qz-head"><code class="qz-code"></code><span class="qz-ask"></span><span class="qz-tabs"></span></div><div class="qz-opts"></div><div class="qz-foot"><span class="qz-status"></span><span class="qz-note"></span></div>`;
+        const board = document.createElement("ol");
+        board.className = "qz-board";
+        card.append(body, board);
+        const $ = (sel) => body.querySelector(sel);
+        const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+        const secs = (ms) => (ms / 1000).toFixed(1) + " s";
+        const seen = {};
+        let live = null;
+        let built = -1;
+
+        const draw = () => {
+          const revealed = reveals.map((e) => e.classList.contains("shown"));
+          let open = 0;
+          opens.forEach((e, i) => e?.classList.contains("shown") && (open = i));
+          const isBoard = !!live?.board;
+          const q = qs[open];
+          const lq = live?.questions[open];
+          if (live?.mine) seen[lq.id] = { votes: live.view.votes, counts: live.view.counts, winner: live.view.winner };
+          slide.classList.toggle("board", isBoard);
+          slide.classList.toggle("voting", !!live && !isBoard && !revealed[open]);
+          slide.classList.toggle("solved", revealed.every(Boolean));
+
+          if (built !== open) {
+            built = open;
+            $(".qz-code").textContent = q.text;
+            $(".qz-ask").textContent = q.ask;
+            $(".qz-note").textContent = q.note;
+            $(".qz-opts").innerHTML = q.options.map((o, i) => `<div class="qz-opt"><span class="fill"></span><b class="L">${"ABCD"[i]}</b><code>${esc(o)}</code><i class="n"></i></div>`).join("");
+          }
+          $(".qz-tabs").innerHTML = qs.length > 1 ? qs.map((x, i) => `<span class="${revealed[i] ? "done" : i === open ? "now" : ""}">Q${i + 1}</span>`).join("") : "";
+          const info = lq && seen[lq.id];
+          const counts = q.options.map((o) => info?.counts.find((c) => c.label === o)?.n || 0);
+          const max = Math.max(1, ...counts);
+          [...body.querySelectorAll(".qz-opt")].forEach((el, i) => {
+            el.style.setProperty("--w", live ? counts[i] / max : 0);
+            el.querySelector(".n").textContent = live && counts[i] ? counts[i] : "";
+            el.classList.toggle("right", revealed[open] && q.options[i] === q.answer);
+            el.classList.toggle("wrong", revealed[open] && q.options[i] !== q.answer);
+            el.querySelector(".L").textContent = revealed[open] && q.options[i] === q.answer ? "✓" : "ABCD"[i];
+          });
+          $(".qz-note").classList.toggle("on", !!revealed[open] && !!q.note);
+          const st = $(".qz-status");
+          if (!live) st.innerHTML = "";
+          else if (revealed[open] && info?.winner) st.innerHTML = `<span class="win">🏆 <b>${esc(info.winner.name)}</b> was fastest · ${secs(info.winner.ms)}</span>`;
+          else if (revealed[open]) st.textContent = info?.votes ? "Nobody got this one" : "No votes";
+          else st.innerHTML = `<span class="dot"></span><b>${info?.votes || 0}</b> vote${info?.votes === 1 ? "" : "s"} so far`;
+
+          if (isBoard) {
+            const rows = live.view?.leaderboard?.slice(0, 3) || [];
+            board.innerHTML = rows.length
+              ? rows.map((r, i) => `<li><span class="rk">${i ? "#" + (i + 1) : "🏆 winner"}</span><b>${esc(r.name)}</b><span>${r.right} right${r.right ? " · " + secs(r.ms) : ""}</span></li>`).join("")
               : `<li class="empty">No answers yet</li>`;
           }
         };
@@ -1632,13 +2015,14 @@
         const A = [1, 1, 0, 0, 0, 0, 0, 0];
         const B = [0, 0, 0, 0, 0, 0, 1, 1];
         const render = (instant) => {
-          const k = slide.querySelectorAll(".line.answer.shown").length;
+          const k = slide.querySelectorAll(".sel.shown").length;
           const or = k >= 2;
           op.textContent = or ? "|" : "&";
           comb.forEach((c, i) => {
             const v = or ? A[i] || B[i] : A[i] && B[i];
-            c.className = "ch " + (v ? "T" : "F");
-            c.textContent = v ? "True" : "False";
+            // before the first answer the combined row is a row of question marks
+            c.className = "ch " + (k ? (v ? "T" : "F") : "");
+            c.textContent = k ? (v ? "True" : "False") : "?";
             vals[i].style.borderColor = k && v ? "var(--pink)" : "";
             vals[i].style.background = k && v ? "rgba(236, 72, 153, 0.28)" : "";
           });
@@ -1662,10 +2046,10 @@
         box.innerHTML = vals.map((v) => `<div class="c">${v}</div>`).join("");
         const cells = [...box.children];
         const render = (instant) => {
-          const k = slide.querySelectorAll(".line.answer.shown").length;
+          const k = slide.querySelectorAll(".sel.shown").length;
           const col = k >= 2;
           const step = box.clientWidth / 8;
-          cap.textContent = col ? "shape (8, 1)" : "shape (8,)";
+          cap.textContent = col ? "shape (8, 1)" : k ? "shape (8,)" : "shape ?";
           cells.forEach((c, i) => {
             const to = col ? { x: (box.clientWidth - c.offsetWidth) / 2, y: i * step } : { x: i * step, y: (box.clientHeight - c.offsetHeight) / 2 };
             gsap.to(c, { ...to, duration: instant ? 0 : 0.8, delay: instant ? 0 : i * 0.06, ease: "power2.inOut" });
@@ -1687,7 +2071,7 @@
           .join("");
         const mid = cube.children[1];
         const render = (instant) => {
-          const on = slide.querySelectorAll(".line.answer.shown").length > 0;
+          const on = slide.querySelectorAll(".sel.shown").length > 0;
           cube.classList.toggle("picking", on);
           mid.classList.toggle("pick", on);
           if (on && !instant) gsap.from(mid.querySelectorAll(".g span"), { scale: 0.5, opacity: 0, stagger: 0.04, duration: 0.3 });

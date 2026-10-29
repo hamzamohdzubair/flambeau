@@ -139,7 +139,11 @@ Click any figure image to zoom it.
 - `data-pos="tl|tr|bl|br"` picks the panel's corner (default top right).
 - A slide designed around its quiz uses `data-layout="slide"`: no panel; the slide holds a
   `<div class="live-join">` for the QR code and draws the votes itself from `live:update` events
-  (see `#index-quiz` in numpy/fundamentals.html, which puts vote bars over the array's cells).
+  (see `#index-quiz` in numpy/fundamentals.html, which puts vote bars over the array's cells, and
+  its `.mcq` slides: a card with the question and A–D answers that fill with votes).
+- Options containing spaces are separated with `|`. `data-note` (shown on reveal) and `data-ask`
+  (a prompt, also sent to phones) are per question. `data-open="n"` lets the slide's own step n
+  open a question, so it flows the same with live mode off.
 - Phones use `/live/`; the relay is the Cloudflare Worker in `live/worker/` (deploy with
   `npx wrangler deploy` there; it is not published with the site). `?liveapi=ws://localhost:8787`
   points a deck at `wrangler dev`.

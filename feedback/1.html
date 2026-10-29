@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thank You</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #thanks {
+        gap: 1.4rem;
+      }
+
+      #thanks .qr {
+        padding: 0.8rem;
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: 0 0 60px -10px rgba(139, 92, 246, 0.8);
+      }
+
+      #thanks .qr img {
+        display: block;
+        width: min(16rem, 60cqw, 34cqh);
+        height: auto;
+        border-radius: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="thanks">
+      <span class="kicker">End of session</span>
+      <h1 class="grad-each"><span>Thank</span> <span>you</span></h1>
+      <p>Attendance and feedback form: scan to fill it in.</p>
+      <figure class="qr"><img src="/assets/2025-10-25-07-09-22.png" alt="QR code for the attendance and feedback form" /></figure>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      Deck.scene("#thanks", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 span"), { y: 50, opacity: 0, stagger: 0.12, duration: 0.8, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelector(".qr"), { scale: 0.6, opacity: 0, duration: 0.8, delay: 0.4, ease: "back.out(1.8)" });
+        },
+      });
+    </script>
+  </body>
+</html>

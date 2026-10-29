@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Decorators Advanced</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Wrapper diagram: a decorator wraps a function in a new one; a call travels in and back out ---------- */
+      .wv {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(12rem, 18rem);
+        gap: 1.5rem;
+        align-items: center;
+        width: min(100%, 60rem);
+        font-family: var(--font-mono);
+        font-variant-ligatures: none;
+      }
+
+      .wv-boxes {
+        display: flex;
+        justify-content: center;
+      }
+
+      .wv .layer,
+      .wv .core {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+        border-radius: 18px;
+        transition:
+          border-color 0.4s,
+          background 0.4s,
+          box-shadow 0.4s,
+          padding 0.4s;
+      }
+
+      .wv .layer {
+        padding: 0.7rem 1rem 1rem;
+        border: 2px dashed rgba(236, 72, 153, 0.6);
+        background: rgba(236, 72, 153, 0.06);
+      }
+
+      .wv .layer.off {
+        padding: 0;
+        border-color: transparent;
+        background: transparent;
+      }
+
+      .wv .layer.off > .lhead,
+      .wv .layer.off > .lfoot {
+        display: none;
+      }
+
+      .wv .core {
+        padding: 0.8rem 1.1rem;
+        border: 2px solid rgba(167, 139, 250, 0.7);
+        background: rgba(15, 18, 35, 0.9);
+      }
+
+      .wv .lhead,
+      .wv .lfoot {
+        font-size: 0.85rem;
+        color: #f9a8d4;
+        white-space: nowrap;
+      }
+
+      .wv .lhead small,
+      .wv .core small {
+        color: var(--faint);
+        font-size: 0.75rem;
+      }
+
+      .wv .core .cbody {
+        color: var(--text);
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+
+      .wv .tag {
+        align-self: flex-start;
+        padding: 0.1rem 0.6rem;
+        border-radius: 999px;
+        background: var(--violet);
+        color: white;
+        font-size: 0.85rem;
+      }
+
+      .wv .active {
+        box-shadow: 0 0 30px -6px rgba(34, 211, 238, 0.8);
+        border-color: var(--cyan) !important;
+      }
+
+      .wv-side {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .stacked .wv-side {
+        width: min(100%, 24rem);
+        justify-self: center;
+      }
+
+      .wv-side h4 {
+        margin: 0;
+        font: 600 0.7rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .wv-call {
+        font-size: 1.05rem;
+        color: var(--text);
+      }
+
+      .wv-console {
+        min-height: 5rem;
+        padding: 0.6rem 0.8rem;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+        color: var(--green);
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .wv-console .ret {
+        color: #f0abfc;
+      }
+
+      .wv-token {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 3;
+        padding: 0.1rem 0.5rem;
+        min-width: 1.2rem;
+        min-height: 1.2rem;
+        border-radius: 999px;
+        background: var(--cyan);
+        color: #05060f;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.9);
+        pointer-events: none;
+        opacity: 0;
+        white-space: nowrap;
+      }
+
+
+      pre code {
+        font-variant-ligatures: none;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 36rem);
+        font-size: 1.3rem;
+      }
+
+      .hint {
+        font-size: 1.2rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      .stacked {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 1.5rem;
+        width: min(100%, 72rem);
+      }
+
+      .stacked .wv {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+      }
+
+      /* ---------- Three layers of a decorator factory ---------- */
+      .factory {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        font-family: var(--font-mono);
+        font-size: 0.95rem;
+      }
+
+      .factory .fbox {
+        padding: 0.5rem 0.8rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        text-align: center;
+      }
+
+      .factory .fbox small {
+        display: block;
+        font: 0.72rem var(--font);
+        color: var(--faint);
+      }
+
+      .factory .arr {
+        color: var(--faint);
+      }
+
+      /* ---------- Memoised Fibonacci call tree ---------- */
+      #cache-tree .cols {
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        width: min(100%, 64rem);
+      }
+
+      .tree {
+        width: 100%;
+        height: auto;
+        max-height: 60cqh;
+        overflow: visible;
+      }
+
+      .tree .edge {
+        stroke: rgba(167, 139, 250, 0.5);
+        stroke-width: 2;
+      }
+
+      .tree .node rect {
+        fill: rgba(15, 18, 35, 0.9);
+        stroke: rgba(167, 139, 250, 0.75);
+        stroke-width: 2;
+      }
+
+      .tree .node.hit rect {
+        fill: rgba(134, 239, 172, 0.16);
+        stroke: var(--green);
+      }
+
+      .tree .node.now rect {
+        stroke: var(--cyan);
+        stroke-width: 3;
+      }
+
+      .tree text {
+        fill: var(--text);
+        font-family: var(--font-mono);
+        font-size: 15px;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .tree .node .ret {
+        fill: #f0abfc;
+        font-size: 12px;
+      }
+
+      .tree .node.hit .ret {
+        fill: var(--green);
+      }
+
+      .cache-side {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        font-family: var(--font-mono);
+      }
+
+      .cache-side h4 {
+        margin: 0;
+        font: 600 0.7rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .cache-table {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        min-height: 2.2rem;
+      }
+
+      .cache-table span {
+        padding: 0.2rem 0.5rem;
+        border-radius: 8px;
+        border: 1px solid rgba(240, 171, 252, 0.5);
+        background: rgba(236, 72, 153, 0.14);
+        font-size: 0.85rem;
+      }
+
+      .cache-count {
+        color: var(--muted);
+        font: 0.95rem var(--font);
+      }
+
+      .cache-count b {
+        color: var(--cyan);
+      }
+
+      .replay {
+        align-self: flex-start;
+        padding: 0.2rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.8rem var(--font);
+        cursor: pointer;
+      }
+
+      /* the wrapper picture, sized for the canvas */
+      .wv {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+        gap: 2.5rem;
+      }
+      .wv .lhead,
+      .wv .lfoot {
+        font-size: 1.15rem;
+      }
+      .wv .lhead small,
+      .wv .core small {
+        font-size: 0.85rem;
+      }
+      .wv .core .cbody {
+        font-size: 1.35rem;
+      }
+      .wv .tag {
+        font-size: 1rem;
+      }
+      .wv .layer {
+        padding: 0.9rem 1.3rem 1.2rem;
+        gap: 0.6rem;
+      }
+      .wv .core {
+        padding: 1rem 1.4rem;
+      }
+      .wv-side h4 {
+        font-size: 0.8rem;
+      }
+      .wv-call {
+        font-size: 1.4rem;
+      }
+      .wv-console {
+        font-size: 1.2rem;
+      }
+      .wv-token {
+        font-size: 0.95rem;
+      }
+      .stacked {
+        width: 100%;
+        gap: 2.5rem;
+      }
+      .stacked .wv-side {
+        width: 100%;
+      }
+      .slide .stacked pre {
+        min-width: 0;
+        font-size: 1.25rem;
+      }
+      /* tall code blocks: tighter lines so they fit the canvas */
+      pre.tall {
+        line-height: 1.45;
+      }
+      pre.tall .line {
+        min-height: 1.45em;
+      }
+      /* ---------- canvas sizing for the factory chain and the cache tree ---------- */
+      .factory {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0.15rem;
+        font-size: 1.4rem;
+      }
+      .factory .fbox {
+        width: min(100%, 34rem);
+        padding: 0.55rem 1.4rem;
+      }
+      .factory .fbox small {
+        font-size: 0.95rem;
+      }
+      .factory .arr {
+        font-size: 1.3rem;
+        line-height: 1.2;
+        transform: rotate(90deg);
+      }
+      #cache-tree .cols {
+        width: 100%;
+        gap: 2.5rem;
+      }
+      .tree .node .ret {
+        font-size: 14px;
+      }
+      .cache-side h4 {
+        font-size: 0.8rem;
+      }
+      .cache-table span {
+        font-size: 1.15rem;
+      }
+      .cache-count {
+        font-size: 1.2rem;
+      }
+      .replay {
+        font-size: 0.9rem;
+        padding: 0.3rem 1rem;
+      }
+      /* recap cards, sized for the canvas */
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.3rem;
+        width: min(100%, 62rem);
+      }
+      #recap .card h3 {
+        font-size: 1.6rem;
+      }
+      #recap .card p {
+        font-size: 1.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · functions</span>
+      <h1 class="grad-each"><span>Decorators</span> <span>Advanced</span></h1>
+      <p>Decorators that take arguments, and the practical ones you will write: timing, caching, access checks.</p>
+    </section>
+
+    <!-- ================================================================ factory -->
+    <section class="slide" id="factory">
+      <h2>Decorator with parameters</h2>
+      <div class="stacked">
+        <pre><code class="language-python">
+          # decorator factory
+          def repeat(times):
+              def decorator(func):
+                  def wrapper(*args):
+                      for _ in range(times):
+                          result = func(*args)
+                      return result
+                  return wrapper
+              return decorator
+          @repeat(times=3)
+          def greet():
+              print("Hello")
+          greet()
+          # ans: Hello (3 times)
+        </code></pre>
+        <div class="wv"></div>
+      </div>
+      <span class="step wrap-step" data-anim="none"></span>
+      <span class="step wrap-step" data-anim="none"></span>
+    </section>
+
+    <section class="slide">
+      <h2>Three functions deep</h2>
+      <div class="factory">
+        <div class="fbox step">repeat(times=3)<small>called first, with the argument</small></div>
+        <span class="arr step">→</span>
+        <div class="fbox step">decorator<small>the real decorator it returns</small></div>
+        <span class="arr step">→</span>
+        <div class="fbox step">decorator(greet)<small>applied to the function</small></div>
+        <span class="arr step">→</span>
+        <div class="fbox step">wrapper<small>now stored as greet</small></div>
+      </div>
+      <p class="hint step"><code>@repeat(times=3)</code> first calls <code>repeat(3)</code>; whatever it returns is used as the decorator.</p>
+    </section>
+
+    <!-- ================================================================ timing -->
+    <section class="slide">
+      <h2>Timing decorator</h2>
+      <pre class="steps" style="font-size: 1.10rem"><code class="language-python">
+        import time
+        # measure execution time
+        def timer(func):
+            def wrapper(*args, **kwargs):
+                start = time.time()
+                result = func(*args, **kwargs)
+                end = time.time()
+                print(f"{func.__name__}: {end-start}s")
+                return result
+            return wrapper
+        @timer
+        def slow():
+            time.sleep(1)
+      </code></pre>
+      <p class="hint step">Calling <code>slow()</code> prints about <code>slow: 1.0s</code>: the wrapper reads the clock before and after the real call.</p>
+    </section>
+
+    <!-- ================================================================ caching -->
+    <section class="slide">
+      <h2>Caching decorator</h2>
+      <pre class="tall steps" style="font-size: 1.10rem"><code class="language-python">
+        from functools import wraps
+        # simple cache
+        def cache(func):
+            cached = {}
+            @wraps(func)
+            def wrapper(*args):
+                if args in cached:
+                    return cached[args]
+                result = func(*args)
+                cached[args] = result
+                return result
+            return wrapper
+        @cache
+        def fibonacci(n):
+            if n &lt; 2:
+                return n
+            return fibonacci(n-1) + fibonacci(n-2)
+      </code></pre>
+    </section>
+
+    <section class="slide" id="cache-tree">
+      <h2>The cache at work: fibonacci(5)</h2>
+      <div class="cols">
+        <svg class="tree" viewBox="-10 0 580 360" aria-label="Call tree of fibonacci(5) with a cache: each value is computed once; repeated calls are cache hits"></svg>
+        <div class="cache-side">
+          <h4>cached</h4>
+          <div class="cache-table"></div>
+          <p class="cache-count"></p>
+          <button class="replay" type="button" data-interactive>Replay</button>
+        </div>
+      </div>
+      <span class="step" data-anim="none"></span>
+      <p class="hint">Green calls are answered from <code>cached</code> without recursing. Without the cache, <code>fibonacci(5)</code> makes 15 calls.</p>
+    </section>
+
+    <!-- ================================================================ auth -->
+    <section class="slide">
+      <h2>Authentication decorator</h2>
+      <pre class="steps" style="font-size: 1.45rem"><code class="language-python">
+        # check permission
+        def require_auth(func):
+            def wrapper(*args, **kwargs):
+                if not is_authenticated():
+                    raise PermissionError()
+                return func(*args, **kwargs)
+            return wrapper
+        @require_auth
+        def sensitive_operation():
+            return "Secret"
+      </code></pre>
+      <p class="hint step">The wrapper is a guard: if the check fails, the original function never runs.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then reveal it.</p>
+    </section>
+
+    <section class="slide ex" id="ex1">
+      <h2>Exercise 1</h2>
+      <div class="stacked">
+        <pre><code class="language-python">
+          # decorator with args?
+          def repeat(n):
+              def decorator(func):
+                  def wrapper():
+                      for _ in range(n):
+                          func()
+                  return wrapper
+              return decorator
+          @repeat(2)
+          def func():
+              print("Hi")
+          func()
+          # ans: Hi (twice)
+        </code></pre>
+        <div class="wv"></div>
+      </div>
+      <span class="step wrap-step" data-anim="none"></span>
+      <span class="step wrap-step" data-anim="none"></span>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 2</h2>
+      <pre style="font-size: 2.00rem"><code class="language-python">
+        # lru_cache?
+        from functools import lru_cache
+        @lru_cache(maxsize=128)
+        def fib(n):
+            if n &lt; 2:
+                return n
+            return fib(n-1) + fib(n-2)
+        # ans: built-in caching
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 3</h2>
+      <pre style="font-size: 2.00rem"><code class="language-python">
+        # multiple decorators with args?
+        @decorator1(arg1)
+        @decorator2(arg2)
+        def func():
+            pass
+        # ans: both decorators get args
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre style="font-size: 1.30rem"><code class="language-python">
+        # decorator counting calls?
+        def count_calls(func):
+            def wrapper(*args):
+                wrapper.calls += 1
+                return func(*args)
+            wrapper.calls = 0
+            return wrapper
+        @count_calls
+        def func():
+            pass
+        func()
+        func.calls
+        # ans: 1
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 5</h2>
+      <pre class="steps" style="font-size: 1.20rem"><code class="language-python">
+        # retry decorator?
+        def retry(max_attempts):
+            def decorator(func):
+                def wrapper(*args):
+                    for attempt in range(max_attempts):
+                        try:
+                            return func(*args)
+                        except:
+                            if attempt == max_attempts-1:
+                                raise
+                return wrapper
+            return decorator
+      </code></pre>
+      <p class="hint step">Each failure is swallowed and retried; on the last attempt the bare <code>raise</code> lets the error through.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre class="steps" style="font-size: 1.20rem"><code class="language-python">
+        # validation decorator?
+        def validate(type_):
+            def decorator(func):
+                def wrapper(arg):
+                    if not isinstance(arg, type_):
+                        raise TypeError()
+                    return func(arg)
+                return wrapper
+            return decorator
+        @validate(int)
+        def double(x):
+            return x * 2
+      </code></pre>
+      <p class="hint step"><code>double(4)</code> returns 8; <code>double("4")</code> raises <code>TypeError</code> before <code>double</code> runs.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 7</h2>
+      <pre style="font-size: 2.00rem"><code class="language-python">
+        # property as decorator?
+        class MyClass:
+            @property
+            def value(self):
+                return 5
+        # ans: property is a decorator
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 8</h2>
+      <pre style="font-size: 2.00rem"><code class="language-python">
+        # classmethod as decorator?
+        class MyClass:
+            @classmethod
+            def method(cls):
+                pass
+        # ans: classmethod is a decorator
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 9</h2>
+      <pre style="font-size: 2.00rem"><code class="language-python">
+        # staticmethod as decorator?
+        class MyClass:
+            @staticmethod
+            def method():
+                pass
+        # ans: staticmethod is a decorator
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 10</h2>
+      <pre style="font-size: 2.00rem"><code class="language-python">
+        # decorator preserving signature?
+        from functools import wraps
+        def decorator(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            return wrapper
+        # ans: preserves func signature
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards">
+        <div class="card step"><h3>Arguments need a factory</h3><p><code>@d(x)</code> calls <code>d(x)</code> first; it must return the actual decorator.</p></div>
+        <div class="card step"><h3>Wrappers can keep state</h3><p>A dict in the enclosing scope (a cache) or an attribute on the wrapper (a call count) lives between calls.</p></div>
+        <div class="card step"><h3>Wrappers can say no</h3><p>Raise before calling the original to guard it; catch and retry to make it robust.</p></div>
+        <div class="card step"><h3>Built-ins</h3><p><code>lru_cache</code>, <code>property</code>, <code>classmethod</code>, <code>staticmethod</code> and <code>wraps</code> are all decorators.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ wrapper diagram
+      // wrapviz(slide, cfg) draws cfg.core inside cfg.layers (outermost first).
+      // The slide's .wrap-step elements drive it: the first wraps the function
+      // (its name tag moves to the outer box), the second calls it and a token
+      // travels in through each layer and back out, printing as it goes.
+      //   cfg.tag: the name, cfg.call: "say_hello()"
+      //   cfg.core: { body: 'print("Hello!")', out: ["Hello!"], ret: "'Hello'", times: 1 }
+      //   cfg.layers: [{ head, foot, note, before: [...], after: [...], ret: (r) => r }]
+      function wrapviz(sel, cfg) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        const wv = slide.querySelector(".wv");
+        const L = cfg.layers;
+        const escW = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        let inner = `<div class="core"><span class="tag">${escW(cfg.tag)}</span><span class="cbody">${escW(cfg.core.body)}</span></div>`;
+        for (let i = L.length - 1; i >= 0; i--) {
+          inner = `<div class="layer off" data-i="${i}"><span class="lhead">${escW(L[i].head)} <small>${escW(L[i].note)}</small></span>${inner}<span class="lfoot">${escW(L[i].foot)}</span></div>`;
+        }
+        wv.innerHTML = `<div class="wv-boxes">${inner}</div><div class="wv-side"><h4>Call</h4><div class="wv-call">-</div><h4>Output</h4><div class="wv-console"></div></div><div class="wv-token"></div>`;
+        const tag = wv.querySelector(".tag");
+        const core = wv.querySelector(".core");
+        const layers = [...wv.querySelectorAll(".layer")];
+        const con = wv.querySelector(".wv-console");
+        const callEl = wv.querySelector(".wv-call");
+        const token = wv.querySelector(".wv-token");
+        const steps = [...slide.querySelectorAll(".wrap-step")];
+        let tl;
+
+        let ret = cfg.core.ret;
+        const rets = [];
+        for (let i = L.length - 1; i >= 0; i--) {
+          if (L[i].ret) ret = L[i].ret(ret);
+          rets[i] = ret;
+        }
+        const finalRet = L.length ? rets[0] : cfg.core.ret;
+
+        function print(text, cls, anim) {
+          const d = document.createElement("div");
+          d.textContent = text;
+          if (cls) d.className = cls;
+          con.appendChild(d);
+          if (anim) gsap.from(d, { opacity: 0, x: -8, duration: 0.3 });
+        }
+        function fillConsole() {
+          L.forEach((l) => (l.before || []).forEach((t) => print(t)));
+          for (let k = 0; k < (cfg.core.times || 1); k++) (cfg.core.out || []).forEach((t) => print(t));
+          for (let i = L.length - 1; i >= 0; i--) (L[i].after || []).forEach((t) => print(t));
+          if (finalRet !== undefined) print("returns " + finalRet, "ret");
+        }
+        function setWrapped(on, animate) {
+          const home = on && L.length ? layers[0] : core;
+          layers.forEach((l) => l.classList.toggle("off", !on));
+          if (tag.parentElement === home) return;
+          const r0 = tag.getBoundingClientRect();
+          home.prepend(tag);
+          if (animate) {
+            const r1 = tag.getBoundingClientRect();
+            const k = wv.getBoundingClientRect().width / wv.offsetWidth || 1; // the canvas is scaled to the window
+            gsap.from(tag, { x: (r0.left - r1.left) / k, y: (r0.top - r1.top) / k, duration: 0.8, ease: "power2.inOut" });
+          }
+        }
+        const at = (el) => {
+          const w = wv.getBoundingClientRect();
+          const r = el.getBoundingClientRect();
+          const k = w.width / wv.offsetWidth || 1; // the canvas is scaled to the window
+          return { x: (r.right - w.left) / k + 8, y: (r.top - w.top + r.height / 2) / k - token.offsetHeight / 2 };
+        };
+        function playCall() {
+          tl = gsap.timeline();
+          const go = (el, box, text) => {
+            tl.call(() => {
+              wv.querySelectorAll(".active").forEach((a) => a.classList.remove("active"));
+              box?.classList.add("active");
+              if (text !== undefined) token.textContent = text;
+            });
+            tl.to(token, { ...at(el), opacity: 1, duration: 0.45, ease: "power2.inOut" });
+          };
+          tl.set(token, { ...at(L.length ? layers[0].querySelector(".lhead") : core), opacity: 0 });
+          tl.call(() => (token.textContent = cfg.args || "call"));
+          L.forEach((l, i) => {
+            go(layers[i].querySelector(".lhead"), layers[i]);
+            (l.before || []).forEach((t) => tl.call(() => print(t, "", true), null, "+=0.15"));
+            tl.to({}, { duration: 0.25 });
+          });
+          for (let k = 0; k < (cfg.core.times || 1); k++) {
+            if (k) {
+              tl.to(token, { x: "+=40", duration: 0.2 });
+              if (cfg.core.loopNote) tl.call(() => (token.textContent = cfg.core.loopNote(k)));
+            }
+            go(core.querySelector(".cbody"), core);
+            (cfg.core.out || []).forEach((t) => tl.call(() => print(t, "", true), null, "+=0.15"));
+          }
+          if (cfg.core.ret !== undefined) tl.call(() => (token.textContent = cfg.core.ret), null, "+=0.2");
+          tl.to({}, { duration: 0.3 });
+          for (let i = L.length - 1; i >= 0; i--) {
+            go(layers[i].querySelector(".lfoot"), layers[i], rets[i]);
+            (L[i].after || []).forEach((t) => tl.call(() => print(t, "", true), null, "+=0.15"));
+            tl.to({}, { duration: 0.25 });
+          }
+          tl.to(token, { opacity: 0, duration: 0.3 });
+          tl.call(() => {
+            wv.querySelectorAll(".active").forEach((a) => a.classList.remove("active"));
+            if (finalRet !== undefined) print("returns " + finalRet, "ret", true);
+          });
+        }
+        function render(state, animate) {
+          tl?.kill();
+          gsap.set(token, { opacity: 0 });
+          wv.querySelectorAll(".active").forEach((a) => a.classList.remove("active"));
+          setWrapped(state >= 1, animate && state === 1);
+          callEl.textContent = state >= 2 ? cfg.call : "-";
+          con.innerHTML = "";
+          if (state < 2) return;
+          if (animate) playCall();
+          else fillConsole();
+        }
+        const state = () => steps.filter((s) => s.classList.contains("shown")).length;
+        Deck.scene(slide, {
+          enter: () => render(0, false),
+          leave: () => tl?.kill(),
+          step: (s, n, els, d) => els.some((e) => steps.includes(e)) && queueMicrotask(() => render(state(), d?.dir > 0 && Deck.step === n)),
+          unstep: (s, n, els) => els.some((e) => steps.includes(e)) && queueMicrotask(() => render(state(), false)),
+        });
+      }
+
+      wrapviz("#factory", {
+        tag: "greet",
+        call: "greet()",
+        core: { body: 'print("Hello")', out: ["Hello"], times: 3, loopNote: (k) => `loop ${k + 1}` },
+        layers: [{ head: "for _ in range(times):", foot: "return result", note: "wrapper, times = 3" }],
+      });
+      wrapviz("#ex1", {
+        tag: "func",
+        call: "func()",
+        core: { body: 'print("Hi")', out: ["Hi"], times: 2, loopNote: (k) => `loop ${k + 1}` },
+        layers: [{ head: "for _ in range(n):", foot: "(returns None)", note: "wrapper, n = 2" }],
+      });
+
+      // ------------------------------------------------------------ memoised fibonacci tree
+      {
+        const slide = document.querySelector("#cache-tree");
+        const svg = slide.querySelector(".tree");
+        const NS = "http://www.w3.org/2000/svg";
+        // id, n, x, y, parent, hit; listed in the order the calls happen
+        const NODES = [
+          ["a", 5, 350, 30, null, false],
+          ["b", 4, 250, 105, "a", false],
+          ["c", 3, 160, 180, "b", false],
+          ["d", 2, 100, 255, "c", false],
+          ["e", 1, 40, 330, "d", false],
+          ["f", 0, 170, 330, "d", false],
+          ["g", 1, 250, 255, "c", true],
+          ["h", 2, 340, 180, "b", true],
+          ["i", 3, 450, 105, "a", true],
+        ];
+        const fib = (n) => (n < 2 ? n : fib(n - 1) + fib(n - 2));
+        const byId = Object.fromEntries(NODES.map((x) => [x[0], x]));
+        svg.innerHTML =
+          NODES.filter((x) => x[4]).map(([id, , x, y, p]) => `<line class="edge" data-id="${id}" x1="${byId[p][2]}" y1="${byId[p][3] + 18}" x2="${x}" y2="${y - 18}"/>`).join("") +
+          NODES.map(([id, n, x, y, , hit]) => `<g class="node${hit ? " hit" : ""}" data-id="${id}" transform="translate(${x} ${y})"><rect x="-44" y="-18" width="88" height="36" rx="10"/><text y="-2">fib(${n})</text><text class="ret" x="50" y="0" style="text-anchor: start">${hit ? "hit → " : "→ "}${fib(n)}</text></g>`).join("");
+        // Events in time order: enter a node, or finish it (its value is cached)
+        const EVENTS = [];
+        const visit = (id) => {
+          const [, n, , , , hit] = byId[id];
+          EVENTS.push({ enter: id });
+          if (!hit && n >= 2) NODES.filter((x) => x[4] === id).forEach((c) => visit(c[0]));
+          EVENTS.push({ done: id, store: hit ? null : n });
+        };
+        visit("a");
+        const table = slide.querySelector(".cache-table");
+        const count = slide.querySelector(".cache-count");
+        let tl;
+
+        function show(k, animate) {
+          // state after the first k events
+          const entered = new Set();
+          const doneSet = new Set();
+          const stored = [];
+          EVENTS.slice(0, k).forEach((e) => {
+            if (e.enter) entered.add(e.enter);
+            if (e.done) {
+              doneSet.add(e.done);
+              if (e.store !== null) stored.push(e.store);
+            }
+          });
+          const cur = [...entered].filter((id) => !doneSet.has(id)).pop();
+          svg.querySelectorAll(".node, .edge").forEach((el) => {
+            const id = el.dataset.id;
+            const on = entered.has(id);
+            el.style.opacity = on ? 1 : 0;
+            if (el.classList.contains("node")) {
+              el.classList.toggle("now", id === cur);
+              el.querySelector(".ret").style.opacity = doneSet.has(id) ? 1 : 0;
+            }
+          });
+          table.innerHTML = stored.map((n) => `<span>(${n},): ${fib(n)}</span>`).join("");
+          const calls = entered.size;
+          const hits = [...entered].filter((id) => byId[id][5]).length;
+          count.innerHTML = `calls: <b>${calls}</b> · cache hits: <b>${hits}</b>`;
+          const last = EVENTS[k - 1];
+          if (animate && last?.enter) gsap.from(svg.querySelector(`.node[data-id="${last.enter}"]`), { scale: 0.3, opacity: 0, duration: 0.35, ease: "back.out(2)", transformOrigin: "50% 50%" });
+          if (animate && last?.store != null) gsap.from(table.lastElementChild, { scale: 0.4, opacity: 0, duration: 0.35 });
+        }
+        function play(instant) {
+          tl?.kill();
+          if (instant) return show(EVENTS.length, false);
+          tl = gsap.timeline();
+          for (let k = 0; k <= EVENTS.length; k++) tl.call(() => show(k, true), null, k * 0.45);
+        }
+        slide.querySelector(".replay").addEventListener("click", () => play(false));
+        const go = slide.querySelector(".step");
+        Deck.scene(slide, {
+          enter: () => {
+            tl?.kill();
+            show(0, false);
+          },
+          leave: () => tl?.kill(),
+          step: (s, n, els, d) => els.includes(go) && queueMicrotask(() => play(d?.dir < 0)),
+          unstep: (s, n, els) => {
+            if (els.includes(go)) {
+              tl?.kill();
+              show(0, false);
+            }
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

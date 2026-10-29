@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Exceptions</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Tracer: code lines light up in the order Python runs them ---------- */
+      pre code,
+      .mem,
+      .viz text {
+        font-variant-ligatures: none;
+      }
+
+      .tracer {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 20rem;
+        gap: 2rem;
+        align-items: start;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .tracer pre {
+        width: 100%;
+        min-width: 0;
+        font-size: 1.5rem;
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.42;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.3;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre.trace .line.boom {
+        background: linear-gradient(90deg, rgba(248, 113, 113, 0.32), rgba(248, 113, 113, 0.05));
+        box-shadow: inset 3px 0 0 var(--red);
+      }
+
+      pre.trace .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.72em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        white-space: nowrap;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border: 1px solid rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f,
+      .tb.x {
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb.n {
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      /* ---------- Memory panel beside traced code ---------- */
+      .mem {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem 1.1rem;
+        border-radius: var(--radius);
+        background: var(--glass);
+        border: 1px solid var(--border);
+        font-size: 1.15rem;
+      }
+
+      .mem h4 {
+        margin: 0 0 0.35rem;
+        font: 600 0.8rem var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .mem .slots {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .slot {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font-mono);
+      }
+
+      .mem .slot b {
+        min-width: 3.2rem;
+        font-weight: 500;
+        color: var(--violet-soft);
+        text-align: right;
+      }
+
+      .mem .slot span {
+        flex: 1;
+        padding: 0.12rem 0.55rem;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        background: rgba(139, 92, 246, 0.12);
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console {
+        min-height: 1.9rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.35);
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        color: var(--green);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .mem .console div.err {
+        color: var(--red);
+      }
+
+      .mem .frames {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.3rem;
+        min-height: 1.9rem;
+      }
+
+      .mem .frame {
+        padding: 0.25rem 0.6rem;
+        border-radius: 8px;
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.08);
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .mem .frame.top {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.18);
+      }
+
+      .mem .frame.hurt {
+        border-color: var(--red);
+        background: rgba(248, 113, 113, 0.16);
+      }
+
+      .mem .frame em {
+        display: block;
+        font-style: normal;
+        font-size: 0.85em;
+        color: var(--muted);
+      }
+
+      .mem .exc {
+        align-self: flex-start;
+        padding: 0.15rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--red);
+        background: rgba(248, 113, 113, 0.18);
+        color: #fecaca;
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+
+      .mem .exc.caught {
+        border-color: var(--green);
+        background: rgba(134, 239, 172, 0.14);
+        color: var(--green);
+      }
+
+      .replay {
+        align-self: flex-end;
+        padding: 0.25rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.95rem var(--font);
+        cursor: pointer;
+      }
+
+      .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      /* ---------- Value chips ---------- */
+      .try {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        font-size: 1.2rem;
+        color: var(--muted);
+      }
+
+      .try.step:not(.shown) {
+        pointer-events: none;
+      }
+
+      .chip {
+        min-width: 3rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1.25rem var(--font-mono);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .hint {
+        font-size: 1.25rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      .slide pre {
+        width: auto;
+        min-width: min(100%, 24rem);
+      }
+
+      #travel .tracer {
+        grid-template-columns: minmax(0, 1fr) 23rem;
+      }
+
+      #travel .tracer pre {
+        font-size: 1.25rem;
+      }
+
+      #travel .mem {
+        font-size: 1.1rem;
+        min-height: 18rem;
+        gap: 0.8rem;
+      }
+
+      #travel {
+        gap: 0.8rem;
+      }
+
+      #travel .hint {
+        font-size: 1.15rem;
+        margin: 0;
+      }
+
+      #travel .mem .frame em {
+        display: inline;
+        margin-left: 0.6em;
+      }
+
+      #files pre {
+        width: min(100%, 52rem);
+        font-size: 1.3rem;
+      }
+
+      #recap .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: min(100%, 70rem) !important;
+      }
+
+      #recap .card p {
+        font-size: 1.2rem;
+      }
+
+      .slide.ex pre {
+        width: min(100%, 64rem);
+        font-size: 2.1rem;
+      }
+
+      .slide pre.mid {
+        width: min(100%, 60rem);
+        font-size: 1.6rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · errors</span>
+      <h1 class="grad-each"><span>Exceptions</span></h1>
+      <p>What Python does when something goes wrong, the errors you will meet most often, and how to raise your own.</p>
+    </section>
+
+    <!-- ================================================================ common -->
+    <section class="slide" id="value">
+      <h2>Common exceptions: ValueError</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # ValueError - invalid value
+          try:
+              int("abc")
+          except ValueError:
+              print("Cannot convert to int")
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step go" data-anim="none"></span>
+      <p class="hint">Right type (a string), but a value <code>int()</code> cannot convert.</p>
+    </section>
+
+    <section class="slide" id="type">
+      <h2>Common exceptions: TypeError</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # TypeError - wrong type
+          try:
+              "2" + 2
+          except TypeError:
+              print("Type mismatch")
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step go" data-anim="none"></span>
+      <p class="hint">A string and an int cannot be added.</p>
+    </section>
+
+    <section class="slide" id="key">
+      <h2>Common exceptions: KeyError</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # KeyError - missing key
+          try:
+              d = {"a": 1}
+              value = d["b"]
+          except KeyError:
+              print("Key not found")
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step go" data-anim="none"></span>
+    </section>
+
+    <section class="slide" id="index">
+      <h2>Common exceptions: IndexError</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # IndexError - invalid index
+          try:
+              lst = [1, 2, 3]
+              value = lst[10]
+          except IndexError:
+              print("Index out of range")
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step go" data-anim="none"></span>
+    </section>
+
+    <section class="slide" id="attr">
+      <h2>Common exceptions: AttributeError</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # AttributeError - no attribute
+          try:
+              x = 5
+              x.append(1)
+          except AttributeError:
+              print("Attribute not found")
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step go" data-anim="none"></span>
+      <p class="hint">An int has no <code>append</code> method.</p>
+    </section>
+
+    <!-- ================================================================ files -->
+    <section class="slide" id="files">
+      <h2>File exceptions</h2>
+      <pre class="steps"><code class="language-python">
+        # FileNotFoundError
+        try:
+            with open("missing.txt") as f:
+                pass
+        except FileNotFoundError:
+            print("File not found")
+        # PermissionError
+        try:
+            with open("/root/file.txt", "w") as f:
+                pass
+        except PermissionError:
+            print("Permission denied")
+      </code></pre>
+      <p class="hint step">The file does not exist, or it exists but you are not allowed to open it that way.</p>
+    </section>
+
+    <!-- ================================================================ raise -->
+    <section class="slide">
+      <h2>Raising exceptions</h2>
+      <pre class="steps mid"><code class="language-python">
+        # raise an exception
+        def validate_age(age):
+            if age &lt; 0:
+                raise ValueError("Age cannot be negative")
+            return age
+      </code></pre>
+      <p class="hint step"><code>raise</code> stops the function immediately; nothing after it runs.</p>
+    </section>
+
+    <section class="slide" id="travel">
+      <h2>How an exception travels up the call stack</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          def validate_age(age):
+              if age &lt; 0:
+                  raise ValueError(
+                      "Age cannot be negative")
+              return age
+          def register(age):
+              return validate_age(age)
+          try:
+              register(-5)
+          except ValueError as e:
+              print("Rejected:", e)
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <div class="try" data-interactive><code>call with</code></div>
+      <p class="hint">No matching <code>except</code> in a function? It is abandoned and the exception moves on to its caller.</p>
+    </section>
+
+    <section class="slide" id="reraise">
+      <h2>Re-raising exceptions</h2>
+      <div class="tracer">
+        <pre class="trace"><code class="language-python">
+          # re-raise same exception
+          try:
+              result = 10 / 0
+          except ZeroDivisionError:
+              print("Logging error...")
+              raise
+        </code></pre>
+        <div class="mem"></div>
+      </div>
+      <span class="step go" data-anim="none"></span>
+      <p class="hint">A bare <code>raise</code> inside <code>except</code> sends the same exception on up, after you have logged it.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Which exception, if any?</p>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 1</h2>
+      <pre><code class="language-python">
+        # ValueError when?
+        int("3.14")
+        # ans: ValueError
+      </code></pre>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 2</h2>
+      <pre><code class="language-python">
+        # TypeError example?
+        len(5)
+        # ans: TypeError (int has no len)
+      </code></pre>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 3</h2>
+      <pre><code class="language-python">
+        # KeyError vs get?
+        d = {"a": 1}
+        d["b"]
+        # ans: KeyError
+        d.get("b")
+        # ans: None
+      </code></pre>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        # IndexError negative?
+        lst = [1, 2]
+        lst[-10]
+        # ans: IndexError
+      </code></pre>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 5</h2>
+      <pre><code class="language-python">
+        # NameError?
+        print(undefined_variable)
+        # ans: NameError
+      </code></pre>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        # ZeroDivisionError?
+        5 / 0
+        # ans: ZeroDivisionError
+        5 // 0
+        # ans: ZeroDivisionError
+      </code></pre>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 7</h2>
+      <pre><code class="language-python">
+        # raise with message?
+        raise ValueError("Custom message")
+        # ans: raises with message
+      </code></pre>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 8</h2>
+      <pre><code class="language-python">
+        # raise without exception?
+        try:
+            raise
+        except:
+            pass
+        # ans: RuntimeError (no active exception)
+      </code></pre>
+      <p class="hint step">A bare <code>raise</code> needs an exception being handled; here there is none, so Python raises <code>RuntimeError</code>, which the bare <code>except</code> then swallows.</p>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 9</h2>
+      <pre><code class="language-python">
+        # exception hierarchy?
+        try:
+            x = 1 / 0
+        except Exception:
+            print("Caught")
+        # ans: catches ZeroDivisionError
+      </code></pre>
+    </section>
+
+    <section class="slide ex">
+      <h2>Exercise 10</h2>
+      <pre><code class="language-python">
+        # assert raises what?
+        assert False, "Message"
+        # ans: AssertionError: Message
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3>Name the mistake</h3><p><code>ValueError</code> bad value, <code>TypeError</code> wrong type, <code>KeyError</code> missing key, <code>IndexError</code> bad position, <code>AttributeError</code> no such attribute, <code>NameError</code> unknown name.</p></div>
+        <div class="card step"><h3>Exceptions travel up</h3><p>An exception leaves each function until some <code>try</code> has a matching <code>except</code>; if none does, the program stops with a traceback.</p></div>
+        <div class="card step"><h3><code>raise</code></h3><p>Raise your own with a message; a bare <code>raise</code> in an <code>except</code> re-raises the current one.</p></div>
+        <div class="card step"><h3><code>except Exception</code></h3><p>Catches almost everything, because most exceptions inherit from <code>Exception</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ------------------------------------------------------------ tracer
+      // tracer(slide, frames, opts) replays a list of frames over the slide's
+      // <pre class="trace">, lighting lines in the order Python runs them and
+      // filling the slide's .mem panel. A frame is
+      //   { l: line (1-based), n: "note badge", c: true/false (condition badge),
+      //     v: { name: "repr" or null to delete }, o: "printed" or [...],
+      //     e: "error text for the output", s: ["<module>", "f(x=1)"] (call stack),
+      //     x: "ExceptionName" (raised; "" clears), k: true (exception caught) }
+      // It plays when the slide's .step.go (or its first answer line) is revealed.
+      const STEP = 0.55; // seconds per frame (opts.step overrides)
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function tracer(sel, frames, opts = {}) {
+        const slide = typeof sel === "string" ? document.querySelector(sel) : sel;
+        if (opts.chips && !frames.length) frames = opts.chips.frames(opts.chips.values[0]);
+        const pre = slide.querySelector("pre.trace");
+        const lines = [...pre.querySelectorAll(".line")];
+        lines.forEach((l) => l.classList.toggle("cmt", /^\s*#/.test(l.textContent) && !l.classList.contains("answer")));
+        const T = { slide, pre, lines, frames, tl: null };
+        const dt = opts.step || STEP;
+        const mem = slide.querySelector(".mem");
+        if (mem) {
+          const all = opts.chips ? opts.chips.values.flatMap((v) => opts.chips.frames(v)) : frames;
+          const has = (key) => all.some((f) => key.split(" ").some((q) => f[q] !== undefined));
+          const secs = opts.sections || [...(has("v") ? ["vars"] : []), ...(has("s") ? ["stack"] : []), ...(has("o e") || opts.chips ? ["out"] : [])];
+          const box = { vars: "slots", stack: "frames", out: "console" };
+          const title = { vars: opts.varsTitle || "Variables", stack: "Call stack", out: "Output" };
+          mem.innerHTML =
+            secs.map((s) => `<div class="sec-${s}"><h4>${title[s]}</h4><div class="${box[s]}"></div></div>`).join("") +
+            `<button class="replay" type="button" data-interactive>Replay</button>`;
+          mem.querySelector(".replay").addEventListener("click", () => T.play(false));
+        }
+        const $ = (q) => mem?.querySelector(q);
+
+        function stateAt(k) {
+          const st = { v: {}, o: [], s: null, x: "", caught: false };
+          for (let i = 0; i <= k; i++) {
+            const f = T.frames[i];
+            for (const [name, val] of Object.entries(f.v || {})) {
+              if (val === null) delete st.v[name];
+              else st.v[name] = val;
+            }
+            for (const o of [].concat(f.o ?? [])) st.o.push({ t: o });
+            if (f.e) st.o.push({ t: f.e, err: true });
+            if (f.s) st.s = f.s;
+            if (f.x !== undefined) {
+              st.x = f.x;
+              st.caught = false;
+            }
+            if (f.k) st.caught = true;
+          }
+          return st;
+        }
+
+        function render(k, anim) {
+          if (!mem) return;
+          const st = stateAt(k);
+          const slots = $(".slots");
+          if (slots) {
+            const have = new Map([...slots.children].map((el) => [el.dataset.name, el]));
+            for (const [name, el] of have) if (!(name in st.v)) el.remove();
+            for (const [name, val] of Object.entries(st.v)) {
+              let el = have.get(name);
+              if (!el) {
+                el = document.createElement("div");
+                el.className = "slot";
+                el.dataset.name = name;
+                el.innerHTML = `<b>${esc(name)}</b><span></span>`;
+                slots.appendChild(el);
+                if (anim) gsap.from(el, { opacity: 0, x: -14, duration: 0.35 });
+              }
+              const span = el.querySelector("span");
+              if (span.textContent !== val) {
+                span.textContent = val;
+                if (anim) gsap.fromTo(span, { backgroundColor: "rgba(34,211,238,0.5)" }, { backgroundColor: "rgba(139,92,246,0.12)", duration: 0.9 });
+              }
+            }
+          }
+          const con = $(".console");
+          if (con) {
+            if (con.children.length > st.o.length) con.innerHTML = "";
+            for (let i = con.children.length; i < st.o.length; i++) {
+              const d = document.createElement("div");
+              d.textContent = st.o[i].t;
+              if (st.o[i].err) d.className = "err";
+              con.appendChild(d);
+              if (anim) gsap.from(d, { opacity: 0, y: 8, duration: 0.3 });
+            }
+          }
+          const fr = $(".frames");
+          if (fr) {
+            const want = st.s || [];
+            if (!anim) fr.querySelectorAll(".gone").forEach((el) => el.remove());
+            const have = [...fr.children].filter((el) => !el.classList.contains("gone"));
+            let same = 0;
+            while (same < want.length && same < have.length && have[same].dataset.key === want[same]) same++;
+            // popped frames slide away (in red while an exception unwinds them)
+            have.slice(same).forEach((el) => {
+              if (!anim) return el.remove();
+              el.classList.add("gone");
+              el.classList.toggle("hurt", !!st.x && !st.caught);
+              gsap.to(el, { opacity: 0, x: 40, duration: 0.4, ease: "power1.in", onComplete: () => el.remove() });
+            });
+            want.slice(same).forEach((name) => {
+              const el = document.createElement("div");
+              el.className = "frame";
+              el.dataset.key = name;
+              const [head, sub] = name.split("|");
+              el.innerHTML = esc(head) + (sub ? `<em>${esc(sub)}</em>` : "");
+              fr.appendChild(el);
+              if (anim) gsap.from(el, { opacity: 0, y: -16, duration: 0.35, ease: "back.out(1.6)" });
+            });
+            [...fr.children].filter((el) => !el.classList.contains("gone")).forEach((el, i, all) => {
+              el.classList.toggle("top", i === all.length - 1);
+              el.classList.toggle("hurt", i === all.length - 1 && !!st.x && !st.caught);
+            });
+          }
+          let exc = $(".exc");
+          if (st.x) {
+            if (!exc) {
+              exc = document.createElement("div");
+              exc.className = "exc";
+              const at = (fr || slots || con)?.parentElement;
+              at ? at.after(exc) : mem.prepend(exc);
+              if (anim) gsap.from(exc, { scale: 0.4, opacity: 0, duration: 0.35, ease: "back.out(2)" });
+            }
+            exc.textContent = (st.caught ? "caught: " : "raised: ") + st.x;
+            exc.classList.toggle("caught", st.caught);
+          } else exc?.remove();
+        }
+
+        function mark(k, anim) {
+          const f = T.frames[k];
+          lines.forEach((l) => l.classList.remove("now", "boom"));
+          const el = lines[f.l - 1];
+          if (!el) return;
+          el.classList.add("run", f.x ? "boom" : "now");
+          el.querySelector(".tb")?.remove();
+          const text = f.c !== undefined ? (f.n ? `${f.n} → ` : "") + (f.c ? "True" : "False") : f.x ? f.x.split(":")[0] : f.n;
+          if (text) {
+            const b = document.createElement("span");
+            b.className = "tb " + (f.c !== undefined ? (f.c ? "t" : "f") : f.x ? "x" : "n");
+            b.textContent = text;
+            el.appendChild(b);
+            if (anim) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+          }
+        }
+
+        T.reset = () => {
+          T.tl?.kill();
+          pre.classList.remove("tracing", "traced");
+          lines.forEach((l) => {
+            l.classList.remove("run", "now", "boom");
+            l.querySelector(".tb")?.remove();
+          });
+          if (mem) {
+            mem.querySelectorAll(".slots, .console, .frames").forEach((b) => (b.innerHTML = ""));
+            mem.querySelector(".exc")?.remove();
+            if (opts.init) render(-1, false);
+          }
+          opts.onReset?.(T);
+        };
+
+        T.play = (instant) => {
+          T.reset();
+          pre.classList.add("tracing");
+          const done = () => {
+            lines.forEach((l) => l.classList.remove("now"));
+            pre.classList.replace("tracing", "traced");
+          };
+          if (instant) {
+            T.frames.forEach((f, k) => mark(k, false));
+            render(T.frames.length - 1, false);
+            opts.onFrame?.(T, T.frames.length - 1, true);
+            done();
+            const last = T.frames[T.frames.length - 1];
+            if (last?.x) lines[last.l - 1]?.classList.add("boom");
+            return;
+          }
+          const tl = gsap.timeline();
+          T.frames.forEach((f, k) =>
+            tl.call(() => {
+              mark(k, true);
+              render(k, true);
+              opts.onFrame?.(T, k, false);
+            }, null, k * dt)
+          );
+          tl.call(done, null, T.frames.length * dt);
+          T.tl = tl;
+        };
+
+        const go = slide.querySelector(".step.go") || pre.querySelector(".line.answer");
+        if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+
+        if (opts.chips) {
+          const C = opts.chips;
+          const box = slide.querySelector(".try");
+          box.insertAdjacentHTML("beforeend", C.values.map((v, i) => `<button class="chip" type="button" data-i="${i}">${esc(C.show ? C.show(v) : v)}</button>`).join(""));
+          T.choose = (i, run) => {
+            const v = C.values[i];
+            T.frames = C.frames(v);
+            C.patch?.(T, v);
+            box.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", +c.dataset.i === i));
+            if (go?.classList.contains("answer")) go.style.setProperty("--ans-delay", T.frames.length * dt + "s");
+            if (run) T.play(run === "instant");
+          };
+          box.addEventListener("click", (e) => {
+            const b = e.target.closest(".chip");
+            if (b) T.choose(+b.dataset.i, true);
+          });
+        }
+
+        Deck.scene(slide, {
+          enter() {
+            if (opts.chips) T.choose(0, false);
+            T.reset();
+            if (!go && opts.auto !== false) T.play(false);
+          },
+          leave: () => T.reset(),
+          step(s, n, els, d) {
+            // several steps at once (a ↓ jump) or going back: show the end state
+            if (go && els.includes(go)) queueMicrotask(() => T.play(d?.dir < 0 || Deck.step > n));
+          },
+          unstep(s, n, els) {
+            if (go && els.includes(go)) T.reset();
+          },
+        });
+        return T;
+      }
+
+      // try at line t, error at line r, handler at line h, print at line p
+      const caught = (r, exc, h, out, pre = []) => [
+        { l: 2, n: "try" },
+        ...pre,
+        { l: r, x: exc },
+        { l: h, k: true, n: "matches" },
+        { l: h + 1, o: out },
+      ];
+
+      tracer("#value", caught(3, "ValueError: invalid literal for int() with base 10: 'abc'", 4, "Cannot convert to int"));
+      tracer("#type", caught(3, 'TypeError: can only concatenate str (not "int") to str', 4, "Type mismatch"));
+      tracer("#key", caught(4, "KeyError: 'b'", 5, "Key not found", [{ l: 3, v: { d: "{'a': 1}" } }]));
+      tracer("#index", caught(4, "IndexError: list index out of range", 5, "Index out of range", [{ l: 3, v: { lst: "[1, 2, 3]" } }]));
+      tracer("#attr", caught(4, "AttributeError: 'int' object has no attribute 'append'", 5, "Attribute not found", [{ l: 3, v: { x: "5" } }]));
+
+      tracer("#reraise", [
+        { l: 2, n: "try" },
+        { l: 3, x: "ZeroDivisionError: division by zero" },
+        { l: 4, k: true, n: "matches" },
+        { l: 5, o: "Logging error..." },
+        { l: 6, n: "raise it again", x: "ZeroDivisionError: division by zero", e: "Traceback ... ZeroDivisionError: division by zero" },
+      ]);
+
+      // ------------------------------------------------------------ an exception unwinding the stack
+      const M = "<module>";
+      const fn = (n) => `<function ${n}>`;
+      tracer("#travel", [], {
+        step: 0.6,
+        sections: ["stack", "out"],
+        chips: {
+          values: [-5, 30],
+          show: (v) => `register(${v})`,
+          patch(T, v) {
+            T.lines[8].innerHTML = `    register(<span class="hljs-number">${v}</span>)`;
+          },
+          frames(v) {
+            const reg = `register()|age = ${v}`;
+            const val = `validate_age()|age = ${v}`;
+            const head = [
+              { l: 1, n: "define", v: { validate_age: fn("validate_age") }, s: [M] },
+              { l: 6, n: "define", v: { register: fn("register") } },
+              { l: 8, n: "try" },
+              { l: 9, n: "call", s: [M, reg] },
+              { l: 7, n: "call", s: [M, reg, val] },
+              { l: 2, c: v < 0, n: `${v} < 0` },
+            ];
+            if (v >= 0)
+              return [...head, { l: 5, n: `return ${v}` }, { l: 7, n: `return ${v}`, s: [M, reg] }, { l: 9, n: `→ ${v}`, s: [M] }, { l: 10, n: "skipped" }];
+            return [
+              ...head,
+              { l: 3, x: "ValueError: Age cannot be negative" },
+              { l: 7, n: "no try: leave", s: [M, reg] },
+              { l: 9, n: "back in try", s: [M] },
+              { l: 10, k: true, n: "matches", v: { e: "ValueError('Age cannot be negative')" } },
+              { l: 11, o: "Rejected: Age cannot be negative" },
+            ];
+          },
+        },
+      });
+
+      // ------------------------------------------------------------ cover
+      Deck.scene("#title", {
+        enter(s) {
+          gsap.from(s.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(s.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

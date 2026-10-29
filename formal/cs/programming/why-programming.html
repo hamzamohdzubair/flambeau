@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Why We Need Programming</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- The bridge: idea -> code -> bits ---------- */
+      .bridge {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .bridge .end {
+        display: grid;
+        gap: 0.5rem;
+        justify-items: center;
+        padding: 1.2rem 1rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--glass);
+        text-align: center;
+        min-height: 14rem;
+        align-content: center;
+      }
+
+      .bridge .end small {
+        font: 500 0.85rem var(--font-mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .bridge .idea {
+        font-size: 1.6rem;
+        color: var(--text);
+      }
+
+      .bridge .code {
+        font: 500 2.1rem var(--font-mono);
+        white-space: nowrap;
+        color: #c4b5fd;
+      }
+
+      .bridge .bits {
+        font: 500 1.2rem var(--font-mono);
+        white-space: nowrap;
+        color: var(--green);
+        letter-spacing: 0.06em;
+        line-height: 1.5;
+      }
+
+      .bridge .arrow {
+        width: 4rem;
+        height: 2px;
+        background: var(--gradient);
+        position: relative;
+      }
+
+      .bridge .arrow::after {
+        content: "";
+        position: absolute;
+        right: -2px;
+        top: -5px;
+        border-left: 10px solid #06b6d4;
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+      }
+
+      .bridge .pulse {
+        position: absolute;
+        top: -4px;
+        left: 0;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #f0abfc;
+        box-shadow: 0 0 12px #ec4899;
+        opacity: 0;
+      }
+
+      .num {
+        display: inline-block;
+        margin-right: 0.5rem;
+        color: var(--faint);
+        -webkit-text-fill-color: var(--faint);
+      }
+
+      .cards .card p,
+      .langs .card p {
+        margin-top: 0.3rem;
+        font-size: 1.3rem;
+      }
+
+      #conclusion .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 56rem;
+      }
+
+      #conclusion .card p {
+        margin: 0;
+        font-size: 1.45rem;
+        color: var(--text);
+      }
+
+      .langs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+        gap: 1rem;
+        width: min(100%, 62rem);
+      }
+
+      .langs .card h3 {
+        font-family: var(--font-mono);
+      }
+
+      /* Point lists: one glass row per point, big enough to read from the back */
+      .slide > ul {
+        display: grid;
+        gap: 1rem;
+        width: 56rem;
+        padding: 0;
+        list-style: none;
+        font-size: 1.45rem;
+      }
+
+      .slide > ul > li {
+        margin: 0;
+        padding: 1.1rem 1.6rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--violet-soft);
+        background: var(--glass);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Programming · concepts</span>
+      <h1 class="grad-each"><span>Why</span> <span>We</span> <span>Need</span> <span>Programming</span> <span>Languages</span></h1>
+      <p>Eight reasons we write code in languages instead of in the computer's own zeros and ones.</p>
+    </section>
+
+    <!-- ================================================================ bridge -->
+    <section class="slide" id="bridge">
+      <h2>The need for programming languages</h2>
+      <p class="lead center">Programming languages are a bridge between <strong>human thinking</strong> and <strong>machine execution</strong>.</p>
+      <div class="bridge">
+        <div class="end"><small>Human thinking</small><span class="idea">“add 5 and 3, call it x”</span></div>
+        <div class="arrow"><span class="pulse"></span></div>
+        <div class="end step" data-step="1"><small>Programming language</small><span class="code">x = 5 + 3</span></div>
+        <div class="arrow"><span class="pulse"></span></div>
+        <div class="end step" data-step="2"><small>Machine code</small><span class="bits">10110101 00000101<br />00000011</span></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ 1 -->
+    <section class="slide">
+      <h2><span class="num">1</span>Abstraction from machine code</h2>
+      <div class="cards">
+        <div class="card step"><h3>Problem</h3><p>Computers only understand binary (0s and 1s).</p></div>
+        <div class="card step"><h3>Solution</h3><p>Programming languages provide human-readable syntax.</p></div>
+        <div class="card step"><h3>Benefit</h3><p>Write <code>x = 5 + 3</code> instead of <code>10110101 00000101 00000011</code>.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ 2 -->
+    <section class="slide">
+      <h2><span class="num">2</span>Productivity and efficiency</h2>
+      <ul>
+        <li class="step"><strong>Faster development</strong>: express complex operations in fewer lines</li>
+        <li class="step"><strong>Code reusability</strong>: functions, libraries and modules</li>
+        <li class="step"><strong>Fewer errors</strong>: high-level languages catch many errors automatically</li>
+        <li class="step">One line of Python can replace hundreds of lines of assembly</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ 3 -->
+    <section class="slide">
+      <h2><span class="num">3</span>Platform independence</h2>
+      <ul>
+        <li class="step"><strong>Write once, run anywhere</strong>: the same code works on different hardware</li>
+        <li class="step"><strong>Abstraction layers</strong>: the language handles hardware-specific details</li>
+        <li class="step"><strong>Example</strong>: Python code runs on Windows, Mac and Linux without changes</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ 4 -->
+    <section class="slide">
+      <h2><span class="num">4</span>Problem-solving at scale</h2>
+      <ul>
+        <li class="step"><strong>Complex systems</strong>: modern software has millions of lines of code</li>
+        <li class="step"><strong>Team collaboration</strong>: a standard syntax lets many developers work together</li>
+        <li class="step"><strong>Maintainability</strong>: code can be understood and modified years later</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ 5 -->
+    <section class="slide">
+      <h2><span class="num">5</span>Specialised tools for different tasks</h2>
+      <p class="center">Different languages excel at different tasks:</p>
+      <div class="langs">
+        <div class="card step"><h3>Python</h3><p>Data science, AI/ML, automation</p></div>
+        <div class="card step"><h3>JavaScript</h3><p>Web development</p></div>
+        <div class="card step"><h3>C / C++</h3><p>System programming, performance-critical applications</p></div>
+        <div class="card step"><h3>SQL</h3><p>Database management</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ 6 -->
+    <section class="slide">
+      <h2><span class="num">6</span>Automation and repeatability</h2>
+      <ul>
+        <li class="step"><strong>Automate repetitive tasks</strong>: let computers do the boring work</li>
+        <li class="step"><strong>Consistency</strong>: the same input always produces the same output</li>
+        <li class="step"><strong>Scalability</strong>: process millions of items as easily as one</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ 7 -->
+    <section class="slide">
+      <h2><span class="num">7</span>Innovation and creativity</h2>
+      <ul>
+        <li class="step"><strong>Build new tools</strong>: create applications that solve real problems</li>
+        <li class="step"><strong>Rapid prototyping</strong>: test ideas quickly</li>
+        <li class="step"><strong>Democratisation</strong>: anyone can learn to create software</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ 8 -->
+    <section class="slide">
+      <h2><span class="num">8</span>Economic and societal impact</h2>
+      <ul>
+        <li class="step"><strong>Job creation</strong>: software development is a growing field</li>
+        <li class="step"><strong>Digital transformation</strong>: every industry needs software</li>
+        <li class="step"><strong>Global connectivity</strong>: apps and platforms connect billions of people</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ without -->
+    <section class="slide">
+      <h2>Without programming languages…</h2>
+      <ul>
+        <li class="step">We would be writing in binary or assembly (extremely tedious)</li>
+        <li class="step">Software development would be 100× slower</li>
+        <li class="step">Modern applications (web, mobile, AI) would not exist</li>
+        <li class="step">Only hardware engineers could write code</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ conclusion -->
+    <section class="slide" id="conclusion">
+      <h2>Conclusion</h2>
+      <p class="lead center">Programming languages are essential tools that:</p>
+      <div class="cards">
+        <div class="card step"><p>Make computers accessible to humans</p></div>
+        <div class="card step"><p>Enable rapid innovation and development</p></div>
+        <div class="card step"><p>Power the modern digital world</p></div>
+        <div class="card step"><p>Transform ideas into reality</p></div>
+      </div>
+      <p class="center muted step">Next: <a href="highvslow.html">high-level vs low-level languages</a>.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const slide = document.querySelector("#bridge");
+      const pulses = slide.querySelectorAll(".pulse");
+      const bits = slide.querySelector(".bits");
+      const FINAL = bits.innerHTML;
+      let tw = [];
+
+      // A pulse runs along arrow k, then the next box resolves
+      function fire(k) {
+        const p = pulses[k];
+        const w = p.parentElement.clientWidth;
+        tw.push(gsap.fromTo(p, { x: -6, opacity: 1 }, { x: w - 4, duration: 0.6, ease: "power1.in", onComplete: () => gsap.to(p, { opacity: 0, duration: 0.2 }) }));
+      }
+
+      // Machine code "assembles" itself: random bits settle left to right
+      function scramble() {
+        const target = "10110101 00000101\n00000011";
+        const st = { k: 0 };
+        tw.push(
+          gsap.to(st, {
+            k: target.length,
+            duration: 1.4,
+            delay: 0.5,
+            ease: "none",
+            onUpdate() {
+              const n = Math.floor(st.k);
+              let s = "";
+              for (let i = 0; i < target.length; i++) s += i < n || target[i] === " " || target[i] === "\n" ? target[i] : Math.random() < 0.5 ? "0" : "1";
+              bits.innerHTML = s.replace("\n", "<br />");
+            },
+            onComplete: () => (bits.innerHTML = FINAL),
+          })
+        );
+      }
+
+      function stop() {
+        tw.forEach((t) => t.kill());
+        tw = [];
+        bits.innerHTML = FINAL;
+        gsap.set(pulses, { opacity: 0 });
+      }
+
+      Deck.scene("#bridge", {
+        step(s, n, els, d) {
+          if (d.dir < 0) return;
+          queueMicrotask(() => {
+            if (Deck.step !== n) return; // several steps at once: just show them
+            fire(n - 1);
+            if (n === 2) scramble();
+          });
+        },
+        unstep: stop,
+        leave: stop,
+      });
+    </script>
+  </body>
+</html>

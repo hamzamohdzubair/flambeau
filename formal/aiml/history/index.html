@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>History of AI</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #chapters .tiles {
+        grid-template-columns: minmax(0, 34rem);
+        justify-content: center;
+      }
+
+      #chapters .tile {
+        min-height: 19rem;
+        font-size: 2rem;
+      }
+
+      #chapters .tile small {
+        font-size: 1rem;
+      }
+
+      #births svg {
+        width: 100%;
+        max-height: 68cqh;
+        height: auto;
+        overflow: visible;
+      }
+
+      #births .axis {
+        stroke: var(--violet-soft);
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+
+      #births .tick {
+        stroke: var(--muted);
+        stroke-width: 2;
+      }
+
+      #births .yr {
+        font-family: var(--font-mono);
+        font-size: 30px;
+        fill: var(--pink);
+        text-anchor: middle;
+      }
+
+      #births .what {
+        font-family: var(--font-display);
+        font-size: 40px;
+        font-weight: 600;
+        fill: #e9d5ff;
+        text-anchor: middle;
+      }
+
+      #births .who {
+        font-family: var(--font);
+        font-size: 22px;
+        fill: var(--muted);
+        text-anchor: middle;
+      }
+
+      #births .ev:not(.on) {
+        opacity: 0;
+      }
+
+      #timeline img {
+        height: 68cqh;
+        max-height: 68cqh;
+      }
+
+      #books .figs img {
+        max-height: 62cqh;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · Extra topics</span>
+      <h1>History of AI</h1>
+      <p>From ancient dreams of thinking machines to the people who named the field.</p>
+    </section>
+
+    <section class="slide" id="chapters">
+      <h2>History of AI: chapters</h2>
+      <div class="tiles">
+        <a class="tile" href="dreams.html" style="--img: url('/assets/2025-10-16-09-29-24.png')"><span>Dreams<small>Automata, Aristotle, early attempts</small></span></a>
+      </div>
+    </section>
+
+    <section class="slide" id="births">
+      <h2>Two names, four years apart</h2>
+      <svg viewBox="0 0 900 330" aria-label="Timeline: 1955, John McCarthy names AI; 1959, Arthur Samuel names ML">
+        <line class="axis" x1="20" y1="200" x2="880" y2="200" />
+        <g class="ev" data-k="1">
+          <line class="tick" x1="250" y1="200" x2="250" y2="150" />
+          <text class="what" x="250" y="60">AI</text>
+          <text class="yr" x="250" y="128">1955</text>
+          <text class="who" x="250" y="245">John</text>
+          <text class="who" x="250" y="275">McCarthy</text>
+        </g>
+        <g class="ev" data-k="2">
+          <line class="tick" x1="650" y1="200" x2="650" y2="150" />
+          <text class="what" x="650" y="60">ML</text>
+          <text class="yr" x="650" y="128">1959</text>
+          <text class="who" x="650" y="245">Arthur</text>
+          <text class="who" x="650" y="275">Samuel</text>
+        </g>
+      </svg>
+      <span class="step" data-anim="none"></span>
+      <span class="step" data-anim="none"></span>
+    </section>
+
+    <section class="slide" id="books">
+      <h2>Resources</h2>
+      <div class="figs contain">
+        <figure class="step"><img src="/assets/2025-10-14-11-56-38.png" alt="Book cover: AI and I, an intellectual history of artificial intelligence, by Eugene Charniak" /><figcaption>Eugene Charniak, <em>AI &amp; I</em></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-14-11-33-44.png" alt="Book cover: The Quest for Artificial Intelligence by Nils J. Nilsson" /><figcaption>Nils J. Nilsson, <em>The Quest for Artificial Intelligence</em></figcaption></figure>
+        <figure class="step"><img src="/assets/2025-10-14-11-32-57.png" alt="Book cover: Machines Who Think by Pamela McCorduck" /><figcaption>Pamela McCorduck, <em>Machines Who Think</em></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide" id="timeline">
+      <h2>A timeline of AI</h2>
+      <figure class="step"><img src="/assets/2025-10-12-16-09-42.png" alt="AI timeline from 1950 to 2017: Turing test, AI named, Unimate, ELIZA, Shakey, AI winter, Deep Blue, Kismet, AIBO, Roomba, Siri, Watson, Eugene Goostman, Alexa, Tay, AlphaGo" /><figcaption><a href="https://media.licdn.com/dms/image/v2/D4D12AQEt4g6pTNlDIA/article-cover_image-shrink_720_1280/">Source</a></figcaption></figure>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // The timeline draws itself; each step drops a milestone onto it
+      const slide = document.querySelector("#births");
+      const axis = slide.querySelector(".axis");
+      const evs = [...slide.querySelectorAll(".ev")];
+      function show(n, animate) {
+        evs.forEach((g) => {
+          const on = +g.dataset.k <= n;
+          if (on && !g.classList.contains("on") && animate) {
+            gsap.fromTo(g.querySelectorAll(".tick"), { attr: { y2: 200 } }, { attr: { y2: 150 }, duration: 0.4 });
+            gsap.fromTo(g.querySelectorAll("text"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.12, duration: 0.5, delay: 0.2, ease: "back.out(2)" });
+          }
+          g.classList.toggle("on", on);
+        });
+      }
+      Deck.scene("#births", {
+        enter() {
+          gsap.fromTo(axis, { attr: { x2: 20 } }, { attr: { x2: 880 }, duration: 1, ease: "power2.out" });
+          show(0, false);
+        },
+        step: (s, n, e, d) => show(n, d.dir > 0),
+        unstep: (s, n) => show(n - 1, false),
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>When experts got it wrong</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #minsky .cols {
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+        gap: 3rem;
+        width: 100%;
+      }
+
+      #minsky .tag {
+        font-family: var(--font-display);
+        font-size: 2.6rem;
+      }
+
+      #minsky blockquote {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      #minsky .quotes {
+        display: grid;
+        gap: 1.3rem;
+      }
+
+      #minsky img {
+        max-height: 64cqh;
+      }
+
+      /* ---------- Deadline bar ---------- */
+      #deadline .track {
+        position: relative;
+        width: calc(100% - 8rem);
+        height: 12rem;
+      }
+
+      #deadline .rail {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 6.4rem;
+        height: 8px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      #deadline .promise,
+      #deadline .overdue {
+        position: absolute;
+        top: 6.4rem;
+        height: 8px;
+        border-radius: 6px;
+      }
+
+      #deadline .promise {
+        left: 0;
+        background: var(--gradient);
+      }
+
+      #deadline .overdue {
+        background: repeating-linear-gradient(90deg, var(--red) 0 10px, transparent 10px 16px);
+      }
+
+      #deadline .mark {
+        position: absolute;
+        top: 0;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      #deadline .mark b {
+        font-family: var(--font-mono);
+        font-size: 2rem;
+      }
+
+      #deadline .mark small {
+        font-size: 1.1rem;
+        color: var(--muted);
+      }
+
+      #deadline .mark i {
+        width: 3px;
+        height: 1.8rem;
+        margin-top: 0.3rem;
+        background: var(--muted);
+      }
+
+      #deadline .now {
+        font-family: var(--font-mono);
+      }
+
+      #deadline p {
+        font-size: 1.35rem;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Limitations of AI</span>
+      <h1>When experts of AI got AI wrong!</h1>
+      <p>Even the founders of the field badly misjudged how hard intelligence is.</p>
+    </section>
+
+    <section class="slide" id="minsky">
+      <h2>Marvin Minsky</h2>
+      <div class="cols">
+        <div class="quotes">
+          <p class="tag grad step">"Father of AI"</p>
+          <blockquote class="step">Within our lifetime machines may surpass us in general intelligence.<cite>— 1961</cite></blockquote>
+          <blockquote class="step">Within a generation… few compartments of intellect will remain outside the machine's realm; the problem of creating "artificial intelligence" will be substantially solved.<cite>— 1967</cite></blockquote>
+        </div>
+        <figure><img src="/assets/2025-10-24-11-29-23.png" alt="Portrait of Marvin Minsky" /></figure>
+      </div>
+    </section>
+
+    <section class="slide" id="deadline">
+      <h2>"Within a generation"</h2>
+      <div class="track">
+        <div class="rail"></div>
+        <div class="promise"></div>
+        <div class="overdue"></div>
+        <div class="mark" style="left: 0%"><b>1967</b><small>the prediction</small><i></i></div>
+        <div class="mark m2"><b>~1997</b><small>one generation later</small><i></i></div>
+        <div class="mark m3"><b class="now">2026</b><small>still waiting</small><i></i></div>
+      </div>
+      <p class="center step">The deadline came and went: progress was real, but nowhere near "substantially solved".</p>
+      <p class="center step muted">See also: <a href="../intro-hype.html#2">Hyping AI isn't new</a></p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // The promise bar runs one generation (~30 years), then the overdue bar keeps going to today
+      const slide = document.querySelector("#deadline");
+      const pct = (yr) => ((yr - 1967) / (2026 - 1967)) * 100 + "%";
+      const promise = slide.querySelector(".promise");
+      const overdue = slide.querySelector(".overdue");
+      const m2 = slide.querySelector(".m2");
+      const m3 = slide.querySelector(".m3");
+      const now = slide.querySelector(".now");
+      let tl = null;
+      Deck.scene("#deadline", {
+        enter() {
+          tl?.kill();
+          gsap.set(m2, { left: pct(1997), opacity: 0 });
+          gsap.set(m3, { left: "100%", opacity: 0 });
+          gsap.set(overdue, { left: pct(1997), width: 0 });
+          gsap.set(promise, { width: 0 });
+          const yr = { v: 1997 };
+          tl = gsap.timeline();
+          tl.to(promise, { width: pct(1997), duration: 1.6, ease: "power1.inOut" })
+            .to(m2, { opacity: 1, duration: 0.4 })
+            .to(overdue, { width: `calc(${pct(2026)} - ${pct(1997)})`, duration: 1.6, ease: "none" })
+            .to(yr, { v: 2026, duration: 1.6, ease: "none", onUpdate: () => (now.textContent = Math.round(yr.v)) }, "<")
+            .to(m3, { opacity: 1, duration: 0.4 }, "<");
+        },
+        leave: () => tl?.progress(1),
+      });
+    </script>
+  </body>
+</html>

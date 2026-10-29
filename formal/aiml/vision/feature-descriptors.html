@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feature Descriptors</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+      .chip {
+        padding: 0.4rem 1rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.95rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      .chip.ghost { border-style: dashed; }
+      canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
+      .sl { display: grid; grid-template-columns: 8rem minmax(0, 1fr) 3rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.95rem; }
+      .sl input { width: 100%; accent-color: var(--violet); }
+      .sl output { color: var(--cyan); text-align: right; }
+
+      /* presentation scale: bigger code, cards and lists */
+      .slide > pre { font-size: 1.2rem; }
+      .card h3 { font-size: 1.7rem; }
+      .card p, .card li { font-size: 1.3rem; }
+      .cards.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; }
+      .cards.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; }
+      .cards .card { padding: 1.6rem 1.8rem; }
+
+      /* bit grids */
+      .bits { --bc: 1.1rem; display: grid; grid-template-columns: repeat(16, var(--bc)); gap: 2px; }
+      .bits.w32 { grid-template-columns: repeat(32, var(--bc)); --bc: 0.8rem; }
+      .bits i { width: var(--bc); height: var(--bc); border-radius: 3px; background: rgba(255, 255, 255, 0.06); }
+      .bits i.one { background: var(--violet); }
+      .bits i.diff { box-shadow: 0 0 0 2px var(--pink); }
+      #title .bits { --bc: 1.05rem; }
+
+      /* pipeline */
+      .pipe { width: 100%; }
+      .pipe svg { width: 100%; overflow: visible; }
+      .pipe text { font-family: var(--font-mono); font-size: 26px; fill: var(--muted); }
+      .pipe .lbl { font-family: var(--font-display); font-size: 32px; fill: var(--text); }
+
+      /* vector sizes */
+      .vecs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.6rem; width: 100%; }
+      .vecs .card { display: grid; gap: 1rem; justify-items: center; align-content: start; text-align: center; }
+      .floats { display: flex; align-items: flex-end; gap: 1px; height: 11rem; width: 100%; }
+      .floats i { flex: 1; background: linear-gradient(0deg, #22d3ee, #8b5cf6); border-radius: 1px 1px 0 0; }
+      .vecs .bits { height: 11rem; align-content: center; }
+
+      /* BRIEF test */
+      .brief { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2.6rem; align-items: center; width: 100%; }
+      .brief svg { width: 20rem; }
+      .brief .test { font-family: var(--font-mono); font-size: 1.1rem; min-height: 1.6em; }
+      .brief .bout { --bc: 1.4rem; gap: 3px; }
+
+      /* distance */
+      .dist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.8rem; width: 100%; }
+      .dist .card { display: grid; gap: 0.8rem; justify-items: center; }
+      .dist .res { font-family: var(--font-mono); font-size: 1.2rem; color: var(--cyan); }
+      .dist .bits { --bc: 1.6rem; gap: 3px; }
+      .l2bars { display: grid; grid-template-columns: repeat(8, 3rem); gap: 6px; align-items: end; height: 8.5rem; }
+      .l2bars span { position: relative; display: block; }
+      .l2bars b, .l2bars s { position: absolute; bottom: 0; width: 46%; border-radius: 3px 3px 0 0; text-decoration: none; }
+      .l2bars b { left: 0; background: #8b5cf6; }
+      .l2bars s { right: 0; background: #22d3ee; }
+
+      /* match demo */
+      .match { width: 100%; display: grid; gap: 0.8rem; }
+      .match .ctl { display: flex; flex-wrap: wrap; gap: 0.8rem 1.6rem; justify-content: center; align-items: center; }
+      .match .ctl .sl { width: 24rem; }
+      .match .stat { font-family: var(--font-mono); font-size: 1.05rem; text-align: center; }
+      .match .stat b { color: #4ade80; } .match .stat s { color: #f87171; text-decoration: none; }
+
+      .qa { display: grid; gap: 1rem; width: min(100%, 64rem); counter-reset: q; }
+      .qa .q { display: grid; gap: 0.3rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.35rem; }
+      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
+      .qa p.answer { padding: 0.2rem 0.7rem; width: max-content; max-width: 100%; font-size: 1.2rem; }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <div class="bits" aria-label="A 256-bit binary descriptor filling in"></div>
+      <h1>Feature Descriptors</h1>
+      <p>Turn the neighbourhood of a keypoint into a vector of numbers, so the same point can be found in another image.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide" id="slide-pipe">
+      <h2>What are feature descriptors?</h2>
+      <p class="lead"><strong>Descriptor:</strong> a numerical representation of a feature's local appearance.</p>
+      <ul>
+        <li class="step">Describes the feature's neighbourhood</li>
+        <li class="step">Enables matching between images</li>
+        <li class="step">Invariant to transformations (rotation, scale, illumination)</li>
+      </ul>
+      <div class="pipe">
+        <svg viewBox="0 -10 1440 340" aria-label="Detect keypoints, compute descriptors, match descriptors across images">
+          <g class="st1">
+            <rect x="0" y="40" width="400" height="240" rx="24" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" />
+            <circle cx="100" cy="120" r="14" fill="none" stroke="#ec4899" stroke-width="5" /><circle cx="260" cy="190" r="14" fill="none" stroke="#ec4899" stroke-width="5" /><circle cx="320" cy="90" r="14" fill="none" stroke="#ec4899" stroke-width="5" /><circle cx="160" cy="230" r="14" fill="none" stroke="#ec4899" stroke-width="5" />
+            <text class="lbl" x="200" y="24" text-anchor="middle">1 · detect keypoints</text>
+            <text x="200" y="316" text-anchor="middle">where</text>
+          </g>
+          <g class="st2">
+            <rect x="520" y="40" width="400" height="240" rx="24" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" />
+            <text x="550" y="110">[0 1 1 0 1 0 0 1 …]</text>
+            <text x="550" y="160">[1 1 0 0 0 1 0 1 …]</text>
+            <text x="550" y="210">[0 0 1 1 0 1 1 0 …]</text>
+            <text x="550" y="260">[1 0 1 0 1 1 0 0 …]</text>
+            <text class="lbl" x="720" y="24" text-anchor="middle">2 · compute descriptors</text>
+            <text x="720" y="316" text-anchor="middle">what it looks like</text>
+          </g>
+          <g class="st3">
+            <rect x="1040" y="40" width="400" height="240" rx="24" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" />
+            <rect x="1070" y="80" width="140" height="160" rx="12" fill="rgba(139,92,246,0.25)" /><rect x="1270" y="80" width="140" height="160" rx="12" fill="rgba(34,211,238,0.2)" />
+            <line x1="1120" y1="120" x2="1320" y2="140" stroke="#4ade80" stroke-width="4" /><line x1="1160" y1="200" x2="1350" y2="210" stroke="#4ade80" stroke-width="4" /><line x1="1180" y1="110" x2="1380" y2="120" stroke="#4ade80" stroke-width="4" />
+            <text class="lbl" x="1240" y="24" text-anchor="middle">3 · match across images</text>
+            <text x="1240" y="316" text-anchor="middle">which is which</text>
+          </g>
+          <path class="ar" d="M410 160 h96" stroke="#a78bfa" stroke-width="5" marker-end="url(#pa)" />
+          <path class="ar" d="M930 160 h96" stroke="#a78bfa" stroke-width="5" marker-end="url(#pa)" />
+          <defs><marker id="pa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a78bfa" /></marker></defs>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ================================================================ properties -->
+    <section class="slide">
+      <h2>Descriptor properties</h2>
+      <p class="lead center">A good descriptor is…</p>
+      <div class="cards g2" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>Distinctive</h3><p>Different features have different descriptors.</p></div>
+        <div class="card step"><h3>Invariant</h3><p>Robust to rotation, scale and illumination.</p></div>
+        <div class="card step"><h3>Compact</h3><p>A small memory footprint.</p></div>
+        <div class="card step"><h3>Fast</h3><p>Quick to compute and to match.</p></div>
+      </div>
+      <p class="step center lead"><strong>Trade-off:</strong> invariance vs distinctiveness vs speed.</p>
+    </section>
+
+    <!-- ================================================================ types -->
+    <section class="slide">
+      <h2>Types of descriptors</h2>
+      <div class="cols">
+        <div class="card step">
+          <h3>Classical</h3>
+          <ul>
+            <li><strong>SIFT:</strong> Scale-Invariant Feature Transform</li>
+            <li><strong>SURF:</strong> Speeded-Up Robust Features</li>
+            <li><strong>ORB:</strong> Oriented FAST and Rotated BRIEF</li>
+            <li><strong>BRIEF:</strong> Binary Robust Independent Elementary Features</li>
+          </ul>
+        </div>
+        <div class="card step">
+          <h3>Deep learning</h3>
+          <ul><li>CNN-based descriptors (covered in advanced topics)</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ vector -->
+    <section class="slide">
+      <h2>The descriptor vector</h2>
+      <p class="lead center">A descriptor is a <strong>fixed-length vector</strong> of numbers.</p>
+      <div class="vecs">
+        <div class="card step">
+          <div class="floats sift"></div>
+          <h3>Float vectors</h3>
+          <p><strong>SIFT:</strong> 128 floats · <strong>SURF:</strong> 64 or 128 floats</p>
+        </div>
+        <div class="card step">
+          <div class="bits w32 orb"></div>
+          <h3>Binary vectors</h3>
+          <p><strong>ORB:</strong> 256 bits (32 bytes) · <strong>BRIEF:</strong> 128, 256 or 512 bits</p>
+        </div>
+      </div>
+      <p class="step center"><strong>Matching:</strong> compare the vectors with a distance metric.</p>
+    </section>
+
+    <!-- ================================================================ ORB + BRIEF test -->
+    <section class="slide" id="slide-brief">
+      <h2>ORB descriptor</h2>
+      <div class="brief">
+        <div style="display: grid; justify-items: center; gap: 0.6rem">
+          <svg viewBox="0 0 160 160" aria-label="A smoothed patch with pairs of points compared, each comparison giving one bit"></svg>
+          <p class="test"></p>
+        </div>
+        <div>
+          <p><strong>ORB:</strong> Oriented FAST + Rotated BRIEF.</p>
+          <p class="muted" style="font-size: 1.1rem">BRIEF compares the brightness of random pairs of points in the patch: <code>1</code> if the first is darker, <code>0</code> otherwise. 256 pairs give 256 bits.</p>
+          <div class="bits bout" style="margin: 0.8rem 0"></div>
+          <ul>
+            <li class="step">Binary descriptor: fast to compute and match</li>
+            <li class="step">Rotation invariant: the pairs are rotated to the keypoint's orientation</li>
+            <li class="step">Scale invariant, using an image pyramid</li>
+            <li class="step">Free to use (no patents)</li>
+          </ul>
+          <p class="step"><strong>Use case:</strong> real-time applications, mobile devices.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ ORB code -->
+    <section class="slide">
+      <h2>ORB in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        # create an ORB detector
+        orb = cv2.ORB_create()  # ans:
+        # detect and compute descriptors
+        keypoints, descriptors = orb.detectAndCompute(gray, None)  # ans:
+        # keypoints: a list of cv2.KeyPoint objects
+        # ans: each holds x, y, size, angle, response
+        # descriptors: a numpy array
+        # ans: shape (N, 32) for N keypoints: 256 bits each
+        # draw keypoints
+        img_kp = cv2.drawKeypoints(img, keypoints, None, (0, 255, 0),
+            cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ ORB params -->
+    <section class="slide">
+      <h2>ORB parameters</h2>
+      <pre class="steps"><code class="language-python">
+        # create ORB with custom parameters
+        orb = cv2.ORB_create(nfeatures=500, scaleFactor=1.2, nlevels=8)  # ans:
+        # nfeatures: maximum number of features
+        # ans: the 500 strongest features are kept
+        # scaleFactor: pyramid decimation ratio
+        # ans: 1.2 means each level is 1.2x smaller
+        # nlevels: number of pyramid levels
+        # ans: 8 levels for multi-scale detection
+        # set the edge threshold
+        orb = cv2.ORB_create()
+        orb.setEdgeThreshold(15)  # ans:
+        # ans: ignores features within 15 pixels of the border
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ SIFT -->
+    <section class="slide">
+      <h2>SIFT descriptor</h2>
+      <p class="lead center"><strong>SIFT:</strong> Scale-Invariant Feature Transform.</p>
+      <div class="cards g3">
+        <div class="card step"><h3>128 floats</h3><p>A 128-dimensional float vector.</p></div>
+        <div class="card step"><h3>Gradient histograms</h3><p>Histograms of gradient orientations around the keypoint.</p></div>
+        <div class="card step"><h3>Highly distinctive</h3><p>Invariant to scale, rotation and illumination.</p></div>
+      </div>
+      <p class="step center"><strong>Disadvantage:</strong> slower; it was patented (the patent expired in 2020).</p>
+      <p class="step center muted">More in <a href="sift-surf.html">SIFT &amp; SURF</a>.</p>
+    </section>
+
+    <!-- ================================================================ SIFT code -->
+    <section class="slide">
+      <h2>SIFT in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # create a SIFT detector
+        sift = cv2.SIFT_create()  # ans:
+        # detect and compute
+        keypoints, descriptors = sift.detectAndCompute(gray, None)  # ans:
+        # descriptors shape
+        # ans: (N, 128) for N keypoints
+        # custom parameters
+        sift = cv2.SIFT_create(nfeatures=0, nOctaveLayers=3,
+                               contrastThreshold=0.04)  # ans:
+        # nfeatures: 0 means no limit
+        # ans: every feature above the threshold is kept
+        # contrastThreshold: filters low-contrast features
+        # ans: higher value = fewer, stronger features
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ SURF -->
+    <section class="slide">
+      <h2>SURF descriptor</h2>
+      <p class="lead center"><strong>SURF:</strong> Speeded-Up Robust Features.</p>
+      <div class="cards g3">
+        <div class="card step"><h3>Faster than SIFT</h3><p>Uses integral images for speed.</p></div>
+        <div class="card step"><h3>64 or 128 dims</h3><p>Similar performance to SIFT.</p></div>
+        <div class="card step"><h3>Patented</h3><p>Not available in OpenCV by default (it lives in the non-free contrib module).</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ distance -->
+    <section class="slide" id="slide-dist">
+      <h2>Descriptor matching</h2>
+      <p class="lead center"><strong>Matching:</strong> find similar descriptors across images. <strong>Lower distance = better match.</strong></p>
+      <div class="dist">
+        <div class="card step">
+          <h3>L2 (Euclidean)</h3>
+          <p class="muted">For float descriptors (SIFT, SURF)</p>
+          <p>\(d = \sqrt{\sum_i (d_1[i] - d_2[i])^2}\)</p>
+          <div class="l2bars"></div>
+          <p class="res r-l2"></p>
+        </div>
+        <div class="card step">
+          <h3>Hamming</h3>
+          <p class="muted">For binary descriptors (ORB, BRIEF)</p>
+          <p>\(d\) = the number of differing bits</p>
+          <div class="bits b1"></div>
+          <div class="bits b2"></div>
+          <p class="res r-h"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ BF code -->
+    <section class="slide">
+      <h2>Brute-force matcher</h2>
+      <pre class="steps"><code class="language-python">
+        # create a BF matcher for ORB (Hamming distance)
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)  # ans:
+        # detect features in both images
+        orb = cv2.ORB_create()
+        kp1, des1 = orb.detectAndCompute(img1_gray, None)
+        kp2, des2 = orb.detectAndCompute(img2_gray, None)
+        # match descriptors
+        matches = bf.match(des1, des2)  # ans:
+        # sort by distance
+        matches = sorted(matches, key=lambda x: x.distance)  # ans:
+        # draw matches
+        img_matches = cv2.drawMatches(img1, kp1, img2, kp2,
+                                      matches[:50], None, flags=2)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ live matching -->
+    <section class="slide" id="slide-match">
+      <h2>Matching binary descriptors, live</h2>
+      <div class="match">
+        <canvas class="photo" width="660" height="180" aria-label="Two versions of a photo side by side with lines joining matched keypoints"></canvas>
+        <p class="stat"></p>
+        <div class="ctl" data-interactive>
+          <div class="chips">
+            <button class="chip on" data-t="shift">Shifted + brighter</button>
+            <button class="chip" data-t="rot">Rotated 30°</button>
+          </div>
+          <div class="chips">
+            <button class="chip ghost" data-o>Orientation: off (BRIEF)</button>
+            <button class="chip ghost on" data-x>crossCheck=True</button>
+          </div>
+          <label class="sl">best matches <input type="range" min="5" max="80" value="30" /><output>30</output></label>
+        </div>
+      </div>
+      <p class="muted center" style="font-size: 0.95rem">FAST keypoints + 256-bit binary tests + brute-force Hamming matching, written in JavaScript. Green = a correct match, red = wrong.</p>
+    </section>
+
+    <!-- ================================================================ FLANN -->
+    <section class="slide">
+      <h2>FLANN matcher</h2>
+      <p class="lead center"><strong>FLANN:</strong> Fast Library for Approximate Nearest Neighbors.</p>
+      <div class="cols" style="align-items: stretch">
+        <div class="card step"><h3>Advantage</h3><p>Much faster for large datasets, because the search is approximate.</p></div>
+        <div class="card step"><h3>Trade-off</h3><p>Speed vs accuracy.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ FLANN code -->
+    <section class="slide">
+      <h2>FLANN in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # FLANN parameters for ORB
+        FLANN_INDEX_LSH = 6
+        index_params = dict(algorithm=FLANN_INDEX_LSH, table_number=6,
+                            key_size=12, multi_probe_level=1)
+        search_params = dict(checks=50)
+        flann = cv2.FlannBasedMatcher(index_params, search_params)  # ans:
+        # match descriptors
+        orb = cv2.ORB_create()
+        kp1, des1 = orb.detectAndCompute(img1_gray, None)
+        kp2, des2 = orb.detectAndCompute(img2_gray, None)
+        matches = flann.knnMatch(des1, des2, k=2)  # ans:
+        # k=2 returns the 2 best matches per descriptor
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is a descriptor?</p><p class="answer">A numerical representation of a feature's local appearance.</p></div>
+        <div class="q"><p>Why do we need descriptors?</p><p class="answer">To match features across images.</p></div>
+        <div class="q"><p>What makes a good descriptor?</p><p class="answer">Distinctive, invariant, compact, fast.</p></div>
+        <div class="q"><p>What is the SIFT descriptor size?</p><p class="answer">128 dimensions (floats).</p></div>
+        <div class="q"><p>What is the ORB descriptor size?</p><p class="answer">256 bits (32 bytes).</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>Which distance for binary descriptors?</p><p class="answer">Hamming distance (count the differing bits).</p></div>
+        <div class="q"><p>Which distance for SIFT?</p><p class="answer">L2 (Euclidean) distance.</p></div>
+        <div class="q"><p>What are ORB's advantages over SIFT?</p><p class="answer">Faster, binary, free (no patent).</p></div>
+        <div class="q"><p>What is FLANN?</p><p class="answer">A fast approximate nearest-neighbour matcher.</p></div>
+        <div class="q"><p>What does <code>crossCheck</code> do in <code>BFMatcher</code>?</p><p class="answer">Keeps only mutual best matches (A→B and B→A).</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # create ORB and detect features
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        orb = cv2.ORB_create()  # ans:
+        keypoints, descriptors = orb.detectAndCompute(gray, None)  # ans:
+        # create SIFT and detect
+        sift = cv2.SIFT_create()  # ans:
+        keypoints, descriptors = sift.detectAndCompute(gray, None)  # ans:
+        # create a BF matcher for ORB
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="steps"><code class="language-python">
+        # match ORB features between two images
+        orb = cv2.ORB_create()
+        kp1, des1 = orb.detectAndCompute(gray1, None)
+        kp2, des2 = orb.detectAndCompute(gray2, None)
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        matches = bf.match(des1, des2)  # ans:
+        matches = sorted(matches, key=lambda x: x.distance)  # ans:
+        # draw the top 20 matches
+        img_matches = cv2.drawMatches(img1, kp1, img2, kp2,
+                                      matches[:20], None, flags=2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="steps"><code class="language-python">
+        # ORB with 1000 features
+        orb = cv2.ORB_create(nfeatures=1000)  # ans:
+        kp, des = orb.detectAndCompute(gray, None)  # ans:
+        # BF matcher for SIFT
+        bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)  # ans:
+        # FLANN for ORB with kNN
+        FLANN_INDEX_LSH = 6
+        index_params = dict(algorithm=FLANN_INDEX_LSH, table_number=6,
+                            key_size=12, multi_probe_level=1)
+        search_params = dict(checks=50)
+        flann = cv2.FlannBasedMatcher(index_params, search_params)
+        matches = flann.knnMatch(des1, des2, k=2)  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      function rng(seed) { return () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296); }
+      function bitGrid(el, n, bits) { el.innerHTML = Array.from({ length: n }, (_, i) => `<i class="${bits && bits[i] ? "one" : ""}"></i>`).join(""); return [...el.children]; }
+
+      // ------------------------------------------------------------ cover: 256 bits fill in
+      (function () {
+        const cells = bitGrid(document.querySelector("#title .bits"), 256);
+        const r = rng(11), bits = cells.map(() => r() < 0.5);
+        let tl = null;
+        Deck.scene("#title", {
+          enter() {
+            tl?.kill();
+            cells.forEach((c) => c.classList.remove("one"));
+            tl = gsap.timeline({ delay: 0.3 });
+            cells.forEach((c, i) => tl.call(() => c.classList.toggle("one", bits[i]), null, i * 0.008));
+          },
+          leave() { tl?.kill(); },
+        });
+      })();
+
+      // ------------------------------------------------------------ pipeline
+      Deck.scene("#slide-pipe", {
+        enter(slide) {
+          gsap.fromTo(slide.querySelectorAll(".st1, .ar, .st2, .st3"), { opacity: 0, y: 14 }, { opacity: 1, y: 0, stagger: 0.35, duration: 0.6, delay: 0.3 });
+        },
+      });
+
+      // ------------------------------------------------------------ vector sizes
+      (function () {
+        const f = document.querySelector(".floats.sift"), r = rng(5);
+        f.innerHTML = Array.from({ length: 128 }, () => `<i style="height:${(8 + r() * 92).toFixed(0)}%"></i>`).join("");
+        const r2 = rng(9);
+        bitGrid(document.querySelector(".bits.orb"), 256, Array.from({ length: 256 }, () => r2() < 0.5));
+      })();
+
+      // ------------------------------------------------------------ BRIEF test animation
+      (function () {
+        const bs = document.querySelector("#slide-brief");
+        const svg = bs.querySelector("svg");
+        const out = bitGrid(bs.querySelector(".bout"), 32);
+        const test = bs.querySelector(".test");
+        // a smooth patch: a bright blob off-centre on a dark ramp
+        const N = 16, P = [];
+        for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) P.push(Math.round(40 + 6 * x + 150 * Math.exp(-((x - 10) ** 2 + (y - 6) ** 2) / 18)));
+        svg.innerHTML = P.map((v, i) => `<rect x="${(i % N) * 10}" y="${Math.floor(i / N) * 10}" width="10" height="10" fill="rgb(${Math.min(255, v)},${Math.min(255, v)},${Math.min(255, v + 12)})"/>`).join("") +
+          `<line class="pl" stroke="#ec4899" stroke-width="2.5"/><circle class="pa" r="5" fill="none" stroke="#fbbf24" stroke-width="2.5"/><circle class="pb" r="5" fill="none" stroke="#22d3ee" stroke-width="2.5"/>`;
+        const r = rng(3);
+        const pairs = Array.from({ length: 32 }, () => [Math.floor(r() * N), Math.floor(r() * N), Math.floor(r() * N), Math.floor(r() * N)]);
+        let tl = null;
+        function run() {
+          tl?.kill();
+          out.forEach((c) => c.classList.remove("one"));
+          tl = gsap.timeline({ repeat: -1, repeatDelay: 1.5 });
+          pairs.forEach(([ax, ay, bx, by], k) => {
+            const A = P[ay * N + ax], B = P[by * N + bx], bit = A < B;
+            const cx = (v) => v * 10 + 5;
+            tl.call(() => {
+              if (k === 0) out.forEach((c) => c.classList.remove("one"));
+              svg.querySelector(".pa").setAttribute("cx", cx(ax)); svg.querySelector(".pa").setAttribute("cy", cx(ay));
+              svg.querySelector(".pb").setAttribute("cx", cx(bx)); svg.querySelector(".pb").setAttribute("cy", cx(by));
+              const l = svg.querySelector(".pl");
+              l.setAttribute("x1", cx(ax)); l.setAttribute("y1", cx(ay)); l.setAttribute("x2", cx(bx)); l.setAttribute("y2", cx(by));
+              test.innerHTML = `bit ${k}: <span style="color:#fbbf24">${A}</span> &lt; <span style="color:#67e8f9">${B}</span> ? → <b>${bit ? 1 : 0}</b>`;
+              out[k].classList.toggle("one", bit);
+            }, null, k * (k < 4 ? 1.1 : 0.25));
+          });
+        }
+        Deck.scene("#slide-brief", { enter: run, leave() { tl?.kill(); } });
+      })();
+
+      // ------------------------------------------------------------ distances
+      (function () {
+        const ds = document.querySelector("#slide-dist");
+        const r = rng(21);
+        const a = Array.from({ length: 8 }, () => r()), b = a.map((v) => Math.min(1, Math.max(0, v + (r() - 0.5) * 0.4)));
+        ds.querySelector(".l2bars").innerHTML = a.map((v, i) => `<span style="height:100%"><b style="height:${v * 100}%"></b><s style="height:${b[i] * 100}%"></s></span>`).join("");
+        ds.querySelector(".r-l2").textContent = `d = ${Math.sqrt(a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0)).toFixed(3)}  (8 of 128 dims shown)`;
+        const r2 = rng(4);
+        const x = Array.from({ length: 32 }, () => r2() < 0.5), y = x.map((v) => (r2() < 0.18 ? !v : v));
+        const c1 = bitGrid(ds.querySelector(".b1"), 32, x), c2 = bitGrid(ds.querySelector(".b2"), 32, y);
+        const res = ds.querySelector(".r-h");
+        let tl = null;
+        Deck.scene("#slide-dist", {
+          step(slide, n, els) {
+            if (!els.some((e) => e.contains(res))) return;
+            tl?.kill();
+            let count = 0;
+            res.textContent = "XOR, then count the 1s…";
+            [...c1, ...c2].forEach((c) => c.classList.remove("diff"));
+            tl = gsap.timeline({ delay: 0.5 });
+            x.forEach((v, i) => tl.call(() => { if (v !== y[i]) { count++; c1[i].classList.add("diff"); c2[i].classList.add("diff"); } res.textContent = `Hamming distance = ${count}`; }, null, i * 0.06));
+          },
+          leave() { tl?.kill(); },
+        });
+      })();
+
+      // ------------------------------------------------------------ live matching
+      (function () {
+        const ms = document.querySelector("#slide-match");
+        const cv = ms.querySelector("canvas"), ctx = cv.getContext("2d");
+        const W = 320, H = 180, GAP = 20;
+        cv.width = 2 * W + GAP; cv.height = H;
+        const photo = new Image();
+        photo.src = "/assets/2025-10-09-22-21-33.png";
+        let mode = "shift", oriented = false, cross = true, nShow = 30, data = null;
+        const TF = { shift: { a: 0, s: 1, tx: 22, ty: -10, b: 30 }, rot: { a: Math.PI / 6, s: 0.95, tx: 0, ty: 0, b: 0 } };
+        // map an image-1 point through the transform (rotate + scale about the centre, then shift)
+        const mapPt = (t, x, y) => { const cx = W / 2, cy = H / 2, dx = x - cx, dy = y - cy; return [cx + t.s * (dx * Math.cos(t.a) - dy * Math.sin(t.a)) + t.tx, cy + t.s * (dx * Math.sin(t.a) + dy * Math.cos(t.a)) + t.ty]; };
+        function render(t) {
+          const c = document.createElement("canvas");
+          c.width = W; c.height = H;
+          const x = c.getContext("2d", { willReadFrequently: true });
+          x.fillStyle = "#000"; x.fillRect(0, 0, W, H);
+          x.translate(W / 2 + t.tx, H / 2 + t.ty); x.rotate(t.a); x.scale(t.s, t.s); x.translate(-W / 2, -H / 2);
+          x.drawImage(photo, 0, 0, W, H);
+          const im = x.getImageData(0, 0, W, H);
+          for (let p = 0; p < im.data.length; p += 4) { im.data[p] += t.b; im.data[p + 1] += t.b; im.data[p + 2] += t.b; }
+          const g = new Float32Array(W * H);
+          for (let i = 0; i < g.length; i++) g[i] = 0.299 * im.data[i * 4] + 0.587 * im.data[i * 4 + 1] + 0.114 * im.data[i * 4 + 2];
+          return { im, g };
+        }
+        const CIRC = [[0, -3], [1, -3], [2, -2], [3, -1], [3, 0], [3, 1], [2, 2], [1, 3], [0, 3], [-1, 3], [-2, 2], [-3, 1], [-3, 0], [-3, -1], [-2, -2], [-1, -3]];
+        function keypoints(g) {
+          const B = 18, pts = [];
+          for (let y = B; y < H - B; y++) for (let x = B; x < W - B; x++) {
+            const p = g[y * W + x], t = 18;
+            const s = CIRC.map(([dx, dy]) => { const v = g[(y + dy) * W + x + dx]; return v > p + t ? 1 : v < p - t ? -1 : 0; });
+            let best = 0;
+            for (const sg of [1, -1]) { let run = 0; for (let k = 0; k < 32; k++) { run = s[k % 16] === sg ? run + 1 : 0; best = Math.max(best, run); } }
+            if (best >= 9) pts.push({ x, y, score: CIRC.reduce((a, [dx, dy]) => a + Math.abs(g[(y + dy) * W + x + dx] - p), 0) });
+          }
+          // keep local maxima, strongest first, at least 6 px apart
+          pts.sort((a, b) => b.score - a.score);
+          const kept = [];
+          for (const p of pts) { if (kept.every((q) => (q.x - p.x) ** 2 + (q.y - p.y) ** 2 >= 36)) kept.push(p); if (kept.length >= 160) break; }
+          return kept;
+        }
+        const smooth = (g) => { const o = new Float32Array(W * H); for (let y = 2; y < H - 2; y++) for (let x = 2; x < W - 2; x++) { let a = 0; for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) a += g[(y + j) * W + x + i]; o[y * W + x] = a / 25; } return o; };
+        const r = rng(1234), gs = () => { let u = 0; for (let i = 0; i < 6; i++) u += r(); return (u - 3) * 4; };
+        const PAIRS = Array.from({ length: 256 }, () => [gs(), gs(), gs(), gs()].map((v) => Math.max(-13, Math.min(13, v))));
+        function describe(g, sm, kps) {
+          return kps.map((k) => {
+            let a = 0;
+            if (oriented) { let m10 = 0, m01 = 0; for (let j = -12; j <= 12; j++) for (let i = -12; i <= 12; i++) if (i * i + j * j <= 144) { const v = g[(k.y + j) * W + k.x + i]; m10 += i * v; m01 += j * v; } a = Math.atan2(m01, m10); }
+            const c = Math.cos(a), s = Math.sin(a), d = new Uint8Array(32);
+            const at = (u, v) => sm[Math.round(k.y + u * s + v * c) * W + Math.round(k.x + u * c - v * s)];
+            PAIRS.forEach(([u1, v1, u2, v2], b) => { if (at(u1, v1) < at(u2, v2)) d[b >> 3] |= 1 << (b & 7); });
+            return d;
+          });
+        }
+        const POP = new Uint8Array(256).map((_, i) => { let c = 0, v = i; while (v) { c += v & 1; v >>= 1; } return c; });
+        const ham = (a, b) => { let d = 0; for (let i = 0; i < 32; i++) d += POP[a[i] ^ b[i]]; return d; };
+        function compute() {
+          const t = TF[mode];
+          const A = render({ a: 0, s: 1, tx: 0, ty: 0, b: 0 }), B = render(t);
+          const k1 = keypoints(A.g), k2 = keypoints(B.g);
+          const d1 = describe(A.g, smooth(A.g), k1), d2 = describe(B.g, smooth(B.g), k2);
+          const best = (D1, D2) => D1.map((d) => { let bi = -1, bd = 999; D2.forEach((e, j) => { const h = ham(d, e); if (h < bd) (bd = h), (bi = j); }); return [bi, bd]; });
+          const f = best(d1, d2), bk = best(d2, d1);
+          let matches = f.map(([j, dd], i) => ({ i, j, d: dd })).filter((m) => !cross || bk[m.j][0] === m.i);
+          matches.sort((a, b) => a.d - b.d);
+          matches.forEach((m) => { const [ex, ey] = mapPt(t, k1[m.i].x, k1[m.i].y); m.ok = Math.hypot(ex - k2[m.j].x, ey - k2[m.j].y) < 5; });
+          data = { A, B, k1, k2, matches };
+        }
+        function draw(progress = 1) {
+          if (!data) return;
+          const { A, B, k1, k2, matches } = data;
+          ctx.fillStyle = "#05060f"; ctx.fillRect(0, 0, cv.width, cv.height);
+          ctx.putImageData(A.im, 0, 0); ctx.putImageData(B.im, W + GAP, 0);
+          ctx.lineWidth = 1;
+          k1.forEach((k) => { ctx.strokeStyle = "rgba(251,191,36,0.6)"; ctx.beginPath(); ctx.arc(k.x, k.y, 2.5, 0, 7); ctx.stroke(); });
+          k2.forEach((k) => { ctx.strokeStyle = "rgba(251,191,36,0.6)"; ctx.beginPath(); ctx.arc(k.x + W + GAP, k.y, 2.5, 0, 7); ctx.stroke(); });
+          const show = matches.slice(0, nShow), n = Math.round(show.length * progress);
+          ctx.lineWidth = 1.4;
+          show.slice(0, n).forEach((m) => { ctx.strokeStyle = m.ok ? "#4ade80" : "#f87171"; ctx.beginPath(); ctx.moveTo(k1[m.i].x, k1[m.i].y); ctx.lineTo(k2[m.j].x + W + GAP, k2[m.j].y); ctx.stroke(); });
+          const good = show.filter((m) => m.ok).length;
+          ms.querySelector(".stat").innerHTML = `${k1.length} + ${k2.length} keypoints · ${matches.length} matches · best ${show.length}: <b>${good} correct</b>, <s>${show.length - good} wrong</s>`;
+        }
+        let tl = null;
+        function animate() { tl?.kill(); const st = { p: 0 }; tl = gsap.to(st, { p: 1, duration: 1.2, ease: "none", onUpdate: () => draw(st.p) }); }
+        function update() { if (!photo.complete) return; compute(); animate(); }
+        photo.decode().then(update);
+        ms.querySelector(".ctl").addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          if (b.dataset.t) { mode = b.dataset.t; ms.querySelectorAll("[data-t]").forEach((c) => c.classList.toggle("on", c === b)); }
+          if ("o" in b.dataset) { oriented = !oriented; b.classList.toggle("on", oriented); b.textContent = oriented ? "Orientation: on (ORB-style)" : "Orientation: off (BRIEF)"; }
+          if ("x" in b.dataset) { cross = !cross; b.classList.toggle("on", cross); b.textContent = `crossCheck=${cross ? "True" : "False"}`; }
+          update();
+        });
+        const sl = ms.querySelector("input");
+        sl.addEventListener("input", () => { nShow = +sl.value; sl.nextElementSibling.textContent = sl.value; draw(); });
+        Deck.scene("#slide-match", { enter() { if (data) animate(); }, leave() { tl?.kill(); } });
+      })();
+    </script>
+  </body>
+</html>

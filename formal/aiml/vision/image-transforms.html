@@ -1,0 +1,1378 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Image Transforms</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 0.95rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 2rem;
+        font-size: 1.05rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 10rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 1.05rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.1rem;
+        width: min(100%, 60rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      /* Code-only slides */
+      .slide > pre {
+        width: min(100%, 62rem);
+        font-size: 1.1rem;
+      }
+
+      .slide > pre.ex {
+        width: min(100%, 62rem);
+        font-size: 1.1rem;
+      }
+
+      /* Bigger maths and text on the theory slides */
+      .slide .katex-display {
+        font-size: 1.45em;
+      }
+
+      .theory ul {
+        font-size: 1.3rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 0.95rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+
+      /* ---------- Cover ---------- */
+      #title .stage {
+        position: relative;
+        width: min(22rem, 70cqw);
+        aspect-ratio: 620 / 349;
+        border-radius: 14px;
+        border: 1px dashed rgba(167, 139, 250, 0.45);
+      }
+
+      #title .stage img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 12px;
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.8);
+      }
+
+      #title .stage .tlabel {
+        position: absolute;
+        left: 50%;
+        bottom: -2.1rem;
+        transform: translateX(-50%);
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        color: var(--cyan);
+        white-space: nowrap;
+      }
+
+      /* ---------- Transform types (F glyph cards) ---------- */
+      #types .cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.2rem;
+        width: 100%;
+      }
+
+      #types .card {
+        display: grid;
+        grid-template-columns: 6.2rem 1fr;
+        gap: 1.2rem;
+        align-items: center;
+        padding: 1.1rem 1.3rem;
+      }
+
+      #types .card h3 {
+        margin: 0 0 0.3rem;
+        font-size: 1.35rem;
+      }
+
+      #types .card p {
+        font-size: 1.1rem;
+      }
+
+      #types svg {
+        width: 6.2rem;
+        height: 6.2rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .ghost {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.25);
+        stroke-dasharray: 3 3;
+      }
+
+      .fglyph {
+        fill: rgba(139, 92, 246, 0.75);
+        stroke: #c4b5fd;
+        stroke-width: 1.5;
+      }
+
+      /* ---------- Lab ---------- */
+      #lab .play {
+        width: min(100%, 46rem);
+        gap: 1.6rem;
+      }
+
+      #lab figcaption {
+        font-size: 1rem;
+      }
+
+      #lab .under {
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-content: center;
+        gap: 1rem 2rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      #lab .ctl {
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        justify-content: start;
+        gap: 0.7rem 2rem;
+      }
+
+      #lab .ctl label {
+        justify-content: space-between;
+      }
+
+      #lab .right {
+        display: grid;
+        gap: 0.7rem;
+        justify-items: center;
+      }
+
+      #lab .chips {
+        justify-content: flex-start;
+      }
+
+      #lab .mx {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      #lab .mat {
+        grid-template-columns: repeat(3, auto);
+      }
+
+      #lab .mat > span {
+        min-width: 5.4rem;
+        height: 2.2rem;
+        font-size: 1rem;
+      }
+
+      #lab pre {
+        width: max-content;
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+      }
+
+      #lab .chips {
+        gap: 0.4rem;
+      }
+
+      #lab .chip {
+        padding: 0.3rem 0.75rem;
+      }
+
+      #lab input[type="range"] {
+        width: 8.5rem;
+      }
+
+      .interp-cards {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        width: 100%;
+      }
+
+      .interp-cards h3 {
+        font-size: 1.35rem;
+      }
+
+      .interp-cards p {
+        font-size: 1.15rem;
+        margin-top: 0.4rem;
+      }
+
+      /* ---------- Interpolation ---------- */
+      #interp .iwrap {
+        display: grid;
+        grid-template-columns: 20rem minmax(0, 1fr);
+        gap: 2.4rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      #interp .figs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem 1.6rem;
+        width: min(100%, 44rem);
+        justify-self: center;
+      }
+
+      #interp figcaption {
+        font-size: 1.05rem;
+      }
+
+      #interp canvas {
+        width: 100%;
+        image-rendering: pixelated;
+        border-radius: 10px;
+      }
+
+      #interp figcaption b {
+        display: block;
+        color: var(--text);
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        font-weight: 400;
+      }
+
+      #interp .src {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.2rem;
+        font-size: 1.15rem;
+        color: var(--muted);
+      }
+
+      #interp .src canvas {
+        width: 20rem;
+        cursor: crosshair;
+      }
+
+      /* ---------- Flip ---------- */
+      #flip .cols {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
+        gap: 3rem;
+      }
+
+      #flip ul {
+        font-size: 1.25rem;
+      }
+
+      #flip .flipbox {
+        perspective: 900px;
+      }
+
+      #flip canvas {
+        transform-style: preserve-3d;
+      }
+
+      #flip .code-now {
+        font-family: var(--font-mono);
+        font-size: 1.15rem;
+        color: var(--cyan);
+        text-align: center;
+      }
+
+      /* ---------- Transpose ---------- */
+      #transpose .panels {
+        --c: 3.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 1.4rem 3rem;
+      }
+
+      #transpose .panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      #transpose .g {
+        display: grid;
+        gap: 3px;
+        padding: 5px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+      }
+
+      #transpose .g span {
+        display: grid;
+        place-items: center;
+        width: var(--c);
+        height: var(--c);
+        border-radius: 5px;
+        font-family: var(--font-mono);
+        font-size: calc(var(--c) * 0.4);
+        color: #fff;
+      }
+
+      #transpose .panel p {
+        font-size: 1.05rem;
+        color: var(--muted);
+        margin: 0;
+        text-align: center;
+      }
+
+      #transpose .panel p code {
+        font-size: 0.9rem;
+      }
+
+      /* ---------- Crop ---------- */
+      #crop .cols {
+        width: 100%;
+        grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+        gap: 2.4rem;
+      }
+
+      #crop figcaption {
+        font-size: 1.05rem;
+      }
+
+      #crop canvas.out {
+        height: 17rem;
+        object-fit: contain;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      #crop .readout {
+        margin-top: 0.6rem;
+      }
+
+      #crop canvas.img {
+        cursor: crosshair;
+        touch-action: none;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <div class="stage">
+        <img src="/assets/2025-10-09-22-21-33.png" alt="A hand holding a lens in front of a lake" />
+        <span class="tlabel">identity</span>
+      </div>
+      <h1 style="margin-top: 1.6rem">Image Transforms</h1>
+      <p>Move, turn, resize, mirror and cut images by changing where every pixel goes.</p>
+    </section>
+
+    <!-- ================================================================ types -->
+    <section class="slide" id="types">
+      <h2>Types of transforms</h2>
+      <p class="lead"><strong>Geometric transforms</strong> change pixel <em>positions</em> without changing the content.</p>
+      <div class="cards">
+        <div class="card step" data-t="translate"><svg viewBox="0 0 100 100"></svg><div><h3>Translation</h3><p>Shift the image position.</p></div></div>
+        <div class="card step" data-t="rotate"><svg viewBox="0 0 100 100"></svg><div><h3>Rotation</h3><p>Rotate around a point.</p></div></div>
+        <div class="card step" data-t="scale"><svg viewBox="0 0 100 100"></svg><div><h3>Scaling</h3><p>Resize the image.</p></div></div>
+        <div class="card step" data-t="flip"><svg viewBox="0 0 100 100"></svg><div><h3>Flipping</h3><p>Mirror horizontally or vertically.</p></div></div>
+        <div class="card step" data-t="affine"><svg viewBox="0 0 100 100"></svg><div><h3>Affine</h3><p>Any mix of the above. Parallel lines stay parallel.</p></div></div>
+        <div class="card step" data-t="perspective"><svg viewBox="0 0 100 100"></svg><div><h3>Perspective</h3><p>A 3-D-like change of viewpoint.</p></div></div>
+      </div>
+      <p class="muted center">The dashed outline is the original; each card animates its transform as it appears.</p>
+    </section>
+
+    <!-- ================================================================ translation -->
+    <section class="slide">
+      <h2>Translation</h2>
+      <p class="lead"><strong>Translation</strong> shifts the image by \((t_x, t_y)\) pixels.</p>
+      <div class="cols theory" style="width: min(100%, 60rem)">
+        <div class="center">
+          <p class="muted">Transformation matrix</p>
+          $$M = \begin{bmatrix} 1 & 0 & t_x \\ 0 & 1 & t_y \end{bmatrix}$$
+        </div>
+        <ul>
+          <li class="step"><strong>Formula:</strong> \(x' = x + t_x\), \(y' = y + t_y\)</li>
+          <li class="step">Positive \(t_x\) moves right, positive \(t_y\) moves <em>down</em> (image y grows downwards).</li>
+          <li class="step"><strong>Use cases:</strong> positioning, data augmentation, image registration.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Translation in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        # translation matrix (shift right 100, down 50)
+        M = np.float32([[1, 0, 100],  # ans:
+                        [0, 1, 50]])  # ans:
+        # apply translation
+        height, width = img.shape[:2]
+        translated = cv2.warpAffine(img, M, (width, height))  # ans:
+        # shift left (negative tx)
+        M = np.float32([[1, 0, -50],
+                        [0, 1,  0]])
+        # ans: shifts 50 pixels left
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ rotation -->
+    <section class="slide">
+      <h2>Rotation</h2>
+      <p class="lead"><strong>Rotation</strong> turns the image by an angle \(\theta\) around a centre \((c_x, c_y)\), optionally scaling by \(s\).</p>
+      <div class="center">
+        $$M = \begin{bmatrix} \alpha & \beta & (1-\alpha)\,c_x - \beta\,c_y \\ -\beta & \alpha & \beta\,c_x + (1-\alpha)\,c_y \end{bmatrix} \qquad \alpha = s\cos\theta,\ \ \beta = s\sin\theta$$
+      </div>
+      <ul class="theory-list" style="font-size: 1.3rem; width: min(100%, 60rem)">
+        <li class="step">The third column moves the centre back where it was, so the image turns <em>about</em> \((c_x, c_y)\) instead of the top-left corner.</li>
+        <li class="step"><strong>OpenCV builds it for you:</strong> <code>cv2.getRotationMatrix2D(center, angle, scale)</code>. A positive angle turns the picture anticlockwise.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Rotation in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # get image center
+        height, width = img.shape[:2]
+        center = (width // 2, height // 2)
+        # rotation matrix (45 degrees, no scaling)
+        M = cv2.getRotationMatrix2D(center, 45, 1.0)  # ans:
+        # ans: angle=45°, scale=1.0 (no resize)
+        # apply rotation
+        rotated = cv2.warpAffine(img, M, (width, height))  # ans:
+        # rotate 90 degrees
+        M = cv2.getRotationMatrix2D(center, 90, 1.0)
+        rotated = cv2.warpAffine(img, M, (width, height))
+        # ans: 90° anticlockwise: positive angles turn anticlockwise
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ lab -->
+    <section class="slide top" id="lab">
+      <h2>warpAffine, live</h2>
+      <div class="play">
+        <figure><canvas class="img src" width="620" height="349"></canvas><figcaption>img</figcaption></figure>
+        <figure><canvas class="img dst" width="620" height="349"></canvas><figcaption>cv2.warpAffine(img, M, (620, 349))</figcaption></figure>
+      </div>
+      <div class="under">
+        <div style="display: grid; gap: 0.7rem">
+          <div class="ctl" data-interactive>
+            <label><span>t<sub>x</sub></span> <input type="range" name="tx" min="-300" max="300" value="0" /><output>0</output></label>
+            <label><span>t<sub>y</sub></span> <input type="range" name="ty" min="-170" max="170" value="0" /><output>0</output></label>
+            <label>angle <input type="range" name="angle" min="-180" max="180" value="0" /><output>0</output></label>
+            <label>scale <input type="range" name="scale" min="0.3" max="2" step="0.05" value="1" /><output>1</output></label>
+          </div>
+          <div class="chips" data-interactive>
+            <button class="chip ghost" data-demo="shift">Shift</button>
+            <button class="chip ghost" data-demo="rot45">Rotate 45°</button>
+            <button class="chip ghost" data-demo="rot90">Rotate 90°</button>
+            <button class="chip ghost" data-demo="zoom">Rotate + scale 0.8</button>
+            <button class="chip ghost" data-demo="reset">Reset</button>
+          </div>
+        </div>
+        <div class="right">
+          <div class="mx"><span class="muted" style="font-size: 0.95rem">M (2×3)</span><div class="mat"></div></div>
+          <pre><code class="language-python code-live"></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ scaling -->
+    <section class="slide">
+      <h2>Scaling (resizing)</h2>
+      <p class="lead"><strong>Scaling</strong> changes the image size. New pixels fall <em>between</em> old ones, so their values must be interpolated.</p>
+      <div class="cards interp-cards">
+        <div class="card step"><h3>Nearest neighbour</h3><p>Fast, blocky.</p><p><code>INTER_NEAREST</code></p></div>
+        <div class="card step"><h3>Bilinear</h3><p>Smooth, fast. The default.</p><p><code>INTER_LINEAR</code></p></div>
+        <div class="card step"><h3>Bicubic</h3><p>Smoother, slower.</p><p><code>INTER_CUBIC</code></p></div>
+        <div class="card step"><h3>Lanczos</h3><p>Best quality, slowest.</p><p><code>INTER_LANCZOS4</code></p></div>
+      </div>
+    </section>
+
+    <section class="slide" id="interp">
+      <h2>The same pixels, four ways</h2>
+      <div class="iwrap">
+      <div class="src">
+        <canvas class="img thumb" width="620" height="349"></canvas>
+        <span>A 40×24 crop from inside the lens, enlarged 8× with each flag.<br />Click the photo to pick another spot.</span>
+      </div>
+      <div class="figs">
+        <figure class="step" data-anim="zoom"><canvas data-m="nearest" width="320" height="192"></canvas><figcaption>Nearest<b>INTER_NEAREST</b></figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-m="linear" width="320" height="192"></canvas><figcaption>Bilinear<b>INTER_LINEAR</b></figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-m="cubic" width="320" height="192"></canvas><figcaption>Bicubic<b>INTER_CUBIC</b></figcaption></figure>
+        <figure class="step" data-anim="zoom"><canvas data-m="lanczos" width="320" height="192"></canvas><figcaption>Lanczos<b>INTER_LANCZOS4</b></figcaption></figure>
+      </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Resizing in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # resize to specific dimensions
+        resized = cv2.resize(img, (640, 480))  # ans:
+        # ans: width=640, height=480 (exact size)
+        # resize by scale factor
+        scaled = cv2.resize(img, None, fx=0.5, fy=0.5)  # ans:
+        # ans: fx=fy=0.5 means 50% of original size
+        # resize with interpolation
+        resized = cv2.resize(img, (320, 240), interpolation=cv2.INTER_CUBIC)  # ans:
+        # ans: INTER_CUBIC for smooth downscaling
+        # upscale 2x
+        scaled = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
+        # ans: doubles size with bilinear interpolation
+      </code></pre>
+      <p class="muted center">Note the order: <code>cv2.resize</code> takes <code>(width, height)</code>, but <code>img.shape</code> is <code>(height, width)</code>.</p>
+    </section>
+
+    <!-- ================================================================ flip -->
+    <section class="slide" id="flip">
+      <h2>Flipping</h2>
+      <div class="cols">
+        <div>
+          <p class="lead" style="text-align: left"><strong>Flipping</strong> mirrors the image across an axis.</p>
+          <ul>
+            <li><strong>Horizontal:</strong> <code>flipCode = 1</code> (left ↔ right)</li>
+            <li><strong>Vertical:</strong> <code>flipCode = 0</code> (top ↔ bottom)</li>
+            <li><strong>Both:</strong> <code>flipCode = -1</code> (same as a 180° rotation)</li>
+            <li class="step"><strong>Use cases:</strong> data augmentation, mirror effects.</li>
+          </ul>
+        </div>
+        <div style="display: grid; gap: 0.8rem">
+          <div class="flipbox"><canvas class="img" width="620" height="349"></canvas></div>
+          <div class="chips" data-interactive>
+            <button class="chip" data-f="1">flipCode = 1</button>
+            <button class="chip" data-f="0">flipCode = 0</button>
+            <button class="chip" data-f="-1">flipCode = -1</button>
+            <button class="chip ghost" data-f="none">Original</button>
+          </div>
+          <div class="code-now">img</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Flipping in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # horizontal flip (left-right)
+        flipped_h = cv2.flip(img, 1)  # ans:
+        # ans: flipCode=1 for horizontal
+        # vertical flip (up-down)
+        flipped_v = cv2.flip(img, 0)  # ans:
+        # ans: flipCode=0 for vertical
+        # both axes (180° rotation)
+        flipped_both = cv2.flip(img, -1)  # ans:
+        # ans: flipCode=-1 for both axes
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ transpose -->
+    <section class="slide" id="transpose">
+      <h2>Transpose</h2>
+      <p class="lead"><strong>Transpose</strong> swaps rows and columns: it reflects the image across its main diagonal, so width and height swap.</p>
+      <div class="panels">
+        <div class="panel"><div class="g orig"></div><p>Original, 3×4</p></div>
+        <div class="panel step" data-anim="none"><div class="g tr"></div><p>Transpose<br /><code>cv2.transpose(img)</code></p></div>
+        <div class="panel step" data-anim="none"><div class="g rot"></div><p>Rotate 90° clockwise<br /><code>ROTATE_90_CLOCKWISE</code></p></div>
+      </div>
+      <p class="step center">Both are 4×3, but the pixels differ: a transpose is a 90° rotation <em>plus</em> a flip.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Transpose in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # transpose (swap width and height)
+        transposed = cv2.transpose(img)  # ans:
+        height, width = img.shape[:2]
+        # ans: new shape = (width, height, channels)
+        # transpose vs rotate 90°
+        transposed = cv2.transpose(img)
+        rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+        # ans: different results! transpose reflects across the diagonal
+        # convenient rotation functions
+        rot_90 = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)  # ans:
+        rot_180 = cv2.rotate(img, cv2.ROTATE_180)  # ans:
+        rot_270 = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ crop -->
+    <section class="slide" id="crop">
+      <h2>Cropping</h2>
+      <p class="lead"><strong>Cropping</strong> extracts a region of interest (ROI) with NumPy slicing: <code>img[y1:y2, x1:x2]</code>. No special OpenCV function needed.</p>
+      <div class="cols">
+        <figure><canvas class="img src" width="620" height="349"></canvas><figcaption>Drag on the photo to choose a region</figcaption></figure>
+        <figure><canvas class="img out" width="200" height="200"></canvas><figcaption class="readout"></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Cropping in OpenCV</h2>
+      <pre class="steps"><code class="language-python">
+        # crop region [y1:y2, x1:x2]
+        cropped = img[100:300, 50:250]  # ans:
+        # ans: rows 100-300, columns 50-250
+        # crop center region
+        height, width = img.shape[:2]
+        x = width // 4
+        y = height // 4
+        w = width // 2
+        h = height // 2
+        cropped = img[y:y+h, x:x+w]  # ans:
+        # ans: center half of image
+      </code></pre>
+      <p class="muted center">Rows come first: <code>y</code> before <code>x</code>. A slice is a view, so use <code>.copy()</code> if you will modify it.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What does translation do?</p><p class="answer">Shifts the image position by \((t_x, t_y)\).</p></div>
+        <div class="q"><p>What is the rotation centre?</p><p class="answer">The point the image rotates around.</p></div>
+        <div class="q"><p>Which interpolation is best for downscaling?</p><p class="answer"><code>INTER_AREA</code> or <code>INTER_CUBIC</code> (best quality).</p></div>
+        <div class="q"><p>What is <code>flipCode=1</code>?</p><p class="answer">A horizontal flip (left ↔ right).</p></div>
+        <div class="q"><p>What is the difference between transpose and rotate?</p><p class="answer">Transpose reflects across the diagonal; rotate turns without mirroring.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What happens to the size during rotation?</p><p class="answer">The output keeps the given size, so content may be clipped at the edges.</p></div>
+        <div class="q"><p>What are <code>fx</code> and <code>fy</code> in resize?</p><p class="answer">Scale factors for the x and y directions.</p></div>
+        <div class="q"><p>The fastest interpolation method?</p><p class="answer"><code>INTER_NEAREST</code> (nearest neighbour).</p></div>
+        <div class="q"><p>The best quality interpolation?</p><p class="answer"><code>INTER_LANCZOS4</code> (slowest but best).</p></div>
+        <div class="q"><p>What is <code>warpAffine</code> used for?</p><p class="answer">Applying affine transformations: translation, rotation, scaling, shear.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # translate right 50, down 30
+        M = np.float32([[1, 0, 50],  # ans:
+                        [0, 1, 30]])  # ans:
+        h, w = img.shape[:2]  # ans:
+        translated = cv2.warpAffine(img, M, (w, h))  # ans:
+        # rotate 30 degrees around center
+        h, w = img.shape[:2]
+        center = (w // 2, h // 2)
+        M = cv2.getRotationMatrix2D(center, 30, 1.0)  # ans:
+        rotated = cv2.warpAffine(img, M, (w, h))  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # resize to 800x600
+        resized = cv2.resize(img, (800, 600))  # ans:
+        # scale down to 25%
+        scaled = cv2.resize(img, None, fx=0.25, fy=0.25)  # ans:
+        # flip horizontally
+        flipped = cv2.flip(img, 1)  # ans:
+        # flip vertically
+        flipped = cv2.flip(img, 0)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # rotate 90 degrees clockwise
+        rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)  # ans:
+        # rotate 180 degrees
+        rotated = cv2.rotate(img, cv2.ROTATE_180)  # ans:
+        # transpose image
+        transposed = cv2.transpose(img)  # ans:
+        # crop top-left 100x100 region
+        cropped = img[0:100, 0:100]  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 6 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # upscale 3x with cubic interpolation
+        scaled = cv2.resize(img, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)  # ans:
+        # rotate with scale
+        h, w = img.shape[:2]
+        M = cv2.getRotationMatrix2D((w//2, h//2), 45, 0.8)
+        # ans: 45° rotation + 80% scale
+        rotated = cv2.warpAffine(img, M, (w, h))  # ans:
+        # combine flip and rotate
+        flipped = cv2.flip(img, 1)
+        rotated = cv2.rotate(flipped, cv2.ROTATE_90_CLOCKWISE)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 7 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # resize maintaining aspect ratio
+        h, w = img.shape[:2]
+        new_w = 640
+        new_h = int(h * (new_w / w))
+        resized = cv2.resize(img, (new_w, new_h))  # ans:
+        # crop center square
+        h, w = img.shape[:2]
+        size = min(h, w)
+        start_y = (h - size) // 2
+        start_x = (w - size) // 2
+        cropped = img[start_y:start_y+size, start_x:start_x+size]  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 8 · advanced</h2>
+      <pre class="ex"><code class="language-python">
+        # translate with border handling
+        M = np.float32([[1, 0, 100],
+                        [0, 1, 50]])
+        h, w = img.shape[:2]
+        translated = cv2.warpAffine(img, M, (w, h),  # ans:
+                                    borderMode=cv2.BORDER_CONSTANT,  # ans:
+                                    borderValue=(0, 0, 0))  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 9 · advanced</h2>
+      <pre class="ex"><code class="language-python">
+        # rotate and expand canvas
+        angle = 45
+        h, w = img.shape[:2]
+        center = (w//2, h//2)
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        cos = np.abs(M[0, 0])
+        sin = np.abs(M[0, 1])
+        new_w = int(h * sin + w * cos)
+        new_h = int(h * cos + w * sin)
+        M[0, 2] += (new_w - w) / 2
+        M[1, 2] += (new_h - h) / 2
+        rotated = cv2.warpAffine(img, M, (new_w, new_h))  # ans:
+        # ans: expands the canvas to fit the rotated image
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      const gsap = await Deck.load("gsap");
+      const PHOTO = "/assets/2025-10-09-22-21-33.png";
+
+      // ------------------------------------------------------------ cover: one photo, many transforms
+      {
+        const img = document.querySelector("#title .stage img");
+        const label = document.querySelector("#title .tlabel");
+        let tl = null;
+        const say = (t) => () => (label.textContent = t);
+        Deck.scene("#title", {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+            tl?.kill();
+            gsap.set(img, { x: 0, y: 0, rotation: 0, scaleX: 1, scaleY: 1 });
+            tl = gsap.timeline({ repeat: -1, repeatDelay: 0.6, delay: 0.8, defaults: { duration: 0.9, ease: "power2.inOut" } });
+            tl.call(say("translate"))
+              .to(img, { x: "18%", y: "10%" })
+              .to(img, { x: 0, y: 0, delay: 0.5 })
+              .call(say("rotate 30°"))
+              .to(img, { rotation: -30 })
+              .to(img, { rotation: 0, delay: 0.5 })
+              .call(say("scale 0.6"))
+              .to(img, { scaleX: 0.6, scaleY: 0.6 })
+              .to(img, { scaleX: 1, scaleY: 1, delay: 0.5 })
+              .call(say("flip"))
+              .to(img, { scaleX: -1 })
+              .to(img, { scaleX: 1, delay: 0.5 })
+              .call(say("identity"));
+          },
+          leave() {
+            tl?.kill();
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ F glyph cards
+      // Solve A x = b (Gaussian elimination); used for the perspective card
+      function solve(A, b) {
+        const n = b.length;
+        const M = A.map((r, i) => [...r, b[i]]);
+        for (let c = 0; c < n; c++) {
+          let p = c;
+          for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+          [M[c], M[p]] = [M[p], M[c]];
+          for (let r = 0; r < n; r++) {
+            if (r === c) continue;
+            const f = M[r][c] / M[c][c];
+            for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k];
+          }
+        }
+        return M.map((r, i) => r[n] / r[i]);
+      }
+      function homography(src, dst) {
+        const A = [], b = [];
+        src.forEach(([x, y], i) => {
+          const [u, v] = dst[i];
+          A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]);
+          b.push(u);
+          A.push([0, 0, 0, x, y, 1, -v * x, -v * y]);
+          b.push(v);
+        });
+        const h = solve(A, b);
+        return [h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7], 1];
+      }
+      const F = [[35, 18], [70, 18], [70, 31], [48, 31], [48, 45], [64, 45], [64, 57], [48, 57], [48, 82], [35, 82]];
+      const rot = (deg) => {
+        const t = (deg * Math.PI) / 180, c = Math.cos(t), s = Math.sin(t);
+        return ([x, y]) => [50 + (x - 50) * c + (y - 50) * s, 50 - (x - 50) * s + (y - 50) * c];
+      };
+      const H = homography([[20, 18], [80, 18], [80, 82], [20, 82]], [[38, 22], [62, 22], [92, 84], [8, 84]]);
+      const TF = {
+        translate: ([x, y]) => [x + 15, y + 10],
+        rotate: rot(35),
+        scale: ([x, y]) => [50 + (x - 50) * 0.6, 50 + (y - 50) * 0.6],
+        flip: ([x, y]) => [100 - x, y],
+        affine: ([x, y]) => [50 + 0.8 * (x - 50) + 0.45 * (y - 50), 50 + 0.15 * (x - 50) + 0.75 * (y - 50)],
+        perspective: ([x, y]) => {
+          const w = H[6] * x + H[7] * y + 1;
+          return [(H[0] * x + H[1] * y + H[2]) / w, (H[3] * x + H[4] * y + H[5]) / w];
+        },
+      };
+      const pts = (a) => a.map((p) => p.map((v) => v.toFixed(2)).join(",")).join(" ");
+      const cards = [...document.querySelectorAll("#types .card")];
+      cards.forEach((card) => {
+        card.querySelector("svg").innerHTML = `<polygon class="ghost" points="${pts(F)}"/><polygon class="fglyph" points="${pts(F)}"/>`;
+      });
+      function setGlyph(card, t) {
+        const f = TF[card.dataset.t];
+        const target = F.map(f);
+        const now = F.map((p, i) => [p[0] + (target[i][0] - p[0]) * t, p[1] + (target[i][1] - p[1]) * t]);
+        card.querySelector(".fglyph").setAttribute("points", pts(now));
+      }
+      function animateGlyph(card, instant) {
+        const o = { t: 0 };
+        gsap.killTweensOf(card._o || {});
+        card._o = o;
+        if (instant) return setGlyph(card, 1);
+        gsap.to(o, { t: 1, duration: 1.1, delay: 0.25, ease: "power2.inOut", onUpdate: () => setGlyph(card, o.t) });
+      }
+      Deck.scene("#types", {
+        step(slide, n, els, d) {
+          els.forEach((c) => animateGlyph(c, d.dir < 0));
+        },
+        unstep(slide, n, els) {
+          els.forEach((c) => {
+            gsap.killTweensOf(c._o || {});
+            setGlyph(c, 0);
+          });
+        },
+      });
+
+      // ------------------------------------------------------------ shared photo
+      const photo = await loadImage(PHOTO);
+      const W = 620, Hh = 349;
+      const base = readPixels(photo, W, Hh);
+
+      // Bilinear sample of base at (x, y); outside -> black (BORDER_CONSTANT)
+      function sample(src, x, y, out, o) {
+        const w = src.width, h = src.height, d = src.data;
+        const x0 = Math.floor(x), y0 = Math.floor(y);
+        const fx = x - x0, fy = y - y0;
+        for (let c = 0; c < 3; c++) {
+          let v = 0;
+          for (let j = 0; j < 2; j++)
+            for (let i = 0; i < 2; i++) {
+              const xx = x0 + i, yy = y0 + j;
+              if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+              v += d[(yy * w + xx) * 4 + c] * (i ? fx : 1 - fx) * (j ? fy : 1 - fy);
+            }
+          out[o + c] = v;
+        }
+        out[o + 3] = 255;
+      }
+
+      // ------------------------------------------------------------ warpAffine lab
+      {
+        const lab = document.querySelector("#lab");
+        const src = lab.querySelector("canvas.src");
+        const dst = lab.querySelector("canvas.dst");
+        const matEl = lab.querySelector(".mat");
+        const codeEl = lab.querySelector(".code-live");
+        show(src, base);
+        const inputs = Object.fromEntries([...lab.querySelectorAll("input")].map((i) => [i.name, i]));
+        const f2 = (v) => (Math.abs(v) < 0.005 ? "0" : (+v.toFixed(2)).toString()).replace("-", "−");
+        let raf = 0;
+        function render() {
+          raf = 0;
+          const tx = +inputs.tx.value, ty = +inputs.ty.value, ang = +inputs.angle.value, s = +inputs.scale.value;
+          lab.querySelectorAll("label").forEach((l) => (l.querySelector("output").textContent = l.querySelector("input").value));
+          // cv2.getRotationMatrix2D(center, angle, scale), then add the shift
+          const cx = W / 2, cy = Hh / 2, t = (ang * Math.PI) / 180;
+          const a = s * Math.cos(t), b = s * Math.sin(t);
+          const M = [a, b, (1 - a) * cx - b * cy + tx, -b, a, b * cx + (1 - a) * cy + ty];
+          matEl.innerHTML = M.map((v) => `<span>${f2(v)}</span>`).join("");
+          const rotLine = ang === 0 && s === 1 ? "M = np.float32([[1, 0, 0], [0, 1, 0]])" : `M = cv2.getRotationMatrix2D((${cx}, ${Math.floor(cy)}), ${ang}, ${s})`;
+          codeEl.textContent = `${rotLine}\nM[:, 2] += (${tx}, ${ty})  # translation\nout = cv2.warpAffine(img, M, (${W}, ${Hh}))`;
+          if (window.hljs) codeEl.innerHTML = hljs.highlight(codeEl.textContent, { language: "python" }).value;
+          // warpAffine maps each output pixel back through the inverse of M
+          const det = M[0] * M[4] - M[1] * M[3];
+          const iA = M[4] / det, iB = -M[1] / det, iD = -M[3] / det, iE = M[0] / det;
+          const iC = -(iA * M[2] + iB * M[5]), iF = -(iD * M[2] + iE * M[5]);
+          const out = new ImageData(W, Hh);
+          for (let y = 0; y < Hh; y++)
+            for (let x = 0; x < W; x++) sample(base, iA * x + iB * y + iC, iD * x + iE * y + iF, out.data, (y * W + x) * 4);
+          show(dst, out);
+        }
+        const schedule = () => raf || (raf = requestAnimationFrame(render));
+        lab.addEventListener("input", schedule);
+        const DEMOS = { shift: [100, 50, 0, 1], rot45: [0, 0, 45, 1], rot90: [0, 0, 90, 1], zoom: [0, 0, 45, 0.8], reset: [0, 0, 0, 1] };
+        let tween = null;
+        lab.querySelector(".chips").addEventListener("click", (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          const [tx, ty, angle, scale] = DEMOS[b.dataset.demo];
+          const o = { tx: +inputs.tx.value, ty: +inputs.ty.value, angle: +inputs.angle.value, scale: +inputs.scale.value };
+          tween?.kill();
+          tween = gsap.to(o, {
+            tx, ty, angle, scale, duration: 0.9, ease: "power2.inOut",
+            onUpdate() {
+              inputs.tx.value = Math.round(o.tx);
+              inputs.ty.value = Math.round(o.ty);
+              inputs.angle.value = Math.round(o.angle);
+              inputs.scale.value = Math.round(o.scale * 20) / 20;
+              schedule();
+            },
+          });
+        });
+        await Deck.ready;
+        render();
+        Deck.scene("#lab", { leave: () => tween?.kill() });
+      }
+
+      // ------------------------------------------------------------ interpolation
+      {
+        const sl = document.querySelector("#interp");
+        const thumb = sl.querySelector("canvas.thumb");
+        const cw = 40, ch = 24, S = 8;
+        let cx0 = 352, cy0 = 196;
+        const cubic = (x) => {
+          const a = -0.75; // OpenCV's bicubic constant
+          x = Math.abs(x);
+          return x <= 1 ? (a + 2) * x ** 3 - (a + 3) * x ** 2 + 1 : x < 2 ? a * x ** 3 - 5 * a * x ** 2 + 8 * a * x - 4 * a : 0;
+        };
+        const sinc = (x) => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
+        const lanczos = (x) => (Math.abs(x) < 4 ? sinc(x) * sinc(x / 4) : 0);
+        const KERN = { linear: [1, (x) => Math.max(0, 1 - Math.abs(x))], cubic: [2, cubic], lanczos: [4, lanczos] };
+        function enlarge(method, canvas) {
+          const out = new ImageData(cw * S, ch * S);
+          const d = base.data;
+          const px = (x, y, c) => d[((clamp(y, 0, ch - 1) + cy0) * W + clamp(x, 0, cw - 1) + cx0) * 4 + c];
+          for (let y = 0; y < ch * S; y++)
+            for (let x = 0; x < cw * S; x++) {
+              const o = (y * cw * S + x) * 4;
+              if (method === "nearest") {
+                for (let c = 0; c < 3; c++) out.data[o + c] = px(Math.floor(x / S), Math.floor(y / S), c);
+              } else {
+                const [r, k] = KERN[method];
+                const sx = (x + 0.5) / S - 0.5, sy = (y + 0.5) / S - 0.5;
+                const x0 = Math.floor(sx), y0 = Math.floor(sy);
+                const acc = [0, 0, 0];
+                let wsum = 0;
+                for (let j = y0 - r + 1; j <= y0 + r; j++) {
+                  const wy = k(sy - j);
+                  for (let i = x0 - r + 1; i <= x0 + r; i++) {
+                    const w = wy * k(sx - i);
+                    wsum += w;
+                    for (let c = 0; c < 3; c++) acc[c] += w * px(i, j, c);
+                  }
+                }
+                for (let c = 0; c < 3; c++) out.data[o + c] = acc[c] / wsum;
+              }
+              out.data[o + 3] = 255;
+            }
+          show(canvas, out);
+        }
+        function drawThumb() {
+          const ctx = thumb.getContext("2d");
+          ctx.putImageData(base, 0, 0);
+          ctx.strokeStyle = "#22d3ee";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(cx0 - 1.5, cy0 - 1.5, cw + 3, ch + 3);
+        }
+        function renderAll() {
+          drawThumb();
+          sl.querySelectorAll("canvas[data-m]").forEach((c) => enlarge(c.dataset.m, c));
+        }
+        thumb.addEventListener("click", (e) => {
+          const [x, y] = canvasPoint(thumb, e);
+          cx0 = clamp(Math.round(x - cw / 2), 0, W - cw);
+          cy0 = clamp(Math.round(y - ch / 2), 0, Hh - ch);
+          renderAll();
+        });
+        renderAll();
+      }
+
+      // ------------------------------------------------------------ flip
+      {
+        const sl = document.querySelector("#flip");
+        const cv = sl.querySelector("canvas");
+        const label = sl.querySelector(".code-now");
+        show(cv, base);
+        let state = { sx: 1, sy: 1 };
+        chipGroup(sl.querySelector(".chips"), "button", (b) => {
+          const f = b.dataset.f;
+          const target = f === "1" ? { sx: -1, sy: 1 } : f === "0" ? { sx: 1, sy: -1 } : f === "-1" ? { sx: -1, sy: -1 } : { sx: 1, sy: 1 };
+          // Animate the mirror as a 3-D turn about the flip axis
+          gsap.to(cv, { rotationY: target.sx < 0 ? 180 : 0, rotationX: target.sy < 0 ? 180 : 0, duration: 0.9, ease: "power2.inOut" });
+          state = target;
+          label.textContent = f === "none" ? "img" : `cv2.flip(img, ${f})`;
+        });
+        // Once turned, the canvas shows its back face, which the browser mirrors: exactly what cv2.flip produces
+        Deck.scene("#flip", {
+          leave() {
+            gsap.set(cv, { rotationX: 0, rotationY: 0 });
+            sl.querySelectorAll(".chip").forEach((c) => c.classList.remove("on"));
+            label.textContent = "img";
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ transpose
+      {
+        const sl = document.querySelector("#transpose");
+        const R = 3, C = 4;
+        const COLORS = ["#7c3aed", "#db2777", "#0891b2", "#ca8a04", "#16a34a", "#dc2626", "#2563eb", "#9333ea", "#0d9488", "#ea580c", "#4f46e5", "#be185d"];
+        const letter = (r, c) => "ABCDEFGHIJKL"[r * C + c];
+        const fill = (g, rows, cols, at) => {
+          g.style.gridTemplateColumns = `repeat(${cols}, var(--c))`;
+          g.innerHTML = "";
+          for (let r = 0; r < rows; r++)
+            for (let c = 0; c < cols; c++) {
+              const [sr, sc] = at(r, c);
+              g.insertAdjacentHTML("beforeend", `<span data-k="${sr * C + sc}" style="background:${COLORS[sr * C + sc]}">${letter(sr, sc)}</span>`);
+            }
+        };
+        const orig = sl.querySelector(".orig"), tr = sl.querySelector(".tr"), rt = sl.querySelector(".rot");
+        fill(orig, R, C, (r, c) => [r, c]);
+        fill(tr, C, R, (r, c) => [c, r]); // out(r, c) = in(c, r)
+        fill(rt, C, R, (r, c) => [R - 1 - c, r]); // rotate 90° clockwise
+        function flyFrom(g) {
+          g.querySelectorAll("span").forEach((s) => {
+            const from = orig.querySelector(`[data-k="${s.dataset.k}"]`).getBoundingClientRect();
+            const to = s.getBoundingClientRect();
+            gsap.fromTo(s, { x: from.left - to.left, y: from.top - to.top, opacity: 0.4 }, { x: 0, y: 0, opacity: 1, duration: 1.1, ease: "power3.inOut", delay: 0.02 * +s.dataset.k });
+          });
+        }
+        Deck.scene("#transpose", {
+          step(slide, n, els, d) {
+            if (d.dir < 0) return;
+            if (n === 1) flyFrom(tr);
+            if (n === 2) flyFrom(rt);
+          },
+        });
+      }
+
+      // ------------------------------------------------------------ crop
+      {
+        const sl = document.querySelector("#crop");
+        const src = sl.querySelector("canvas.src");
+        const out = sl.querySelector("canvas.out");
+        const read = sl.querySelector(".readout");
+        let r = { x1: 50, y1: 100, x2: 250, y2: 300 };
+        function draw() {
+          const ctx = src.getContext("2d");
+          ctx.putImageData(base, 0, 0);
+          ctx.fillStyle = "rgba(5,6,15,0.55)";
+          ctx.fillRect(0, 0, W, Hh);
+          const w = r.x2 - r.x1, h = r.y2 - r.y1;
+          if (w > 0 && h > 0) ctx.putImageData(base, 0, 0, r.x1, r.y1, w, h);
+          ctx.strokeStyle = "#22d3ee";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(r.x1, r.y1, w, h);
+          if (w > 1 && h > 1) {
+            out.width = w;
+            out.height = h;
+            out.getContext("2d").putImageData(base, -r.x1, -r.y1, r.x1, r.y1, w, h);
+          }
+          read.innerHTML = `cropped = img[<b>${r.y1}:${r.y2}</b>, <b>${r.x1}:${r.x2}</b>]<br>shape = (${h}, ${w}, 3)`;
+        }
+        let start = null;
+        src.addEventListener("pointerdown", (e) => {
+          src.setPointerCapture(e.pointerId);
+          start = canvasPoint(src, e).map(Math.round);
+        });
+        src.addEventListener("pointermove", (e) => {
+          if (!start) return;
+          const [x, y] = canvasPoint(src, e).map(Math.round);
+          r = { x1: clamp(Math.min(x, start[0]), 0, W), x2: clamp(Math.max(x, start[0]), 0, W), y1: clamp(Math.min(y, start[1]), 0, Hh), y2: clamp(Math.max(y, start[1]), 0, Hh) };
+          if (r.x2 - r.x1 > 2 && r.y2 - r.y1 > 2) draw();
+        });
+        src.addEventListener("pointerup", () => (start = null));
+        draw();
+      }
+    </script>
+  </body>
+</html>

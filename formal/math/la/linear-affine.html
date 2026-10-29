@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Linear vs Affine</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #table table {
+        width: min(100%, 60rem);
+        font-size: 1.1rem;
+      }
+
+      #table td:first-child {
+        font-weight: 600;
+      }
+
+      #table .k1 { color: var(--violet-soft); }
+      #table .k2 { color: var(--cyan); }
+      #table .k3 { color: var(--amber); }
+      #table .k4 { color: var(--pink); }
+
+      /* ---------- The combination playground ---------- */
+      #reach .cols {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        align-items: center;
+        width: 100%;
+      }
+
+      .plane {
+        width: 100%;
+        height: auto;
+        max-height: 64cqh;
+        overflow: hidden;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: rgba(15, 18, 35, 0.6);
+      }
+
+      .plane .gridl {
+        stroke: rgba(255, 255, 255, 0.06);
+      }
+
+      .plane .axis {
+        stroke: rgba(255, 255, 255, 0.35);
+        stroke-width: 1.5;
+      }
+
+      .plane .vec {
+        stroke-width: 3.5;
+        marker-end: url(#tip);
+      }
+
+      .plane .vec.u { stroke: #c4b5fd; }
+      .plane .vec.v { stroke: #67e8f9; }
+
+      .plane .vlabel {
+        font: italic 600 22px var(--font);
+      }
+
+      .plane .region {
+        fill: var(--rc, #8b5cf6);
+        fill-opacity: 0.18;
+        stroke: var(--rc, #8b5cf6);
+        stroke-width: 3;
+        stroke-opacity: 0.85;
+      }
+
+      .plane .dot {
+        fill: var(--rc, #8b5cf6);
+      }
+
+      .plane .part {
+        stroke-width: 2.5;
+        stroke-dasharray: 6 5;
+        fill: none;
+      }
+
+      .plane .live {
+        fill: #fff;
+        stroke: var(--rc, #8b5cf6);
+        stroke-width: 3;
+      }
+
+      .kinds {
+        display: grid;
+        gap: 0.6rem;
+      }
+
+      .kind {
+        display: grid;
+        gap: 0.15rem;
+        padding: 0.7rem 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .kind b {
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        color: var(--text);
+      }
+
+      .kind small {
+        font-size: 1.05rem;
+      }
+
+      .kind.on {
+        border-color: var(--kc);
+        background: color-mix(in srgb, var(--kc) 18%, transparent);
+      }
+
+      .kind:not(.shown) {
+        pointer-events: none;
+      }
+
+      .coef {
+        font: 1.15rem var(--font-mono);
+        margin-top: 0.4rem;
+        white-space: pre;
+        color: var(--muted);
+        text-align: center;
+        min-height: 1.5em;
+      }
+
+      /* ---------- Maps ---------- */
+      #maps .cols {
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        align-items: center;
+        width: 100%;
+      }
+
+      #maps .cols > div {
+        display: grid;
+        gap: 1.4rem;
+      }
+
+      #maps svg {
+        width: 100%;
+        max-height: 72cqh;
+        overflow: hidden;
+      }
+
+      #maps .gl {
+        stroke: rgba(167, 139, 250, 0.45);
+        stroke-width: 1.4;
+      }
+
+      #maps .gl.ax {
+        stroke: rgba(255, 255, 255, 0.7);
+        stroke-width: 2.2;
+      }
+
+      #maps .origin {
+        fill: var(--pink);
+        filter: drop-shadow(0 0 8px #ec4899);
+      }
+
+      #maps .ghost {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.4);
+        stroke-dasharray: 4 4;
+      }
+
+      #maps .formula {
+        font: 1.05rem var(--font-mono);
+        color: var(--muted);
+        text-align: center;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Linear algebra · terminology</span>
+      <h1 class="grad-each"><span>Linear,</span> <span>Affine,</span> <span>Conical,</span> <span>Convex</span></h1>
+      <p>Four ways to combine vectors \(a\mathbf{u} + b\mathbf{v}\): the only difference is which coefficients you allow.</p>
+    </section>
+
+    <!-- ================================================================ table -->
+    <section class="slide" id="table">
+      <h2>Linear, affine, conical, convex combinations</h2>
+      <p class="center">A combination of vectors is \( a_1\mathbf{x}_1 + a_2\mathbf{x}_2 + \dots + a_n\mathbf{x}_n \).</p>
+      <table>
+        <thead>
+          <tr><th>Type of combination</th><th>Restriction on coefficients</th><th>Name of set</th><th>Model space</th></tr>
+        </thead>
+        <tbody>
+          <tr class="step"><td class="k1">Linear</td><td>no restrictions</td><td>Vector subspace</td><td>\( \mathbb{R}^n \)</td></tr>
+          <tr class="step"><td class="k2">Affine</td><td>\( \sum a_i = 1 \)</td><td>Affine subspace</td><td>Affine hyperplane</td></tr>
+          <tr class="step"><td class="k3">Conical</td><td>\( a_i \ge 0 \)</td><td>Convex cone</td><td>Quadrant, octant, or orthant</td></tr>
+          <tr class="step"><td class="k4">Convex</td><td>\( a_i \ge 0 \) and \( \sum a_i = 1 \)</td><td>Convex set</td><td>Simplex</td></tr>
+        </tbody>
+      </table>
+      <p class="muted center"><a href="https://en.wikipedia.org/wiki/Linear_combination#Affine,_conical,_and_convex_combinations" target="_blank" rel="noopener">Wikipedia: affine, conical and convex combinations</a></p>
+    </section>
+
+    <!-- ================================================================ playground -->
+    <section class="slide" id="reach">
+      <h2>What can two vectors reach?</h2>
+      <div class="cols">
+        <div>
+          <svg class="plane" viewBox="0 0 600 420" aria-label="Vectors u and v from the origin, with the set of points each kind of combination can reach">
+            <defs>
+              <marker id="tip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="context-stroke" />
+              </marker>
+              <clipPath id="planeClip"><rect width="600" height="420" /></clipPath>
+            </defs>
+            <g class="bg"></g>
+            <g class="set" clip-path="url(#planeClip)"></g>
+            <g class="dots" clip-path="url(#planeClip)"></g>
+            <path class="part pa" />
+            <path class="part pb" />
+            <line class="vec u" />
+            <line class="vec v" />
+            <text class="vlabel u" fill="#c4b5fd">u</text>
+            <text class="vlabel v" fill="#67e8f9">v</text>
+            <circle class="live" r="8" opacity="0" />
+          </svg>
+          <p class="coef"></p>
+        </div>
+        <div class="kinds" data-interactive>
+          <button class="kind step" data-kind="linear" style="--kc: #a78bfa"><b>Linear</b><small>any a, b: the whole plane</small></button>
+          <button class="kind step" data-kind="affine" style="--kc: #22d3ee"><b>Affine</b><small>a + b = 1: the line through u and v</small></button>
+          <button class="kind step" data-kind="conic" style="--kc: #fbbf24"><b>Conical</b><small>a, b ≥ 0: the wedge between them</small></button>
+          <button class="kind step" data-kind="convex" style="--kc: #ec4899"><b>Convex</b><small>a, b ≥ 0, a + b = 1: the segment</small></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ sketch -->
+    <section class="slide">
+      <h2>The same four pictures, by hand</h2>
+      <figure class="zoom-on-reveal">
+        <img src="/assets/2025-10-23-20-53-44.png" alt="Hand-drawn sketches: (a) linear combinations fill the plane, (b) affine combinations form the line through u and v, (c) conic combinations fill the wedge between u and v, (d) convex combinations form the segment from u to v" style="max-height: 70cqh" />
+        <figcaption><a href="https://www.cnblogs.com/rhyswang/p/14696146.html" target="_blank" rel="noopener">source</a></figcaption>
+      </figure>
+    </section>
+
+    <!-- ================================================================ maps -->
+    <section class="slide" id="maps">
+      <h2>The same words for maps</h2>
+      <div class="cols">
+        <svg viewBox="-210 -210 420 420" aria-label="A grid transformed first by a linear map, which keeps the origin fixed, then shifted by a vector, which moves it">
+          <g class="lines"></g>
+          <circle class="ghost" r="9" cx="0" cy="0" />
+          <circle class="origin" r="7" cx="0" cy="0" />
+        </svg>
+        <div>
+          <p class="step" data-step="1"><strong>Linear map</strong> \( f(\mathbf{x}) = A\mathbf{x} \)<br /><span class="muted">Grid lines stay straight and evenly spaced; the origin stays put.</span></p>
+          <p class="step" data-step="2"><strong>Affine map</strong> \( f(\mathbf{x}) = A\mathbf{x} + \mathbf{b} \)<br /><span class="muted">A linear map followed by a shift: the origin moves.</span></p>
+          <p class="step muted" data-step="3">Affine maps keep affine combinations: the midpoint of a segment still lands on the midpoint.</p>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        parent?.appendChild(e);
+        return e;
+      };
+
+      // ================================================================ playground
+      {
+        const slide = document.querySelector("#reach");
+        const svg = slide.querySelector(".plane");
+        const O = [170, 320], S = 62; // origin in px, px per unit
+        const P = ([x, y]) => [O[0] + x * S, O[1] - y * S];
+        const u = [1.4, 2.2], v = [3.3, 0.9];
+        const add = (p, q) => [p[0] + q[0], p[1] + q[1]];
+        const mul = (k, p) => [k * p[0], k * p[1]];
+        const combo = (a, b) => add(mul(a, u), mul(b, v));
+
+        const bg = svg.querySelector(".bg");
+        for (let gx = -3; gx <= 7; gx++) el("line", { class: "gridl", x1: P([gx, 0])[0], x2: P([gx, 0])[0], y1: 0, y2: 420 }, bg);
+        for (let gy = -2; gy <= 6; gy++) el("line", { class: "gridl", y1: P([0, gy])[1], y2: P([0, gy])[1], x1: 0, x2: 600 }, bg);
+        el("line", { class: "axis", x1: 0, x2: 600, y1: O[1], y2: O[1] }, bg);
+        el("line", { class: "axis", y1: 0, y2: 420, x1: O[0], x2: O[0] }, bg);
+
+        const setLine = (line, p) => {
+          const [x2, y2] = P(p);
+          Object.entries({ x1: O[0], y1: O[1], x2, y2 }).forEach(([k, val]) => line.setAttribute(k, val));
+        };
+        setLine(svg.querySelector(".vec.u"), u);
+        setLine(svg.querySelector(".vec.v"), v);
+        const lu = svg.querySelector(".vlabel.u"), lv = svg.querySelector(".vlabel.v");
+        lu.setAttribute("x", P(u)[0] - 26); lu.setAttribute("y", P(u)[1] - 4);
+        lv.setAttribute("x", P(v)[0] + 8); lv.setAttribute("y", P(v)[1] + 22);
+
+        const COLORS = { linear: "#a78bfa", affine: "#22d3ee", conic: "#fbbf24", convex: "#ec4899" };
+        const setG = svg.querySelector(".set"), dotsG = svg.querySelector(".dots");
+        const pa = svg.querySelector(".pa"), pb = svg.querySelector(".pb"), live = svg.querySelector(".live");
+        const coef = slide.querySelector(".coef");
+        const pts = (arr) => arr.map((p) => P(p).join(",")).join(" ");
+
+        // The reachable set, as an SVG shape, and a sampler for coefficients
+        const KINDS = {
+          linear: {
+            shape: () => el("rect", { class: "region", x: -10, y: -10, width: 620, height: 440, "stroke-opacity": 0 }),
+            sample: () => [Math.random() * 4 - 2, Math.random() * 4 - 2],
+            path: (t) => [1.2 * Math.cos(t * 2 * Math.PI), 0.9 * Math.sin(t * 2 * Math.PI) + 0.2],
+          },
+          affine: {
+            shape: () => el("polyline", { class: "region", points: pts([combo(4, -3), combo(-3, 4)]), fill: "none" }),
+            sample: () => { const t = Math.random() * 4 - 1.5; return [1 - t, t]; },
+            path: (t) => { const s = -0.6 + 2.2 * (0.5 - 0.5 * Math.cos(t * 2 * Math.PI)); return [1 - s, s]; },
+          },
+          conic: {
+            shape: () => el("polygon", { class: "region", points: pts([[0, 0], mul(5, u), mul(6, v)]) }),
+            sample: () => [Math.random() * 2.2, Math.random() * 2.2],
+            path: (t) => [0.9 + 0.6 * Math.cos(t * 2 * Math.PI), 0.9 + 0.6 * Math.sin(t * 2 * Math.PI)],
+          },
+          convex: {
+            shape: () => el("polyline", { class: "region", points: pts([u, v]), fill: "none", "stroke-width": 6 }),
+            sample: () => { const t = Math.random(); return [1 - t, t]; },
+            path: (t) => { const s = 0.5 - 0.5 * Math.cos(t * 2 * Math.PI); return [1 - s, s]; },
+          },
+        };
+
+        let current = null, tl = null, loop = null;
+        const clock = { t: 0 };
+
+        function placeLive(kind) {
+          const [a, b] = KINDS[kind].path(clock.t);
+          const au = mul(a, u), p = combo(a, b);
+          const [x0, y0] = P([0, 0]), [x1, y1] = P(au), [x2, y2] = P(p);
+          pa.setAttribute("d", `M${x0},${y0} L${x1},${y1}`);
+          pb.setAttribute("d", `M${x1},${y1} L${x2},${y2}`);
+          live.setAttribute("cx", x2);
+          live.setAttribute("cy", y2);
+          coef.textContent = `a = ${a.toFixed(2)}   b = ${b.toFixed(2)}   a + b = ${(a + b).toFixed(2)}`;
+        }
+
+        function show(kind, instant = false) {
+          if (current === kind && !instant) return;
+          current = kind;
+          tl?.kill();
+          loop?.kill();
+          setG.replaceChildren();
+          dotsG.replaceChildren();
+          const color = COLORS[kind];
+          svg.style.setProperty("--rc", color);
+          pa.setAttribute("stroke", "#c4b5fd");
+          pb.setAttribute("stroke", "#67e8f9");
+          slide.querySelectorAll(".kind").forEach((b) => b.classList.toggle("on", b.dataset.kind === kind));
+          const shape = KINDS[kind].shape();
+          setG.appendChild(shape);
+          const dots = Array.from({ length: 70 }, () => {
+            const [x, y] = P(combo(...KINDS[kind].sample()));
+            return el("circle", { class: "dot", cx: x, cy: y, r: 4 }, dotsG);
+          });
+          live.setAttribute("opacity", 1);
+          placeLive(kind);
+          tl = gsap.timeline();
+          if (instant) gsap.set(shape, { opacity: 1 });
+          else {
+            tl.from(dots, { scale: 0, opacity: 0, transformOrigin: "center", duration: 0.35, stagger: 0.012, ease: "back.out(2)" });
+            tl.from(shape, { opacity: 0, duration: 0.6 }, 0.6);
+          }
+          loop = gsap.to(clock, { t: "+=1", duration: 6, ease: "none", repeat: -1, onUpdate: () => placeLive(kind) });
+        }
+
+        function reset() {
+          current = null;
+          tl?.kill();
+          loop?.kill();
+          setG.replaceChildren();
+          dotsG.replaceChildren();
+          live.setAttribute("opacity", 0);
+          pa.removeAttribute("d");
+          pb.removeAttribute("d");
+          coef.textContent = "Press → to reveal each kind of combination.";
+          slide.querySelectorAll(".kind").forEach((b) => b.classList.remove("on"));
+        }
+        reset();
+
+        const order = ["linear", "affine", "conic", "convex"];
+        slide.querySelectorAll(".kind").forEach((b) => b.addEventListener("click", () => show(b.dataset.kind)));
+        // deck.js updates Deck.step after firing step events, so sync to the final state in a microtask
+        const sync = (instant) => queueMicrotask(() => (Deck.step ? show(order[Math.min(Deck.step, 4) - 1], instant) : reset()));
+        Deck.scene("#reach", {
+          step: (s, n, els, d) => sync(d.dir < 0),
+          unstep: () => sync(true),
+          leave: () => {
+            tl?.kill();
+            loop?.kill();
+          },
+          enter: () => {
+            if (current) show(current, true);
+          },
+        });
+      }
+
+      // ================================================================ linear vs affine maps
+      {
+        const slide = document.querySelector("#maps");
+        const g = slide.querySelector(".lines");
+        const origin = slide.querySelector(".origin");
+        const S = 40, N = 4;
+        const A = [[1.1, 0.55], [-0.35, 0.9]], B = [1.4, 0.9];
+        const st = { l: 0, s: 0 };
+        const lines = [];
+        for (let k = -N; k <= N; k++) {
+          lines.push({ e: el("line", { class: "gl" + (k ? "" : " ax") }, g), p: [k, -N], q: [k, N] });
+          lines.push({ e: el("line", { class: "gl" + (k ? "" : " ax") }, g), p: [-N, k], q: [N, k] });
+        }
+        const map = ([x, y]) => {
+          const m = [[1 + (A[0][0] - 1) * st.l, A[0][1] * st.l], [A[1][0] * st.l, 1 + (A[1][1] - 1) * st.l]];
+          const X = m[0][0] * x + m[0][1] * y + B[0] * st.s;
+          const Y = m[1][0] * x + m[1][1] * y + B[1] * st.s;
+          return [X * S, -Y * S];
+        };
+        function render() {
+          for (const { e, p, q } of lines) {
+            const [x1, y1] = map(p), [x2, y2] = map(q);
+            e.setAttribute("x1", x1); e.setAttribute("y1", y1); e.setAttribute("x2", x2); e.setAttribute("y2", y2);
+          }
+          const [ox, oy] = map([0, 0]);
+          origin.setAttribute("cx", ox);
+          origin.setAttribute("cy", oy);
+        }
+        render();
+        let tw = null;
+        const to = (l, s, instant) => {
+          tw?.kill();
+          if (instant) {
+            Object.assign(st, { l, s });
+            render();
+          } else tw = gsap.to(st, { l, s, duration: 1.4, ease: "power2.inOut", onUpdate: render });
+        };
+        const target = () => [Deck.step >= 1 ? 1 : 0, Deck.step >= 2 ? 1 : 0];
+        Deck.scene("#maps", {
+          step: (s, n, els, d) => queueMicrotask(() => to(...target(), d.dir < 0)),
+          unstep: () => queueMicrotask(() => to(...target(), true)),
+          leave: () => tw?.kill(),
+        });
+      }
+    </script>
+  </body>
+</html>

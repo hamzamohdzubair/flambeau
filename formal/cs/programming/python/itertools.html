@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Itertools</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Iterator view: a cursor walking over an iterable ---------- */
+      .itv {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        min-width: 0;
+      }
+
+      .itv .src {
+        max-width: 100%;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+
+      .itv .lbl {
+        padding-top: 1.1rem;
+        font: 500 1.1rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .itv .cells {
+        min-width: 0;
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2.6rem 0.4rem;
+        padding-bottom: 2.6rem;
+      }
+
+      .itv .cell.gstart:not(:first-child) {
+        margin-left: 1.1rem;
+      }
+
+      .itv.small .cell {
+        min-width: 3rem;
+        height: 3.2rem;
+        padding: 0 0.4rem;
+        font-size: 1.25rem;
+      }
+
+      .itv .outs .build b {
+        color: var(--green);
+      }
+
+      .itv .cell {
+        display: grid;
+        place-items: center;
+        min-width: 3.6rem;
+        height: 3.6rem;
+        padding: 0 0.7rem;
+        border-radius: 12px;
+        border: 2px solid rgba(167, 139, 250, 0.6);
+        background: rgba(139, 92, 246, 0.14);
+        font: 600 1.5rem var(--font-mono);
+        color: var(--text);
+        transition:
+          opacity 0.35s,
+          border-color 0.35s,
+          background 0.35s;
+      }
+
+      .itv .cell.taken {
+        opacity: 0.35;
+        border-style: dashed;
+        background: transparent;
+      }
+
+      .itv .cell.skip {
+        opacity: 0.4;
+        border-color: var(--red);
+        border-style: dashed;
+        background: transparent;
+        text-decoration: line-through;
+        text-decoration-color: var(--red);
+      }
+
+      .itv .ptr {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 3.6rem;
+        font: 600 1rem var(--font-mono);
+        color: var(--cyan);
+        white-space: nowrap;
+        transition: opacity 0.3s;
+      }
+
+      .itv .ptr::before {
+        content: "";
+        width: 0;
+        height: 0;
+        border: 0.45rem solid transparent;
+        border-bottom: 0.6rem solid var(--cyan);
+        border-top: 0;
+        margin-bottom: 0.15rem;
+      }
+
+      .itv .ptr.end {
+        color: var(--red);
+      }
+
+      .itv .ptr.end::before {
+        border-bottom-color: var(--red);
+      }
+
+      .itv .outs {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: min(100%, 24rem);
+        min-height: 3.2rem;
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 1.2rem/1.5 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .itv .outs b {
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      .itv .outs .err b {
+        color: var(--red);
+      }
+
+      .flyval {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        padding: 0 0.5em;
+        border-radius: 8px;
+        font: 600 1.4rem/1.7 var(--font-mono);
+        color: #fff;
+        background: rgba(34, 211, 238, 0.35);
+        border: 1px solid var(--cyan);
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.6);
+      }
+
+
+      .itv-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .itv-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2.5rem;
+        align-items: center;
+        width: min(100%, 80rem);
+      }
+
+      .itv-cols.stack {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 1.2rem;
+      }
+
+      .itv-cols.stack pre {
+        width: min(100%, 60rem);
+      }
+
+      .itv-cols pre {
+        width: 100%;
+        font-size: 1.3rem;
+      }
+
+      /* ---------- Combinatorics grid: which (row, column) pairs come out, in order ---------- */
+      .cgrid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.7rem;
+        min-width: 0;
+      }
+
+      .cgrid .ttl {
+        font: 500 1.05rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      .cgrid table {
+        border-collapse: separate;
+        border-spacing: 0.35rem;
+        background: none;
+        font: 600 1rem var(--font-mono);
+      }
+
+      .cgrid th {
+        background: none;
+        border: none;
+        padding: 0.2rem 0.4rem;
+        color: var(--violet-soft);
+        font-family: var(--font-mono);
+      }
+
+      .cgrid td {
+        min-width: 4.6rem;
+        padding: 0.45rem 0.5rem;
+        border-radius: 10px;
+        border: 1.5px dashed rgba(167, 139, 250, 0.35);
+        background: transparent;
+        color: var(--faint);
+        text-align: center;
+        white-space: nowrap;
+        transition:
+          background 0.3s,
+          border-color 0.3s,
+          color 0.3s;
+      }
+
+      .cgrid tr:nth-child(2n) td {
+        background: transparent;
+      }
+
+      .cgrid td.no {
+        border: 1px solid transparent;
+        background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.04) 0 6px, transparent 6px 12px) !important;
+        color: transparent;
+      }
+
+      .cgrid td.on {
+        border-style: solid;
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.16) !important;
+        color: var(--text);
+      }
+
+      .cgrid td .n {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--amber);
+        min-height: 0.9em;
+      }
+
+      .cgrid .gout {
+        max-width: 100%;
+        min-height: 2.8rem;
+        padding: 0.5rem 1.1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 1.15rem/1.5 var(--font-mono);
+        color: var(--green);
+        overflow-wrap: anywhere;
+      }
+
+      .cgrid .gout:empty {
+        visibility: hidden;
+      }
+
+      .slide > pre {
+        width: min(100%, 66rem);
+        font-size: 1.45rem;
+      }
+
+      .hint {
+        font-size: 1.2rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      .two {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+      }
+
+      #perm .itv-cols,
+      #comb .itv-cols,
+      #e8 .itv-cols {
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      }
+
+      #perm .itv-cols pre,
+      #comb .itv-cols pre,
+      #e8 .itv-cols pre {
+        font-size: 1.1rem;
+      }
+
+      #count pre,
+      #cycle pre {
+        font-size: 1.05rem;
+      }
+
+      #count pre .line,
+      #cycle pre .line {
+        min-height: 1.5em;
+      }
+
+      #count .itv .cells,
+      #cycle .itv .cells {
+        padding-bottom: 2.2rem;
+      }
+
+      #e9 .outs {
+        flex-direction: row;
+        gap: 1.6rem;
+      }
+
+      #e10 pre {
+        font-size: 1.2rem;
+      }
+
+      #e10 .zipv {
+        gap: 0.5rem;
+      }
+
+      #e10 .zipv td {
+        padding: 0.45rem;
+      }
+
+      #e7 pre {
+        font-size: 1.1rem;
+      }
+
+      .itv-cols.stack {
+        gap: 0.7rem;
+      }
+
+      #e7 .cgrid {
+        gap: 0.4rem;
+      }
+
+      #count .outs,
+      #cycle .outs {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        column-gap: 2rem;
+        width: max-content;
+      }
+
+      #cycle .outs {
+        column-gap: 1.2rem;
+        font-size: 1.1rem;
+      }
+
+      #e5 .itv .src {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      #e5 .itv .lbl {
+        padding-top: 0;
+      }
+
+      #e5 .itv .cells {
+        gap: 2.6rem 0.25rem;
+      }
+
+      #e5 .itv.small .cell {
+        min-width: 2.5rem;
+        padding: 0 0.2rem;
+      }
+
+      .itv-cols .cgrid + .cgrid {
+        margin-top: 0.4rem;
+      }
+
+      .itv-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      /* ---------- zip_longest: columns become tuples ---------- */
+      .zipv {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .zipv table {
+        border-collapse: separate;
+        border-spacing: 0.4rem;
+        background: none;
+        font: 600 1.4rem var(--font-mono);
+      }
+
+      .zipv th {
+        background: none;
+        border: none;
+        color: var(--faint);
+        font: 500 1.1rem var(--font-mono);
+        text-align: right;
+      }
+
+      .zipv td {
+        min-width: 4.4rem;
+        padding: 0.6rem;
+        border-radius: 10px;
+        border: 1.5px solid rgba(167, 139, 250, 0.5);
+        background: rgba(139, 92, 246, 0.12) !important;
+        text-align: center;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .zipv td.fill {
+        border-style: dashed;
+        border-color: var(--amber);
+        background: rgba(251, 191, 36, 0.08) !important;
+        color: transparent;
+      }
+
+      .zipv td.fill.on {
+        color: #fde68a;
+      }
+
+      .zipv td.on {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.16) !important;
+      }
+
+      .zipv .gout {
+        min-height: 2.8rem;
+        padding: 0.5rem 1.1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.42);
+        font: 1.2rem/1.5 var(--font-mono);
+        color: var(--green);
+      }
+
+      .zipv .gout:empty {
+        visibility: hidden;
+      }
+
+      /* ---------- recap / overview cards, scaled for the 1600x900 canvas ---------- */
+      .big-cards {
+        width: min(100%, 80rem);
+      }
+
+      .big-cards .card {
+        padding: 1.6rem 1.8rem;
+      }
+
+      .big-cards h3 {
+        font-size: 1.6rem;
+      }
+
+      .big-cards p {
+        font-size: 1.3rem;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · iterators &amp; generators</span>
+      <h1 class="grad-each"><span>Itertools</span></h1>
+      <p>Ready-made iterator building blocks: endless counters, cycles, chains, slices and combinations.</p>
+    </section>
+
+    <!-- ================================================================ infinite -->
+    <section class="slide" id="count">
+      <h2>count</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import count
+          # infinite counting
+          for i in count(10, 2):
+              print(i)
+              if i &gt; 20:
+                  break
+          # ans: 10, 12, 14, 16, 18, 20, 22
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">22 is printed before the check, so it appears too. Without the <code>break</code>, this would never end.</p>
+    </section>
+
+    <section class="slide" id="cycle">
+      <h2>cycle</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import cycle
+          # infinite cycling
+          colors = ['red', 'green', 'blue']
+          color_cycle = cycle(colors)
+          for i, color in enumerate(color_cycle):
+              print(color)
+              if i &gt;= 5:
+                  break
+          # ans: red, green, blue, red, green, blue
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="repeat">
+      <h2>repeat</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          from itertools import repeat
+          # repeat value
+          list(repeat(10, 3))
+          # ans: [10, 10, 10]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">Without a count, <code>repeat(10)</code> goes on forever.</p>
+    </section>
+
+    <!-- ================================================================ chain islice -->
+    <section class="slide" id="chain">
+      <h2>chain</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import chain
+          # combine iterables
+          list(chain([1, 2], [3, 4], [5, 6]))
+          # ans: [1, 2, 3, 4, 5, 6]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">One iterable after another, without building a combined list first.</p>
+    </section>
+
+    <section class="slide" id="islice">
+      <h2>islice</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import islice
+          # slice iterator: islice(it, start, stop, step)
+          list(islice(range(10), 2, 8, 2))
+          # ans: [2, 4, 6]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">Like list slicing, but for any iterator: it stops at <code>stop</code> without looking further.</p>
+    </section>
+
+    <section class="slide" id="islice2">
+      <h2>islice: take the first n</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import islice, count
+          # take first n
+          list(islice(count(), 5))
+          # ans: [0, 1, 2, 3, 4]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint">This works even on an infinite iterator like <code>count()</code>: only 5 values are ever made.</p>
+    </section>
+
+    <!-- ================================================================ combinatoric -->
+    <section class="slide" id="product">
+      <h2>product</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import product
+          # cartesian product
+          list(product([1, 2], ['a', 'b']))
+          # ans: [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')]
+        </code></pre>
+        <div class="cgrid"></div>
+      </div>
+      <p class="hint">Every row with every column: like nested for loops.</p>
+    </section>
+
+    <section class="slide" id="perm">
+      <h2>permutations</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          from itertools import permutations
+          # all orderings
+          list(permutations([1, 2, 3], 2))
+          # ans: [(1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2)]
+        </code></pre>
+        <div class="cgrid"></div>
+      </div>
+      <p class="hint">Order matters, so <code>(1, 2)</code> and <code>(2, 1)</code> both appear; an item can't pair with itself.</p>
+    </section>
+
+    <section class="slide" id="comb">
+      <h2>combinations</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          from itertools import combinations
+          # unique selections
+          list(combinations([1, 2, 3, 4], 2))
+          # ans: [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
+        </code></pre>
+        <div class="cgrid"></div>
+      </div>
+      <p class="hint">Order doesn't matter: only the upper triangle, each pair once.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict the answer, then press → to check.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          from itertools import count
+          # count is infinite?
+          c = count()
+          next(c)
+          # ans: 0
+          next(c)
+          # ans: 1
+          # ans: never stops
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import cycle
+          # cycle repeats?
+          c = cycle([1, 2])
+          [next(c) for _ in range(5)]
+          # ans: [1, 2, 1, 2, 1]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import repeat, islice
+          # repeat without count?
+          r = repeat(5)
+          # ans: infinite
+          list(islice(r, 3))
+          # ans: [5, 5, 5]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 4</h2>
+      <pre><code class="language-python">
+        from itertools import chain
+        # chain vs +?
+        chain([1], [2], [3])
+        # ans: an iterator
+        [1] + [2] + [3]
+        # ans: [1, 2, 3] (a list)
+      </code></pre>
+      <p class="hint step"><code>+</code> builds a new list right away; <code>chain</code> hands out the items lazily.</p>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import islice
+          # islice with step?
+          list(islice(range(20), 0, 10, 2))
+          # ans: [0, 2, 4, 6, 8]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercise 6</h2>
+      <pre><code class="language-python">
+        from itertools import product
+        # product with repeat?
+        list(product([0, 1], repeat=3))
+        # ans: [(0,0,0), (0,0,1), (0,1,0), (0,1,1),
+        # ans:  (1,0,0), (1,0,1), (1,1,0), (1,1,1)]
+      </code></pre>
+      <p class="hint step"><code>repeat=3</code> means <code>product([0, 1], [0, 1], [0, 1])</code>: all 8 three-bit patterns, counting in binary.</p>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import permutations, combinations
+          # permutations vs combinations?
+          list(permutations([1, 2], 2))
+          # ans: [(1, 2), (2, 1)]
+          list(combinations([1, 2], 2))
+          # ans: [(1, 2)]
+        </code></pre>
+        <div class="two">
+          <div class="cgrid g1"></div>
+          <div class="cgrid g2"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="e8">
+      <h2>Exercise 8</h2>
+      <div class="itv-cols">
+        <pre><code class="language-python">
+          from itertools import combinations
+          # combinations order?
+          list(combinations([3, 1, 2], 2))
+          # ans: [(3, 1), (3, 2), (1, 2)]
+          # ans: maintains input order
+        </code></pre>
+        <div class="cgrid"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e9">
+      <h2>Exercise 9</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import groupby
+          # group consecutive
+          data = [1, 1, 2, 2, 2, 3]
+          [(k, list(g)) for k, g in groupby(data)]
+          # ans: [(1, [1, 1]), (2, [2, 2, 2]), (3, [3])]
+        </code></pre>
+        <div class="itv"></div>
+      </div>
+      <p class="hint"><code>groupby</code> only groups <em>neighbouring</em> equal items; sort first to group all equal values.</p>
+    </section>
+
+    <section class="slide" id="e10">
+      <h2>Exercise 10</h2>
+      <div class="itv-cols stack">
+        <pre><code class="language-python">
+          from itertools import zip_longest
+          # zip with fillvalue
+          list(zip_longest([1, 2], ['a', 'b', 'c'], fillvalue=0))
+          # ans: [(1, 'a'), (2, 'b'), (0, 'c')]
+        </code></pre>
+        <div class="zipv"></div>
+      </div>
+      <p class="hint">Plain <code>zip</code> would stop at the shorter list and drop <code>'c'</code>.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards big-cards">
+        <div class="card step"><h3>Infinite</h3><p><code>count</code>, <code>cycle</code>, <code>repeat</code>: pair them with <code>break</code> or <code>islice</code>.</p></div>
+        <div class="card step"><h3>Plumbing</h3><p><code>chain</code>, <code>islice</code>, <code>groupby</code>, <code>zip_longest</code> reshape streams lazily.</p></div>
+        <div class="card step"><h3>Combinatorics</h3><p><code>product</code> (all pairs), <code>permutations</code> (order matters), <code>combinations</code> (it doesn't).</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // ================================================================ Iterator view
+      // An iterable's items in a row, and an iterator's cursor under the next one.
+      // Each deck step runs some operations: "next", "list" (drain the rest) or
+      // "loop" (a for loop: print each, then StopIteration ends it quietly).
+      const escI = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const BEAT = 0.6;
+      const dur = (e) => (e.build ? 0.25 : e.skip !== undefined || (e.take !== undefined && !e.line && !e.add) ? BEAT / 2 : BEAT);
+
+      function Itv(slide, cfg) {
+        const root = cfg.root || slide.querySelector(".itv");
+        root.classList.toggle("small", !!cfg.small);
+        const items = cfg.items;
+        root.innerHTML = `<div class="src"><span class="lbl">${escI(cfg.name || "")}</span><div class="cells">${items.map((v, i) => `<span class="cell${cfg.groups?.includes(i) ? " gstart" : ""}">${escI(v)}</span>`).join("")}<span class="ptr">${escI(cfg.ptr || "iterator")}</span></div></div><div class="outs"></div>`;
+        const cells = [...root.querySelectorAll(".cell")];
+        const ptr = root.querySelector(".ptr");
+        const outs = root.querySelector(".outs");
+        let tl = null, seen = 0, pending = null, fliers = [];
+
+        // cfg.f maps an item to the value handed out; cfg.keep filters items
+        const F = cfg.f || ((v) => v);
+        const keep = cfg.keep || (() => true);
+        function events(k) {
+          const groups = [];
+          let pos = 0;
+          const skipTo = (ev) => {
+            while (pos < items.length && !keep(items[pos])) ev.push({ skip: pos++ });
+          };
+          for (let s = 0; s < k && s < cfg.steps.length; s++) {
+            const ev = [];
+            for (let op of [].concat(cfg.steps[s])) {
+              if (typeof op === "string") op = { op };
+              const call = op.call || cfg.call || "next(iterator)";
+              if (op.op === "next") {
+                skipTo(ev);
+                if (pos < items.length) ev.push({ take: pos, val: F(items[pos]), line: `${escI(call)} → <b>${escI(op.show ?? F(items[pos]))}</b>` }), pos++;
+                else ev.push({ stop: true, line: `${escI(call)} → <b>StopIteration</b>`, err: true });
+              } else if (op.op === "list") {
+                const got = [];
+                const end = Math.min(items.length, op.upto ?? Infinity);
+                while (pos < end) {
+                  if (keep(items[pos])) ev.push({ take: pos }), got.push(F(items[pos]));
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+                ev.push({ line: `${escI(op.call || "list(" + (cfg.ptrName || "it") + ")")} → <b>${escI(op.show ?? "[" + got.join(", ") + "]")}</b>` });
+              } else if (op.op === "loop") {
+                const end = Math.min(items.length, op.upto ?? Infinity);
+                while (pos < end) {
+                  if (keep(items[pos])) ev.push({ take: pos, val: F(items[pos]), line: `${escI(op.call || "print")} → <b>${escI(F(items[pos]))}</b>` });
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+                if (op.end !== false) ev.push({ stop: pos >= items.length, line: op.endLine || `StopIteration → <b>${escI(op.end || "loop ends")}</b>` });
+              } else if (op.op === "build") {
+                // a comprehension: kept items are transformed and added to a growing list
+                ev.push({ build: op.call || "result" });
+                const end = Math.min(items.length, op.upto ?? Infinity);
+                while (pos < end) {
+                  if (keep(items[pos])) ev.push({ take: pos, val: F(items[pos]), add: true });
+                  else ev.push({ skip: pos });
+                  pos++;
+                }
+              } else if (op.op === "runs") {
+                // groupby: consecutive equal items form one group
+                while (pos < items.length) {
+                  const k = items[pos], grp = [];
+                  while (pos < items.length && items[pos] === k) ev.push({ take: pos }), grp.push(items[pos++]);
+                  ev.push({ line: `${escI(op.call || "")}<b>(${escI(k)}, [${escI(grp.join(", "))}])</b>` });
+                }
+              } else if (op.op === "say") ev.push({ line: op.line, err: op.err });
+            }
+            groups.push(ev);
+          }
+          return groups;
+        }
+
+        function placePtr(pos, anim) {
+          const last = cells[cells.length - 1];
+          const at = pos < cells.length ? cells[pos] : last;
+          const x = pos < cells.length ? at.offsetLeft + at.offsetWidth / 2 : last.offsetLeft + last.offsetWidth + 16;
+          const y = at.offsetTop + at.offsetHeight + 4;
+          ptr.classList.toggle("end", pos >= cells.length);
+          ptr.textContent = pos >= cells.length ? "end" : cfg.ptr || "iterator";
+          const w = ptr.offsetWidth;
+          gsap.killTweensOf(ptr, "x,y");
+          if (anim) gsap.to(ptr, { x: x - w / 2, y, duration: 0.4, ease: "power2.inOut" });
+          else gsap.set(ptr, { x: x - w / 2, y });
+        }
+
+        function clear() {
+          tl?.kill();
+          fliers.forEach((f) => f.remove());
+          fliers = [];
+          cells.forEach((c) => c.classList.remove("taken", "skip"));
+          outs.innerHTML = "";
+          gsap.killTweensOf(ptr);
+          gsap.set(ptr, { rotate: 0 });
+          placePtr(0, false);
+        }
+
+        function apply(e, anim) {
+          if (e.skip !== undefined) {
+            cells[e.skip].classList.add("skip");
+            placePtr(e.skip + 1, anim);
+            if (anim) gsap.fromTo(cells[e.skip], { x: -4 }, { x: 0, duration: 0.3, ease: "elastic.out(1, 0.3)" });
+            return;
+          }
+          let line = null;
+          if (e.build) {
+            line = document.createElement("div");
+            line.className = "build";
+            line.innerHTML = `${escI(e.build)} = [<span class="acc"></span>]`;
+            outs.appendChild(line);
+            if (anim) gsap.fromTo(line, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+            return;
+          }
+          if (e.add) {
+            const acc = [...outs.querySelectorAll(".build .acc")].pop();
+            if (acc.children.length) acc.append(", ");
+            line = document.createElement("b");
+            line.textContent = e.val;
+            acc.appendChild(line);
+          }
+          if (e.line) {
+            line = document.createElement("div");
+            if (e.err) line.className = "err";
+            line.innerHTML = e.line;
+            outs.appendChild(line);
+          }
+          if (e.take !== undefined) {
+            const cell = cells[e.take];
+            if (anim && line) {
+              const from = cell.getBoundingClientRect();
+              const to = (line.matches("b") ? line : line.querySelector("b")).getBoundingClientRect();
+              gsap.set(line, { opacity: 0 });
+              const f = document.createElement("span");
+              f.className = "flyval";
+              f.textContent = e.val ?? cell.textContent;
+              document.body.appendChild(f);
+              fliers.push(f);
+              gsap.set(f, { left: from.left, top: from.top });
+              gsap.to(f, { left: to.left, top: to.top - 4, duration: 0.5, ease: "power2.inOut", onComplete: () => { f.remove(); gsap.to(line, { opacity: 1, duration: 0.2 }); } });
+            }
+            cell.classList.add("taken");
+            if (anim && !line) gsap.fromTo(cell, { y: -10 }, { y: 0, duration: 0.3 });
+            placePtr(e.take + 1, anim);
+          } else if (anim && line) {
+            gsap.fromTo(line, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3 });
+            if (e.stop) gsap.fromTo(ptr, { rotate: -12 }, { rotate: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+          }
+          if (e.stop) placePtr(cells.length, anim);
+        }
+
+        function render(k, anim) {
+          clear();
+          const groups = events(k);
+          const lastAnim = anim ? groups.pop() : null;
+          groups.flat().forEach((e) => apply(e, false));
+          if (!lastAnim) return;
+          tl = gsap.timeline();
+          let t = 0;
+          lastAnim.forEach((e) => {
+            tl.call(() => apply(e, true), null, t);
+            t += dur(e);
+          });
+        }
+
+        function sync(dir) {
+          const n = Deck.step - (cfg.offset || 0);
+          const jump = Deck.step - seen;
+          seen = Deck.step;
+          render(Math.max(0, n), dir > 0 && jump === 1 && n > 0 && n <= cfg.steps.length);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+
+        // each step's answer waits for its animation
+        const steps = [...slide.querySelectorAll(".step")];
+        cfg.steps.forEach((ops, i) => {
+          const el = steps[i + (cfg.offset || 0)];
+          const ev = events(i + 1)[i];
+          const t = ev.slice(0, -1).reduce((a, e) => a + dur(e), 0);
+          if (el && ev.length > 1) el.style.setProperty("--ans-delay", t + 0.5 + "s");
+        });
+
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        // reserve the tallest output so the slide never grows mid-animation
+        let tallest = 0;
+        for (let k = 0; k <= cfg.steps.length; k++) {
+          render(k, false);
+          tallest = Math.max(tallest, outs.offsetHeight);
+        }
+        outs.style.minHeight = tallest + "px";
+        render(0, false);
+      }
+      const itv = (id, cfg) => Itv(document.getElementById(id), cfg);
+      // ================================================================ Combinatorics grid
+      // Rows and columns are the two picks; cells that the function produces light
+      // up in the order it yields them, building the output list.
+      function Grid(slide, cfg) {
+        const root = cfg.root || slide.querySelector(".cgrid");
+        const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const fmt = cfg.fmt || ((r, c) => `(${r}, ${c})`);
+        let html = cfg.title ? `<div class="ttl">${esc(cfg.title)}</div>` : "";
+        html += `<table><tr><th></th>${cfg.cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>`;
+        cfg.rows.forEach((r, i) => {
+          html += `<tr><th>${esc(r)}</th>${cfg.cols.map((c, j) => `<td class="${cfg.pick(i, j) ? "" : "no"}" data-i="${i}" data-j="${j}"><span class="n"></span>${esc(fmt(r, c))}</td>`).join("")}</tr>`;
+        });
+        html += `</table><div class="gout"></div>`;
+        root.innerHTML = html;
+        const out = root.querySelector(".gout");
+        const order = [];
+        cfg.rows.forEach((r, i) => cfg.cols.forEach((c, j) => cfg.pick(i, j) && order.push([i, j])));
+        const cell = ([i, j]) => root.querySelector(`td[data-i="${i}"][data-j="${j}"]`);
+        const DT = cfg.dt || 0.35;
+        let tl = null, seen = 0, pending = null;
+        const at = cfg.step || 1;
+
+        function paint(n) {
+          root.querySelectorAll("td").forEach((td) => {
+            td.classList.remove("on");
+            td.querySelector(".n").textContent = "";
+          });
+          order.slice(0, n).forEach((p, k) => {
+            const td = cell(p);
+            td.classList.add("on");
+            td.querySelector(".n").textContent = k + 1;
+          });
+          out.textContent = n ? `${cfg.call ? cfg.call + " → " : ""}[${order.slice(0, n).map(([i, j]) => fmt(cfg.rows[i], cfg.cols[j])).join(", ")}${n === order.length ? "]" : ", …"}` : "";
+        }
+        function render(on, anim) {
+          tl?.kill();
+          if (!on) return paint(0);
+          if (!anim) return paint(order.length);
+          paint(0);
+          tl = gsap.timeline();
+          order.forEach((p, k) =>
+            tl.call(() => {
+              paint(k + 1);
+              gsap.fromTo(cell(p), { scale: 1.15 }, { scale: 1, duration: 0.3, ease: "back.out(3)" });
+            }, null, k * DT)
+          );
+        }
+        const steps = [...slide.querySelectorAll(".step")];
+        steps[at - 1]?.style.setProperty("--ans-delay", Math.max(0, order.length * DT - 0.2) + "s");
+        function sync(dir) {
+          const n = Deck.step, jump = n - seen;
+          seen = n;
+          render(n >= at, dir > 0 && jump === 1 && n === at);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+        Deck.scene(slide, {
+          enter() { seen = 0; render(false); },
+          leave() { render(false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        paint(order.length);
+        out.style.minHeight = out.offsetHeight + "px";
+        render(false);
+      }
+      const grid = (id, cfg) => Grid(document.getElementById(id), cfg);
+      const r = (n) => Array.from({ length: n }, (_, i) => String(i));
+      const S = (id) => document.getElementById(id);
+
+      // ================================================================ infinite iterators
+      itv("count", { items: ["10", "12", "14", "16", "18", "20", "22", "24", "…"], name: "count(10, 2)", ptr: "i", steps: [{ op: "loop", call: "print(i)", upto: 7, endLine: "22 > 20 → <b>break</b>" }] });
+      itv("cycle", { items: ["red", "green", "blue", "red", "green", "blue", "red", "…"], groups: [0, 3, 6], name: "cycle(colors)", ptr: "color", steps: [{ op: "loop", call: "print(color)", upto: 6, endLine: "i = 5 → <b>break</b>" }] });
+      itv("repeat", { items: ["10", "10", "10"], name: "repeat(10, 3)", ptr: "it", steps: [{ op: "list", call: "list(repeat(10, 3))" }] });
+      itv("chain", { items: r(7).slice(1), groups: [0, 2, 4], name: "chain(...)", ptr: "it", steps: [{ op: "list", call: "list(chain(...))" }] });
+      itv("islice", { items: r(10), name: "range(10)", ptr: "it", keep: (x) => x >= 2 && x % 2 === 0, steps: [{ op: "list", upto: 8, call: "islice(range(10), 2, 8, 2)" }] });
+      itv("islice2", { items: [...r(8), "…"], name: "count()", ptr: "it", steps: [{ op: "list", upto: 5, call: "islice(count(), 5)" }] });
+
+      // ================================================================ combinatorics
+      grid("product", { rows: ["1", "2"], cols: ["'a'", "'b'"], pick: () => true });
+      grid("perm", { rows: ["1", "2", "3"], cols: ["1", "2", "3"], pick: (i, j) => i !== j });
+      grid("comb", { rows: ["1", "2", "3", "4"], cols: ["1", "2", "3", "4"], pick: (i, j) => i < j });
+
+      // ================================================================ exercises
+      itv("e1", { items: ["0", "1", "2", "3", "…"], name: "count()", ptr: "c", call: "next(c)", steps: ["next", "next", { op: "say", line: "count() <b>never</b> raises StopIteration" }] });
+      itv("e2", { items: ["1", "2", "1", "2", "1", "2", "…"], groups: [0, 2, 4, 6], name: "cycle([1, 2])", ptr: "c", steps: [{ op: "list", upto: 5, call: "5 × next(c)" }] });
+      itv("e3", { items: ["5", "5", "5", "5", "…"], name: "repeat(5)", ptr: "r", steps: [{ op: "say", line: "r is <b>infinite</b>" }, { op: "list", upto: 3, call: "list(islice(r, 3))" }] });
+      itv("e5", { items: r(20), name: "range(20)", ptr: "it", small: true, keep: (x) => x % 2 === 0, steps: [{ op: "list", upto: 10, call: "islice(range(20), 0, 10, 2)" }] });
+      Grid(S("e7"), { root: S("e7").querySelector(".g1"), title: "permutations", rows: ["1", "2"], cols: ["1", "2"], pick: (i, j) => i !== j, step: 1 });
+      Grid(S("e7"), { root: S("e7").querySelector(".g2"), title: "combinations", rows: ["1", "2"], cols: ["1", "2"], pick: (i, j) => i < j, step: 2 });
+      grid("e8", { rows: ["3", "1", "2"], cols: ["3", "1", "2"], pick: (i, j) => i < j });
+      itv("e9", { items: ["1", "1", "2", "2", "2", "3"], groups: [0, 2, 5], name: "data", ptr: "groupby", steps: [{ op: "runs" }] });
+
+      // ================================================================ zip_longest
+      {
+        const slide = S("e10");
+        const A = ["1", "2"], B = ["'a'", "'b'", "'c'"];
+        const n = Math.max(A.length, B.length);
+        const cellA = (i) => (i < A.length ? `<td>${A[i]}</td>` : `<td class="fill">0</td>`);
+        const box = slide.querySelector(".zipv");
+        box.innerHTML = `<table><tr><th>[1, 2]</th>${[...Array(n).keys()].map(cellA).join("")}</tr><tr><th>['a', 'b', 'c']</th>${B.map((b) => `<td>${b}</td>`).join("")}</tr></table><div class="gout"></div>`;
+        const out = box.querySelector(".gout");
+        const col = (i) => [...box.querySelectorAll("tr")].map((tr) => tr.children[i + 1]);
+        const pairs = [...Array(n).keys()].map((i) => `(${i < A.length ? A[i] : 0}, ${B[i]})`);
+        let tl, seen = 0;
+        const paint = (k) => {
+          box.querySelectorAll("td").forEach((td) => td.classList.remove("on"));
+          for (let i = 0; i < k; i++) col(i).forEach((td) => td.classList.add("on"));
+          out.textContent = k ? `[${pairs.slice(0, k).join(", ")}${k === n ? "]" : ", …"}` : "";
+        };
+        const render = (on, anim) => {
+          tl?.kill();
+          if (!on || !anim) return paint(on ? n : 0);
+          paint(0);
+          tl = gsap.timeline();
+          for (let i = 1; i <= n; i++) tl.call(() => paint(i), null, (i - 1) * 0.5);
+        };
+        slide.querySelector(".line.answer").style.setProperty("--ans-delay", "1.1s");
+        Deck.scene(slide, {
+          enter() { seen = 0; render(false); },
+          leave() { render(false); },
+          step: (s, k, els, d) => requestAnimationFrame(() => { const j = Deck.step - seen; seen = Deck.step; render(Deck.step > 0, d.dir > 0 && j === 1); }),
+          unstep: () => requestAnimationFrame(() => { seen = Deck.step; render(Deck.step > 0, false); }),
+        });
+        paint(n);
+        out.style.minHeight = out.offsetHeight + "px";
+        render(false);
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

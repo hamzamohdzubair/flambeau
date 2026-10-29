@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Classification</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #contents ol {
+        display: grid;
+        gap: 1.2rem;
+        font-family: var(--font-display);
+        font-size: 2.6rem;
+        color: var(--text);
+      }
+
+      .maths {
+        display: grid;
+        gap: 1rem;
+        font-size: 2rem;
+      }
+
+      .maths p {
+        color: var(--text);
+      }
+
+      .maths .katex {
+        font-size: 2em;
+      }
+
+      .maths + p {
+        font-size: 1.35rem;
+      }
+
+      /* ---------- Boundary demo ---------- */
+      #boundary .stage {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 22rem;
+        gap: 2.5rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      #boundary svg {
+        width: 100%;
+        height: auto;
+        max-height: 62cqh;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.6);
+      }
+
+      #boundary .side {
+        display: grid;
+        gap: 1.2rem;
+      }
+
+      #boundary .side > p:not(.stat) {
+        font-size: 1.2rem;
+      }
+
+      #boundary > p {
+        font-size: 1.25rem;
+      }
+
+      #boundary .stat {
+        font-family: var(--font-mono);
+        font-size: 1.2rem;
+        color: var(--muted);
+      }
+
+      #boundary .stat b {
+        font-size: 2.4rem;
+        color: var(--text);
+      }
+
+      #boundary .stat b.zero {
+        color: var(--green);
+      }
+
+      #boundary .chips {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      #boundary .chip {
+        padding: 0.5rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1.05rem var(--font);
+        cursor: pointer;
+      }
+
+      #boundary .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      #boundary .bline {
+        stroke: #fff;
+        stroke-width: 3;
+      }
+
+      #boundary .pt {
+        stroke-width: 3;
+      }
+
+      #boundary .wrong {
+        fill: none;
+        stroke: var(--red);
+        stroke-width: 2;
+      }
+
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">AI/ML · Major tasks</span>
+      <h1>Classification</h1>
+      <p>Given a point described by \(D\) numbers, decide which class it belongs to.</p>
+    </section>
+
+    <section class="slide" id="contents">
+      <h2>Contents</h2>
+      <ol>
+        <li class="step">Binary classification</li>
+        <li class="step">Multiclass classification</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <h2>What is binary classification?</h2>
+      <div class="maths">
+        <p class="step">$$ f : \mathbb{R}^D \to \{ 0, 1 \} $$</p>
+        <p class="step">$$ f : \mathbb{R}^D \to \{ +1, -1 \} $$</p>
+      </div>
+      <p class="step center">A function from \(D\) real numbers (the features) to one of two labels. The two codings mean the same thing; different algorithms prefer one or the other.</p>
+    </section>
+
+    <section class="slide" id="boundary">
+      <h2>The decision boundary</h2>
+      <div class="stage">
+        <svg viewBox="0 0 520 400" aria-label="A perceptron's line rotating until it separates two classes of points">
+          <defs>
+            <clipPath id="plotClip"><rect x="0" y="0" width="520" height="400" rx="16" /></clipPath>
+          </defs>
+          <g clip-path="url(#plotClip)">
+            <polygon class="half pos" fill="rgba(236,72,153,0.12)" />
+            <polygon class="half neg" fill="rgba(34,211,238,0.10)" />
+            <line class="bline" />
+            <g class="pts"></g>
+          </g>
+        </svg>
+        <div class="side">
+          <p class="stat">update <b class="it">0</b></p>
+          <p class="stat">misclassified <b class="err">0</b></p>
+          <p>Each update nudges the line toward a point it got wrong (a perceptron). It stops when every point is on its own side.</p>
+          <div class="chips" data-interactive>
+            <button class="chip" data-act="replay">Replay</button>
+            <button class="chip" data-act="shuffle">New data</button>
+          </div>
+        </div>
+      </div>
+      <p class="center step">\(f(\mathbf{x}) = 1\) on one side of the line, \(0\) on the other: the line is the <strong>decision boundary</strong>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>What is multiclass classification?</h2>
+      <div class="maths">
+        <p class="step">$$ f : \mathbb{R}^D \to \{ 1, 2, \dots, K \} $$</p>
+      </div>
+      <p class="step center">The same idea with \(K &gt; 2\) labels: digits 0 to 9, or cat / dog / bird.</p>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        parent?.appendChild(e);
+        return e;
+      };
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // ---------- Perceptron on 2-D points ----------
+      const slide = document.querySelector("#boundary");
+      const svg = slide.querySelector("svg");
+      const ptsG = slide.querySelector(".pts");
+      const bline = slide.querySelector(".bline");
+      const [halfPos, halfNeg] = slide.querySelectorAll(".half");
+      const itOut = slide.querySelector(".it");
+      const errOut = slide.querySelector(".err");
+      const SX = (x) => 260 + x * 240, SY = (y) => 200 - y * 180; // data in [-1, 1]
+      const POS = "#ec4899", NEG = "#22d3ee";
+
+      let seed = 11;
+      const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      let data = [], history = [];
+
+      function makeData() {
+        // A hidden true line; keep a margin so the data is separable
+        const a = rnd() * Math.PI;
+        const tw = [Math.cos(a), Math.sin(a)], tb = (rnd() - 0.5) * 0.4;
+        data = [];
+        while (data.length < 34) {
+          const x = [rnd() * 2 - 1, rnd() * 2 - 1];
+          const s = tw[0] * x[0] + tw[1] * x[1] + tb;
+          if (Math.abs(s) < 0.12) continue;
+          data.push({ x, y: s > 0 ? 1 : -1 });
+        }
+        // Run the perceptron, recording each update
+        let w = [0.3, -1], b = 0.6; // a deliberately bad start
+        history = [{ w: [...w], b }];
+        for (let epoch = 0; epoch < 60; epoch++) {
+          let changed = false;
+          for (const p of data) {
+            if (p.y * (w[0] * p.x[0] + w[1] * p.x[1] + b) <= 0) {
+              w = [w[0] + 0.25 * p.y * p.x[0], w[1] + 0.25 * p.y * p.x[1]];
+              b += 0.25 * p.y;
+              history.push({ w: [...w], b, p });
+              changed = true;
+            }
+          }
+          if (!changed) break;
+        }
+        ptsG.innerHTML = "";
+        for (const p of data) {
+          p.ring = el("circle", { class: "wrong", cx: SX(p.x[0]), cy: SY(p.x[1]), r: 13, opacity: 0 }, ptsG);
+          p.el = el("circle", { class: "pt", cx: SX(p.x[0]), cy: SY(p.x[1]), r: 7, fill: p.y > 0 ? POS : NEG, stroke: "#05060f" }, ptsG);
+        }
+      }
+
+      // Draw the state: line, shaded half-planes, wrong points
+      function draw({ w, b }, k) {
+        const n2 = w[0] * w[0] + w[1] * w[1] || 1e-9;
+        const p0 = [(-b * w[0]) / n2, (-b * w[1]) / n2];
+        const len = Math.sqrt(n2);
+        const d = [-w[1] / len, w[0] / len], n = [w[0] / len, w[1] / len];
+        const P = (x, y) => `${SX(x)},${SY(y)}`;
+        const A = [p0[0] - 4 * d[0], p0[1] - 4 * d[1]], B = [p0[0] + 4 * d[0], p0[1] + 4 * d[1]];
+        Object.entries({ x1: SX(A[0]), y1: SY(A[1]), x2: SX(B[0]), y2: SY(B[1]) }).forEach(([a, v]) => bline.setAttribute(a, v));
+        halfPos.setAttribute("points", [P(...A), P(...B), P(B[0] + 4 * n[0], B[1] + 4 * n[1]), P(A[0] + 4 * n[0], A[1] + 4 * n[1])].join(" "));
+        halfNeg.setAttribute("points", [P(...A), P(...B), P(B[0] - 4 * n[0], B[1] - 4 * n[1]), P(A[0] - 4 * n[0], A[1] - 4 * n[1])].join(" "));
+        let errs = 0;
+        for (const p of data) {
+          const wrong = p.y * (w[0] * p.x[0] + w[1] * p.x[1] + b) <= 0;
+          errs += wrong;
+          p.ring.setAttribute("opacity", wrong ? 1 : 0);
+        }
+        itOut.textContent = k;
+        errOut.textContent = errs;
+        errOut.classList.toggle("zero", errs === 0);
+      }
+
+      let tl = null;
+      function play() {
+        tl?.kill();
+        const state = { w0: history[0].w[0], w1: history[0].w[1], b: history[0].b, k: 0 };
+        const render = () => draw({ w: [state.w0, state.w1], b: state.b }, state.k);
+        render();
+        tl = gsap.timeline({ delay: 0.6 });
+        const per = Math.min(0.7, 9 / history.length);
+        history.slice(1).forEach((h, i) => {
+          tl.call(() => h.p && gsap.fromTo(h.p.el, { attr: { r: 12 } }, { attr: { r: 7 }, duration: per }));
+          tl.to(state, { w0: h.w[0], w1: h.w[1], b: h.b, duration: per, ease: "power2.inOut", onUpdate: render, onComplete: () => { state.k = i + 1; render(); } });
+        });
+      }
+      makeData();
+      draw(history[0], 0);
+      slide.querySelector(".chips").addEventListener("click", (e) => {
+        const act = e.target.closest("button")?.dataset.act;
+        if (act === "shuffle") makeData();
+        if (act) play();
+      });
+      Deck.scene("#boundary", {
+        enter: play,
+        leave: () => tl?.progress(1),
+      });
+    </script>
+  </body>
+</html>

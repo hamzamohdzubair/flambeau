@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Image Segmentation</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+      .chip {
+        padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--glass); color: var(--muted); font: 500 0.85rem var(--font); cursor: pointer; transition: all 0.25s;
+      }
+      .chip:hover { border-color: rgba(167, 139, 250, 0.7); color: var(--text); }
+      .chip.on { background: rgba(139, 92, 246, 0.35); border-color: var(--violet-soft); color: var(--text); }
+      .chip.ghost { border-style: dashed; }
+      canvas.photo { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(255, 255, 255, 0.04); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7); }
+      canvas.plot { display: block; width: 100%; height: auto; border-radius: 12px; background: rgba(10, 12, 26, 0.75); border: 1px solid var(--border); }
+      figure figcaption { font-family: var(--font-mono); }
+      .sl { display: grid; grid-template-columns: 6.4rem minmax(0, 1fr) 3rem; gap: 0.8rem; align-items: center; font-family: var(--font-mono); font-size: 0.85rem; margin: 0.25rem 0; }
+      .sl input { width: 100%; accent-color: var(--violet); }
+      .sl output { color: var(--cyan); text-align: right; }
+      .twocol { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: center; width: min(100%, 70rem); }
+      .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; width: min(100%, 70rem); }
+      .centers { display: flex; gap: 0.4rem; justify-content: center; min-height: 2rem; }
+      .centers i { width: 2rem; height: 2rem; border-radius: 6px; border: 1px solid var(--border); }
+      .note { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); text-align: center; }
+
+      .qa { display: grid; gap: 1.1rem; width: min(100%, 60rem); counter-reset: q; }
+      .qa .q { display: grid; gap: 0.4rem; }
+      .qa .q > p:first-child { color: var(--text); font-size: 1.1rem; }
+      .qa .q > p:first-child::before { content: "Q" counter(q) "  "; counter-increment: q; font-family: var(--font-mono); font-size: 0.8em; color: var(--cyan); }
+      .qa p.answer { padding: 0.2rem 0.6rem; width: max-content; max-width: 100%; }
+
+      pre.big { width: min(100%, 62rem); font-size: 1.12rem; }
+      .flood { width: min(100%, 48rem); }
+      .flood svg { width: 100%; overflow: visible; display: block; margin: 0 auto; }
+      .flood text { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); }
+      .flood text.dam { fill: #f87171; }
+      .flood-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; width: min(100%, 60rem); }
+      .flood-notes p { font-size: 1.1rem; }
+      .wsgrid { display: grid; grid-template-columns: 25rem minmax(0, 1fr); gap: 2rem; align-items: center; width: 100%; }
+      .wsgrid .quad { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1.2rem; }
+      .wsgrid figcaption { font-family: var(--font); font-size: 0.9rem; margin-top: 0.3rem; }
+      .wsgrid figcaption b { color: var(--text); }
+      .wsgrid figcaption code { font-size: 0.85em; }
+      .kmgrid { display: grid; grid-template-columns: minmax(0, 1fr) 28rem; gap: 2.5rem; align-items: center; width: 100%; }
+      .kmgrid ol { font-size: 1.2rem; }
+      .gcgrid { display: grid; grid-template-columns: 41rem minmax(0, 1fr); gap: 2rem; align-items: center; width: 100%; }
+      .gcgrid canvas { cursor: crosshair; touch-action: none; }
+      .gcgrid .side { display: grid; gap: 1rem; }
+      .gcgrid .side p { font-size: 1.05rem; }
+      .gcgrid .stat { font-family: var(--font-mono); color: var(--cyan); font-size: 1.05rem; }
+      .ctgrid { display: grid; grid-template-columns: 35rem minmax(0, 1fr); gap: 2rem; align-items: center; width: 100%; }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas class="photo" width="400" height="225" style="width: min(30rem, 84cqw)" aria-label="A photo split into k colour regions by k-means"></canvas>
+      <h1>Image Segmentation</h1>
+      <p>Split an image into meaningful regions, so every pixel knows which object it belongs to.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide">
+      <h2>What is image segmentation?</h2>
+      <p class="lead"><strong>Segmentation:</strong> partitioning an image into meaningful regions. <span class="muted">Goal: group the pixels that belong to the same object or region.</span></p>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3>Semantic</h3><p>Label each pixel by its class.</p></div>
+        <div class="card step"><h3>Instance</h3><p>Separate the individual objects.</p></div>
+        <div class="card step"><h3>Panoptic</h3><p>Semantic + instance combined.</p></div>
+      </div>
+      <p class="step center"><strong>Methods:</strong> thresholding · clustering · watershed · deep learning</p>
+    </section>
+
+    <!-- ================================================================ thresholding -->
+    <section class="slide">
+      <h2>Thresholding methods</h2>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card"><h3>Simple</h3><p>One fixed threshold.</p></div>
+        <div class="card"><h3>Adaptive</h3><p>A local threshold per region.</p></div>
+        <div class="card"><h3>Otsu's method</h3><p>An automatic, optimal threshold.</p></div>
+      </div>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        # simple threshold
+        _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        # Otsu's automatic threshold
+        ret, binary = cv2.threshold(gray, 0, 255,
+                                    cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # ans:
+        # ans: ret is the computed threshold value
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ Otsu live -->
+    <section class="slide" id="slide-otsu">
+      <h2>How Otsu picks the threshold</h2>
+      <div class="twocol">
+        <div style="display: grid; gap: 0.6rem">
+          <canvas class="plot" width="520" height="260"></canvas>
+          <div data-interactive>
+            <label class="sl">thresh <input type="range" min="1" max="254" value="127" /><output>127</output></label>
+            <div class="chips"><button class="chip" data-t="127">127 (fixed)</button><button class="chip" data-t="otsu">THRESH_OTSU</button></div>
+          </div>
+        </div>
+        <figure><canvas class="photo bin" width="400" height="225"></canvas><figcaption class="cap"></figcaption></figure>
+      </div>
+      <p class="muted center" style="font-size: 0.9rem">Otsu tries every threshold and keeps the one that best separates the histogram into two classes (the peak of the pink curve: the between-class variance).</p>
+    </section>
+
+    <!-- ================================================================ adaptive -->
+    <section class="slide">
+      <h2>Adaptive thresholding</h2>
+      <p class="lead center"><strong>Why adaptive?</strong> It handles varying illumination.</p>
+      <ul>
+        <li class="step"><strong>Mean:</strong> threshold = mean of the neighbourhood − C</li>
+        <li class="step"><strong>Gaussian:</strong> threshold = weighted mean − C</li>
+      </ul>
+      <pre class="steps"><code class="language-python">
+        # adaptive mean thresholding
+        adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+                                         cv2.THRESH_BINARY, blockSize=11, C=2)  # ans:
+        # adaptive Gaussian thresholding
+        adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                         cv2.THRESH_BINARY, 11, 2)  # ans:
+        # blockSize: neighbourhood size (must be odd)
+        # ans: C: a constant subtracted from the mean
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ adaptive live -->
+    <section class="slide" id="slide-adapt">
+      <h2>Global vs adaptive, under uneven light</h2>
+      <div class="three">
+        <figure><canvas class="photo a" width="360" height="200"></canvas><figcaption>gray (lit from the left)</figcaption></figure>
+        <figure><canvas class="photo b" width="360" height="200"></canvas><figcaption>cv2.threshold(gray, 127, …)</figcaption></figure>
+        <figure><canvas class="photo c" width="360" height="200"></canvas><figcaption class="cc"></figcaption></figure>
+      </div>
+      <div style="width: min(100%, 30rem)" data-interactive>
+        <label class="sl">blockSize <input type="range" min="3" max="51" step="2" value="11" data-k="b" /><output>11</output></label>
+        <label class="sl">C <input type="range" min="-10" max="20" value="2" data-k="c" /><output>2</output></label>
+        <div class="chips"><button class="chip on" data-m="mean">MEAN_C</button><button class="chip" data-m="gauss">GAUSSIAN_C</button></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ watershed -->
+    <section class="slide" id="slide-flood">
+      <h2>Watershed segmentation</h2>
+      <p class="lead center">Treat the image like a <strong>topographic map</strong>: intensity = height.</p>
+      <div class="flood">
+        <svg viewBox="0 -24 600 238" aria-label="A terrain profile; water rises from markers in each basin; where two basins meet, a dam is built"></svg>
+      </div>
+      <div class="flood-notes">
+        <p>Water fills the basins, starting from <strong>markers</strong>.</p>
+        <p>Where two floods meet, a <strong>watershed line</strong> (dam) separates the regions.</p>
+      </div>
+    </section>
+
+    <!-- ================================================================ watershed impl -->
+    <section class="slide">
+      <h2>Watershed implementation</h2>
+      <pre class="steps big"><code class="language-python">
+        # binary threshold
+        _, binary = cv2.threshold(gray, 0, 255,
+                                  cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        # noise removal (opening)
+        kernel = np.ones((3, 3), np.uint8)
+        opening = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=2)
+        # sure background (dilation)
+        sure_bg = cv2.dilate(opening, kernel, iterations=3)  # ans:
+        # sure foreground (distance transform + threshold)
+        dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)  # ans:
+        _, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)  # ans:
+        # unknown region
+        sure_fg = np.uint8(sure_fg)  # ans:
+        unknown = cv2.subtract(sure_bg, sure_fg)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ watershed markers -->
+    <section class="slide">
+      <h2>Watershed markers</h2>
+      <pre class="steps big"><code class="language-python">
+        # label markers
+        _, markers = cv2.connectedComponents(sure_fg)  # ans:
+        # add 1 to all labels (background becomes 1, not 0)
+        markers = markers + 1  # ans:
+        # mark the unknown region as 0
+        markers[unknown == 255] = 0  # ans:
+        # apply watershed
+        markers = cv2.watershed(img, markers)  # ans:
+        # mark boundaries (-1) in red
+        img[markers == -1] = [0, 0, 255]  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ watershed live -->
+    <section class="slide" id="slide-ws">
+      <h2>Watershed, step by step</h2>
+      <div class="wsgrid">
+        <figure>
+          <canvas class="photo w0" width="200" height="140"></canvas>
+          <figcaption>Two touching coins after <code>opening</code>: a plain threshold sees <b>one blob</b>.</figcaption>
+        </figure>
+        <div class="quad">
+          <figure class="step"><canvas class="photo w1" width="200" height="140"></canvas><figcaption><b>1. Find markers</b> (sure foreground): dist &gt; 0.7·max</figcaption></figure>
+          <figure class="step"><canvas class="photo w2" width="200" height="140"></canvas><figcaption><b>2. Find the background</b>: dilate; grey = unknown</figcaption></figure>
+          <figure class="step"><canvas class="photo w3" width="200" height="140"></canvas><figcaption><b>3. Apply watershed</b>: flood from the markers</figcaption></figure>
+          <figure class="step"><canvas class="photo w4" width="200" height="140"></canvas><figcaption><b>4. Extract boundaries</b>: markers == −1</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ GrabCut -->
+    <section class="slide">
+      <h2>GrabCut</h2>
+      <p class="lead center"><strong>GrabCut:</strong> iterative segmentation using graph cuts.</p>
+      <div class="cards" style="width: min(100%, 64rem)">
+        <div class="card step"><h3>Input</h3><p>A rectangle around the object.</p></div>
+        <div class="card step"><h3>Algorithm</h3><ul><li>Iteratively estimates foreground / background</li><li>Uses Gaussian Mixture Models (GMMs)</li><li>Refines the boundary</li></ul></div>
+        <div class="card step"><h3>Advantage</h3><p>Semi-automatic: minimal user input.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ GrabCut code -->
+    <section class="slide">
+      <h2>GrabCut in OpenCV</h2>
+      <pre class="steps big"><code class="language-python">
+        # define a rectangle around the object
+        rect = (50, 50, 450, 290)  # (x, y, width, height)  # ans:
+        # initialise the mask and models
+        mask = np.zeros(img.shape[:2], np.uint8)
+        bgdModel = np.zeros((1, 65), np.float64)
+        fgdModel = np.zeros((1, 65), np.float64)
+        # apply GrabCut
+        cv2.grabCut(img, mask, rect, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_RECT)  # ans:
+        # ans: 5 iterations
+        # extract the foreground
+        mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')  # ans:
+        result = img * mask2[:, :, np.newaxis]  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ GrabCut live -->
+    <section class="slide" id="slide-gc">
+      <h2>GrabCut, live</h2>
+      <div class="gcgrid">
+        <canvas class="photo" width="480" height="270" aria-label="Drag a rectangle around a doll; the foreground is estimated iteratively"></canvas>
+        <div class="side">
+          <p><strong>Drag a rectangle</strong> around a doll. Outside: sure background. Inside: each iteration re-fits both colour models and relabels the pixels.</p>
+          <p class="stat">iteration 0 / 5</p>
+          <div class="chips" data-interactive style="justify-content: flex-start"><button class="chip ghost" data-run>Run again</button><button class="chip" data-reset>Reset rectangle</button></div>
+          <p class="muted" style="font-size: 0.9rem">Simplified: a small colour mixture per side plays the GMM; a smoothing pass plays the graph cut.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ k-means -->
+    <section class="slide" id="slide-kmc">
+      <h2>K-means clustering</h2>
+      <div class="kmgrid">
+        <div style="display: grid; gap: 1.2rem">
+          <p class="lead" style="text-align: left"><strong>K-means</strong> clusters pixels by colour similarity.</p>
+          <ol>
+            <li class="step">Reshape the image into a list of pixels</li>
+            <li class="step">Apply k-means (k clusters)</li>
+            <li class="step">Replace each pixel with its cluster centre</li>
+            <li class="step">Reshape back</li>
+          </ol>
+          <p class="step lead" style="text-align: left"><strong>Result:</strong> segmented regions with k colours.</p>
+        </div>
+        <figure>
+          <canvas class="plot" width="600" height="520" aria-label="Pixels of a photo plotted by colour; three cluster centres move until they settle"></canvas>
+          <figcaption class="cap">pixels of the lens photo, plotted by (red, blue)</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ================================================================ k-means code -->
+    <section class="slide">
+      <h2>K-means in OpenCV</h2>
+      <pre class="steps big"><code class="language-python">
+        # reshape to a 2-D array of pixels
+        pixels = img.reshape((-1, 3))  # ans:
+        pixels = np.float32(pixels)  # ans:
+        # define criteria and apply k-means
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
+        k = 3
+        _, labels, centers = cv2.kmeans(pixels, k, None, criteria, 10,
+                                        cv2.KMEANS_RANDOM_CENTERS)  # ans:
+        # convert centres to uint8
+        centers = np.uint8(centers)  # ans:
+        # map labels to centres
+        segmented = centers[labels.flatten()]  # ans:
+        segmented = segmented.reshape(img.shape)  # ans:
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ k-means live -->
+    <section class="slide" id="slide-km">
+      <h2>K-means, iteration by iteration</h2>
+      <div class="twocol">
+        <figure><canvas class="photo src" width="400" height="225"></canvas><figcaption>img</figcaption></figure>
+        <figure><canvas class="photo dst" width="400" height="225"></canvas><figcaption class="cap">segmented</figcaption></figure>
+      </div>
+      <div class="centers"></div>
+      <div style="width: min(100%, 34rem)" data-interactive>
+        <label class="sl">k <input type="range" min="2" max="8" value="3" /><output>3</output></label>
+        <div class="chips">
+          <button class="chip on" data-img="lens">Lens</button><button class="chip" data-img="dolls">Dolls</button><button class="chip" data-img="dice">Dice</button>
+          <button class="chip ghost" data-run>Run again</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ contours -->
+    <section class="slide">
+      <h2>Contour-based segmentation</h2>
+      <p class="lead center"><strong>Contours</strong> are the boundaries of shapes; <code>findContours</code> detects them all.</p>
+      <pre class="steps big"><code class="language-python">
+        # threshold to binary
+        _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        # find contours
+        contours, hierarchy = cv2.findContours(binary, cv2.RETR_EXTERNAL,
+                                               cv2.CHAIN_APPROX_SIMPLE)  # ans:
+        # draw contours
+        cv2.drawContours(img, contours, -1, (0, 255, 0), 2)  # ans:
+        # ans: -1 draws all contours
+        # filter by area
+        large_contours = [c for c in contours if cv2.contourArea(c) &gt; 1000]  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide" id="slide-cont">
+      <h2>Contours, live</h2>
+      <div class="ctgrid">
+        <div style="display: grid; gap: 0.6rem">
+          <canvas class="photo" width="400" height="225" aria-label="Dolls with their external contours drawn in green"></canvas>
+          <div data-interactive>
+            <label class="sl">thresh <input type="range" min="1" max="254" value="127" data-k="t" /><output>127</output></label>
+            <label class="sl">min area <input type="range" min="0" max="3000" step="50" value="1000" data-k="a" /><output>1000</output></label>
+          </div>
+        </div>
+        <div style="display: grid; gap: 1.2rem">
+          <p class="cap stat" style="font-family: var(--font-mono); color: var(--cyan); font-size: 1.3rem"></p>
+          <p class="muted" style="font-size: 1.05rem">The dolls are darker than the wall, so this uses <code>THRESH_BINARY_INV</code>: objects must be white for <code>findContours</code>.</p>
+          <p class="muted" style="font-size: 1.05rem">Only contours with area above the minimum are drawn: the small blobs inside the patterns drop out.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>What is image segmentation?</p><p class="answer">Partitioning an image into meaningful regions.</p></div>
+        <div class="q"><p>What is Otsu's method?</p><p class="answer">An automatic computation of the optimal threshold.</p></div>
+        <div class="q"><p>Why adaptive thresholding?</p><p class="answer">It handles varying illumination.</p></div>
+        <div class="q"><p>What is the watershed algorithm?</p><p class="answer">It treats the image as a topographic map and floods the basins.</p></div>
+        <div class="q"><p>What is GrabCut?</p><p class="answer">Iterative segmentation using graph cuts and GMMs.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <div class="qa">
+        <div class="q"><p>How is k-means used for segmentation?</p><p class="answer">It clusters pixels by colour similarity.</p></div>
+        <div class="q"><p>What are contours?</p><p class="answer">The boundaries of shapes or objects.</p></div>
+        <div class="q"><p>Semantic vs instance segmentation?</p><p class="answer">Semantic labels pixels by class; instance separates individual objects.</p></div>
+        <div class="q"><p>What is the advantage of GrabCut?</p><p class="answer">Semi-automatic: it needs only a rectangle as input.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="steps big"><code class="language-python">
+        # Otsu's thresholding
+        ret, binary = cv2.threshold(gray, 0, 255,
+                                    cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # ans:
+        # adaptive thresholding
+        adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                         cv2.THRESH_BINARY, 11, 2)  # ans:
+        # find contours
+        _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_SIMPLE)  # ans:
+        cv2.drawContours(img, contours, -1, (0, 255, 0), 2)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="steps big"><code class="language-python">
+        # k-means with 4 clusters
+        pixels = img.reshape((-1, 3))
+        pixels = np.float32(pixels)
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
+        _, labels, centers = cv2.kmeans(pixels, 4, None, criteria, 10,
+                                        cv2.KMEANS_RANDOM_CENTERS)  # ans:
+        centers = np.uint8(centers)  # ans:
+        segmented = centers[labels.flatten()].reshape(img.shape)  # ans:
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · mixed</h2>
+      <pre class="steps big"><code class="language-python">
+        # GrabCut segmentation
+        rect = (50, 50, 450, 290)
+        mask = np.zeros(img.shape[:2], np.uint8)
+        bgdModel = np.zeros((1, 65), np.float64)
+        fgdModel = np.zeros((1, 65), np.float64)
+        cv2.grabCut(img, mask, rect, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_RECT)  # ans:
+        mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')  # ans:
+        result = img * mask2[:, :, np.newaxis]  # ans:
+      </code></pre>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      function rng(seed) { return () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296); }
+      async function loadPixels(src, w) {
+        const im = new Image();
+        im.src = src;
+        await im.decode();
+        const h = Math.round((im.naturalHeight / im.naturalWidth) * w);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const x = c.getContext("2d", { willReadFrequently: true });
+        x.drawImage(im, 0, 0, w, h);
+        return x.getImageData(0, 0, w, h);
+      }
+      const toGray = (d) => { const g = new Float32Array(d.width * d.height); for (let i = 0; i < g.length; i++) g[i] = 0.299 * d.data[i * 4] + 0.587 * d.data[i * 4 + 1] + 0.114 * d.data[i * 4 + 2]; return g; };
+      function showGray(canvas, g, W, H, map = (v) => [v, v, v]) {
+        canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext("2d"), im = ctx.createImageData(W, H);
+        for (let i = 0; i < g.length; i++) { const [r, gg, b] = map(g[i], i); im.data[i * 4] = r; im.data[i * 4 + 1] = gg; im.data[i * 4 + 2] = b; im.data[i * 4 + 3] = 255; }
+        ctx.putImageData(im, 0, 0);
+        return ctx;
+      }
+      const IMGS = {
+        lens: loadPixels("/assets/2025-10-09-22-21-33.png", 400),
+        dolls: loadPixels("/assets/2025-10-16-19-17-39.png", 400),
+        dice: loadPixels("/assets/2025-09-30-23-10-12.png", 400),
+      };
+
+      // ------------------------------------------------------------ k-means (shared by the cover and the live slide)
+      function kmeansInit(img, k, seed) {
+        const r = rng(seed), n = img.width * img.height, C = [];
+        for (let i = 0; i < k; i++) { const p = Math.floor(r() * n) * 4; C.push([img.data[p], img.data[p + 1], img.data[p + 2]]); }
+        return { C, labels: new Uint8Array(n) };
+      }
+      function kmeansStep(img, st) {
+        const d = img.data, n = img.width * img.height, k = st.C.length, sum = st.C.map(() => [0, 0, 0, 0]);
+        let moved = 0;
+        for (let i = 0; i < n; i++) {
+          let best = 0, bd = Infinity;
+          for (let c = 0; c < k; c++) { const e = (d[i * 4] - st.C[c][0]) ** 2 + (d[i * 4 + 1] - st.C[c][1]) ** 2 + (d[i * 4 + 2] - st.C[c][2]) ** 2; if (e < bd) (bd = e), (best = c); }
+          st.labels[i] = best;
+          const s = sum[best]; s[0] += d[i * 4]; s[1] += d[i * 4 + 1]; s[2] += d[i * 4 + 2]; s[3]++;
+        }
+        st.C = st.C.map((c, j) => { const s = sum[j]; if (!s[3]) return c; const nc = [s[0] / s[3], s[1] / s[3], s[2] / s[3]]; moved = Math.max(moved, Math.hypot(nc[0] - c[0], nc[1] - c[1], nc[2] - c[2])); return nc; });
+        return moved;
+      }
+      function paintSeg(canvas, img, st) {
+        canvas.width = img.width; canvas.height = img.height;
+        const ctx = canvas.getContext("2d"), out = ctx.createImageData(img.width, img.height);
+        for (let i = 0; i < st.labels.length; i++) { const c = st.C[st.labels[i]]; out.data[i * 4] = c[0]; out.data[i * 4 + 1] = c[1]; out.data[i * 4 + 2] = c[2]; out.data[i * 4 + 3] = 255; }
+        ctx.putImageData(out, 0, 0);
+      }
+
+      // cover: cycle k = 2..6 on the photo
+      (async function () {
+        const cv = document.querySelector("#title canvas");
+        const img = await IMGS.lens;
+        const segs = [2, 3, 4, 6, 12].map((k) => { const st = kmeansInit(img, k, 5 + k); for (let i = 0; i < 8; i++) kmeansStep(img, st); return st; });
+        paintSeg(cv, img, segs[1]);
+        let tl = null;
+        Deck.scene("#title", {
+          enter() { tl?.kill(); tl = gsap.timeline({ repeat: -1 }); segs.forEach((s) => tl.call(() => paintSeg(cv, img, s)).to({}, { duration: 1.1 })); },
+          leave() { tl?.kill(); },
+        });
+      })();
+
+      // ------------------------------------------------------------ Otsu
+      (async function () {
+        const os = document.querySelector("#slide-otsu");
+        const plot = os.querySelector(".plot"), pc = plot.getContext("2d"), bin = os.querySelector(".bin"), sl = os.querySelector("input");
+        const img = await IMGS.lens, g = toGray(img), W = img.width, H = img.height;
+        const hist = new Float32Array(256);
+        g.forEach((v) => hist[Math.round(v)]++);
+        const N = g.length, varB = new Float32Array(256);
+        let sumAll = 0; for (let i = 0; i < 256; i++) sumAll += i * hist[i];
+        let w0 = 0, s0 = 0, otsu = 0;
+        for (let t = 0; t < 256; t++) {
+          w0 += hist[t]; s0 += t * hist[t];
+          const w1 = N - w0; if (!w0 || !w1) continue;
+          const m0 = s0 / w0, m1 = (sumAll - s0) / w1;
+          varB[t] = (w0 / N) * (w1 / N) * (m0 - m1) ** 2;
+          if (varB[t] > varB[otsu]) otsu = t;
+        }
+        const hm = Math.max(...hist), vm = Math.max(...varB);
+        function paint(t) {
+          sl.value = t; sl.nextElementSibling.textContent = t;
+          const PW = plot.width, PH = plot.height, X = (i) => 10 + (i / 255) * (PW - 20), base = PH - 30;
+          pc.clearRect(0, 0, PW, PH);
+          for (let i = 0; i < 256; i++) { pc.fillStyle = i <= t ? "rgba(100,112,143,0.9)" : "rgba(226,232,240,0.9)"; const h = (hist[i] / hm) * (base - 20); pc.fillRect(X(i), base - h, (PW - 20) / 256 + 0.5, h); }
+          pc.beginPath(); for (let i = 0; i < 256; i++) pc.lineTo(X(i), base - (varB[i] / vm) * (base - 20)); pc.strokeStyle = "#ec4899"; pc.lineWidth = 2; pc.stroke();
+          pc.strokeStyle = "#22d3ee"; pc.lineWidth = 2; pc.beginPath(); pc.moveTo(X(t), 34); pc.lineTo(X(t), base); pc.stroke();
+          pc.fillStyle = "#a8b3c7"; pc.font = "18px JetBrains Mono, monospace";
+          pc.fillText("0", 8, PH - 6); pc.fillText("255", PW - 44, PH - 6);
+          pc.fillStyle = "#67e8f9"; pc.fillText(`t = ${t}`, Math.min(PW - 92, X(t) + 6), 26);
+          pc.fillStyle = "#f9a8d4"; pc.fillText(`Otsu: ${otsu}`, X(otsu) - 50, PH - 6);
+          showGray(bin, g, W, H, (v) => (v > t ? [255, 255, 255] : [0, 0, 0]));
+          os.querySelector(".cap").textContent = t === otsu ? `cv2.threshold(gray, 0, 255, THRESH_BINARY + THRESH_OTSU) → ret = ${otsu}` : `cv2.threshold(gray, ${t}, 255, cv2.THRESH_BINARY)`;
+        }
+        sl.addEventListener("input", () => { tl?.kill(); os.querySelectorAll("[data-t]").forEach((c) => c.classList.remove("on")); paint(+sl.value); });
+        os.querySelector(".chips").addEventListener("click", (e) => {
+          const b = e.target.closest("button"); if (!b) return;
+          tl?.kill();
+          os.querySelectorAll("[data-t]").forEach((c) => c.classList.toggle("on", c === b));
+          const to = b.dataset.t === "otsu" ? otsu : 127, st = { t: +sl.value };
+          tl = gsap.to(st, { t: to, duration: 0.8, ease: "power2.inOut", onUpdate: () => paint(Math.round(st.t)) });
+        });
+        paint(127);
+        let tl = null;
+        Deck.scene("#slide-otsu", {
+          enter() { tl?.kill(); const st = { t: 20 }; tl = gsap.timeline().to(st, { t: 235, duration: 3, ease: "sine.inOut", onUpdate: () => paint(Math.round(st.t)) }).to(st, { t: otsu, duration: 1.2, ease: "power2.inOut", onUpdate: () => paint(Math.round(st.t)), onComplete: () => os.querySelector('[data-t="otsu"]').classList.add("on") }); },
+          leave() { tl?.kill(); },
+        });
+      })();
+
+      // ------------------------------------------------------------ adaptive
+      (function () {
+        const as = document.querySelector("#slide-adapt");
+        const W = 360, H = 200;
+        const c = document.createElement("canvas");
+        c.width = W; c.height = H;
+        const x = c.getContext("2d", { willReadFrequently: true });
+        x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
+        x.fillStyle = "#222"; x.font = "700 46px Inter, system-ui, sans-serif"; x.textAlign = "center";
+        x.fillText("OpenCV", W / 2, 80); x.font = "600 30px Inter, system-ui, sans-serif"; x.fillText("adaptive threshold", W / 2, 140);
+        x.fillRect(30, 165, 300, 4);
+        const d = x.getImageData(0, 0, W, H).data, g = new Float32Array(W * H), r = rng(2);
+        // lighting falls off from left to right, plus a little noise
+        for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) { const i = y * W + xx, L = 1.1 - 0.95 * (xx / W) - 0.15 * (y / H); g[i] = Math.max(0, Math.min(255, d[i * 4] * L * 0.9 + 15 + (r() - 0.5) * 6)); }
+        showGray(as.querySelector(".a"), g, W, H);
+        showGray(as.querySelector(".b"), g, W, H, (v) => (v > 127 ? [255, 255, 255] : [0, 0, 0]));
+        // integral image for fast local means
+        const I = new Float64Array((W + 1) * (H + 1));
+        for (let y = 0; y < H; y++) { let row = 0; for (let xx = 0; xx < W; xx++) { row += g[y * W + xx]; I[(y + 1) * (W + 1) + xx + 1] = I[y * (W + 1) + xx + 1] + row; } }
+        const ins = Object.fromEntries([...as.querySelectorAll("input")].map((i) => [i.dataset.k, i]));
+        let method = "mean";
+        function run() {
+          const B = +ins.b.value, C = +ins.c.value, h = B >> 1;
+          ins.b.nextElementSibling.textContent = B; ins.c.nextElementSibling.textContent = C;
+          let thr;
+          if (method === "mean") {
+            thr = new Float32Array(W * H);
+            for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) {
+              const x0 = Math.max(0, xx - h), x1 = Math.min(W, xx + h + 1), y0 = Math.max(0, y - h), y1 = Math.min(H, y + h + 1);
+              thr[y * W + xx] = (I[y1 * (W + 1) + x1] - I[y0 * (W + 1) + x1] - I[y1 * (W + 1) + x0] + I[y0 * (W + 1) + x0]) / ((x1 - x0) * (y1 - y0));
+            }
+          } else {
+            const s = 0.3 * ((B - 1) * 0.5 - 1) + 0.8, k = [];
+            for (let i = -h; i <= h; i++) k.push(Math.exp(-(i * i) / (2 * s * s)));
+            const ks = k.reduce((a, b) => a + b, 0), kk = k.map((v) => v / ks), tmp = new Float32Array(W * H);
+            thr = new Float32Array(W * H);
+            const cl = (v, m) => Math.max(0, Math.min(m - 1, v));
+            for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) { let a = 0; for (let i = -h; i <= h; i++) a += kk[i + h] * g[y * W + cl(xx + i, W)]; tmp[y * W + xx] = a; }
+            for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) { let a = 0; for (let i = -h; i <= h; i++) a += kk[i + h] * tmp[cl(y + i, H) * W + xx]; thr[y * W + xx] = a; }
+          }
+          showGray(as.querySelector(".c"), g, W, H, (v, i) => (v > thr[i] - C ? [255, 255, 255] : [0, 0, 0]));
+          as.querySelector(".cc").textContent = `adaptive ${method === "mean" ? "MEAN_C" : "GAUSSIAN_C"}, ${B}, ${C}`;
+        }
+        Object.values(ins).forEach((i) => i.addEventListener("input", run));
+        as.querySelector(".chips").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; method = b.dataset.m; as.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === b)); run(); });
+        run();
+      })();
+
+      // ------------------------------------------------------------ watershed flooding (1-D)
+      (function () {
+        const fs = document.querySelector("#slide-flood");
+        const svg = fs.querySelector("svg");
+        const Wd = 600, N = 300;
+        const terr = Array.from({ length: N }, (_, i) => {
+          const x = i / (N - 1);
+          return 30 + 150 * (0.55 + 0.45 * Math.cos(x * Math.PI * 6 + 0.3)) * (0.75 + 0.25 * Math.sin(x * 9)) ;
+        });
+        const X = (i) => (i / (N - 1)) * Wd, Y = (h) => 210 - h;
+        // basins = local minima
+        const mins = [];
+        for (let i = 1; i < N - 1; i++) if (terr[i] < terr[i - 1] && terr[i] <= terr[i + 1]) mins.push(i);
+        const cols = ["#8b5cf6", "#22d3ee", "#ec4899", "#fbbf24", "#4ade80"];
+        svg.innerHTML =
+          `<g class="water"></g><g class="dams"></g>` +
+          `<path d="M0 210 ${terr.map((h, i) => `L${X(i).toFixed(1)} ${Y(h).toFixed(1)}`).join(" ")} L${Wd} 210 Z" fill="rgba(148,163,184,0.25)" stroke="#cbd5e1" stroke-width="2"/>` +
+          mins.map((m, k) => `<circle cx="${X(m)}" cy="${Y(terr[m]) + 7}" r="5" fill="${cols[k % 5]}"/>`).join("") +
+          `<text x="${X(mins[0]) + 12}" y="${Y(terr[mins[0]]) + 26}">marker</text>`;
+        const water = svg.querySelector(".water"), dams = svg.querySelector(".dams");
+        // catchment basin of every point: follow the slope down to a minimum
+        const catch_ = terr.map((_, i) => { let j = i; for (;;) { const l = j > 0 && terr[j - 1] < terr[j], r = j < N - 1 && terr[j + 1] < terr[j]; if (l && (!r || terr[j - 1] <= terr[j + 1])) j--; else if (r) j++; else break; } return mins.indexOf(j); });
+        function paint(level) {
+          // each basin fills up to 'level'; where two flooded basins touch, build a dam
+          const owner = terr.map((h, i) => (h <= level && catch_[i] >= 0 ? catch_[i] : -1));
+          let w = "", dm = "";
+          for (let i = 0; i < N; i++) if (owner[i] >= 0) w += `<rect x="${X(i).toFixed(1)}" y="${Y(level).toFixed(1)}" width="${(Wd / N + 0.6).toFixed(1)}" height="${(level - terr[i]).toFixed(1)}" fill="${cols[owner[i] % 5]}" opacity="0.55"/>`;
+          for (let i = 1; i < N; i++) if (owner[i] >= 0 && owner[i - 1] >= 0 && owner[i] !== owner[i - 1]) dm += `<line x1="${X(i)}" x2="${X(i)}" y1="${Y(terr[i])}" y2="${Y(level) - 14}" stroke="#f87171" stroke-width="3"/><text class="dam" x="${X(i)}" y="${Y(level) - 18}" text-anchor="middle">dam</text>`;
+          water.innerHTML = w; dams.innerHTML = dm;
+        }
+        let tl = null;
+        Deck.scene("#slide-flood", {
+          enter() { tl?.kill(); const st = { l: 25 }; paint(25); tl = gsap.to(st, { l: 182, duration: 6, ease: "none", repeat: -1, repeatDelay: 1.5, onUpdate: () => paint(st.l) }); },
+          leave() { tl?.kill(); },
+        });
+      })();
+
+      // ------------------------------------------------------------ watershed on two touching coins
+      (function () {
+        const ws = document.querySelector("#slide-ws");
+        const W = 200, H = 140, bin = new Uint8Array(W * H);
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) bin[y * W + x] = (x - 72) ** 2 + (y - 70) ** 2 < 44 ** 2 || (x - 135) ** 2 + (y - 72) ** 2 < 38 ** 2 ? 1 : 0;
+        // distance transform (two-pass chamfer 3-4)
+        const D = new Float32Array(W * H).map((_, i) => (bin[i] ? 1e9 : 0));
+        const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? 0 : D[y * W + x]);
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (bin[y * W + x]) D[y * W + x] = Math.min(D[y * W + x], at(x - 1, y) + 3, at(x, y - 1) + 3, at(x - 1, y - 1) + 4, at(x + 1, y - 1) + 4);
+        for (let y = H - 1; y >= 0; y--) for (let x = W - 1; x >= 0; x--) if (bin[y * W + x]) D[y * W + x] = Math.min(D[y * W + x], at(x + 1, y) + 3, at(x, y + 1) + 3, at(x + 1, y + 1) + 4, at(x - 1, y + 1) + 4);
+        const dmax = Math.max(...D);
+        // sure foreground: dist > 0.7 * max ; label it
+        const fg = new Int32Array(W * H);
+        let nl = 0;
+        for (let i = 0; i < W * H; i++) if (D[i] > 0.7 * dmax && !fg[i]) {
+          nl++; const st = [i]; fg[i] = nl;
+          while (st.length) { const j = st.pop(), x = j % W, y = (j / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy, k = yy * W + xx; if (xx >= 0 && yy >= 0 && xx < W && yy < H && !fg[k] && D[k] > 0.7 * dmax) { fg[k] = nl; st.push(k); } } }
+        }
+        // watershed: flood from the markers in order of decreasing distance (priority by -D)
+        const lab = new Int32Array(W * H).map((_, i) => (bin[i] ? (fg[i] || 0) : -2));
+        const order = [];
+        for (let i = 0; i < W * H; i++) if (bin[i] && !fg[i]) order.push(i);
+        let changed = true;
+        const levels = [...new Set(order.map((i) => Math.round(D[i])))].sort((a, b) => b - a);
+        for (const lv of levels) {
+          changed = true;
+          while (changed) {
+            changed = false;
+            for (const i of order) {
+              if (lab[i] !== 0 || Math.round(D[i]) < lv) continue;
+              const x = i % W, y = (i / W) | 0;
+              let l = 0;
+              for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = (y + dy) * W + x + dx; if (lab[k] > 0) { if (l && l !== lab[k]) { l = -1; break; } l = lab[k]; } }
+              if (l) { lab[i] = l; changed = true; }
+            }
+          }
+        }
+        // boundaries (-1): object pixels touching a different label or the background
+        const lab2 = lab.slice();
+        for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const i = y * W + x; if (lab[i] > 0 && [1, -1, W, -W].some((d) => lab[i + d] !== lab[i])) lab2[i] = -1; }
+        // sure background: dilate the binary image (3x3 kernel, 3 iterations = a 3 px square grow)
+        const bg = new Uint8Array(W * H);
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let on = 0; for (let dy = -3; dy <= 3 && !on; dy++) for (let dx = -3; dx <= 3; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H && bin[yy * W + xx]) { on = 1; break; } } bg[y * W + x] = on; }
+        const COL = [[139, 92, 246], [34, 211, 238]];
+        const show = (cls, fn) => { const cv = ws.querySelector(cls), ctx = cv.getContext("2d"), im = ctx.createImageData(W, H); for (let i = 0; i < W * H; i++) { const [r, g, b] = fn(i); im.data[i * 4] = r; im.data[i * 4 + 1] = g; im.data[i * 4 + 2] = b; im.data[i * 4 + 3] = 255; } ctx.putImageData(im, 0, 0); };
+        show(".w0", (i) => (bin[i] ? [255, 255, 255] : [0, 0, 0]));
+        show(".w1", (i) => { if (fg[i]) return [255, 255, 255]; const t = D[i] / dmax; return [40 + 200 * t, 20 + 160 * t * t, 60 + 190 * t]; });
+        show(".w2", (i) => (fg[i] ? [255, 255, 255] : bg[i] ? [110, 110, 135] : [0, 0, 0]));
+        show(".w3", (i) => (lab[i] > 0 ? COL[(lab[i] - 1) % 2] : bin[i] ? [255, 40, 40] : [24, 28, 48]));
+        show(".w4", (i) => (lab2[i] === -1 ? [255, 40, 40] : bin[i] ? [200, 200, 210] : [0, 0, 0]));
+        // thicken the red boundary on the last panel so it reads when scaled
+        { const ctx = ws.querySelector(".w4").getContext("2d"); ctx.fillStyle = "rgb(255,40,40)"; for (let i = 0; i < W * H; i++) if (lab2[i] === -1) ctx.fillRect((i % W) - 1, ((i / W) | 0) - 1, 3, 3); }
+      })();
+
+
+      // ------------------------------------------------------------ k-means in colour space (concept slide)
+      (async function () {
+        const sl = document.querySelector("#slide-kmc"), cv = sl.querySelector("canvas"), ctx = cv.getContext("2d");
+        const img = await IMGS.lens, r = rng(11), P = [];
+        for (let n = 0; n < 900; n++) { const p = Math.floor(r() * img.width * img.height) * 4; P.push([img.data[p], img.data[p + 1], img.data[p + 2]]); }
+        const CW = cv.width, CH = cv.height, L = 70, B = CH - 60, S = Math.min(CW - L - 20, B - 20);
+        const X = (v) => L + (v / 255) * S, Y = (v) => B - (v / 255) * S;
+        const RING = ["#8b5cf6", "#22d3ee", "#ec4899"];
+        let C = [], lab = new Uint8Array(P.length), trail = [], tl = null;
+        const assign = () => P.forEach((p, i) => { let b = 0, bd = Infinity; C.forEach((c, j) => { const e = (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2 + (p[2] - c[2]) ** 2; if (e < bd) (bd = e), (b = j); }); lab[i] = b; });
+        const means = () => C.map((c, j) => { const s = [0, 0, 0, 0]; P.forEach((p, i) => { if (lab[i] === j) { s[0] += p[0]; s[1] += p[1]; s[2] += p[2]; s[3]++; } }); return s[3] ? [s[0] / s[3], s[1] / s[3], s[2] / s[3]] : c; });
+        function draw(it, phase) {
+          ctx.clearRect(0, 0, CW, CH);
+          ctx.strokeStyle = "rgba(148,163,184,0.5)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(L, B - S); ctx.lineTo(L, B); ctx.lineTo(L + S, B); ctx.stroke();
+          ctx.fillStyle = "#a8b3c7"; ctx.font = "22px Inter, system-ui, sans-serif"; ctx.textAlign = "center";
+          ctx.fillText("red →", L + S / 2, B + 40);
+          ctx.save(); ctx.translate(L - 30, B - S / 2); ctx.rotate(-Math.PI / 2); ctx.fillText("blue →", 0, 0); ctx.restore();
+          P.forEach((p, i) => { ctx.fillStyle = `rgb(${p[0]},${p[1]},${p[2]})`; ctx.beginPath(); ctx.arc(X(p[0]), Y(p[2]), 4.5, 0, 7); ctx.fill(); if (it > 0) { ctx.strokeStyle = RING[lab[i]]; ctx.lineWidth = 1.5; ctx.stroke(); } });
+          trail.forEach((t, j) => { ctx.strokeStyle = RING[j]; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.beginPath(); t.forEach((c, k) => (k ? ctx.lineTo : ctx.moveTo).call(ctx, X(c[0]), Y(c[2]))); ctx.stroke(); ctx.setLineDash([]); });
+          C.forEach((c, j) => { ctx.fillStyle = `rgb(${c.map(Math.round).join(",")})`; ctx.strokeStyle = RING[j]; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(X(c[0]), Y(c[2]), 16, 0, 7); ctx.fill(); ctx.stroke(); });
+          ctx.textAlign = "left"; ctx.fillStyle = "#67e8f9"; ctx.font = "22px JetBrains Mono, monospace";
+          ctx.fillText(it ? `k = 3 · iteration ${it}${phase ? " · " + phase : ""}` : "k = 3 · random centres", L + 10, 30);
+        }
+        function start() {
+          tl?.kill();
+          // simulate first, then play the recorded iterations
+          C = [0, 1, 2].map(() => P[Math.floor(r() * P.length)].slice());
+          const hist = [{ C: C.map((c) => c.slice()) }];
+          for (let it = 1; it <= 6; it++) { assign(); const L0 = lab.slice(), to = means(); hist.push({ lab: L0, from: C.map((c) => c.slice()), to }); C = to; }
+          C = hist[0].C.map((c) => c.slice()); trail = C.map((c) => [c.slice()]); lab.fill(0);
+          draw(0);
+          tl = gsap.timeline({ onComplete: () => (tl = gsap.delayedCall(2.5, start)) });
+          for (let it = 1; it <= 6; it++) {
+            const h = hist[it], st = { t: 0 };
+            tl.call(() => { lab = h.lab; C = h.from.map((c) => c.slice()); draw(it, "assign"); }, null, "+=0.9");
+            tl.to(st, { t: 1, duration: 0.7, ease: "power2.inOut", immediateRender: false,
+              onStart: () => (st.t = 0),
+              onUpdate: () => { C = h.from.map((f, j) => f.map((v, d) => v + (h.to[j][d] - v) * st.t)); draw(it, "move centres"); },
+              onComplete: () => trail.forEach((t, j) => t.push(h.to[j].slice())) }, "+=0.6");
+          }
+        }
+        draw(0);
+        Deck.scene("#slide-kmc", { enter: start, leave() { tl?.kill(); } });
+      })();
+
+      // ------------------------------------------------------------ GrabCut (simplified) on the dolls
+      (async function () {
+        const gs = document.querySelector("#slide-gc"), cv = gs.querySelector("canvas"), ctx = cv.getContext("2d");
+        const img = await loadPixels("/assets/2025-10-16-19-17-39.png", 480), W = img.width, H = img.height, d = img.data;
+        cv.width = W; cv.height = H;
+        const stat = gs.querySelector(".stat");
+        const DEF = { x: 26, y: 18, w: 152, h: H - 18 };
+        let rect = { ...DEF }, mask = new Uint8Array(W * H), tl = null, drag = null;
+        const inRect = (x, y) => x >= rect.x && y >= rect.y && x < rect.x + rect.w && y < rect.y + rect.h;
+        function model(sel) {
+          // 5 colour clusters with weights and spreads: a small isotropic Gaussian mixture (the GMM)
+          const idx = []; for (let i = 0; i < W * H; i += 3) if (sel(i)) idx.push(i);
+          if (!idx.length) return [{ m: [0, 0, 0], v: 400, w: 1 }];
+          const r = rng(7), C = Array.from({ length: 5 }, () => { const p = idx[Math.floor(r() * idx.length)] * 4; return [d[p], d[p + 1], d[p + 2]]; });
+          let s;
+          for (let it = 0; it < 5; it++) {
+            s = C.map(() => [0, 0, 0, 0, 0]);
+            for (const i of idx) { const p = i * 4; let b = 0, bd = Infinity; C.forEach((c, j) => { const e = (d[p] - c[0]) ** 2 + (d[p + 1] - c[1]) ** 2 + (d[p + 2] - c[2]) ** 2; if (e < bd) (bd = e), (b = j); }); const q = s[b]; q[0] += d[p]; q[1] += d[p + 1]; q[2] += d[p + 2]; q[3]++; q[4] += bd; }
+            s.forEach((q, j) => q[3] && (C[j] = [q[0] / q[3], q[1] / q[3], q[2] / q[3]]));
+          }
+          return C.map((m, j) => ({ m, v: Math.max(60, s[j][4] / Math.max(1, s[j][3]) / 3), w: Math.max(1e-3, s[j][3] / idx.length) }));
+        }
+        // negative log-likelihood of a pixel under a mixture (best component)
+        const nll = (G, p) => { let m = Infinity; for (const g of G) { const e = (d[p] - g.m[0]) ** 2 + (d[p + 1] - g.m[1]) ** 2 + (d[p + 2] - g.m[2]) ** 2; m = Math.min(m, e / (2 * g.v) + 1.5 * Math.log(g.v) - Math.log(g.w)); } return m; };
+        function iterate() {
+          const fgM = model((i) => mask[i]), bgM = model((i) => !mask[i]), nm = new Uint8Array(W * H);
+          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (inRect(x, y)) { const i = y * W + x; nm[i] = nll(fgM, i * 4) < nll(bgM, i * 4) ? 1 : 0; }
+          // smoothing: neighbours vote (the graph cut's job of keeping regions coherent)
+          for (let pass = 0; pass < 3; pass++) {
+            const o = nm.slice();
+            for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (inRect(x, y)) { let v = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) v += o[(y + dy) * W + x + dx]; nm[y * W + x] = v >= 5 ? 1 : 0; }
+          }
+          mask = nm;
+        }
+        function paint() {
+          const out = ctx.createImageData(W, H);
+          for (let i = 0; i < W * H; i++) { const p = i * 4; if (mask[i]) { out.data[p] = d[p]; out.data[p + 1] = d[p + 1]; out.data[p + 2] = d[p + 2]; } else { out.data[p] = d[p] * 0.18 + 20; out.data[p + 1] = d[p + 1] * 0.18 + 12; out.data[p + 2] = d[p + 2] * 0.18 + 40; } out.data[p + 3] = 255; }
+          ctx.putImageData(out, 0, 0);
+          ctx.fillStyle = "#4ade80";
+          for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const i = y * W + x; if (mask[i] && (!mask[i - 1] || !mask[i + 1] || !mask[i - W] || !mask[i + W])) ctx.fillRect(x - 0.5, y - 0.5, 1.6, 1.6); }
+          ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.w - 1, rect.h - 1); ctx.setLineDash([]);
+        }
+        function initMask() { mask = new Uint8Array(W * H); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) mask[y * W + x] = inRect(x, y) ? 1 : 0; }
+        function run(instant) {
+          tl?.kill(); initMask(); paint(); stat.textContent = "iteration 0 / 5: rect only";
+          if (instant) { for (let k = 1; k <= 5; k++) iterate(); paint(); stat.textContent = "iteration 5 / 5"; return; }
+          tl = gsap.timeline();
+          for (let k = 1; k <= 5; k++) tl.call(() => { iterate(); paint(); stat.textContent = `iteration ${k} / 5`; }, null, k === 1 ? 0.6 : "+=0.55");
+        }
+        // pointer → image pixels, through the scaled canvas box
+        const pt = (e) => { const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(W, ((e.clientX - r.left) / r.width) * W)), Math.max(0, Math.min(H, ((e.clientY - r.top) / r.height) * H))]; };
+        cv.addEventListener("pointerdown", (e) => { tl?.kill(); cv.setPointerCapture(e.pointerId); drag = pt(e); });
+        cv.addEventListener("pointermove", (e) => {
+          if (!drag) return;
+          const [x, y] = pt(e);
+          rect = { x: Math.round(Math.min(x, drag[0])), y: Math.round(Math.min(y, drag[1])), w: Math.round(Math.abs(x - drag[0])), h: Math.round(Math.abs(y - drag[1])) };
+          initMask(); paint(); stat.textContent = `rect = (${rect.x}, ${rect.y}, ${rect.w}, ${rect.h})`;
+        });
+        cv.addEventListener("pointerup", () => { if (!drag) return; drag = null; if (rect.w > 8 && rect.h > 8) run(); else { rect = { ...DEF }; run(); } });
+        gs.querySelector("[data-run]").addEventListener("click", () => run());
+        gs.querySelector("[data-reset]").addEventListener("click", () => { rect = { ...DEF }; run(); });
+        run(true);
+        Deck.scene("#slide-gc", { enter: () => run(), leave() { tl?.kill(); } });
+      })();
+
+      // ------------------------------------------------------------ k-means live
+      (function () {
+        const ks = document.querySelector("#slide-km");
+        const src = ks.querySelector(".src"), dst = ks.querySelector(".dst"), sl = ks.querySelector("input"), cen = ks.querySelector(".centers");
+        let name = "lens", tl = null, seed = 1;
+        async function run() {
+          tl?.kill();
+          const img = await IMGS[name], k = +sl.value;
+          sl.nextElementSibling.textContent = k;
+          src.width = img.width; src.height = img.height; src.getContext("2d").putImageData(img, 0, 0);
+          const st = kmeansInit(img, k, seed++);
+          let it = 0;
+          tl = gsap.timeline();
+          const step = () => {
+            const moved = kmeansStep(img, st);
+            it++;
+            paintSeg(dst, img, st);
+            cen.innerHTML = st.C.map((c) => `<i style="background:rgb(${c.map(Math.round).join(",")})"></i>`).join("");
+            ks.querySelector(".cap").textContent = `k = ${k}, iteration ${it}${moved < 1 ? ": converged" : ""}`;
+            if (moved >= 1 && it < 15) tl.call(step, null, "+=0.6");
+          };
+          tl.call(step, null, 0.3);
+        }
+        sl.addEventListener("change", run);
+        sl.addEventListener("input", () => (sl.nextElementSibling.textContent = sl.value));
+        ks.querySelector(".chips").addEventListener("click", (e) => {
+          const b = e.target.closest("button"); if (!b) return;
+          if (b.dataset.img) { name = b.dataset.img; ks.querySelectorAll("[data-img]").forEach((c) => c.classList.toggle("on", c === b)); }
+          run();
+        });
+        Deck.scene("#slide-km", { enter: run, leave() { tl?.kill(); } });
+      })();
+
+      // ------------------------------------------------------------ contours
+      (async function () {
+        const cs = document.querySelector("#slide-cont");
+        const cv = cs.querySelector("canvas");
+        const img = await IMGS.dolls, g = toGray(img), W = img.width, H = img.height;
+        const ins = Object.fromEntries([...cs.querySelectorAll("input")].map((i) => [i.dataset.k, i]));
+        function run() {
+          const t = +ins.t.value, minA = +ins.a.value;
+          ins.t.nextElementSibling.textContent = t; ins.a.nextElementSibling.textContent = minA;
+          // THRESH_BINARY: objects are the bright pixels; here we invert so the dark dolls are white
+          const b = new Uint8Array(W * H).map((_, i) => (g[i] < t ? 1 : 0));
+          const lab = new Int32Array(W * H), area = [0];
+          let n = 0;
+          for (let i = 0; i < W * H; i++) if (b[i] && !lab[i]) {
+            n++; area.push(0); const st = [i]; lab[i] = n;
+            while (st.length) { const j = st.pop(); area[n]++; const x = j % W, y = (j / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy, k = yy * W + xx; if (xx >= 0 && yy >= 0 && xx < W && yy < H && b[k] && !lab[k]) { lab[k] = n; st.push(k); } } }
+          }
+          const ctx = cv.getContext("2d");
+          ctx.putImageData(img, 0, 0);
+          const im = ctx.getImageData(0, 0, W, H);
+          // RETR_EXTERNAL: only boundaries facing the outside background count, not holes
+          const out = new Uint8Array(W * H), q = [];
+          for (let x = 0; x < W; x++) for (const y of [0, H - 1]) if (!b[y * W + x] && !out[y * W + x]) { out[y * W + x] = 1; q.push(y * W + x); }
+          for (let y = 0; y < H; y++) for (const x of [0, W - 1]) if (!b[y * W + x] && !out[y * W + x]) { out[y * W + x] = 1; q.push(y * W + x); }
+          while (q.length) { const j = q.pop(), x = j % W, y = (j / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy, k = yy * W + xx; if (xx >= 0 && yy >= 0 && xx < W && yy < H && !b[k] && !out[k]) { out[k] = 1; q.push(k); } } }
+          let kept = 0;
+          const keep = area.map((a) => a > minA);
+          keep.forEach((k, i) => i && k && kept++);
+          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+            const l = lab[y * W + x];
+            if (!l || !keep[l]) continue;
+            const edge = x === 0 || y === 0 || x === W - 1 || y === H - 1 || out[y * W + x - 1] || out[y * W + x + 1] || out[(y - 1) * W + x] || out[(y + 1) * W + x];
+            if (edge) for (const [dx, dy] of [[0, 0], [1, 0], [0, 1]]) { const o = (Math.min(H - 1, y + dy) * W + Math.min(W - 1, x + dx)) * 4; im.data[o] = 0; im.data[o + 1] = 255; im.data[o + 2] = 0; }
+          }
+          ctx.putImageData(im, 0, 0);
+          cs.querySelector(".cap").textContent = `${n} contours, ${kept} with area > ${minA}`;
+        }
+        Object.values(ins).forEach((i) => i.addEventListener("input", run));
+        run();
+      })();
+    </script>
+  </body>
+</html>

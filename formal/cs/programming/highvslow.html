@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>High Level vs Low Level</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #chart .cols {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        align-items: center;
+        width: 100%;
+      }
+
+      .trade {
+        width: 100%;
+        height: auto;
+        max-height: 70cqh;
+        overflow: visible;
+      }
+
+      .trade .axis {
+        stroke: rgba(255, 255, 255, 0.6);
+        stroke-width: 2.5;
+        marker-end: url(#axTip);
+      }
+
+      .trade .al {
+        fill: var(--muted);
+        font: 600 23px var(--font);
+      }
+
+      .trade .curve {
+        fill: none;
+        stroke-width: 5;
+        stroke-linecap: round;
+      }
+
+      .trade .hi {
+        stroke: var(--pink);
+      }
+
+      .trade .lo {
+        stroke: var(--cyan);
+      }
+
+      .trade .guide {
+        stroke-width: 1.6;
+        stroke-dasharray: 6 6;
+      }
+
+      .trade .guide.hi {
+        stroke: rgba(236, 72, 153, 0.7);
+      }
+
+      .trade .guide.lo {
+        stroke: rgba(34, 211, 238, 0.7);
+      }
+
+      .trade .note {
+        font: 20px var(--font);
+        fill: var(--muted);
+      }
+
+      .key {
+        display: grid;
+        gap: 0.9rem;
+      }
+
+      .key p {
+        margin: 0;
+      }
+
+      .sw {
+        display: inline-block;
+        width: 1.6rem;
+        height: 4px;
+        margin-right: 0.5rem;
+        border-radius: 2px;
+        vertical-align: middle;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Programming · concepts</span>
+      <h1 class="grad-each"><span>High</span> <span>Level</span> <span>vs</span> <span>Low</span> <span>Level</span></h1>
+      <p>The trade-off between how fast you can write a program and how fast it runs.</p>
+    </section>
+
+    <!-- ================================================================ animated chart -->
+    <section class="slide" id="chart">
+      <h2>Trade-off chart</h2>
+      <div class="cols">
+        <svg class="trade" viewBox="0 0 880 500" aria-label="CPU time against development time. The high-level language curve starts early but levels off higher; the low-level curve starts later but ends lower.">
+          <defs>
+            <marker id="axTip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="rgba(255,255,255,0.6)" /></marker>
+          </defs>
+          <line class="axis" x1="100" y1="440" x2="860" y2="440" />
+          <line class="axis" x1="100" y1="440" x2="100" y2="40" />
+          <text class="al" x="860" y="482" text-anchor="end">Development time →</text>
+          <text class="al" x="88" y="50" text-anchor="end" transform="rotate(-90 88 50)" dy="-6">CPU time →</text>
+
+          <!-- guides -->
+          <line class="guide hi g-first" x1="150" y1="90" x2="150" y2="440" />
+          <line class="guide lo g-first" x1="330" y1="190" x2="330" y2="440" />
+          <text class="note g-first" x="150" y="466" text-anchor="middle">first runnable</text>
+          <text class="note g-first" x="330" y="466" text-anchor="middle">first runnable</text>
+          <line class="guide hi g-best" x1="100" y1="332" x2="840" y2="332" />
+          <line class="guide lo g-best" x1="100" y1="410" x2="840" y2="410" />
+          <text class="note g-best" x="840" y="356" text-anchor="end">best possible (high-level)</text>
+          <text class="note g-best" x="840" y="432" text-anchor="end">best possible (low-level)</text>
+
+          <!-- curves -->
+          <path class="curve hi" d="M150 90 C 250 240, 420 300, 840 332" />
+          <path class="curve lo" d="M330 190 C 420 330, 560 400, 840 410" />
+        </svg>
+        <div class="key">
+          <p class="step" data-step="1"><span class="sw" style="background: var(--pink)"></span><strong>High-level language</strong>: code runs early, but more CPU time.</p>
+          <p class="step" data-step="2"><span class="sw" style="background: var(--cyan)"></span><strong>Low-level language</strong>: takes longer to get running, but ends up using less CPU time.</p>
+          <p class="step" data-step="3"><strong>Development effort</strong> until the first runnable code that solves the problem: much less for high level.</p>
+          <p class="step" data-step="4"><strong>Best possible performance</strong> after a significant amount of development effort: better for low level.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ original figure -->
+    <section class="slide">
+      <h2>The original figure</h2>
+      <figure class="zoom-on-reveal">
+        <img src="/assets/2025-10-21-14-03-24.png" alt="Trade-off between low- and high-level languages: CPU time against development time" style="max-height: 70cqh" />
+        <figcaption>Source: Johansson, Robert. <em>Numerical Python</em>. New York, NY: Apress, 2019.</figcaption>
+      </figure>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const slide = document.querySelector("#chart");
+      const hi = slide.querySelector(".curve.hi"), lo = slide.querySelector(".curve.lo");
+      const first = slide.querySelectorAll(".g-first"), best = slide.querySelectorAll(".g-best");
+      [hi, lo].forEach((p) => {
+        const L = p.getTotalLength();
+        p.style.strokeDasharray = L;
+        p.style.strokeDashoffset = L;
+      });
+      gsap.set([...first, ...best], { opacity: 0 });
+
+      // State-based: what is visible depends only on how many steps are shown
+      function sync(animate) {
+        const n = Deck.step, d = animate ? 1.4 : 0;
+        gsap.to(hi, { strokeDashoffset: n >= 1 ? 0 : hi.getTotalLength(), duration: d, ease: "power2.inOut" });
+        gsap.to(lo, { strokeDashoffset: n >= 2 ? 0 : lo.getTotalLength(), duration: d, ease: "power2.inOut" });
+        gsap.to(first, { opacity: n >= 3 ? 1 : 0, duration: d * 0.4 });
+        gsap.to(best, { opacity: n >= 4 ? 1 : 0, duration: d * 0.4 });
+      }
+      Deck.scene("#chart", {
+        enter: () => queueMicrotask(() => sync(false)),
+        step: (s, n, els, d) => queueMicrotask(() => sync(d.dir > 0)),
+        unstep: () => queueMicrotask(() => sync(false)),
+      });
+    </script>
+  </body>
+</html>

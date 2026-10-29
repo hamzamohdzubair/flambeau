@@ -1,0 +1,1494 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Iterators &amp; Generators</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Code sizing on the 1600x900 canvas ---------- */
+      .slide > pre {
+        width: fit-content;
+        min-width: 40rem;
+        font-size: 1.25rem;
+      }
+
+      .slide > pre.xl {
+        font-size: 1.4rem;
+      }
+
+      .slide > pre.md {
+        font-size: 1.12rem;
+      }
+
+      /* two blocks side by side, each as wide as its code */
+      .pair {
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-content: center;
+        align-items: center;
+        gap: 1.6rem;
+        width: 100%;
+      }
+
+      .pair.top {
+        align-items: start;
+      }
+
+      .pair > pre,
+      .pair > div > pre {
+        width: auto;
+        font-size: 1.1rem;
+      }
+
+      .pair .tag {
+        display: block;
+        margin: 0 0 0.5rem 0.2rem;
+        font: 500 0.95rem var(--font-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .note {
+        font-size: 1.2rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.1rem;
+        width: 100%;
+      }
+
+      .stack > pre {
+        width: fit-content;
+        min-width: 44rem;
+        font-size: 1.1rem;
+      }
+
+      /* ---------- Things you can loop over: a 2x2 grid of snippets ---------- */
+      .quad {
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-content: center;
+        gap: 1.4rem 1.6rem;
+        width: 100%;
+      }
+
+      .quad pre {
+        width: auto;
+        font-size: 1.15rem;
+      }
+
+      /* ---------- iter()/next() animation ---------- */
+      #proto .pair {
+        grid-template-columns: auto minmax(0, 34rem);
+        gap: 2.4rem;
+      }
+
+      #proto pre {
+        font-size: 1.3rem;
+      }
+
+      svg.itsvg {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+      }
+
+      .itsvg text {
+        font-family: var(--font-mono);
+        fill: var(--text);
+      }
+
+      .itsvg .lbl {
+        font-size: 22px;
+        fill: var(--faint);
+      }
+
+      .itsvg .box rect {
+        fill: rgba(139, 92, 246, 0.16);
+        stroke: rgba(167, 139, 250, 0.7);
+        stroke-width: 2;
+      }
+
+      .itsvg .box.seen rect {
+        fill: rgba(139, 92, 246, 0.06);
+        stroke: rgba(167, 139, 250, 0.35);
+      }
+
+      .itsvg .box text,
+      .itsvg .chip text {
+        font-size: 34px;
+        font-weight: 600;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .itsvg .endbox rect {
+        fill: none;
+        stroke: var(--faint);
+        stroke-dasharray: 6 6;
+        stroke-width: 2;
+      }
+
+      .itsvg .endbox text {
+        font-size: 22px;
+        fill: var(--faint);
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .itsvg .slot {
+        fill: none;
+        stroke: rgba(148, 163, 184, 0.35);
+        stroke-dasharray: 5 6;
+        stroke-width: 2;
+      }
+
+      .itsvg .chip rect {
+        fill: rgba(34, 211, 238, 0.22);
+        stroke: var(--cyan);
+        stroke-width: 2;
+      }
+
+      .itsvg #ptr path {
+        fill: var(--pink);
+      }
+
+      .itsvg #ptr text {
+        font-size: 22px;
+        fill: var(--pink);
+        text-anchor: middle;
+      }
+
+      .itsvg #stop rect {
+        fill: rgba(248, 113, 113, 0.16);
+        stroke: var(--red);
+        stroke-width: 2;
+      }
+
+      .itsvg #stop text {
+        font-size: 26px;
+        font-weight: 600;
+        fill: var(--red);
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      /* ---------- Generator pause tracer ---------- */
+      #pause .pair {
+        grid-template-columns: auto minmax(0, 26rem);
+        gap: 2.4rem;
+        align-items: center;
+      }
+
+      #pause pre {
+        font-size: 1.25rem;
+      }
+
+      #pause .line {
+        border-radius: 4px;
+        transition:
+          background 0.25s,
+          box-shadow 0.25s;
+      }
+
+      #pause .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.32), rgba(34, 211, 238, 0.04));
+        box-shadow: inset 4px 0 0 var(--cyan);
+      }
+
+      #pause .line.now.paused {
+        background: linear-gradient(90deg, rgba(167, 139, 250, 0.35), rgba(167, 139, 250, 0.05));
+        box-shadow: inset 4px 0 0 var(--violet);
+      }
+
+      #pause .line.call {
+        box-shadow: inset 4px 0 0 var(--pink);
+        background: rgba(236, 72, 153, 0.1);
+      }
+
+      #pause .line[data-note]::after,
+      #pause .line.now.paused::after {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.75em;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+      }
+
+      #pause .line[data-note]::after {
+        content: attr(data-note);
+        color: var(--green);
+        border: 1px solid rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      #pause .line[data-note].bad::after {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      #pause .line.now.paused::after {
+        content: "paused";
+        color: var(--violet-soft);
+        border: 1px solid rgba(167, 139, 250, 0.55);
+        background: rgba(139, 92, 246, 0.15);
+      }
+
+      .gpanel {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .mh {
+        font: 500 0.85rem var(--font-mono);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .gbadge {
+        align-self: flex-start;
+        padding: 0.35rem 1rem;
+        border-radius: 999px;
+        font: 600 1.15rem var(--font);
+        color: var(--muted);
+        border: 1.5px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        transition:
+          color 0.3s,
+          border-color 0.3s,
+          background 0.3s;
+      }
+
+      .gbadge[data-s="running"] {
+        color: var(--cyan);
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.12);
+      }
+
+      .gbadge[data-s="paused"] {
+        color: var(--violet-soft);
+        border-color: var(--violet);
+        background: rgba(139, 92, 246, 0.15);
+      }
+
+      .gbadge[data-s="finished"] {
+        color: var(--red);
+        border-color: var(--red);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .gvars {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 1.2rem;
+        min-height: 4.6rem;
+        padding: 0.6rem 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #0d0f20;
+        font: 1.3rem/1.6 var(--font-mono);
+      }
+
+      .gvars .k {
+        color: var(--muted);
+      }
+
+      .gvars .v {
+        color: var(--text);
+        border-radius: 4px;
+      }
+
+      .gvars .empty {
+        grid-column: 1 / -1;
+        color: var(--faint);
+        font-size: 1.05rem;
+      }
+
+      .gtray {
+        display: flex;
+        gap: 0.6rem;
+        min-height: 3.6rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .gtray b {
+        display: grid;
+        place-items: center;
+        min-width: 3.2rem;
+        height: 3.2rem;
+        padding: 0 0.7rem;
+        border-radius: 10px;
+        font: 600 1.5rem var(--font-mono);
+        color: var(--text);
+        background: rgba(34, 211, 238, 0.2);
+        border: 1.5px solid var(--cyan);
+      }
+
+      .gtray b.err {
+        font-size: 1.1rem;
+        color: var(--red);
+        background: rgba(248, 113, 113, 0.12);
+        border-color: var(--red);
+      }
+
+      /* ---------- Memory bars ---------- */
+      .bars {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1rem 1.2rem;
+        align-items: center;
+        width: min(100%, 58rem);
+      }
+
+      .bars .name {
+        font: 1.2rem var(--font-mono);
+        color: var(--muted);
+      }
+
+      .bars .track {
+        height: 2.6rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        overflow: hidden;
+      }
+
+      .bars .fill {
+        height: 100%;
+        width: 0;
+        border-radius: 10px;
+        background: var(--gradient);
+        transition: width 1.2s var(--ease);
+      }
+
+      .bars .shown .fill,
+      .bars .fill.shown {
+        width: var(--w);
+      }
+
+      .bars .size {
+        font: 600 1.2rem var(--font-mono);
+        color: var(--text);
+        min-width: 9rem;
+      }
+
+      /* ---------- Pipeline animation ---------- */
+      #pipe .pair {
+        grid-template-columns: auto minmax(0, 26rem);
+        gap: 2.4rem;
+      }
+
+      #pipe pre {
+        font-size: 1rem;
+      }
+
+      .pipesvg .stage rect {
+        fill: rgba(139, 92, 246, 0.12);
+        stroke: rgba(167, 139, 250, 0.6);
+        stroke-width: 2;
+      }
+
+      .pipesvg .stage text {
+        font: 600 28px var(--font-mono);
+        fill: var(--violet-soft);
+        dominant-baseline: central;
+      }
+
+      .pipesvg .flow {
+        stroke: rgba(148, 163, 184, 0.35);
+        stroke-width: 2;
+        stroke-dasharray: 6 8;
+      }
+
+      .pipesvg .tok circle {
+        fill: rgba(34, 211, 238, 0.25);
+        stroke: var(--cyan);
+        stroke-width: 2.5;
+      }
+
+      .pipesvg .tok.drop circle {
+        fill: rgba(248, 113, 113, 0.18);
+        stroke: var(--red);
+      }
+
+      .pipesvg .tok text {
+        font: 600 26px var(--font-mono);
+        fill: var(--text);
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .pipesvg .res {
+        font: 500 28px var(--font-mono);
+        fill: var(--green);
+      }
+
+      .pipesvg .res tspan.k {
+        fill: var(--muted);
+      }
+
+      .pipesvg .side {
+        font: 24px var(--font);
+        fill: var(--faint);
+      }
+
+      /* ---------- Slides that need a little more width ---------- */
+      #batch {
+        padding-inline: 2.5rem;
+      }
+
+      #batch pre {
+        font-size: 1.05rem;
+      }
+
+      #recap .cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.1rem;
+      }
+
+      #recap .card h3 {
+        font-size: 1.3rem;
+      }
+
+      #recap .card p {
+        margin: 0;
+        font-size: 1.08rem;
+        color: var(--muted);
+      }
+
+      #ivi .cards {
+        grid-template-columns: 1fr;
+        width: 22rem;
+      }
+
+      #ivi .card p {
+        margin: 0.3rem 0 0;
+        font-size: 1.1rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · advanced</span>
+      <h1 class="grad-each"><span>Iterators</span> <span>&amp;</span> <span>Generators</span></h1>
+      <p>How a for loop really gets its values, and how <code>yield</code> lets a function hand them out one at a time.</p>
+    </section>
+
+    <!-- ================================================================ iteration -->
+    <section class="slide section">
+      <h2>Iterators</h2>
+      <p class="center">The protocol behind every <code>for</code> loop.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Anything you can loop over</h2>
+      <div class="quad">
+        <pre class="step"><code class="language-python">
+          # iterating over a list
+          numbers = [1, 2, 3, 4, 5]
+          for num in numbers:
+              print(num)
+        </code></pre>
+        <pre class="step"><code class="language-python">
+          # iterating over a dictionary
+          person = {"name": "Alice", "age": 25}
+          for key in person:
+              print(key, person[key])
+        </code></pre>
+        <pre class="step"><code class="language-python">
+          # iterating over a string
+          for char in "hello":
+              print(char)
+        </code></pre>
+        <pre class="step"><code class="language-python">
+          # iterating over a file
+          with open("data.txt") as file:
+              for line in file:
+                  print(line.strip())
+        </code></pre>
+      </div>
+      <p class="note step">Lists, strings, dictionaries and files all speak the same <em>iterator protocol</em>.</p>
+    </section>
+
+    <section class="slide" id="proto">
+      <h2>iter() and next()</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # getting an iterator
+          numbers = [1, 2, 3]
+          iterator = iter(numbers)
+
+          # calling next
+          next(iterator)  # ans: 1
+          next(iterator)  # ans: 2
+          next(iterator)  # ans: 3
+          next(iterator)  # ans: StopIteration
+        </code></pre>
+        <svg class="itsvg" viewBox="0 0 560 500" aria-label="An iterator pointing into a list; each next() hands out the value it points at and moves on">
+          <text class="lbl" x="20" y="28">numbers (the list)</text>
+          <g class="box" data-i="0" transform="translate(20,48)"><rect width="110" height="90" rx="14" /><text x="55" y="45">1</text></g>
+          <g class="box" data-i="1" transform="translate(150,48)"><rect width="110" height="90" rx="14" /><text x="55" y="45">2</text></g>
+          <g class="box" data-i="2" transform="translate(280,48)"><rect width="110" height="90" rx="14" /><text x="55" y="45">3</text></g>
+          <g class="endbox" transform="translate(410,48)"><rect width="110" height="90" rx="14" /><text x="55" y="45">end</text></g>
+          <g id="ptr">
+            <path d="M0,0 L-16,26 L16,26 Z" transform="translate(0,152)" />
+            <text x="0" y="210">iterator</text>
+          </g>
+          <text class="lbl" x="20" y="282">next() handed out</text>
+          <rect class="slot" x="20" y="300" width="110" height="90" rx="14" />
+          <rect class="slot" x="150" y="300" width="110" height="90" rx="14" />
+          <rect class="slot" x="280" y="300" width="110" height="90" rx="14" />
+          <g class="chip" data-i="0"><rect width="110" height="90" rx="14" /><text x="55" y="45">1</text></g>
+          <g class="chip" data-i="1"><rect width="110" height="90" rx="14" /><text x="55" y="45">2</text></g>
+          <g class="chip" data-i="2"><rect width="110" height="90" rx="14" /><text x="55" y="45">3</text></g>
+          <g id="stop" transform="translate(280,430)"><rect x="-150" y="-32" width="300" height="64" rx="32" /><text x="0" y="0">StopIteration</text></g>
+        </svg>
+      </div>
+      <p class="note">The iterator remembers where it is. The list itself never changes.</p>
+    </section>
+
+    <section class="slide">
+      <h2>A for loop uses the iterator protocol</h2>
+      <div class="pair">
+        <div>
+          <span class="tag">What you write</span>
+          <pre><code class="language-python">
+            for num in numbers:
+                print(num)
+          </code></pre>
+        </div>
+        <div class="step">
+          <span class="tag">Is equivalent to</span>
+          <pre><code class="language-python">
+            iterator = iter(numbers)
+            while True:
+                try:
+                    num = next(iterator)
+                    print(num)
+                except StopIteration:
+                    break
+          </code></pre>
+        </div>
+      </div>
+      <p class="note step"><code>for</code> calls <code>iter()</code> once, then <code>next()</code> until <code>StopIteration</code> says there is nothing left.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Creating a custom iterator</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # iterator class
+          class Counter:
+              def __init__(self, start, end):
+                  self.current = start
+                  self.end = end
+
+              def __iter__(self):
+                  return self
+
+              def __next__(self):
+                  if self.current &gt;= self.end:
+                      raise StopIteration
+                  self.current += 1
+                  return self.current - 1
+        </code></pre>
+        <pre><code class="language-python">
+          counter = Counter(0, 5)
+          for num in counter:
+              print(num)  # ans: 0, 1, 2, 3, 4
+
+          # manual iteration
+          counter = Counter(0, 3)
+          next(counter)  # ans: 0
+          next(counter)  # ans: 1
+          next(counter)  # ans: 2
+          next(counter)  # ans: StopIteration
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide" id="ivi">
+      <h2>Iterable vs iterator</h2>
+      <div class="pair">
+        <div class="cards">
+          <div class="card"><h3>Iterable</h3><p>has <code>__iter__()</code>: you can ask it for an iterator</p></div>
+          <div class="card"><h3>Iterator</h3><p>has <code>__iter__()</code> <em>and</em> <code>__next__()</code>: it hands out values</p></div>
+        </div>
+        <pre><code class="language-python">
+          # a list is iterable but not an iterator
+          numbers = [1, 2, 3]
+          iter(numbers)      # creates an iterator
+          next(numbers)      # ans: Error! (TypeError)
+
+          # an iterator is both iterable and iterator
+          iterator = iter(numbers)
+          iter(iterator)     # ans: returns itself
+          next(iterator)     # ans: 1
+
+          # range is iterable
+          r = range(5)
+          iter(r)            # creates an iterator
+          next(r)            # ans: Error! (TypeError)
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>A custom iterable</h2>
+      <div class="pair top">
+        <pre><code class="language-python">
+          class MyRange:
+              def __init__(self, start, end):
+                  self.start = start
+                  self.end = end
+
+              def __iter__(self):
+                  return MyRangeIterator(
+                      self.start, self.end)
+        </code></pre>
+        <pre><code class="language-python">
+          class MyRangeIterator:
+              def __init__(self, start, end):
+                  self.current = start
+                  self.end = end
+
+              def __iter__(self):
+                  return self
+
+              def __next__(self):
+                  if self.current &gt;= self.end:
+                      raise StopIteration
+                  self.current += 1
+                  return self.current - 1
+        </code></pre>
+      </div>
+      <p class="note step">Every <code>iter()</code> call builds a fresh iterator, so one <code>MyRange</code> can be looped over again and again.</p>
+    </section>
+
+    <!-- ================================================================ generators -->
+    <section class="slide section">
+      <h2>Generators</h2>
+      <p class="center">Functions that pause at <code>yield</code> and pick up where they left off.</p>
+    </section>
+
+    <section class="slide" id="pause">
+      <h2>A generator pauses at yield</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # generator function with yield
+          def count_up_to(n):
+              count = 1
+              while count &lt;= n:
+                  yield count
+                  count += 1
+
+          gen = count_up_to(3)
+          next(gen)
+          next(gen)
+          next(gen)
+          next(gen)
+        </code></pre>
+        <div class="gpanel">
+          <span class="mh">the generator</span>
+          <span class="gbadge" data-s="none">not created yet</span>
+          <span class="mh">its local variables</span>
+          <div class="gvars"><span class="empty">no frame yet</span></div>
+          <span class="mh">values handed out</span>
+          <div class="gtray"></div>
+        </div>
+      </div>
+      <div hidden>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Generator functions: basics</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # creates a generator object
+          gen = count_up_to(5)
+          next(gen)  # ans: 1
+          next(gen)  # ans: 2
+
+          # iterate over a generator
+          for num in count_up_to(5):
+              print(num)  # ans: 1, 2, 3, 4, 5
+        </code></pre>
+        <pre><code class="language-python">
+          # simple generator
+          def simple_gen():
+              yield 1
+              yield 2
+              yield 3
+
+          for value in simple_gen():
+              print(value)  # ans: 1, 2, 3
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Fibonacci, one value at a time</h2>
+      <pre class="xl"><code class="language-python">
+        # generator with multiple yields
+        def fibonacci(n):
+            a, b = 0, 1
+            for _ in range(n):
+                yield a
+                a, b = b, a + b
+
+        list(fibonacci(10))
+        # ans: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>An infinite generator</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          def infinite_counter():
+              count = 0
+              while True:
+                  yield count
+                  count += 1
+        </code></pre>
+        <pre><code class="language-python">
+          # use with break, or take the first n
+          counter = infinite_counter()
+          for i, num in enumerate(counter):
+              print(num)
+              if i &gt;= 4:
+                  break
+          # ans: 0, 1, 2, 3, 4
+        </code></pre>
+      </div>
+      <p class="note step"><code>while True</code> is safe here: the generator only runs when someone asks for the next value.</p>
+    </section>
+
+    <section class="slide">
+      <h2>A generator with a condition</h2>
+      <pre class="xl"><code class="language-python">
+        def even_numbers(n):
+            for i in range(n):
+                if i % 2 == 0:
+                    yield i
+
+        list(even_numbers(10))  # ans: [0, 2, 4, 6, 8]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Generator expressions</h2>
+      <pre><code class="language-python">
+        # like a list comprehension, in round brackets
+        gen = (x**2 for x in range(10))
+        next(gen)  # ans: 0
+        next(gen)  # ans: 1
+
+        # vs list comprehension
+        list_comp = [x**2 for x in range(10)]  # ans: creates a list
+        gen_exp = (x**2 for x in range(10))    # ans: creates a generator
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Memory efficiency</h2>
+      <pre><code class="language-python">
+        import sys
+        sys.getsizeof([x for x in range(1000)])   # ans: ~9000 bytes
+        sys.getsizeof((x for x in range(1000)))   # ans: ~200 bytes
+      </code></pre>
+      <div class="bars">
+        <span class="name">list</span>
+        <div class="track"><div class="fill step" data-step="1" data-anim="none" style="--w: 100%"></div></div>
+        <span class="size step" data-step="1">~9000 bytes</span>
+        <span class="name">generator</span>
+        <div class="track"><div class="fill step" data-step="2" data-anim="none" style="--w: 2.2%"></div></div>
+        <span class="size step" data-step="2">~200 bytes</span>
+      </div>
+      <p class="note step">The list holds all 1000 values. The generator holds only its recipe and where it is up to.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Generators in function calls and chains</h2>
+      <pre class="md"><code class="language-python">
+        # use in functions: no extra brackets needed
+        sum(x**2 for x in range(10))               # ans: 285
+        max(x for x in range(10) if x % 2 == 0)    # ans: 8
+
+        # chaining generators
+        numbers = (x for x in range(10))
+        evens = (x for x in numbers if x % 2 == 0)
+        squares = (x**2 for x in evens)
+        list(squares)  # ans: [0, 4, 16, 36, 64]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>yield from</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # yield from (Python 3.3+)
+          def generator1():
+              yield 1
+              yield 2
+
+          def generator2():
+              yield 3
+              yield 4
+
+          def combined():
+              yield from generator1()
+              yield from generator2()
+
+          list(combined())  # ans: [1, 2, 3, 4]
+        </code></pre>
+        <div class="step">
+          <span class="tag">Is equivalent to</span>
+          <pre><code class="language-python">
+            def combined():
+                for value in generator1():
+                    yield value
+                for value in generator2():
+                    yield value
+          </code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Flattening a nested list</h2>
+      <pre class="xl"><code class="language-python">
+        # flatten nested structure
+        def flatten(nested):
+            for item in nested:
+                if isinstance(item, list):
+                    yield from flatten(item)
+                else:
+                    yield item
+
+        nested = [1, [2, [3, 4], 5], 6]
+        list(flatten(nested))  # ans: [1, 2, 3, 4, 5, 6]
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ methods -->
+    <section class="slide section">
+      <h2>Generator methods</h2>
+      <p class="center"><code>send()</code>, <code>throw()</code> and <code>close()</code>: talking back to a paused generator.</p>
+    </section>
+
+    <section class="slide">
+      <h2>send(): values into a generator</h2>
+      <pre><code class="language-python">
+        def echo():
+            while True:
+                value = yield
+                print(f"Received: {value}")
+
+        gen = echo()
+        next(gen)           # prime the generator
+        gen.send("Hello")   # ans: Received: Hello
+        gen.send("World")   # ans: Received: World
+      </code></pre>
+      <p class="note step"><code>next()</code> runs it to the first <code>yield</code>; <code>send(x)</code> resumes it, and <code>yield</code> evaluates to <code>x</code>.</p>
+    </section>
+
+    <section class="slide">
+      <h2>A generator that yields and receives</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          def running_average():
+              total = 0
+              count = 0
+              average = None
+              while True:
+                  value = yield average
+                  total += value
+                  count += 1
+                  average = total / count
+        </code></pre>
+        <pre><code class="language-python">
+          avg = running_average()
+          next(avg)       # ans: None
+          avg.send(10)    # ans: 10.0
+          avg.send(20)    # ans: 15.0
+          avg.send(30)    # ans: 20.0
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>throw(): an exception at the yield</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          def my_gen():
+              try:
+                  yield 1
+                  yield 2
+                  yield 3
+              except ValueError:
+                  yield "Error caught"
+              yield 4
+        </code></pre>
+        <pre><code class="language-python">
+          gen = my_gen()
+          next(gen)              # ans: 1
+          gen.throw(ValueError)  # ans: "Error caught"
+          next(gen)              # ans: 4
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>close(): stopping a generator</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          def count_forever():
+              count = 0
+              try:
+                  while True:
+                      yield count
+                      count += 1
+              finally:
+                  print("Cleanup")
+        </code></pre>
+        <pre><code class="language-python">
+          gen = count_forever()
+          next(gen)    # ans: 0
+          next(gen)    # ans: 1
+          gen.close()  # ans: prints Cleanup
+          next(gen)    # ans: StopIteration
+        </code></pre>
+      </div>
+    </section>
+
+    <!-- ================================================================ itertools -->
+    <section class="slide section">
+      <h2>The itertools module</h2>
+      <p class="center">Ready-made iterators: infinite, combinatoric and utilities.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Infinite iterators: count and repeat</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          from itertools import count, cycle, repeat
+
+          # count: infinite counting
+          for i in count(10, 2):  # start=10, step=2
+              print(i)
+              if i &gt; 20:
+                  break
+          # ans: 10, 12, 14, 16, 18, 20, 22
+        </code></pre>
+        <pre><code class="language-python">
+          # repeat: repeat a value
+          for x in repeat(10, 3):
+              print(x)
+          # ans: 10, 10, 10
+        </code></pre>
+      </div>
+      <p class="note step">The <code>if</code> runs after <code>print</code>, so 22 is printed before the loop breaks.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Infinite iterators: cycle</h2>
+      <pre class="xl"><code class="language-python">
+        # cycle: infinite cycling
+        colors = ['red', 'green', 'blue']
+        color_cycle = cycle(colors)
+        for i, color in enumerate(color_cycle):
+            print(color)
+            if i &gt;= 5:
+                break
+        # ans: red, green, blue, red, green, blue
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Combinatoric iterators: product and permutations</h2>
+      <pre><code class="language-python">
+        from itertools import product, permutations
+
+        # product: cartesian product
+        list(product([1, 2], ['a', 'b']))
+        # ans: [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')]
+
+        # permutations: all orderings
+        list(permutations([1, 2, 3], 2))
+        # ans: [(1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2)]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Combinatoric iterators: combinations</h2>
+      <pre><code class="language-python">
+        from itertools import combinations, combinations_with_replacement
+
+        # combinations: unique selections
+        list(combinations([1, 2, 3, 4], 2))
+        # ans: [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
+
+        # combinations_with_replacement
+        list(combinations_with_replacement([1, 2, 3], 2))
+        # ans: [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3)]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>chain, islice and zip_longest</h2>
+      <pre><code class="language-python">
+        from itertools import chain, islice, zip_longest
+
+        # chain: combine iterables
+        list(chain([1, 2], [3, 4], [5, 6]))
+        # ans: [1, 2, 3, 4, 5, 6]
+
+        # islice: slice an iterator (start, stop, step)
+        list(islice(range(10), 2, 8, 2))
+        # ans: [2, 4, 6]
+
+        # zip_longest: zip with a fill value
+        list(zip_longest([1, 2], ['a', 'b', 'c'], fillvalue=0))
+        # ans: [(1, 'a'), (2, 'b'), (0, 'c')]
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>groupby</h2>
+      <pre class="xl"><code class="language-python">
+        # groupby: group consecutive items
+        from itertools import groupby
+        data = [1, 1, 2, 2, 2, 3, 1, 1]
+        for key, group in groupby(data):
+            print(key, list(group))
+        # ans: 1 [1, 1]
+        # ans: 2 [2, 2, 2]
+        # ans: 3 [3]
+        # ans: 1 [1, 1]
+      </code></pre>
+      <p class="note step">Only <em>consecutive</em> equal items are grouped, so 1 appears twice.</p>
+    </section>
+
+    <!-- ================================================================ practice -->
+    <section class="slide section">
+      <h2>Generators in practice</h2>
+      <p class="center">Big files, batches, pipelines and coroutines.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Reading a large file efficiently</h2>
+      <pre class="xl"><code class="language-python">
+        def read_large_file(file_path):
+            with open(file_path) as file:
+                for line in file:
+                    yield line.strip()
+
+        for line in read_large_file("large_file.txt"):
+            process(line)
+      </code></pre>
+      <p class="note step">Only one line is in memory at a time, however large the file.</p>
+    </section>
+
+    <section class="slide" id="batch">
+      <h2>Batch processing</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          def batch_iterator(iterable, batch_size):
+              batch = []
+              for item in iterable:
+                  batch.append(item)
+                  if len(batch) &gt;= batch_size:
+                      yield batch
+                      batch = []
+              if batch:
+                  yield batch
+        </code></pre>
+        <pre><code class="language-python">
+          for batch in batch_iterator(range(10), 3):
+              print(batch)
+          # ans: [0, 1, 2]
+          # ans: [3, 4, 5]
+          # ans: [6, 7, 8]
+          # ans: [9]
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide" id="pipe">
+      <h2>The pipeline pattern</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          def read_data():
+              for i in range(100):
+                  yield i
+
+          def filter_evens(numbers):
+              for num in numbers:
+                  if num % 2 == 0:
+                      yield num
+
+          def square(numbers):
+              for num in numbers:
+                  yield num ** 2
+
+          pipeline = square(filter_evens(read_data()))
+          result = list(pipeline)
+        </code></pre>
+        <svg class="pipesvg" viewBox="0 0 640 500" aria-label="Values flowing one at a time through read_data, filter_evens and square">
+          <line class="flow" x1="330" y1="90" x2="330" y2="160" />
+          <line class="flow" x1="330" y1="240" x2="330" y2="310" />
+          <line class="flow" x1="330" y1="390" x2="330" y2="430" />
+          <g class="stage"><rect x="0" y="10" width="400" height="80" rx="16" /><text x="24" y="50">read_data()</text></g>
+          <g class="stage"><rect x="0" y="160" width="400" height="80" rx="16" /><text x="24" y="200">filter_evens()</text></g>
+          <g class="stage"><rect x="0" y="310" width="400" height="80" rx="16" /><text x="24" y="350">square()</text></g>
+          <text class="side" x="420" y="57">yields i</text>
+          <text class="side" x="420" y="194">odd: dropped</text>
+          <text class="side" x="420" y="222">even: passed on</text>
+          <text class="side" x="420" y="357">num ** 2</text>
+          <text class="res" x="0" y="480"><tspan class="k">result = </tspan><tspan class="v">[]</tspan></text>
+          <g class="toks"></g>
+        </svg>
+      </div>
+      <p class="note">Each value travels the whole pipeline before the next one is read.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Generator performance: memory</h2>
+      <pre class="md"><code class="language-python">
+        # memory efficient
+        def read_numbers_list(n):
+            return [i for i in range(n)]
+
+        def read_numbers_gen(n):
+            for i in range(n):
+                yield i
+
+        # memory usage
+        import sys
+        n = 1000000
+        list_size = sys.getsizeof(read_numbers_list(n))
+        gen_size = sys.getsizeof(read_numbers_gen(n))
+        # ans: list_size: ~8MB
+        # ans: gen_size: ~200 bytes
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Lazy evaluation</h2>
+      <pre><code class="language-python">
+        from itertools import islice
+
+        def expensive_operation(x):
+            # simulate expensive computation
+            return x ** 2
+
+        # generator: operations done on demand
+        gen = (expensive_operation(x) for x in range(1000000))
+        first_five = list(islice(gen, 5))
+
+        # list: all operations done immediately
+        lst = [expensive_operation(x) for x in range(1000000)]
+      </code></pre>
+      <p class="note step">The generator calls <code>expensive_operation</code> 5 times; the list calls it a million times.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Coroutines (advanced)</h2>
+      <div class="stack">
+        <pre><code class="language-python">
+          # simple coroutine
+          def grep(pattern):
+              print(f"Searching for {pattern}")
+              while True:
+                  line = yield
+                  if pattern in line:
+                      print(line)
+        </code></pre>
+        <pre><code class="language-python">
+          search = grep("python")
+          next(search)  # prime the coroutine
+          search.send("I love python")    # ans: I love python
+          search.send("Hello world")      # ans: (no output)
+          search.send("python is great")  # ans: python is great
+        </code></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>A coroutine pipeline</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          def producer():
+              for i in range(10):
+                  yield i
+
+          def filter_even(target):
+              while True:
+                  num = yield
+                  if num % 2 == 0:
+                      target.send(num)
+
+          def printer():
+              while True:
+                  value = yield
+                  print(value)
+        </code></pre>
+        <pre><code class="language-python">
+          # set up the pipeline
+          p = printer()
+          next(p)
+          f = filter_even(p)
+          next(f)
+
+          for num in producer():
+              f.send(num)
+          # ans: 0, 2, 4, 6, 8
+        </code></pre>
+      </div>
+      <p class="note step">A generator <em>pulls</em> values with <code>next()</code>; a coroutine has values <em>pushed</em> into it with <code>send()</code>.</p>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards">
+        <div class="card step"><h3>Iterable</h3><p>has <code>__iter__()</code>; <code>iter(x)</code> gives an iterator</p></div>
+        <div class="card step"><h3>Iterator</h3><p>has <code>__next__()</code>; <code>next()</code> until <code>StopIteration</code></p></div>
+        <div class="card step"><h3>yield</h3><p>hands out a value and pauses the function, locals and all</p></div>
+        <div class="card step"><h3>(x for x in ...)</h3><p>a generator expression: lazy, tiny in memory</p></div>
+        <div class="card step"><h3>yield from</h3><p>hands out every value of another iterable</p></div>
+        <div class="card step"><h3>send / throw / close</h3><p>push a value, an exception or a stop into a paused generator</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      // Re-render a slide from Deck.step after a burst of step events; animate
+      // only a single forward step, jump to the final state otherwise
+      function stepScene(slide, render) {
+        let seen = 0, pending = null;
+        const sync = (dir) => {
+          if (Deck.slides[Deck.index] !== slide) return;
+          const k = Deck.step;
+          const anim = dir > 0 && k - seen === 1;
+          seen = k;
+          render(k, anim);
+        };
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        render(0, false);
+      }
+
+      // ================================================================ iter() and next()
+      {
+        const slide = document.getElementById("proto");
+        const boxes = [...slide.querySelectorAll(".box")];
+        const chips = [...slide.querySelectorAll(".chip")];
+        const ptr = slide.querySelector("#ptr");
+        const stop = slide.querySelector("#stop");
+        const colX = (i) => 20 + i * 130; // left edge of column i (3 = end marker)
+        let tl = null;
+
+        stepScene(slide, (k, anim) => {
+          tl?.kill();
+          gsap.killTweensOf([ptr, stop, ...chips]);
+          const done = Math.min(k, 3);
+          // instant state for everything before this step
+          const base = anim ? k - 1 : k;
+          const bDone = Math.min(base, 3);
+          boxes.forEach((b, i) => b.classList.toggle("seen", i < bDone));
+          chips.forEach((c, i) => gsap.set(c, { x: colX(i), y: i < bDone ? 300 : 48, opacity: i < bDone ? 1 : 0, scale: 1 }));
+          gsap.set(ptr, { x: colX(bDone) + 55, rotation: 0 });
+          gsap.set(stop, { opacity: base >= 4 ? 1 : 0, scale: 1, transformOrigin: "50% 50%" });
+          if (!anim) return;
+
+          tl = gsap.timeline();
+          if (k <= 3) {
+            const i = k - 1, c = chips[i];
+            tl.set(c, { opacity: 1 })
+              .fromTo(c, { y: 48, scale: 1.08 }, { y: 300, scale: 1, duration: 0.7, ease: "power2.inOut" })
+              .call(() => boxes[i].classList.add("seen"), null, 0.1)
+              .to(ptr, { x: colX(done) + 55, duration: 0.5, ease: "back.out(1.6)" }, 0.35);
+          } else {
+            tl.to(ptr, { x: "+=10", duration: 0.07, repeat: 5, yoyo: true })
+              .fromTo(stop, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, 0.2);
+          }
+        });
+      }
+
+      // ================================================================ a generator pauses at yield
+      {
+        const slide = document.getElementById("pause");
+        const lines = [...slide.querySelectorAll("pre .line")];
+        const badge = slide.querySelector(".gbadge");
+        const vars = slide.querySelector(".gvars");
+        const tray = slide.querySelector(".gtray");
+        // code lines (0-based): 1 def, 2 count = 1, 3 while, 4 yield, 5 count += 1, 7 gen =, 8-11 next(gen)
+        const L = { init: 2, test: 3, yld: 4, inc: 5, gen: 7, calls: [8, 9, 10, 11] };
+        const STATES = { none: "not created yet", created: "created: nothing has run", running: "running", paused: "paused at yield", finished: "finished" };
+
+        // the beats of each deck step: [line, state, vars, extra]
+        const beats = [
+          [{ caller: L.gen, state: "created", vars: { n: 3 } }],
+        ];
+        for (let c = 1; c <= 4; c++) {
+          const b = [{ caller: L.calls[c - 1], state: "running" }];
+          if (c === 1) b.push({ line: L.init, vars: { n: 3, count: 1 } });
+          else b.push({ line: L.inc, vars: { n: 3, count: c } });
+          const ok = c <= 3;
+          b.push({ line: L.test, test: `${c} <= 3: ${ok ? "True" : "False"}`, bad: !ok });
+          if (ok) b.push({ line: L.yld, state: "paused", out: c, ret: `→ ${c}` });
+          else b.push({ line: null, state: "finished", out: "StopIteration", ret: "→ StopIteration", err: true });
+          beats.push(b);
+        }
+
+        let st, tl = null;
+        function reset() {
+          st = { state: "none", vars: null, line: null, caller: null, out: [], rets: {}, test: null };
+        }
+        function apply(beat) {
+          if (beat.caller !== undefined) st.caller = beat.caller;
+          if (beat.state) st.state = beat.state;
+          if (beat.vars) st.vars = beat.vars;
+          if ("line" in beat) st.line = beat.line;
+          st.test = beat.test ? { text: beat.test, bad: beat.bad } : null;
+          if (beat.out !== undefined) { st.out.push({ v: beat.out, err: beat.err }); st.rets[st.caller] = { t: beat.ret, err: beat.err }; }
+        }
+        let shownOut = 0;
+        function draw(pop) {
+          lines.forEach((l, i) => {
+            l.classList.toggle("now", i === st.line);
+            l.classList.toggle("paused", i === st.line && st.state === "paused");
+            l.classList.toggle("call", i === st.caller && st.state !== "finished" && st.state !== "paused" && st.state !== "created");
+            const r = st.rets[i];
+            const note = i === st.line && st.test ? st.test.text : r ? r.t : null;
+            if (note) l.dataset.note = note; else delete l.dataset.note;
+            l.classList.toggle("bad", !!((i === st.line && st.test && st.test.bad) || (r && r.err && !(i === st.line && st.test))));
+          });
+          badge.dataset.s = st.state;
+          badge.textContent = STATES[st.state];
+          const prev = Object.fromEntries([...vars.querySelectorAll(".v")].map((v) => [v.dataset.k, v.textContent]));
+          vars.innerHTML = st.vars
+            ? Object.entries(st.vars).map(([k, v]) => `<span class="k">${k}</span><span class="v" data-k="${k}">${v}</span>`).join("")
+            : `<span class="empty">no frame yet</span>`;
+          if (pop) vars.querySelectorAll(".v").forEach((v) => {
+            if (prev[v.dataset.k] !== undefined && prev[v.dataset.k] !== v.textContent) gsap.fromTo(v, { backgroundColor: "rgba(34,211,238,0.45)" }, { backgroundColor: "rgba(34,211,238,0)", duration: 0.9 });
+          });
+          if (st.out.length !== shownOut) {
+            tray.innerHTML = st.out.map((o) => `<b class="${o.err ? "err" : ""}">${o.v}</b>`).join("");
+            if (pop && st.out.length > shownOut) gsap.from(tray.lastElementChild, { scale: 0.4, opacity: 0, y: -30, duration: 0.5, ease: "back.out(2)" });
+            shownOut = st.out.length;
+          }
+        }
+
+        stepScene(slide, (k, anim) => {
+          tl?.kill();
+          reset();
+          const upto = anim ? k - 1 : k;
+          for (let s = 0; s < upto; s++) beats[s].forEach(apply);
+          shownOut = -1;
+          draw(false);
+          if (!anim) return;
+          tl = gsap.timeline();
+          beats[k - 1].forEach((b, j) => tl.call(() => { apply(b); draw(true); }, null, j * 0.6));
+        });
+      }
+
+      // ================================================================ pipeline
+      {
+        const slide = document.getElementById("pipe");
+        const layer = slide.querySelector(".toks");
+        const res = slide.querySelector(".res .v");
+        const NS = "http://www.w3.org/2000/svg";
+        let tl = null;
+
+        function token(text) {
+          const g = document.createElementNS(NS, "g");
+          g.setAttribute("class", "tok");
+          g.innerHTML = `<circle r="34" /><text>${text}</text>`;
+          layer.appendChild(g);
+          gsap.set(g, { x: 330, y: 50, opacity: 0 });
+          return g;
+        }
+
+        function build() {
+          tl?.kill();
+          layer.innerHTML = "";
+          res.textContent = "[]";
+          const out = [];
+          tl = gsap.timeline({ repeat: -1, repeatDelay: 1.2, onRepeat: () => { out.length = 0; res.textContent = "[]"; } });
+          let t = 0.3;
+          for (let i = 0; i < 9; i++) {
+            const g = token(i);
+            const txt = g.querySelector("text");
+            tl.set(g, { x: 330, y: 50, opacity: 0, scale: 0.5 }, t)
+              .call(() => { txt.textContent = i; g.classList.remove("drop"); }, null, t)
+              .to(g, { opacity: 1, scale: 1, duration: 0.3 }, t)
+              .to(g, { y: 200, duration: 0.55, ease: "power1.inOut" }, t + 0.35);
+            t += 0.95;
+            if (i % 2) {
+              tl.call(() => g.classList.add("drop"), null, t)
+                .to(g, { x: 560, opacity: 0, duration: 0.5, ease: "power1.in" }, t + 0.15);
+              t += 0.55;
+            } else {
+              tl.to(g, { y: 350, duration: 0.55, ease: "power1.inOut" }, t)
+                .call(() => { txt.textContent = i * i; }, null, t + 0.6)
+                .fromTo(g, { scale: 1.25 }, { scale: 1, duration: 0.3 }, t + 0.6)
+                .to(g, { y: 450, opacity: 0, duration: 0.5, ease: "power1.in" }, t + 1.0)
+                .call(() => { out.push(i * i); res.textContent = "[" + out.join(", ") + ", …]"; }, null, t + 1.45);
+              t += 1.5;
+            }
+          }
+        }
+
+        Deck.scene(slide, {
+          enter: build,
+          leave() { tl?.kill(); tl = null; layer.innerHTML = ""; },
+        });
+      }
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

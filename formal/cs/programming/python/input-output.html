@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Input &amp; Output</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .pr-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+        gap: 2rem;
+        align-items: center;
+        width: 100%;
+      }
+
+      .pr-cols pre {
+        width: 100%;
+        font-size: 1.25rem;
+      }
+
+      .pr-cols .line.answer.shown {
+        transition-delay: var(--ans-delay, 0s);
+      }
+
+      .hint {
+        font-size: 1.2rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* ---------- print(): values -> str -> joined by sep -> + end -> screen ---------- */
+      .printer {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        min-width: 0;
+      }
+
+      .printer .call {
+        min-height: 2rem;
+        font: 500 1.25rem var(--font-mono);
+        color: var(--cyan);
+        overflow-wrap: anywhere;
+      }
+
+      .printer .parts {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        min-height: 3.2rem;
+      }
+
+      .pt {
+        padding: 0.15rem 0.55rem;
+        border-radius: 8px;
+        font: 600 1.35rem var(--font-mono);
+        white-space: pre;
+        tab-size: 4;
+      }
+
+      .pt.arg {
+        color: #cffafe;
+        background: rgba(34, 211, 238, 0.14);
+        border: 1px solid rgba(34, 211, 238, 0.55);
+      }
+
+      .pt.sep {
+        color: #fde68a;
+        background: rgba(251, 191, 36, 0.12);
+        border: 1px dashed rgba(251, 191, 36, 0.6);
+      }
+
+      .pt.end {
+        color: #fbcfe8;
+        background: rgba(236, 72, 153, 0.14);
+        border: 1px dashed rgba(236, 72, 153, 0.6);
+      }
+
+      .printer .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        font-size: 1rem;
+        color: var(--faint);
+      }
+
+      .printer .legend b {
+        font-weight: 500;
+      }
+
+      .printer .legend .a { color: var(--cyan); }
+      .printer .legend .s { color: var(--amber); }
+      .printer .legend .e { color: var(--pink); }
+
+      .term {
+        min-height: 11rem;
+        padding: 0.9rem 1.3rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #02030a;
+        font: 1.4rem/1.55 var(--font-mono);
+        color: var(--green);
+        white-space: pre-wrap;
+        tab-size: 8;
+        overflow-wrap: anywhere;
+      }
+
+      .term::before {
+        content: "terminal";
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .term .cur {
+        display: inline-block;
+        width: 0.55em;
+        height: 1.1em;
+        vertical-align: -0.15em;
+        background: var(--green);
+        animation: blink 1s steps(1) infinite;
+      }
+
+      .term .note {
+        color: var(--faint);
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · basics</span>
+      <h1 class="grad-each"><span>Input</span> <span>&amp;</span> <span>Output</span></h1>
+      <p>Everything <code>print()</code> does: several values, separators, line endings and escape characters.</p>
+    </section>
+
+    <section class="slide" id="how">
+      <h2>What print() does</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3>1. Turn values into text</h3><p>Each argument is converted with <code>str()</code>.</p></div>
+        <div class="card step"><h3>2. Join with <code>sep</code></h3><p>The texts are joined by the separator, a space unless you say otherwise.</p></div>
+        <div class="card step"><h3>3. Add <code>end</code></h3><p>Then <code>end</code> is added, a newline unless you say otherwise, and the result is written to the screen.</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ basic -->
+    <section class="slide" id="basic">
+      <h2>Basic print</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # simple print
+          print("Hello, World!")
+          # ans: Hello, World!
+          print("Python")
+          # ans: Python
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="multi">
+      <h2>Print multiple values</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # multiple arguments
+          print("Age:", 25)
+          # ans: Age: 25
+          print("Name:", "Alice", "Score:", 95)
+          # ans: Name: Alice Score: 95
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="sep">
+      <h2>Print separator</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # custom separator
+          print("a", "b", "c", sep="-")
+          # ans: a-b-c
+          print(1, 2, 3, sep=" | ")
+          # ans: 1 | 2 | 3
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="end">
+      <h2>Print end character</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # custom end character
+          print("Hello", end="")
+          print("World")
+          # ans: HelloWorld
+          print("Line1", end=" ")
+          print("Line2")
+          # ans: Line1 Line2
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+      <p class="hint">With <code>end=""</code> the cursor stays on the same line, so the next print carries on there.</p>
+    </section>
+
+    <section class="slide" id="expr">
+      <h2>Print expressions</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # print with expression
+          print(5 + 3)
+          # ans: 8
+          x = 10
+          print("x =", x)
+          # ans: x = 10
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+      <p class="hint">Expressions are worked out first; <code>print</code> only sees the results.</p>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Predict exactly what appears on screen, then press → to check.</p>
+    </section>
+
+    <section class="slide" id="e1">
+      <h2>Exercise 1</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # what is printed?
+          print(1, 2, 3)
+          # ans: 1 2 3
+          # what separator is used?
+          print("a", "b", "c", sep="-")
+          # ans: a-b-c
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e2">
+      <h2>Exercise 2</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # what is printed?
+          print("Hello", end="")
+          print("World")
+          # ans: HelloWorld
+          # what about an expression?
+          print(5 + 3)
+          # ans: 8
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e3">
+      <h2>Exercise 3</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # what does this print?
+          print("Result:", 10, 20, sep=", ")
+          # ans: Result:, 10, 20
+          # what about this?
+          print()
+          # ans: (empty line)
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e4">
+      <h2>Exercise 4</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # print with expression?
+          x = 5
+          print("x =", x)
+          # ans: x = 5
+          # what is the output?
+          print("Line1\nLine2")
+          # ans: Line1
+          # ans: Line2 (on separate lines)
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e5">
+      <h2>Exercise 5</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # tab character?
+          print("Name:\tAlice")
+          # ans: Name:    Alice (with a tab)
+          # escape quotes?
+          print("He said \"Hi\"")
+          # ans: He said "Hi"
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e6">
+      <h2>Exercise 6</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # raw string?
+          print(r"C:\new\path")
+          # ans: C:\new\path
+          # ans: (raw string: backslashes stay)
+          # print return value?
+          x = print("Hello")
+          # ans: Hello (printed)
+          # ans: x is None
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <section class="slide" id="e7">
+      <h2>Exercise 7</h2>
+      <div class="pr-cols">
+        <pre><code class="language-python">
+          # empty print?
+          print("")
+          # ans: (empty line)
+          # multiple newlines?
+          print("A\n\nB")
+          # ans: A
+          # ans: (blank line)
+          # ans: B
+        </code></pre>
+        <div class="printer"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ recap -->
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 62rem)">
+        <div class="card step"><h3><code>sep</code></h3><p>Goes <em>between</em> values; default <code>" "</code>.</p></div>
+        <div class="card step"><h3><code>end</code></h3><p>Goes after the last value; default <code>"\n"</code>.</p></div>
+        <div class="card step"><h3>Escapes</h3><p><code>\n</code> new line, <code>\t</code> tab, <code>\"</code> a quote; a raw string <code>r"..."</code> keeps backslashes.</p></div>
+        <div class="card step"><h3>Returns None</h3><p><code>print</code> shows text; it doesn't give a value back.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      // the text a Python literal turns into: quotes removed, escapes applied (not in raw strings)
+      const str = (lit) => {
+        if (Array.isArray(lit)) return lit[1];
+        const m = lit.match(/^(r?)"(.*)"$/);
+        if (!m) return lit;
+        return m[1] ? m[2] : m[2].replace(/\\(.)/g, (_, c) => ({ n: "\n", t: "\t" })[c] ?? c);
+      };
+      const shown = (t) => t.replace(/\n/g, "↵").replace(/\t/g, "⇥");
+      const visible = (t) => (t === "" ? "∅" : t === " " ? "␣" : shown(t).replace(/ /g, "␣"));
+
+      // ================================================================ printer
+      // steps: list of lists of calls { c: call text, args: [literals], sep, end, note }
+      function Printer(slide, steps) {
+        const box = slide.querySelector(".printer");
+        box.innerHTML = `<div class="call"></div><div class="parts"></div><div class="legend"><span><b class="a">value</b> as text</span><span><b class="s">sep</b></span><span><b class="e">end</b></span></div><div class="term"></div>`;
+        const callEl = box.querySelector(".call"), parts = box.querySelector(".parts"), term = box.querySelector(".term");
+        let tl = null, seen = 0, pending = null, text = "", notes = [];
+
+        const paint = () => {
+          term.innerHTML = esc(text) + `<span class="cur"></span>` + notes.map((n) => `\n<span class="note">${esc(n)}</span>`).join("");
+        };
+        const pieces = (c) => {
+          const sep = c.sep ?? " ", end = c.end ?? "\n";
+          const out = [];
+          c.args.forEach((a, i) => {
+            if (i) out.push({ k: "sep", t: sep });
+            out.push({ k: "arg", t: str(a) });
+          });
+          out.push({ k: "end", t: end });
+          return out;
+        };
+        const DT = 0.22;
+        function one(c, t, anim) {
+          const at = (dt, fn) => (anim ? tl.call(fn, null, t + dt) : fn());
+          if (c.say) {
+            at(0, () => {
+              notes.push(c.say);
+              paint();
+            });
+            return 0.4;
+          }
+          const ps = pieces(c);
+          at(0, () => {
+            callEl.textContent = c.c;
+            parts.innerHTML = "";
+          });
+          ps.forEach((p, i) =>
+            at(0.2 + i * DT, () => {
+              const el = document.createElement("span");
+              el.className = "pt " + p.k;
+              el.textContent = p.k === "arg" ? shown(p.t) || "''" : visible(p.t);
+              parts.appendChild(el);
+              if (anim) gsap.fromTo(el, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.25 });
+            })
+          );
+          const tFly = 0.3 + ps.length * DT;
+          at(tFly, () => {
+            text += ps.map((p) => p.t).join("");
+            if (c.note) notes.push(c.note);
+            paint();
+            if (anim) gsap.fromTo(parts.children, { opacity: 1 }, { opacity: 0.35, duration: 0.3 });
+          });
+          return tFly + 0.45;
+        }
+        function render(k, anim) {
+          tl?.kill();
+          text = "";
+          notes = [];
+          callEl.textContent = "";
+          parts.innerHTML = "";
+          paint();
+          for (let s = 0; s < k && s < steps.length; s++) {
+            const last = anim && s === k - 1;
+            if (last) tl = gsap.timeline();
+            let t = 0;
+            for (const c of steps[s]) t += one(c, t, last);
+          }
+        }
+        const durOf = (cs) => cs.reduce((a, c) => a + (c.say ? 0.4 : 0.75 + pieces(c).length * DT), 0);
+        [...slide.querySelectorAll(".step")].forEach((el, i) => steps[i] && el.style.setProperty("--ans-delay", Math.max(0, durOf(steps[i]) - 0.4) + "s"));
+        function sync(dir) {
+          const n = Deck.step, jump = n - seen;
+          seen = n;
+          render(n, dir > 0 && jump === 1 && n <= steps.length);
+        }
+        const schedule = (dir) => {
+          if (pending) { pending.dir = Math.min(pending.dir, dir); return; }
+          pending = { dir };
+          requestAnimationFrame(() => { const d = pending.dir; pending = null; sync(d); });
+        };
+        Deck.scene(slide, {
+          enter() { seen = 0; render(0, false); },
+          leave() { render(0, false); },
+          step: (s, n, els, d) => schedule(d.dir),
+          unstep: (s, n, els, d) => schedule(d.dir),
+        });
+        render(0, false);
+      }
+      const pr = (id, steps) => Printer(document.getElementById(id), steps);
+
+      pr("basic", [[{ c: 'print("Hello, World!")', args: ['"Hello, World!"'] }], [{ c: 'print("Python")', args: ['"Python"'] }]]);
+      pr("multi", [[{ c: 'print("Age:", 25)', args: ['"Age:"', "25"] }], [{ c: 'print("Name:", "Alice", "Score:", 95)', args: ['"Name:"', '"Alice"', '"Score:"', "95"] }]]);
+      pr("sep", [[{ c: 'print("a", "b", "c", sep="-")', args: ['"a"', '"b"', '"c"'], sep: "-" }], [{ c: 'print(1, 2, 3, sep=" | ")', args: ["1", "2", "3"], sep: " | " }]]);
+      pr("end", [
+        [{ c: 'print("Hello", end="")', args: ['"Hello"'], end: "" }, { c: 'print("World")', args: ['"World"'] }],
+        [{ c: 'print("Line1", end=" ")', args: ['"Line1"'], end: " " }, { c: 'print("Line2")', args: ['"Line2"'] }],
+      ]);
+      pr("expr", [[{ c: "print(5 + 3)  # 5 + 3 is 8 first", args: [["5 + 3", "8"]] }], [{ c: 'print("x =", x)  # x is 10', args: ['"x ="', ["x", "10"]] }]]);
+
+      pr("e1", [[{ c: "print(1, 2, 3)", args: ["1", "2", "3"] }], [{ c: 'print("a", "b", "c", sep="-")', args: ['"a"', '"b"', '"c"'], sep: "-" }]]);
+      pr("e2", [[{ c: 'print("Hello", end="")', args: ['"Hello"'], end: "" }, { c: 'print("World")', args: ['"World"'] }], [{ c: "print(5 + 3)", args: [["5 + 3", "8"]] }]]);
+      pr("e3", [[{ c: 'print("Result:", 10, 20, sep=", ")', args: ['"Result:"', "10", "20"], sep: ", " }], [{ c: "print()", args: [] }]]);
+      pr("e4", [[{ c: 'print("x =", x)', args: ['"x ="', ["x", "5"]] }], [{ c: 'print("Line1\\nLine2")', args: ['"Line1\\nLine2"'] }], []]);
+      pr("e5", [[{ c: 'print("Name:\\tAlice")', args: ['"Name:\\tAlice"'] }], [{ c: 'print("He said \\"Hi\\"")', args: ['"He said \\"Hi\\""'] }]]);
+      pr("e6", [[{ c: 'print(r"C:\\new\\path")', args: ['r"C:\\new\\path"'] }], [], [{ c: 'x = print("Hello")', args: ['"Hello"'] }], [{ say: "x is None: print returned nothing" }]]);
+      pr("e7", [[{ c: 'print("")', args: ['""'] }], [{ c: 'print("A\\n\\nB")', args: ['"A\\n\\nB"'] }], [], []]);
+
+      // ================================================================ cover
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+          gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1456 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Arithmetic Operations</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* tracer:start (shared by the Python decks: traced code beside variables, objects and output) */
+      pre code,
+      .viz,
+      .reduce {
+        font-variant-ligatures: none;
+      }
+
+      /* Tracer sizes are in --u: 1rem times --tz, a per-slide scale the script picks
+         so the traced code and its panels fill the 1600x900 canvas without overflowing */
+      .slide,
+      .viz {
+        --u: calc(1rem * var(--tz, 1));
+      }
+
+      .viz {
+        display: grid;
+        grid-template-columns: auto minmax(16rem, 1fr);
+        justify-content: center;
+        align-items: start;
+        gap: calc(1.4 * var(--u));
+        width: min(100%, calc(56 * var(--u)));
+      }
+
+      .viz > pre {
+        width: auto;
+        min-width: min(100%, calc(22 * var(--u)));
+        max-width: 100%;
+        padding: calc(0.9 * var(--u)) calc(1.2 * var(--u));
+        font-size: calc(1.15 * var(--u));
+      }
+
+      .viz.wide {
+        width: min(100%, calc(64 * var(--u)));
+      }
+
+      /* Panels under the code, for lines too long to share the width */
+      .viz.below {
+        grid-template-columns: minmax(0, auto);
+      }
+
+      .viz.below .panel:not(.mem2) {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+      }
+
+      pre.trace .line {
+        border-radius: 4px;
+        transition:
+          opacity 0.3s,
+          background 0.3s,
+          box-shadow 0.3s;
+      }
+
+      pre.tracing .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.42;
+      }
+
+      pre.traced .line:not(.run):not(.cmt):not(.answer) {
+        opacity: 0.3;
+      }
+
+      pre.trace .line.run {
+        background: rgba(139, 92, 246, 0.14);
+      }
+
+      pre.trace .line.now {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.3), rgba(34, 211, 238, 0.05));
+        box-shadow: inset 3px 0 0 var(--cyan);
+      }
+
+      pre .line.answer.shown {
+        transition-delay: var(--d, 0s);
+      }
+
+      .tb {
+        display: inline-block;
+        margin-left: 0.9em;
+        padding: 0 0.6em;
+        border-radius: 999px;
+        font-family: var(--font);
+        font-size: 0.85em;
+        font-style: normal;
+        line-height: 1.6;
+        vertical-align: 0.1em;
+        color: #a5f3fc;
+        border: 1px solid rgba(34, 211, 238, 0.45);
+        background: rgba(34, 211, 238, 0.1);
+        white-space: nowrap;
+      }
+
+      .tb.t {
+        color: var(--green);
+        border-color: rgba(134, 239, 172, 0.5);
+        background: rgba(134, 239, 172, 0.12);
+      }
+
+      .tb.f,
+      .tb.e {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.5);
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .tb.s {
+        color: var(--amber);
+        border-color: rgba(251, 191, 36, 0.5);
+        background: rgba(251, 191, 36, 0.1);
+      }
+
+      .panel {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: calc(0.75 * var(--u));
+        min-width: 0;
+      }
+
+      /* Variables and output side by side under a tape or a file */
+      .panel.split {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+
+      .panel.split > .tape,
+      .panel.split > .file {
+        grid-column: 1 / -1;
+      }
+
+      /* Tape labels beside their cells */
+      .panel.compact > .tape {
+        display: flex;
+        align-items: center;
+        column-gap: calc(1 * var(--u));
+        padding-block: calc(0.5 * var(--u));
+      }
+
+      .panel.compact > .tape .bh {
+        flex: none;
+        margin: 0;
+      }
+
+      /* Long values wrap inside their boxes */
+      .viz.wrapv .var .v {
+        white-space: pre-wrap;
+        text-align: center;
+      }
+
+      /* With objects: variables on the left, objects on the right, arrows between */
+      .panel.mem2 {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: calc(1.8 * var(--u));
+        row-gap: calc(0.75 * var(--u));
+        align-items: start;
+      }
+
+      /* Narrow variables column: its header wraps the replay button */
+      .panel.mem2.tight {
+        grid-template-columns: min-content minmax(0, 1fr);
+      }
+
+      .panel.mem2.tight .bh {
+        flex-wrap: wrap;
+        row-gap: calc(0.3 * var(--u));
+      }
+
+      .panel.mem2 > .box:not(.vars):not(.heap),
+      .panel.mem2 > .heap:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .panel.mem2 .vgrid,
+      .panel.mem2 .hgrid {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+      }
+
+      .panel .box {
+        position: relative;
+        padding: calc(0.55 * var(--u)) calc(0.8 * var(--u)) calc(0.75 * var(--u));
+        border-radius: calc(0.5 * var(--u));
+        border: 1px solid var(--border);
+        background: var(--glass);
+      }
+
+      .panel .bh {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: calc(0.8 * var(--u));
+        margin-bottom: calc(0.45 * var(--u));
+        font: 600 calc(0.85 * var(--u)) var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .panel .replay {
+        padding: calc(0.1 * var(--u)) calc(0.6 * var(--u));
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font: 500 calc(0.85 * var(--u)) var(--font);
+        letter-spacing: 0.04em;
+        text-transform: none;
+        cursor: pointer;
+      }
+
+      .panel .replay:hover {
+        color: var(--text);
+        border-color: var(--violet-soft);
+      }
+
+      .vgrid,
+      .hgrid {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: calc(0.55 * var(--u)) calc(0.7 * var(--u));
+        min-height: calc(3.9 * var(--u));
+      }
+
+      .hgrid {
+        min-height: calc(2.5 * var(--u));
+      }
+
+      .var {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: calc(0.12 * var(--u));
+        max-width: 100%;
+      }
+
+      .var .n {
+        font: 500 calc(1 * var(--u)) var(--font-mono);
+        color: var(--violet-soft);
+      }
+
+      .var .v,
+      .obj .fv {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-width: calc(3 * var(--u));
+        min-height: calc(2.1 * var(--u));
+        max-width: 100%;
+        padding: calc(0.25 * var(--u)) calc(0.6 * var(--u));
+        overflow: hidden;
+        border: 2px solid rgba(167, 139, 250, 0.55);
+        border-radius: calc(0.333 * var(--u));
+        background: rgba(10, 12, 26, 0.9);
+        font: 500 calc(1.1 * var(--u)) var(--font-mono);
+        color: var(--text);
+        white-space: pre;
+        transition:
+          border-color 0.4s,
+          box-shadow 0.4s;
+      }
+
+      .var .v b,
+      .obj .fv b {
+        font-weight: 500;
+      }
+
+      .var .v b.gone,
+      .obj .fv b.gone {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .var .n,
+      .var .t {
+        white-space: nowrap;
+      }
+
+      .var .t {
+        font: calc(0.85 * var(--u)) var(--font-mono);
+        color: var(--faint);
+      }
+
+      .var.hot .v,
+      .obj .fv.hot {
+        border-color: var(--cyan);
+        box-shadow: 0 0 calc(0.583 * var(--u)) rgba(34, 211, 238, 0.35);
+      }
+
+      .var.gone {
+        opacity: 0.3;
+      }
+
+      .dot {
+        display: inline-block;
+        width: calc(0.6 * var(--u));
+        height: calc(0.6 * var(--u));
+        border-radius: 50%;
+        background: var(--pink);
+        box-shadow: 0 0 calc(0.333 * var(--u)) var(--pink);
+      }
+
+      .obj {
+        min-width: calc(7 * var(--u));
+        border-radius: calc(0.417 * var(--u));
+        border: 1px solid rgba(236, 72, 153, 0.5);
+        background: rgba(236, 72, 153, 0.07);
+        padding: calc(0.3 * var(--u)) calc(0.5 * var(--u)) calc(0.45 * var(--u));
+        font: calc(0.95 * var(--u)) var(--font-mono);
+      }
+
+      .obj .oh {
+        display: flex;
+        justify-content: space-between;
+        gap: calc(0.8 * var(--u));
+        margin-bottom: calc(0.25 * var(--u));
+        color: #f9a8d4;
+        font-weight: 600;
+      }
+
+      .obj .oh i {
+        font-style: normal;
+        font-weight: 400;
+        color: var(--faint);
+      }
+
+      .obj .fr {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: calc(0.5 * var(--u));
+        margin-top: calc(0.25 * var(--u));
+      }
+
+      .obj .fr > span {
+        color: var(--violet-soft);
+      }
+
+      .obj .fv {
+        min-height: calc(1.7 * var(--u));
+        min-width: calc(2.4 * var(--u));
+        font-size: calc(1 * var(--u));
+        padding: calc(0.1 * var(--u)) calc(0.45 * var(--u));
+      }
+
+      .panel svg.arrows {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: visible;
+      }
+
+      .panel svg.arrows path {
+        fill: none;
+        stroke: #f472b6;
+        stroke-width: 2;
+        opacity: 0.85;
+      }
+
+      .con {
+        min-height: calc(2.2 * var(--u));
+        max-height: calc(15 * var(--u));
+        overflow: auto;
+        font: calc(1.1 * var(--u))/1.5 var(--font-mono);
+        color: #e2e8f0;
+        white-space: pre-wrap;
+        tab-size: 8;
+      }
+
+      .con .e {
+        color: var(--red);
+      }
+
+      .con .nl {
+        color: var(--faint);
+        font-style: normal;
+      }
+
+      .cells {
+        display: flex;
+        flex-wrap: wrap;
+        gap: calc(0.3 * var(--u));
+      }
+
+      .cell {
+        position: relative;
+        min-width: calc(2 * var(--u));
+        padding: calc(0.2 * var(--u)) calc(0.4 * var(--u));
+        text-align: center;
+        border-radius: calc(0.25 * var(--u));
+        border: 1px solid var(--border);
+        font: calc(1 * var(--u)) var(--font-mono);
+        color: var(--muted);
+        transition:
+          color 0.3s,
+          background 0.3s,
+          border-color 0.3s,
+          box-shadow 0.3s,
+          transform 0.3s;
+      }
+
+      .cell.now {
+        border-color: var(--cyan);
+        color: var(--text);
+        box-shadow: 0 0 calc(0.5 * var(--u)) rgba(34, 211, 238, 0.45);
+        transform: translateY(-3px);
+      }
+
+      .cell.ok {
+        background: rgba(134, 239, 172, 0.16);
+        border-color: rgba(134, 239, 172, 0.55);
+        color: var(--green);
+      }
+
+      .cell.skip {
+        background: rgba(251, 191, 36, 0.12);
+        border-color: rgba(251, 191, 36, 0.5);
+        color: var(--amber);
+        text-decoration: line-through;
+      }
+
+      .cell.stop {
+        background: rgba(248, 113, 113, 0.15);
+        border-color: rgba(248, 113, 113, 0.6);
+        color: var(--red);
+      }
+
+      .cell.done {
+        background: rgba(139, 92, 246, 0.18);
+        border-color: rgba(167, 139, 250, 0.5);
+        color: var(--text);
+      }
+
+      .cell.never {
+        opacity: 0.35;
+      }
+
+      .fl {
+        font: calc(1 * var(--u))/1.55 var(--font-mono);
+        color: var(--muted);
+      }
+
+      .fl div {
+        padding: 0 calc(0.4 * var(--u));
+        border-radius: calc(0.167 * var(--u));
+        white-space: pre;
+        transition:
+          color 0.3s,
+          background 0.3s,
+          border-color 0.3s,
+          box-shadow 0.3s,
+          transform 0.3s;
+      }
+
+      .fl div.now {
+        color: var(--text);
+        background: rgba(34, 211, 238, 0.18);
+        box-shadow: inset calc(0.125 * var(--u)) 0 0 var(--cyan);
+      }
+
+      .fl div.done {
+        color: var(--text);
+      }
+
+      /* Step-by-step evaluation of one expression */
+      .reduce {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 0.7em;
+        list-style: none;
+        margin: 0;
+        padding: 1rem 1.6rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        font: 1.5rem/1.8 var(--font-mono);
+      }
+
+      .reduce.v {
+        flex-direction: column;
+      }
+
+      .reduce li {
+        padding: 0;
+        margin: 0;
+        white-space: pre;
+      }
+
+      .reduce li::marker {
+        content: "";
+      }
+
+      .reduce li + li::before {
+        content: "→ ";
+        color: var(--faint);
+      }
+
+      .reduce mark {
+        padding: 0 0.2em;
+        border-radius: 4px;
+        color: var(--text);
+        background: rgba(34, 211, 238, 0.22);
+        box-shadow: inset 0 -2px 0 var(--cyan);
+      }
+
+      .reduce s {
+        color: var(--faint);
+        text-decoration-color: var(--red);
+      }
+
+      .reduce li:last-child {
+        color: var(--green);
+      }
+
+      .reduce .why {
+        margin-left: 0.6em;
+        font: 0.75em var(--font);
+        color: var(--muted);
+        white-space: normal;
+      }
+
+      .hint {
+        font-size: 1.05rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      /* tracer:end */
+
+      /* codefit:start (Python decks: code outside the tracer starts large; the codefit script steps it down to fit) */
+      .slide > pre {
+        width: auto;
+        min-width: min(100%, 42rem);
+        max-width: 100%;
+        font-size: 1.8rem;
+      }
+      /* codefit:end */
+
+      .pair {
+        display: grid;
+        grid-template-columns: minmax(0, auto) minmax(0, auto);
+        justify-content: center;
+        align-items: center;
+        gap: 2.5rem;
+        width: 100%;
+      }
+
+      .pair > pre {
+        width: auto;
+        min-width: min(100%, 22rem);
+        font-size: 1.4rem;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      #ops table {
+        width: min(100%, 56rem);
+        font-size: 1.35rem;
+      }
+
+      #ops td:first-child,
+      #ops td:nth-child(3) {
+        font-family: var(--font-mono);
+        color: #f0abfc;
+        white-space: nowrap;
+      }
+
+      /* Modulus as grouping dots */
+      .groups {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
+        min-width: min(100%, 32rem);
+      }
+
+      .dots {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.9rem;
+        min-height: 4.4rem;
+      }
+
+      .grp {
+        display: flex;
+        gap: 0.4rem;
+        padding: 0.55rem;
+        border-radius: 10px;
+        border: 1px dashed rgba(167, 139, 250, 0.6);
+      }
+
+      .dt {
+        width: 1.9rem;
+        height: 1.9rem;
+        border-radius: 50%;
+        background: var(--violet);
+        box-shadow: 0 0 8px rgba(139, 92, 246, 0.7);
+      }
+
+      .rest .dt {
+        background: var(--pink);
+        box-shadow: 0 0 10px var(--pink);
+      }
+
+      .rest {
+        display: flex;
+        gap: 0.4rem;
+        padding: 0.55rem;
+        border-radius: 10px;
+        border: 1px solid rgba(236, 72, 153, 0.6);
+      }
+
+      .eqn {
+        font: 1.7rem var(--font-mono);
+        color: var(--muted);
+        min-height: 2.3rem;
+      }
+
+      .eqn b {
+        color: var(--pink);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Python · basics</span>
+      <h1 class="grad-each"><span>Arithmetic</span> <span>Operations</span></h1>
+      <p>Python as a calculator: the seven operators, and the order it applies them in.</p>
+    </section>
+
+    <section class="slide" id="ops">
+      <h2>The operators</h2>
+      <table>
+        <tr><th>Operator</th><th>Meaning</th><th>Example</th></tr>
+        <tr class="step"><td>+ - *</td><td>add, subtract, multiply</td><td>10 * 5 → 50</td></tr>
+        <tr class="step"><td>/</td><td>division, always a float</td><td>10 / 5 → 2.0</td></tr>
+        <tr class="step"><td>//</td><td>floor division: round down</td><td>10 // 3 → 3</td></tr>
+        <tr class="step"><td>%</td><td>modulus: the remainder</td><td>10 % 3 → 1</td></tr>
+        <tr class="step"><td>**</td><td>power</td><td>2 ** 3 → 8</td></tr>
+      </table>
+    </section>
+
+    <section class="slide">
+      <h2>Basic arithmetic</h2>
+      <pre style="width: min(100%, 28rem)"><code class="language-python">
+        # addition
+        10 + 5
+        # ans: 15
+        # subtraction
+        10 - 5
+        # ans: 5
+        # multiplication
+        10 * 5
+        # ans: 50
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Division operations</h2>
+      <pre style="width: min(100%, 32rem)"><code class="language-python">
+        # division (always returns float)
+        10 / 5
+        # ans: 2.0
+        10 / 3
+        # ans: 3.3333...
+        # floor division
+        10 // 3
+        # ans: 3
+      </code></pre>
+      <p class="hint step">Floor division keeps the whole part: 10 / 3 is 3.33…, rounded <em>down</em> to 3.</p>
+    </section>
+
+    <section class="slide" id="mod">
+      <h2>Modulus</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # modulus (remainder)
+          10 % 3
+          # ans: 1
+          7 % 3
+          # ans: 1
+          15 % 4
+          # ans: 3
+        </code></pre>
+        <div class="groups">
+          <div class="dots"></div>
+          <div class="eqn"></div>
+        </div>
+      </div>
+      <p class="hint">Make as many full groups as you can; the modulus is what is left over.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exponentiation</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # power/exponentiation
+          10 ** 2
+          # ans: 100
+          2 ** 3
+          # ans: 8
+          5 ** 0
+          # ans: 1
+        </code></pre>
+        <div class="stack">
+          <ol class="reduce step" data-step="1"><li>10 ** 2</li><li>10 × 10</li><li>100</li></ol>
+          <ol class="reduce step" data-step="2"><li>2 ** 3</li><li>2 × 2 × 2</li><li>8</li></ol>
+          <ol class="reduce step" data-step="3"><li>5 ** 0<span class="why">anything to the power 0</span></li><li>1</li></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Operator precedence</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # PEMDAS rules apply
+          10 + 5 * 2
+          # ans: 20 (multiply first)
+          (10 + 5) * 2
+          # ans: 30 (parentheses first)
+          2 + 3 * 4
+          # ans: 14
+        </code></pre>
+        <div class="stack">
+          <ol class="reduce step" data-step="1"><li>10 + <mark>5 * 2</mark></li><li><mark>10 + 10</mark></li><li>20</li></ol>
+          <ol class="reduce step" data-step="2"><li><mark>(10 + 5)</mark> * 2</li><li><mark>15 * 2</mark></li><li>30</li></ol>
+          <ol class="reduce step" data-step="3"><li>2 + <mark>3 * 4</mark></li><li><mark>2 + 12</mark></li><li>14</li></ol>
+        </div>
+      </div>
+      <p class="hint">Parentheses, then <code>**</code>, then <code>* / // %</code>, then <code>+ -</code>. The highlighted part runs next.</p>
+    </section>
+
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Work each one out before pressing →.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 1</h2>
+      <pre style="width: min(100%, 30rem)"><code class="language-python">
+        # what is the result?
+        7 % 3
+        # ans: 1
+        # division types
+        10 / 3
+        # ans: 3.3333...
+        10 // 3
+        # ans: 3
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 2</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # negative modulus?
+          -10 % 3
+          # ans: 2
+          # what is this?
+          2 ** 3 ** 2
+          # ans: 512 (right associative: 2^(3^2) = 2^9)
+        </code></pre>
+        <div class="stack">
+          <ol class="reduce step" data-step="1"><li>-10 = 3 × (-4) + 2<span class="why">the remainder takes the sign of 3</span></li><li>2</li></ol>
+          <ol class="reduce step" data-step="2"><li>2 ** <mark>3 ** 2</mark><span class="why">right to left</span></li><li><mark>2 ** 9</mark></li><li>512</li></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 3</h2>
+      <pre style="width: min(100%, 30rem)"><code class="language-python">
+        # operator precedence?
+        10 + 5 * 2
+        # ans: 20
+        # what happens?
+        5 / 0
+        # ans: ZeroDivisionError
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 4</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # floor division with negative?
+          -10 // 3
+          # ans: -4
+          # modulus with float?
+          10.5 % 3
+          # ans: 1.5
+        </code></pre>
+        <div class="stack">
+          <ol class="reduce step" data-step="1"><li>-10 / 3 = -3.33…</li><li>round down (towards −∞)</li><li>-4</li></ol>
+          <ol class="reduce step" data-step="2"><li>10.5 = 3 × 3 + 1.5</li><li>1.5</li></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 5</h2>
+      <pre style="width: min(100%, 30rem)"><code class="language-python">
+        # what is result?
+        100 // 10
+        # ans: 10
+        # power of zero?
+        5 ** 0
+        # ans: 1
+        # negative exponent?
+        2 ** -1
+        # ans: 0.5
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises · part 6</h2>
+      <div class="pair">
+        <pre><code class="language-python">
+          # order of operations?
+          2 * 3 ** 2
+          # ans: 18 (exponent first)
+          # mixing operations?
+          10 - 5 + 3
+          # ans: 8 (left to right)
+          # division by float?
+          10 / 2.0
+          # ans: 5.0
+        </code></pre>
+        <div class="stack">
+          <ol class="reduce step" data-step="1"><li>2 * <mark>3 ** 2</mark></li><li><mark>2 * 9</mark></li><li>18</li></ol>
+          <ol class="reduce step" data-step="2"><li><mark>10 - 5</mark> + 3</li><li><mark>5 + 3</mark></li><li>8</li></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="recap">
+      <h2>Remember</h2>
+      <div class="cards" style="width: min(100%, 60rem)">
+        <div class="card step"><h3><code>/</code> vs <code>//</code></h3><p><code>/</code> always gives a float; <code>//</code> rounds down, even for negatives (<code>-10 // 3</code> is <code>-4</code>).</p></div>
+        <div class="card step"><h3><code>%</code> is the remainder</h3><p>What is left after making as many full groups as possible.</p></div>
+        <div class="card step"><h3>Precedence</h3><p>Parentheses, <code>**</code>, then <code>* / // %</code>, then <code>+ -</code>; equal ranks go left to right, except <code>**</code>.</p></div>
+        <div class="card step"><h3>No dividing by zero</h3><p><code>5 / 0</code> raises <code>ZeroDivisionError</code>.</p></div>
+      </div>
+    </section>
+
+    <script type="module">
+      /* tracer:start (shared by the Python decks) */
+      // A tracer plays a snippet line by line beside panels for its variables,
+      // objects, the items a loop walks over, a file, and printed output.
+      // A program is a list of events, grouped into beats keyed by the slide's
+      // step number: beat k plays when step k is revealed (beat 0 on enter).
+      //   { l: 3 | "x = 5", set: { x: 5, s: "'hi'" }, out: "text", end: "",
+      //     cond: true, note: "5 > 3", val: "15", err: "ZeroDivisionError",
+      //     say: "text", del: ["x"], heap: { id: { cls, f: {...}, v } },
+      //     clear: true (fresh run), tape: [index, "ok" | "skip" | "stop" | "done", which], file: { line } | { add } }
+      // Strings in `set` are Python reprs written as they print ("'Alice'", "2.0");
+      // "@id" is a reference to a heap object. `l` as a string means the next line
+      // (searching down from the current one, wrapping) that starts with that text.
+      const gsap = await Deck.load("gsap");
+      await Deck.ready;
+
+      const repr = (v) =>
+        v === true ? "True" : v === false ? "False" : v == null ? "None" : Array.isArray(v) ? "[" + v.map(repr).join(", ") + "]" : String(v);
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const typeName = (r, heap) => {
+        if (r.startsWith("@")) return heap.get(r.slice(1))?.cls ?? "object";
+        if (/^-?\d+$/.test(r)) return "int";
+        if (/^-?(\d+\.\d*(e-?\d+)?|inf|nan)$/.test(r)) return "float";
+        if (/^[rbf]?['"]/.test(r)) return "str";
+        if (r === "True" || r === "False") return "bool";
+        if (r === "None") return "NoneType";
+        if (r[0] === "[") return "list";
+        if (r[0] === "(") return "tuple";
+        if (r[0] === "{") return r === "{}" || r.includes(":") ? "dict" : "set";
+        return "";
+      };
+      // Record a program with ordinary JS control flow: t(line, set, more)
+      const rec = (fn) => {
+        const ev = [];
+        fn((l, set, more) => ev.push({ l, set, ...more }), ev);
+        return ev;
+      };
+      const SVGNS = "http://www.w3.org/2000/svg";
+      let arrowIds = 0;
+
+      class Tracer {
+        constructor(viz, cfg) {
+          this.viz = viz;
+          this.cfg = cfg;
+          this.dt = cfg.dt ?? 0.5;
+          this.pre = viz.querySelector("pre");
+          this.pre.classList.add("trace");
+          this.lines = [...this.pre.querySelectorAll(".line")];
+          this.lines.forEach((l) => l.classList.toggle("cmt", /^\s*(#|$)/.test(l.textContent) && !l.classList.contains("answer")));
+          this.slide = viz.closest(".slide");
+          this.beats = cfg.beats || { 0: cfg.run || [] };
+          this.shown = 0;
+          this.build();
+        }
+
+        build() {
+          const c = this.cfg;
+          const want = c.panels || ["vars", "out"];
+          const p = (this.panel = this.viz.querySelector(".panel") || this.viz.appendChild(document.createElement("div")));
+          p.classList.add("panel");
+          p.setAttribute("data-interactive", "");
+          p.innerHTML = "";
+          const box = (cls, title) => {
+            const b = document.createElement("div");
+            b.className = "box " + cls;
+            b.innerHTML = `<div class="bh"><span>${title}</span></div>`;
+            p.appendChild(b);
+            return b;
+          };
+          const tapes = c.tape ? [].concat(c.tape) : [];
+          this.tapes = [];
+          for (const name of want) {
+            if (name === "tape") {
+              for (const tp of tapes) {
+                const b = box("tape", tp.label);
+                const row = b.appendChild(document.createElement("div"));
+                row.className = "cells";
+                row.innerHTML = tp.items.map((x) => `<span class="cell">${esc(repr(x))}</span>`).join("");
+                this.tapes.push([...row.children]);
+              }
+            } else if (name === "file") {
+              const b = box("file", c.file.name);
+              this.fileEl = b.appendChild(document.createElement("div"));
+              this.fileEl.className = "fl";
+            } else if (name === "vars") {
+              this.vgrid = box("vars", c.varsTitle || "Variables").appendChild(document.createElement("div"));
+              this.vgrid.className = "vgrid";
+            } else if (name === "heap") {
+              this.hgrid = box("heap", "Objects in memory").appendChild(document.createElement("div"));
+              this.hgrid.className = "hgrid";
+            } else if (name === "out") {
+              this.con = box("out", c.outTitle || "Output").appendChild(document.createElement("div"));
+              this.con.className = "con";
+            }
+          }
+          const btn = document.createElement("button");
+          btn.className = "replay";
+          btn.textContent = "replay";
+          btn.addEventListener("click", () => this.renderTo(this.shown, "all"));
+          p.querySelector(".bh").appendChild(btn);
+          if (want.includes("heap")) {
+            p.classList.add("mem2");
+            this.svg = document.createElementNS(SVGNS, "svg");
+            this.svg.classList.add("arrows");
+            const id = "tr-arrow-" + ++arrowIds;
+            this.svg.innerHTML = `<defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f472b6"/></marker></defs><g></g>`;
+            this.marker = id;
+            p.appendChild(this.svg);
+          }
+        }
+
+        reset() {
+          this.tl?.kill();
+          this.tl = null;
+          this.cur = -1;
+          this.vars = new Map();
+          this.heap = new Map();
+          this.objEls = new Map();
+          this.pre.classList.remove("tracing", "traced");
+          this.lines.forEach((l) => {
+            l.classList.remove("run", "now");
+            l.querySelector(".tb")?.remove();
+          });
+          if (this.vgrid) this.vgrid.innerHTML = "";
+          if (this.hgrid) this.hgrid.innerHTML = "";
+          if (this.con) this.con.innerHTML = "";
+          this.tapes.forEach((cells) => cells.forEach((x) => (x.className = "cell")));
+          if (this.fileEl) this.fileEl.innerHTML = (this.cfg.file.text ?? "").split("\n").filter((s, i, a) => s || i < a.length - 1).map((s) => `<div>${esc(s) || " "}</div>`).join("");
+          this.drawArrows();
+        }
+
+        find(l) {
+          const L = this.lines;
+          if (typeof l === "number") return l - 1;
+          for (let k = 1; k <= L.length; k++) {
+            const i = (this.cur + k + L.length) % L.length;
+            if (!L[i].classList.contains("answer") && L[i].textContent.trim().startsWith(l)) return i;
+          }
+          console.warn("tracer: no line starts with", l);
+          return -1;
+        }
+
+        badge(el, e, anim) {
+          el.querySelector(".tb")?.remove();
+          const b = document.createElement("span");
+          let cls = "", txt;
+          if (e.err) (cls = "e"), (txt = e.err);
+          else if (e.cond !== undefined) (cls = e.cond ? "t" : "f"), (txt = (e.note ? e.note + " → " : "") + (e.cond ? "True" : "False"));
+          else if (e.val !== undefined) txt = "→ " + e.val;
+          else (cls = e.skip ? "s" : ""), (txt = e.say);
+          b.className = "tb " + cls;
+          b.textContent = txt;
+          el.appendChild(b);
+          if (anim) gsap.from(b, { scale: 0.4, opacity: 0, duration: 0.3, ease: "back.out(2)" });
+        }
+
+        valueHTML(r) {
+          return r.startsWith("@") ? `<i class="dot"></i>` : esc(r);
+        }
+
+        swapValue(holder, r, anim) {
+          const old = holder.querySelector("b:not(.gone)");
+          if (old && old.dataset.r === r) return false;
+          const nb = document.createElement("b");
+          nb.dataset.r = r;
+          nb.innerHTML = this.valueHTML(r);
+          if (r.startsWith("@")) holder.dataset.ref = r.slice(1);
+          else delete holder.dataset.ref;
+          holder.appendChild(nb);
+          if (old) {
+            if (anim) {
+              old.classList.add("gone");
+              gsap.to(old, { y: -22, opacity: 0, duration: 0.3, onComplete: () => old.remove() });
+              gsap.from(nb, { y: 22, opacity: 0, duration: 0.35, ease: "power2.out" });
+            } else old.remove();
+          }
+          return true;
+        }
+
+        flash(el, anim) {
+          if (!anim) return;
+          el.classList.add("hot");
+          setTimeout(() => el.classList.remove("hot"), 650);
+        }
+
+        setVar(n, v, anim) {
+          const r = repr(v);
+          let box = this.vars.get(n);
+          if (!box) {
+            box = document.createElement("div");
+            box.className = "var";
+            box.innerHTML = `<span class="n">${esc(n)}</span><span class="v"></span><span class="t"></span>`;
+            this.vgrid.appendChild(box);
+            this.vars.set(n, box);
+            this.swapValue(box.querySelector(".v"), r, false);
+            if (anim) gsap.from(box, { scale: 0.3, opacity: 0, duration: 0.4, ease: "back.out(2)" });
+          } else if (this.swapValue(box.querySelector(".v"), r, anim)) this.flash(box, anim);
+          box.classList.remove("gone");
+          box.querySelector(".t").textContent = typeName(r, this.heap);
+        }
+
+        setObj(id, o, anim) {
+          const prev = this.heap.get(id) || { f: {} };
+          const obj = { cls: o.cls ?? prev.cls, f: { ...prev.f, ...(o.f || {}) }, v: o.v ?? prev.v };
+          this.heap.set(id, obj);
+          let el = this.objEls.get(id);
+          if (!el) {
+            el = document.createElement("div");
+            el.className = "obj";
+            el.innerHTML = `<div class="oh"><span>${esc(obj.cls)}</span><i>${esc(o.label ?? "")}</i></div>`;
+            this.hgrid.appendChild(el);
+            this.objEls.set(id, el);
+            if (anim) gsap.from(el, { scale: 0.4, opacity: 0, duration: 0.4, ease: "back.out(2)" });
+          }
+          const rows = o.v !== undefined ? { "": o.v } : o.f || {};
+          for (const [k, v] of Object.entries(rows)) {
+            let row = [...el.querySelectorAll(".fr")].find((x) => x.dataset.k === k);
+            if (!row) {
+              row = document.createElement("div");
+              row.className = "fr";
+              row.dataset.k = k;
+              row.innerHTML = `${k ? `<span>${esc(k)}</span>` : ""}<span class="fv"></span>`;
+              el.appendChild(row);
+              this.swapValue(row.querySelector(".fv"), repr(v), false);
+              if (anim) gsap.from(row, { opacity: 0, x: -10, duration: 0.3 });
+            } else if (this.swapValue(row.querySelector(".fv"), repr(v), anim)) this.flash(row.querySelector(".fv"), anim);
+          }
+        }
+
+        print(text, anim, err) {
+          const s = document.createElement("span");
+          if (err) s.className = "e";
+          s.innerHTML = this.cfg.showEnd ? esc(text).replace(/\n/g, '<i class="nl">↵</i>\n') : esc(text);
+          this.con.appendChild(s);
+          this.con.scrollTop = this.con.scrollHeight;
+          if (anim) gsap.from(s, { opacity: 0, duration: 0.35 });
+        }
+
+        apply(e, anim) {
+          if (e.clear) {
+            // a fresh run: forget variables, objects and output
+            this.vars.forEach((b) => b.remove());
+            this.vars.clear();
+            this.objEls.forEach((b) => b.remove());
+            this.objEls.clear();
+            this.heap.clear();
+            if (this.con) this.con.innerHTML = "";
+          }
+          if (e.l != null) {
+            const i = this.find(e.l);
+            if (i >= 0) {
+              this.lines.forEach((x) => x.classList.remove("now"));
+              const el = this.lines[i];
+              el.classList.add("run", "now");
+              this.cur = i;
+              this.pre.classList.add("tracing");
+              this.pre.classList.remove("traced");
+              if (e.err || e.cond !== undefined || e.val !== undefined || e.say) this.badge(el, e, anim);
+            }
+          }
+          if (e.heap) for (const [id, o] of Object.entries(e.heap)) this.setObj(id, o, anim);
+          if (e.set) for (const [n, v] of Object.entries(e.set)) this.setVar(n, v, anim);
+          if (e.del)
+            e.del.forEach((n) => {
+              this.vars.get(n)?.remove();
+              this.vars.delete(n);
+            });
+          if (e.out !== undefined) this.print(e.out + (e.end ?? "\n"), anim, false);
+          if (e.err && this.con) this.print(e.err + "\n", anim, true);
+          if (e.tape) {
+            const [i, cls, w = 0] = e.tape;
+            const cells = this.tapes[w];
+            cells.forEach((x) => x.classList.remove("now"));
+            if (cells[i]) {
+              cells[i].classList.add("now");
+              if (cls) cells[i].classList.add(cls);
+            }
+          }
+          if (e.tapeEnd) {
+            const [cls, w = 0] = e.tapeEnd;
+            this.tapes[w].forEach((x) => {
+              x.classList.remove("now");
+              if (cls && !/ok|skip|stop|done/.test(x.className)) x.classList.add(cls);
+            });
+          }
+          if (e.tapeClear !== undefined) this.tapes[e.tapeClear].forEach((x) => (x.className = "cell"));
+          if (e.file && this.fileEl) {
+            const rows = [...this.fileEl.children];
+            rows.forEach((x) => x.classList.remove("now"));
+            if (e.file.line !== undefined && rows[e.file.line]) rows[e.file.line].classList.add("now", "done");
+            if (e.file.add !== undefined) {
+              const d = document.createElement("div");
+              d.textContent = e.file.add || " ";
+              d.className = "now done";
+              this.fileEl.appendChild(d);
+              if (anim) gsap.from(d, { opacity: 0, x: -12, duration: 0.35 });
+            }
+          }
+          if (e.heap || e.set || e.del) this.arrowsSoon();
+        }
+
+        settle() {
+          this.lines.forEach((l) => l.classList.remove("now"));
+          if (this.pre.classList.contains("tracing")) this.pre.classList.replace("tracing", "traced");
+          this.tapes.forEach((cells) => cells.forEach((x) => x.classList.remove("now")));
+          this.arrowsSoon();
+        }
+
+        keys() {
+          return Object.keys(this.beats).map(Number).sort((a, b) => a - b);
+        }
+
+        duration(k) {
+          return (this.beats[k]?.length || 0) * this.dt;
+        }
+
+        // mode: false = instant, "last" = animate beat k only, "all" = animate beats 0..k
+        renderTo(k, mode) {
+          this.reset();
+          this.shown = k;
+          const play = [];
+          for (const b of this.keys()) {
+            if (b > k) continue;
+            if (mode === "all" || (mode === "last" && b === k)) play.push(...this.beats[b]);
+            else this.beats[b].forEach((e) => this.apply(e, false));
+          }
+          if (!play.length) return this.settle();
+          const tl = gsap.timeline();
+          play.forEach((e, j) => tl.call(() => this.apply(e, true), null, j * this.dt));
+          tl.call(() => this.settle(), null, play.length * this.dt);
+          this.tl = tl;
+        }
+
+        arrowsSoon(ms = 700) {
+          if (!this.svg) return;
+          const until = performance.now() + ms;
+          const tick = () => {
+            this.drawArrows();
+            if (performance.now() < until) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+
+        drawArrows() {
+          if (!this.svg) return;
+          const g = this.svg.querySelector("g");
+          g.innerHTML = "";
+          const pr = this.panel.getBoundingClientRect();
+          if (!pr.width) return;
+          const sx = this.panel.offsetWidth / pr.width || 1;
+          const rel = (r) => ({ l: (r.left - pr.left) * sx, r: (r.right - pr.left) * sx, t: (r.top - pr.top) * sx, b: (r.bottom - pr.top) * sx });
+          for (const src of this.panel.querySelectorAll("[data-ref]")) {
+            const tgt = this.objEls.get(src.dataset.ref);
+            if (!tgt || !src.isConnected) continue;
+            const a = rel(src.querySelector(".dot")?.getBoundingClientRect() ?? src.getBoundingClientRect());
+            const b = rel(tgt.getBoundingClientRect());
+            const ax = (a.l + a.r) / 2, ay = (a.t + a.b) / 2;
+            let d;
+            if (b.t > ay + 12) {
+              const bx = Math.min(Math.max(ax, b.l + 14), b.r - 14);
+              d = `M${ax} ${ay} C${ax} ${(ay + b.t) / 2} ${bx} ${(ay + b.t) / 2} ${bx} ${b.t - 2}`;
+            } else if (b.l > ax + 12) {
+              const by = (b.t + b.b) / 2;
+              d = `M${ax} ${ay} C${(ax + b.l) / 2} ${ay} ${(ax + b.l) / 2} ${by} ${b.l - 2} ${by}`;
+            } else {
+              const by = b.t + 14, x = Math.max(a.r, b.r) + 26;
+              d = `M${a.r} ${ay} C${x} ${ay} ${x} ${by} ${b.r + 2} ${by}`;
+            }
+            const path = document.createElementNS(SVGNS, "path");
+            path.setAttribute("d", d);
+            path.setAttribute("marker-end", `url(#${this.marker})`);
+            g.appendChild(path);
+          }
+        }
+      }
+
+      // Which elements each step of a slide reveals (mirrors deck.js)
+      const stepGroups = (slide) => {
+        let auto = 0;
+        const by = new Map();
+        for (const e of slide.querySelectorAll(".step, .answer")) {
+          const k = e.dataset.step !== undefined ? parseFloat(e.dataset.step) : ++auto;
+          if (!by.has(k)) by.set(k, []);
+          by.get(k).push(e);
+        }
+        return [...by.entries()].sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+      };
+
+      const tracers = new Map();
+      const trace = (sel, cfg) => {
+        const viz = typeof sel === "string" ? document.querySelector(sel) : sel;
+        if (!viz) return console.warn("tracer: missing", sel);
+        const t = new Tracer(viz, cfg);
+        const groups = stepGroups(t.slide);
+        const max = Math.max(...t.keys());
+        if (max > groups.length) console.warn(`tracer: ${t.slide.id || "slide"} has beat ${max} but ${groups.length} steps`);
+        if (!tracers.has(t.slide)) tracers.set(t.slide, []);
+        tracers.get(t.slide).push(t);
+        return t;
+      };
+
+      const delays = (slide, on) => {
+        stepGroups(slide).forEach((g, i) => {
+          const d = on ? Math.max(0, ...(tracers.get(slide) || []).map((t) => t.duration(i + 1))) : 0;
+          g.forEach((e) => e.classList.contains("answer") && e.style.setProperty("--d", d + "s"));
+        });
+      };
+
+      const pending = new Map();
+      const queue = (slide, k, dir) => {
+        const ts = tracers.get(slide);
+        if (!ts) return;
+        if (dir < 0) delays(slide, false);
+        let p = pending.get(slide);
+        if (!p) {
+          p = { n: 0 };
+          pending.set(slide, p);
+          queueMicrotask(() => {
+            pending.delete(slide);
+            const instant = p.dir < 0 || p.n > 1;
+            if (instant) delays(slide, false);
+            ts.forEach((t) => t.renderTo(p.k, instant ? false : "last"));
+          });
+        }
+        p.n++;
+        p.k = k;
+        p.dir = dir;
+      };
+
+      // Scale each tracer slide to fill the canvas: the largest --tz (the unit of every
+      // tracer size) at which the slide, with every beat played, fits without overflow
+      // or scrolling inside the code and the output. Layouts tried, each a set of classes:
+      // panels beside the code, stacked or with variables and output side by side (split)
+      // or a narrow variables column beside the objects (tight); only when those must go
+      // below 1: panels under the code (below), tape labels beside their cells (compact),
+      // long values wrapped (wrapv).
+      const LAYOUT_CLASSES = { below: "viz", wrapv: "viz", split: "panel", tight: "panel", compact: "panel" };
+      const fitTracers = () => {
+        for (const [slide, ts] of tracers) {
+          const shown = ts.map((t) => t.shown);
+          ts.forEach((t) => t.renderTo(Infinity, false));
+          slide.style.zoom = "";
+          const fits = () =>
+            slide.scrollHeight <= slide.clientHeight + 1 &&
+            slide.scrollWidth <= slide.clientWidth + 1 &&
+            ts.every(
+              (t) =>
+                t.pre.scrollWidth <= t.pre.clientWidth + 1 &&
+                [t.panel, ...t.panel.querySelectorAll(".box, .v, .fv")].every((b) => b.scrollWidth <= b.clientWidth + 1) &&
+                (!t.con || t.con.scrollHeight <= t.con.clientHeight + 1),
+            );
+          const set = (layout, z) =>
+            ts.forEach((t) => {
+              for (const [c, on] of Object.entries(LAYOUT_CLASSES)) (on === "viz" ? t.viz : t.panel).classList.toggle(c, layout.includes(c));
+              t.viz.style.setProperty("--tz", z);
+            });
+          const best = (layout) => {
+            for (let z = 1.6; z >= 0.9; z = Math.round((z - 0.05) * 100) / 100) {
+              set(layout, z);
+              if (fits()) return z;
+            }
+            return 0;
+          };
+          const all = (f) => ts.every(f);
+          const canSplit = all((t) => t.vgrid && t.con && (t.tapes.length || t.fileEl));
+          const first = [[], canSplit && ["split"], all((t) => t.svg) && ["tight"]];
+          const then = [
+            !ts.some((t) => t.cfg.beside) && ["below"],
+            all((t) => t.tapes.length) && ["compact"],
+            canSplit && all((t) => t.tapes.length) && ["split", "compact"],
+            all((t) => t.vgrid) && ["wrapv"],
+            canSplit && ["split", "wrapv"],
+          ];
+          let pick = [[], 0];
+          const consider = (layouts) =>
+            layouts.filter(Boolean).forEach((l) => {
+              const z = best(l);
+              if (z > pick[1]) pick = [l, z];
+            });
+          consider(first);
+          if (pick[1] < 1) consider(then);
+          set(pick[0], pick[1] || 0.9);
+          ts.forEach((t, i) => t.renderTo(shown[i], false));
+        }
+        Deck.fit();
+      };
+
+      // Call once, after every trace(): hooks the tracers to the deck's events
+      const startTracers = () => {
+        fitTracers();
+        document.fonts?.ready.then(fitTracers);
+        Deck.on("enter", (slide) => {
+          const ts = tracers.get(slide);
+          if (!ts) return;
+          delays(slide, true);
+          ts.forEach((t) => {
+            t.renderTo(0, t.cfg.auto ? "all" : false);
+            t.arrowsSoon(1200);
+          });
+        });
+        Deck.on("step", (slide, i, d) => queue(slide, d.step, d.dir));
+        Deck.on("unstep", (slide, i, d) => queue(slide, d.step - 1, -1));
+        Deck.on("leave", (slide) => (tracers.get(slide) || []).forEach((t) => t.tl?.kill()));
+        addEventListener("resize", () => tracers.forEach((ts) => ts.forEach((t) => t.drawArrows())));
+
+        // Reductions: an expression rewritten one evaluation at a time
+        const playReduce = (r, instant) => {
+          const rows = r.querySelectorAll("li");
+          gsap.killTweensOf(rows);
+          if (instant) gsap.set(rows, { opacity: 1, x: 0 });
+          else gsap.fromTo(rows, { opacity: 0, x: -14 }, { opacity: 1, x: 0, stagger: 0.75, duration: 0.4, delay: 0.15 });
+        };
+        document.querySelectorAll(".reduce").forEach((r) => {
+          if (r.classList.contains("step")) r.addEventListener("step:show", (e) => e.target === r && playReduce(r, e.detail.dir < 0));
+        });
+        Deck.on("enter", (slide, i, d) => slide.querySelectorAll(".reduce:not(.step)").forEach((r) => playReduce(r, d?.dir < 0)));
+      };
+
+      const cover = (sel) =>
+        Deck.scene(sel, {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1 > span"), { y: 50, opacity: 0, rotate: 4, stagger: 0.12, duration: 0.9, ease: "back.out(1.6)" });
+            gsap.from(slide.querySelectorAll(".kicker, p"), { opacity: 0, y: 20, delay: 0.4, duration: 0.8 });
+          },
+        });
+      /* tracer:end */
+
+      cover("#title");
+      startTracers();
+
+      // Modulus: a dots are packed into groups of b; the leftovers are a % b
+      const CASES = [null, [10, 3], [7, 3], [15, 4]];
+      const mod = document.querySelector("#mod");
+      const dots = mod.querySelector(".dots");
+      const eqn = mod.querySelector(".eqn");
+      const dot = '<i class="dt"></i>';
+      function showCase(n, animate) {
+        gsap.killTweensOf(dots.querySelectorAll("*"));
+        if (!n) {
+          dots.innerHTML = "";
+          eqn.innerHTML = "Press → to group the dots";
+          return;
+        }
+        const [a, b] = CASES[n];
+        const q = Math.floor(a / b), r = a % b;
+        dots.innerHTML =
+          Array.from({ length: q }, () => `<span class="grp">${dot.repeat(b)}</span>`).join("") + (r ? `<span class="rest">${dot.repeat(r)}</span>` : "");
+        eqn.innerHTML = `${a} = ${b} × ${q} + <b>${r}</b>  →  ${a} % ${b} = <b>${r}</b>`;
+        if (!animate) return;
+        const tl = gsap.timeline();
+        tl.from(dots.querySelectorAll(".dt"), { scale: 0, opacity: 0, stagger: 0.05, duration: 0.25 });
+        tl.from(dots.querySelectorAll(".grp"), { borderColor: "rgba(167,139,250,0)", stagger: 0.15, duration: 0.3 });
+        tl.from(dots.querySelectorAll(".rest"), { scale: 1.4, duration: 0.4, ease: "back.out(3)" });
+        tl.from(eqn, { opacity: 0, y: 10, duration: 0.4 });
+      }
+      Deck.scene("#mod", {
+        enter: () => showCase(0),
+        step: (s, n, els, d) => showCase(n, d.dir > 0),
+        unstep: (s, n) => showCase(n - 1, false),
+      });
+
+      /* codefit:start (Python decks: shrink a slide's code blocks together until the slide fits) */
+      const fitCode = () => {
+        const groups = new Map();
+        for (const pre of document.querySelectorAll(".slide pre")) {
+          if (pre.closest(".viz")) continue;
+          const slide = pre.closest(".slide");
+          if (!groups.has(slide)) groups.set(slide, []);
+          groups.get(slide).push(pre);
+        }
+        for (const [slide, pres] of groups) {
+          slide.style.zoom = "";
+          pres.forEach((p) => (p.style.fontSize = ""));
+          const base = pres.map((p) => parseFloat(getComputedStyle(p).fontSize));
+          const over = () =>
+            slide.scrollHeight > slide.clientHeight + 1 ||
+            slide.scrollWidth > slide.clientWidth + 1 ||
+            pres.some((p) => p.scrollWidth > p.clientWidth + 1 || p.scrollHeight > p.clientHeight + 1);
+          for (let k = 0.96; over() && Math.min(...base) * k >= 20; k -= 0.04) pres.forEach((p, i) => (p.style.fontSize = base[i] * k + "px"));
+        }
+        Deck.fit();
+      };
+      await Deck.ready;
+      fitCode();
+      document.fonts?.ready.then(fitCode);
+      /* codefit:end */
+    </script>
+  </body>
+</html>

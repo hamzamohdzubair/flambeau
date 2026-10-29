@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#05060f" />
+    <title>Live quiz</title>
+    <!-- The audience's side of a live quiz (deck/live.js): scanned from the QR code on a slide -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #05060f;
+        --text: #f1f5f9;
+        --muted: #a8b3c7;
+        --faint: #64708f;
+        --violet: #8b5cf6;
+        --cyan: #22d3ee;
+        --green: #86efac;
+        --amber: #fbbf24;
+        --red: #f87171;
+        --gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+        --gradient-text: linear-gradient(100deg, #c4b5fd 0%, #f0abfc 40%, #67e8f9 100%);
+        --glass: rgba(15, 18, 35, 0.7);
+        --border: rgba(255, 255, 255, 0.12);
+        --mono: "JetBrains Mono", ui-monospace, monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body {
+        min-height: 100dvh;
+        background: var(--bg);
+        color: var(--text);
+        font: 16px/1.5 Inter, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+        display: flex;
+        flex-direction: column;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background:
+          radial-gradient(60% 40% at 10% 0%, rgba(139, 92, 246, 0.35), transparent 70%),
+          radial-gradient(50% 35% at 100% 100%, rgba(236, 72, 153, 0.18), transparent 70%);
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        color: var(--faint);
+        font-size: 14px;
+      }
+      header b { color: var(--muted); font-weight: 600; }
+      .dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--faint); }
+      .dot.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 18px;
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 8px 16px 32px;
+      }
+      h1 {
+        margin: 0;
+        font: 700 30px/1.2 "Space Grotesk", sans-serif;
+        background: var(--gradient-text);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      p { margin: 0; color: var(--muted); }
+      label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 14px; }
+      input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--glass);
+        color: var(--text);
+        font: 500 18px Inter, sans-serif;
+        outline: none;
+      }
+      input:focus { border-color: var(--violet); }
+      #code { font-family: var(--mono); letter-spacing: 0.3em; text-transform: uppercase; }
+      button {
+        border: 0;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+      }
+      .primary {
+        padding: 15px;
+        border-radius: 14px;
+        background: var(--gradient);
+        font-weight: 600;
+        font-size: 18px;
+      }
+      .primary:disabled { opacity: 0.4; }
+      .context {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--glass);
+        color: var(--muted);
+        font: 13px/1.5 var(--mono);
+        overflow-x: auto;
+        white-space: pre;
+      }
+      .question { font: 500 34px/1.25 var(--mono); color: var(--cyan); word-break: break-word; }
+      .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .options button {
+        padding: 18px 8px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--glass);
+        font: 500 24px var(--mono);
+        transition: transform 0.1s, background 0.2s, opacity 0.3s;
+      }
+      .options button:active { transform: scale(0.96); }
+      /* long options (whole arrays) get a row each */
+      .options.long { grid-template-columns: 1fr; }
+      .options.long button { display: flex; align-items: center; gap: 12px; padding: 12px 14px; font-size: 17px; text-align: left; }
+      .options.long button i {
+        flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1); font: 600 14px "Space Grotesk", sans-serif; font-style: normal; color: var(--muted);
+      }
+      .options button.mine { background: var(--gradient); border-color: transparent; }
+      .options.locked button:not(.mine) { opacity: 0.35; }
+      .options button.right { background: rgba(134, 239, 172, 0.2); border-color: var(--green); color: var(--green); opacity: 1; }
+      .options button.mine.wrong { background: rgba(248, 113, 113, 0.18); border-color: var(--red); }
+      .free { display: flex; gap: 8px; }
+      .free input { font-family: var(--mono); }
+      .free button { padding: 0 18px; border-radius: 14px; background: var(--gradient); font-weight: 600; }
+      .banner { padding: 14px 16px; border-radius: 14px; font-weight: 600; font-size: 18px; text-align: center; }
+      .banner.wait { background: var(--glass); border: 1px solid var(--border); color: var(--muted); font-weight: 500; font-size: 16px; }
+      .banner.good { background: rgba(134, 239, 172, 0.14); border: 1px solid var(--green); color: var(--green); }
+      .banner.bad { background: rgba(248, 113, 113, 0.12); border: 1px solid var(--red); color: var(--red); }
+      .winner { text-align: center; color: var(--amber); }
+      .winner b { color: var(--text); }
+      .big { font-size: 56px; text-align: center; line-height: 1; }
+      .center { text-align: center; }
+      .pulse { animation: pulse 1.6s ease-in-out infinite; }
+      @keyframes pulse { 50% { opacity: 0.45; } }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span><i class="dot" id="dot"></i><b id="room">Live quiz</b></span>
+      <span id="score"></span>
+    </header>
+    <main id="app"></main>
+
+    <script>
+      "use strict";
+      const params = new URLSearchParams(location.search);
+      const API = params.get("api") || "wss://slides-live.hamzamohdzubair.workers.dev";
+      const app = document.getElementById("app");
+      const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      const norm = (s) => String(s ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+      const secs = (ms) => (ms / 1000).toFixed(1) + " s";
+
+      const store = (k, v) => {
+        try {
+          if (v === undefined) return localStorage.getItem(k);
+          localStorage.setItem(k, v);
+        } catch {
+          return null;
+        }
+      };
+      let me = store("live-id");
+      if (!me) store("live-id", (me = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)));
+
+      let code = location.hash.slice(1).toUpperCase().replace(/[^A-Z]/g, "");
+      let name = store("live-name") || "";
+      let ws, state, retry = 0;
+
+      // ------------------------------------------------------------ joining
+
+      function joinForm() {
+        app.innerHTML = `
+          <h1>Join the quiz</h1>
+          <p>Answer the questions on the slide from your phone.</p>
+          <div ${code ? "hidden" : ""}><label for="code">Room code (on the slide)</label>
+            <input id="code" maxlength="6" autocomplete="off" autocapitalize="characters" value="${esc(code)}"></div>
+          <div><label for="name">Your name</label>
+            <input id="name" maxlength="24" autocomplete="nickname" placeholder="So the winner can be announced" value="${esc(name)}"></div>
+          <button class="primary" id="go">Join</button>`;
+        const go = document.getElementById("go");
+        const codeIn = document.getElementById("code");
+        const nameIn = document.getElementById("name");
+        const ok = () => (go.disabled = !(nameIn.value.trim() && /^[A-Za-z]{4,6}$/.test(codeIn.value.trim())));
+        codeIn.oninput = nameIn.oninput = ok;
+        ok();
+        (code ? nameIn : codeIn).focus();
+        const submit = () => {
+          if (go.disabled) return;
+          name = nameIn.value.trim();
+          code = codeIn.value.trim().toUpperCase();
+          store("live-name", name);
+          history.replaceState(null, "", "#" + code);
+          connect();
+        };
+        go.onclick = submit;
+        // A handler that returns false cancels the key, so these return nothing
+        app.onkeydown = (e) => {
+          if (e.key === "Enter") submit();
+        };
+      }
+
+      function connect() {
+        document.getElementById("room").textContent = "Room " + code;
+        app.onkeydown = null;
+        if (!state) app.innerHTML = `<p class="center pulse">Connecting…</p>`;
+        ws = new WebSocket(`${API}/ws/${code}`);
+        ws.onopen = () => {
+          retry = 0;
+          document.getElementById("dot").classList.add("on");
+          ws.send(JSON.stringify({ t: "join", id: me, name }));
+        };
+        ws.onmessage = (e) => {
+          const msg = JSON.parse(e.data);
+          if (msg.t === "state") {
+            state = msg;
+            render();
+          }
+        };
+        ws.onclose = () => {
+          document.getElementById("dot").classList.remove("on");
+          setTimeout(connect, Math.min(8000, 500 * 2 ** retry++));
+        };
+      }
+
+      // ------------------------------------------------------------ the quiz
+
+      function vote(choice) {
+        if (!state?.q || state.mine != null || state.result || !choice) return;
+        state.mine = choice; // shown at once; the room confirms
+        render();
+        navigator.vibrate?.(30);
+        ws.send(JSON.stringify({ t: "vote", q: state.q.id, choice }));
+      }
+
+      let shownQ = null;
+      function render() {
+        const s = state;
+        document.getElementById("score").textContent = s.rank ? `${s.score} right · #${s.rank} of ${s.of}` : "";
+        if (!s.q) {
+          shownQ = null;
+          app.innerHTML = `
+            <div class="big">⏳</div>
+            <h1 class="center">You're in, ${esc(s.name)}</h1>
+            <p class="center pulse">Waiting for the next question…</p>`;
+          return;
+        }
+        const q = s.q;
+        const r = s.result;
+        // Keep a half-typed free answer when the view refreshes
+        const typed = document.getElementById("free")?.value || "";
+        let answer;
+        if (q.options) {
+          const long = q.options.some((o) => o.length > 7);
+          answer = `<div class="options ${long ? "long" : ""} ${s.mine != null || r ? "locked" : ""}">${q.options
+            .map((o, i) => {
+              const cls = [o === s.mine && "mine", r && norm(o) === norm(r.answer) && "right", r && o === s.mine && !r.correct && "wrong"].filter(Boolean).join(" ");
+              // long options carry the slide's A–D letters
+              const letter = long && q.options.length <= 6 ? `<i>${"ABCDEF"[i]}</i>` : "";
+              return `<button class="${cls}" data-o="${esc(o)}">${letter}${esc(o)}</button>`;
+            })
+            .join("")}</div>`;
+        } else if (s.mine == null && !r) {
+          answer = `<div class="free"><input id="free" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your answer"><button id="send">Send</button></div>`;
+        } else {
+          answer = s.mine != null ? `<p class="context">${esc(s.mine)}</p>` : "";
+        }
+
+        let status;
+        if (r) {
+          status = r.correct
+            ? `<div class="banner good">Correct! 🎉</div>`
+            : `<div class="banner bad">${s.mine == null ? "Time's up" : "Not quite"}: the answer is <code>${esc(r.answer)}</code></div>`;
+          if (r.winner) status += `<p class="winner">${r.winner.you ? "🏆 <b>You</b> were fastest!" : `🏆 <b>${esc(r.winner.name)}</b> was fastest`} (${secs(r.winner.ms)})</p>`;
+        } else if (s.mine != null) status = `<div class="banner wait pulse">Locked in. Watch the slide for the answer</div>`;
+        else status = "";
+
+        app.innerHTML = `
+          ${q.context ? `<div class="context">${esc(q.context)}</div>` : ""}
+          <div class="question">${esc(q.text)}</div>
+          ${answer}
+          ${status}`;
+        app.querySelectorAll("[data-o]").forEach((b) => (b.onclick = () => vote(b.dataset.o)));
+        const free = document.getElementById("free");
+        if (free) {
+          free.value = typed;
+          if (shownQ !== q.id) free.focus();
+          document.getElementById("send").onclick = () => vote(free.value.trim());
+          free.onkeydown = (e) => {
+            if (e.key === "Enter") vote(free.value.trim());
+          };
+        }
+        shownQ = q.id;
+      }
+
+      if (code && name) connect();
+      else joinForm();
+    </script>
+  </body>
+</html>

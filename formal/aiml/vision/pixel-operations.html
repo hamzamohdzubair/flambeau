@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pixel Operations</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Shared bits for the vision decks ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .chip {
+        padding: 0.45rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--glass);
+        color: var(--muted);
+        font: 500 1rem var(--font);
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+
+      .chip:hover {
+        border-color: rgba(167, 139, 250, 0.7);
+        color: var(--text);
+      }
+
+      .chip.on {
+        background: rgba(139, 92, 246, 0.35);
+        border-color: var(--violet-soft);
+        color: var(--text);
+      }
+
+      .chip.ghost {
+        border-style: dashed;
+      }
+
+      /* Sliders */
+      .ctl {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem 2rem;
+        font-size: 1.05rem;
+        color: var(--muted);
+      }
+
+      .ctl label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .ctl output {
+        min-width: 2.6em;
+        font-family: var(--font-mono);
+        color: var(--text);
+      }
+
+      input[type="range"] {
+        width: 12rem;
+        height: 1.4rem;
+        accent-color: var(--violet);
+      }
+
+      /* Canvases */
+      .play {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        width: min(100%, 64rem);
+      }
+
+      .play figure {
+        min-width: 0;
+      }
+
+      canvas.img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      .readout {
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .readout b {
+        color: var(--cyan);
+        font-weight: 500;
+      }
+
+      /* Code next to a figure */
+      .codek {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.4rem;
+        align-items: center;
+        width: min(100%, 68rem);
+      }
+
+      .codek pre {
+        width: 100%;
+      }
+
+      .codek .side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 22rem;
+      }
+
+      .codek .side p {
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .codek .side canvas {
+        width: min(20rem, 100%);
+      }
+
+      /* Matrices drawn as grids */
+      .mat {
+        display: inline-grid;
+        gap: 3px;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(10, 12, 26, 0.7);
+        font-family: var(--font-mono);
+      }
+
+      .mat > span {
+        display: grid;
+        place-items: center;
+        min-width: 3.4rem;
+        height: 2.3rem;
+        padding: 0 0.4rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+
+      /* Exercises */
+      .qa {
+        display: grid;
+        gap: 1.3rem;
+        width: min(100%, 64rem);
+        counter-reset: q;
+      }
+
+      .qa .q {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .qa .q > p:first-child {
+        color: var(--text);
+        font-size: 1.3rem;
+      }
+
+      .qa .q > p:first-child::before {
+        content: "Q" counter(q) "  ";
+        counter-increment: q;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--cyan);
+      }
+
+      .qa p.answer {
+        padding: 0.2rem 0.6rem;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .qa pre {
+        width: 100%;
+        font-size: 0.92rem;
+      }
+
+      .slide > pre,
+      pre.ex {
+        width: min(100%, 66rem);
+        font-size: 1.15rem;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        background: rgba(139, 92, 246, 0.2);
+        color: #ddd6fe;
+      }
+
+      .cards .card h3 code {
+        font-size: 0.75em;
+      }
+
+      .card p {
+        font-size: 1.05rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .card ul {
+        font-size: 1.1rem;
+      }
+
+      .card.good {
+        border-color: rgba(134, 239, 172, 0.4);
+      }
+
+      .card.warn {
+        border-color: rgba(251, 191, 36, 0.4);
+      }
+
+      .x:not(.shown) {
+        pointer-events: none;
+      }
+
+      #title canvas {
+        width: min(24rem, 75cqw);
+        border-radius: 12px;
+      }
+
+      #title .opname {
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        color: var(--cyan);
+        min-height: 1.4em;
+      }
+
+      #what .cards {
+        width: min(100%, 64rem);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .formula {
+        font-family: var(--font-mono);
+        font-size: 1.1rem;
+        color: var(--cyan);
+      }
+
+      /* ---------- Overflow dials ---------- */
+      #overflow .cols {
+        width: min(100%, 62rem);
+      }
+
+      #overflow svg {
+        width: min(17rem, 60cqw);
+        height: auto;
+      }
+
+      #overflow .track {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.1);
+        stroke-width: 28;
+      }
+
+      #overflow .arc {
+        fill: none;
+        stroke-width: 28;
+        stroke-linecap: round;
+      }
+
+      #overflow .num {
+        font: 600 68px var(--font-display);
+        fill: var(--text);
+      }
+
+      #overflow .sub {
+        font: 24px var(--font-mono);
+        fill: var(--muted);
+      }
+
+      .bar {
+        position: relative;
+        height: 1.6rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+      }
+
+      .bar i {
+        position: absolute;
+        inset: 0 auto 0 0;
+        background: linear-gradient(90deg, #0891b2, #22d3ee);
+        border-radius: 8px;
+      }
+
+      .dialbox {
+        display: grid;
+        justify-items: center;
+        gap: 0.5rem;
+        text-align: center;
+      }
+
+      .dialbox h3 {
+        margin: 0;
+      }
+
+      /* ---------- Labs ---------- */
+      .lab2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.6rem;
+        width: min(100%, 64rem);
+      }
+
+      /* one big canvas on the left, two smaller ones stacked on the right */
+      .lab3 {
+        display: grid;
+        grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        gap: 0.9rem 1.6rem;
+        width: min(100%, 60rem);
+        align-items: start;
+      }
+
+      .lab3 > .big {
+        grid-row: span 2;
+      }
+
+      .lab3 figcaption {
+        font-size: 0.9rem;
+      }
+
+      #blend .lab3 {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2.1fr);
+      }
+
+      canvas.hist {
+        width: 100%;
+        height: 5rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .labrow {
+        display: grid;
+        gap: 1rem;
+        justify-items: center;
+        align-content: center;
+      }
+
+      #blend input[type="range"] {
+        width: 9rem;
+      }
+
+      #bright .lab2 {
+        width: min(100%, 70rem);
+      }
+
+      #bitwise .side canvas {
+        width: 100%;
+        border-radius: 8px;
+      }
+
+      #mask canvas.img {
+        cursor: grab;
+        touch-action: none;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Computer vision</span>
+      <canvas width="480" height="270"></canvas>
+      <span class="opname">img</span>
+      <h1>Pixel Operations</h1>
+      <p>Add, blend, mask and threshold: changing each pixel on its own, and the overflow traps along the way.</p>
+    </section>
+
+    <!-- ================================================================ what -->
+    <section class="slide" id="what">
+      <h2>What are pixel operations?</h2>
+      <p class="lead"><strong>Pixel operations</strong> modify pixel values directly.</p>
+      <div class="cols" style="width: min(100%, 62rem)">
+        <div class="card"><h3>Point operations</h3><p>Each output pixel depends only on the corresponding input pixel. <strong>This deck.</strong></p></div>
+        <div class="card"><h3>Local operations</h3><p>The output depends on a neighbourhood. Covered in filtering.</p></div>
+      </div>
+      <div class="cards">
+        <div class="card step"><h3>Arithmetic</h3><p>add, subtract, multiply, divide</p></div>
+        <div class="card step"><h3>Logical</h3><p>AND, OR, XOR, NOT</p></div>
+        <div class="card step"><h3>Thresholding</h3><p>binary, adaptive</p></div>
+        <div class="card step"><h3>Normalization</h3><p>rescaling pixel values</p></div>
+      </div>
+    </section>
+
+    <!-- ================================================================ arithmetic -->
+    <section class="slide">
+      <h2>Image arithmetic</h2>
+      <div class="cards" style="width: min(100%, 66rem)">
+        <div class="card step"><h3>Addition</h3><p class="formula">result = img1 + img2</p><p>Brightens the image. Careful of overflow!</p></div>
+        <div class="card step"><h3>Subtraction</h3><p class="formula">result = img1 - img2</p><p>Finds differences: motion detection.</p></div>
+        <div class="card step"><h3>Multiplication</h3><p class="formula">result = img * scalar</p><p>Contrast adjustment, masking.</p></div>
+      </div>
+      <p class="step center"><strong>Important:</strong> use <code>cv2.add()</code> instead of <code>+</code> to prevent overflow.</p>
+    </section>
+
+    <!-- ================================================================ overflow -->
+    <section class="slide" id="overflow">
+      <h2>NumPy vs OpenCV arithmetic</h2>
+      <div class="cols">
+        <div class="dialbox">
+          <h3>NumPy: modulo</h3>
+          <svg viewBox="0 0 400 400" class="wrap"><circle class="track" cx="200" cy="200" r="160" /><path class="arc" stroke="#ec4899" /><text class="num" x="200" y="218" text-anchor="middle">0</text><text class="sub" x="200" y="266" text-anchor="middle">(a + b) % 256</text></svg>
+          <p class="formula">255 + 10 = 9</p>
+          <p class="muted">Wraps around. Fast, but beware overflow.</p>
+        </div>
+        <div class="dialbox">
+          <h3>OpenCV: saturated</h3>
+          <svg viewBox="0 0 400 400" class="sat"><circle class="track" cx="200" cy="200" r="160" /><path class="arc" stroke="#22d3ee" /><text class="num" x="200" y="218" text-anchor="middle">0</text><text class="sub" x="200" y="266" text-anchor="middle">min(a + b, 255)</text></svg>
+          <p class="formula">cv2.add(255, 10) = 255</p>
+          <p class="muted">Clips to the max. Safe: it saturates.</p>
+        </div>
+      </div>
+      <div class="ctl" data-interactive>
+        <label>a <input type="range" name="a" min="0" max="255" value="250" /><output></output></label>
+        <label>b <input type="range" name="b" min="0" max="255" value="10" /><output></output></label>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Image addition</h2>
+      <pre class="steps"><code class="language-python">
+        import cv2
+        import numpy as np
+        # numpy addition (overflow)
+        img = np.array([[250]], dtype=np.uint8)
+        result = img + np.array([[10]], dtype=np.uint8)
+        # ans: (250 + 10) % 256 = 4 (overflow!)
+        # opencv addition (saturation)
+        result = cv2.add(img, np.array([[10]], dtype=np.uint8))
+        # ans: min(250 + 10, 255) = 255 (clips to max)
+      </code></pre>
+    </section>
+
+    <!-- ================================================================ brighten -->
+    <section class="slide">
+      <h2>Brightening and darkening</h2>
+      <pre class="steps"><code class="language-python">
+        # brighten image (add constant)
+        bright = cv2.add(img, np.array([50]))  # ans:
+        # ans: adds 50 to all pixels (saturates at 255)
+        # darken image (subtract constant)
+        dark = cv2.subtract(img, np.array([50]))  # ans:
+        # ans: subtracts 50 (saturates at 0)
+        # alternative using numpy (watch overflow!)
+        bright = np.clip(img.astype(int) + 50, 0, 255).astype(np.uint8)
+        # ans: clip prevents overflow (do the sum in a wider type first)
+      </code></pre>
+      <p class="muted center">A scalar passed as <code>np.array([50])</code> is added to the first channel only on a colour image; use <code>(50, 50, 50, 0)</code> to shift all three.</p>
+    </section>
+
+    <section class="slide top" id="bright">
+      <h2>Saturate or wrap?</h2>
+      <div class="lab2">
+        <figure><canvas class="img a" width="480" height="270"></canvas><figcaption>cv2.add / cv2.subtract: saturates</figcaption></figure>
+        <figure><canvas class="img b" width="480" height="270"></canvas><figcaption>img + value as uint8: wraps around</figcaption></figure>
+      </div>
+      <div class="ctl" data-interactive><label>value <input type="range" min="-150" max="150" value="60" /><output></output></label></div>
+      <p class="muted center">The bright sky wraps past 255 into dark garbage; the saturated version just turns white.</p>
+    </section>
+
+    <!-- ================================================================ blend -->
+    <section class="slide">
+      <h2>Image blending</h2>
+      <pre class="steps"><code class="language-python">
+        # weighted sum of two images
+        img1 = cv2.imread('image1.jpg')
+        img2 = cv2.imread('image2.jpg')
+        # alpha blending: result = α*img1 + β*img2 + γ
+        blended = cv2.addWeighted(img1, 0.7, img2, 0.3, 0)  # ans:
+        # ans: 70% img1 + 30% img2
+        # must satisfy: α + β = 1 for proper blending
+        # ans: ensures output stays in the valid range
+      </code></pre>
+    </section>
+
+    <section class="slide top" id="blend">
+      <h2>addWeighted, live</h2>
+      <div class="lab3">
+        <figure><canvas class="img i1" width="480" height="270"></canvas><figcaption>img1</figcaption></figure>
+        <figure class="big" style="grid-column: 2"><canvas class="img out" width="480" height="270"></canvas><figcaption class="readout"></figcaption></figure>
+        <figure><canvas class="img i2" width="480" height="270"></canvas><figcaption>img2</figcaption></figure>
+      </div>
+      <div class="ctl" data-interactive>
+        <label>α <input type="range" name="a" min="0" max="1" step="0.05" value="0.7" /><output></output></label>
+        <label>β <input type="range" name="b" min="0" max="1" step="0.05" value="0.3" /><output></output></label>
+        <label>γ <input type="range" name="g" min="-100" max="100" step="5" value="0" /><output></output></label>
+        <label><input type="checkbox" name="lock" checked /> keep α + β = 1</label>
+      </div>
+    </section>
+
+    <!-- ================================================================ bitwise -->
+    <section class="slide" id="bitwise">
+      <h2>Bitwise operations</h2>
+      <div class="codek">
+        <pre class="steps"><code class="language-python">
+          # bitwise AND (intersection)
+          result = cv2.bitwise_and(img1, img2)
+          # ans: keeps pixels where both are non-zero
+          # bitwise OR (union)
+          result = cv2.bitwise_or(img1, img2)
+          # ans: combines regions from both images
+          # bitwise NOT (invert)
+          result = cv2.bitwise_not(img)
+          # ans: inverts all bits (negative image)
+          # bitwise XOR (difference)
+          result = cv2.bitwise_xor(img1, img2)
+          # ans: highlights differences
+        </code></pre>
+        <div class="side">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem">
+            <figure><canvas class="m1" width="160" height="120"></canvas><figcaption>img1</figcaption></figure>
+            <figure><canvas class="m2" width="160" height="120"></canvas><figcaption>img2</figcaption></figure>
+          </div>
+          <canvas class="mo" width="160" height="120" style="width: 100%; border-radius: 10px"></canvas>
+          <p class="readout"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ threshold -->
+    <section class="slide">
+      <h2>Binary thresholding</h2>
+      <pre class="steps"><code class="language-python">
+        # simple thresholding
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        ret, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        # ans: pixels > 127 become 255, others become 0
+        # inverse threshold
+        ret, inv = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
+        # ans: pixels > 127 become 0, others become 255
+        # ret is the threshold value used
+        # ans: useful for automatic thresholding methods (Otsu)
+      </code></pre>
+    </section>
+
+    <section class="slide top" id="thresh">
+      <h2>Threshold, live</h2>
+      <div class="lab2">
+        <figure><canvas class="img g" width="480" height="270"></canvas><figcaption>gray</figcaption></figure>
+        <figure><canvas class="img b" width="480" height="270"></canvas><figcaption class="readout"></figcaption></figure>
+        <figure><canvas class="hist" width="512" height="110"></canvas><figcaption>histogram of gray, pink line = thresh</figcaption></figure>
+        <div class="labrow">
+          <div class="chips" data-interactive><button class="chip on" data-t="BINARY">THRESH_BINARY</button><button class="chip" data-t="BINARY_INV">THRESH_BINARY_INV</button></div>
+          <div class="ctl" data-interactive><label>thresh <input type="range" name="t" min="0" max="255" value="127" /><output></output></label><label>maxval <input type="range" name="m" min="0" max="255" value="255" /><output></output></label></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ masking -->
+    <section class="slide">
+      <h2>Image masking</h2>
+      <pre class="steps"><code class="language-python">
+        # create circular mask
+        mask = np.zeros(img.shape[:2], dtype=np.uint8)
+        cv2.circle(mask, (center_x, center_y), radius, 255, -1)
+        # ans: the circular region is 255, the rest is 0
+        # apply mask to image
+        result = cv2.bitwise_and(img, img, mask=mask)
+        # ans: keeps only the circular region, the rest is black
+        # inverse masking
+        inv_mask = cv2.bitwise_not(mask)
+        background = cv2.bitwise_and(img, img, mask=inv_mask)
+        # ans: keeps everything except the circle
+      </code></pre>
+    </section>
+
+    <section class="slide top" id="mask">
+      <h2>Masking, live</h2>
+      <div class="lab3">
+        <figure class="big"><canvas class="img src" width="480" height="270"></canvas><figcaption>img: drag the circle</figcaption></figure>
+        <figure><canvas class="img m" width="480" height="270"></canvas><figcaption class="mname">mask</figcaption></figure>
+        <figure><canvas class="img out" width="480" height="270"></canvas><figcaption class="oname">bitwise_and(img, img, mask=mask)</figcaption></figure>
+      </div>
+      <div class="ctl" data-interactive><label>radius <input type="range" min="20" max="200" value="90" /><output></output></label><button class="chip ghost" data-act="inv">Invert the mask</button></div>
+    </section>
+
+    <!-- ================================================================ normalize -->
+    <section class="slide">
+      <h2>Normalization</h2>
+      <pre class="steps"><code class="language-python">
+        # normalize to 0-255 range
+        normalized = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+        # ans: scales the min value to 0, the max to 255
+        # why normalize?
+        # ans: improves contrast, standardizes the range
+        # ans: useful before visualization or further processing
+        # manual normalization
+        norm = ((img - img.min()) / (img.max() - img.min()) * 255).astype(np.uint8)  # ans:
+        # ans: same effect as cv2.normalize
+      </code></pre>
+    </section>
+
+    <section class="slide" id="norm">
+      <h2>Stretching the histogram</h2>
+      <div class="lab2">
+        <figure><canvas class="img lo" width="480" height="270"></canvas><canvas class="hist h1" width="512" height="110"></canvas><figcaption class="r1"></figcaption></figure>
+        <figure><canvas class="img hi" width="480" height="270"></canvas><canvas class="hist h2" width="512" height="110"></canvas><figcaption class="r2"></figcaption></figure>
+      </div>
+      <div class="chips" data-interactive><button class="chip ghost" data-act="replay">Replay</button></div>
+    </section>
+
+    <!-- ================================================================ exercises -->
+    <section class="slide section">
+      <h2>Exercises</h2>
+      <p class="center">Answer first, then press → to check.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 1 · concepts</h2>
+      <pre class="ex"><code class="language-python">
+        # what's the difference?
+        result1 = img + 10
+        result2 = cv2.add(img, 10)
+        # ans: result1 wraps (modulo), result2 saturates
+        # when does overflow occur?
+        img = np.array([[250]], dtype=np.uint8)
+        result = img + np.array([[20]], dtype=np.uint8)
+        # ans: (250+20) % 256 = 14, overflow!
+        # what is the alpha blending formula?
+        result = cv2.addWeighted(img1, 0.7, img2, 0.3, 0)
+        # ans: result = 0.7*img1 + 0.3*img2 + 0
+        # what should α + β equal?
+        # ans: 1.0 for proper blending (preserves intensity)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 2 · concepts</h2>
+      <pre class="ex"><code class="language-python">
+        # what does bitwise_and do with masks?
+        result = cv2.bitwise_and(img, img, mask=mask)
+        # ans: keeps pixels where mask=255, others become 0
+        # what does thresholding do?
+        ret, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        # ans: converts to binary (only 0 or 255)
+        # why normalize images?
+        # ans: improves contrast, standardizes the range
+        # what is image inversion?
+        inv = cv2.bitwise_not(img)
+        # ans: dark becomes light, light becomes dark
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 3 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # brighten image by 30
+        bright = cv2.add(img, np.array([30]))  # ans:
+        # ans: adds 30, saturates at 255
+        # darken image by 50
+        dark = cv2.subtract(img, np.array([50]))  # ans:
+        # ans: subtracts 50, saturates at 0
+        # blend two images 50-50
+        blended = cv2.addWeighted(img1, 0.5, img2, 0.5, 0)  # ans:
+        # ans: equal mix of both images
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 4 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # create negative image
+        negative = cv2.bitwise_not(img)  # ans:
+        # ans: 255 - pixel_value for all pixels
+        # threshold at 100
+        ret, binary = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)  # ans:
+        # ans: > 100 becomes 255, ≤ 100 becomes 0
+        # create rectangular mask
+        mask = np.zeros((480, 640), dtype=np.uint8)  # ans:
+        mask[100:300, 200:400] = 255  # ans:
+        # ans: rows 100-300, columns 200-400 are white
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 5 · coding</h2>
+      <pre class="ex"><code class="language-python">
+        # what is the output?
+        img = np.array([[200]], dtype=np.uint8)
+        result = cv2.add(img, np.array([[100]], dtype=np.uint8))
+        # ans: 255 (saturates at max)
+        # XOR of image with itself?
+        result = cv2.bitwise_xor(img, img)
+        # ans: all zeros (anything XOR itself = 0)
+        # normalize image to 0-1 range
+        norm = img.astype(float) / 255.0  # ans:
+        # ans: scales to the [0.0, 1.0] range
+        # apply mask to extract ROI
+        roi = cv2.bitwise_and(img, img, mask=mask)  # ans:
+        # ans: region of interest extracted, the rest is black
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 6 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # what happens here?
+        img = np.array([[100, 200]], dtype=np.uint8)
+        result = img * 2
+        # ans: [200, 400 % 256] = [200, 144] (overflow on the 2nd)
+        # using cv2.multiply instead?
+        result = cv2.multiply(img, np.array([[2, 2]], dtype=np.uint8))
+        # ans: [200, 255] (saturates at 255)
+        # blend with a gamma
+        blended = cv2.addWeighted(img1, 0.6, img2, 0.4, 10)
+        # ans: 0.6*img1 + 0.4*img2 + 10 (adds 10 to all pixels)
+      </code></pre>
+    </section>
+
+    <section class="slide">
+      <h2>Exercises 7 · mixed</h2>
+      <pre class="ex"><code class="language-python">
+        # invert only specific channel
+        img = cv2.imread('img.jpg')
+        img[:, :, 0] = cv2.bitwise_not(img[:, :, 0])
+        # ans: inverts the blue channel only (OpenCV stores BGR)
+        # threshold with different max value
+        ret, binary = cv2.threshold(gray, 127, 200, cv2.THRESH_BINARY)
+        # ans: pixels > 127 become 200 (not 255)
+        # combine two masks
+        mask3 = cv2.bitwise_or(mask1, mask2)
+        # ans: union of both masks
+      </code></pre>
+    </section>
+
+    <script type="module">
+      // ------------------------------------------------------------ image kit
+      // Load /assets images onto canvases and read their pixels
+      const loadImage = (src) =>
+        new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = () => reject(new Error("image " + src));
+          im.src = src;
+        });
+      function readPixels(im, w, h, crop) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const [sx, sy, sw, sh] = crop || [0, 0, im.naturalWidth, im.naturalHeight];
+        ctx.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+        return ctx.getImageData(0, 0, w, h);
+      }
+      function toGray(id) {
+        const g = new Float32Array(id.width * id.height);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = 0.299 * id.data[p] + 0.587 * id.data[p + 1] + 0.114 * id.data[p + 2];
+        return g;
+      }
+      function grayToImage(g, w, h) {
+        const out = new ImageData(w, h);
+        for (let i = 0, p = 0; i < g.length; i++, p += 4) {
+          out.data[p] = out.data[p + 1] = out.data[p + 2] = g[i];
+          out.data[p + 3] = 255;
+        }
+        return out;
+      }
+      function show(canvas, id) {
+        if (canvas.width !== id.width) canvas.width = id.width;
+        if (canvas.height !== id.height) canvas.height = id.height;
+        canvas.getContext("2d").putImageData(id, 0, 0);
+      }
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      // Pointer position in canvas pixel coordinates
+      function canvasPoint(canvas, e) {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
+      }
+      // Wire a row of .chip buttons: one is "on" at a time
+      function chipGroup(root, sel, fn) {
+        root.addEventListener("click", (e) => {
+          const b = e.target.closest(sel);
+          if (!b) return;
+          root.querySelectorAll(sel).forEach((x) => x.classList.toggle("on", x === b));
+          fn(b);
+        });
+      }
+      const gsap = await Deck.load("gsap");
+      const W = 480, H = 270;
+      const [lens, dolls] = await Promise.all([loadImage("/assets/2025-10-09-22-21-33.png"), loadImage("/assets/2025-10-16-19-17-39.png")]);
+      const A = readPixels(lens, W, H);
+      const B = readPixels(dolls, W, H);
+      const GA = toGray(A);
+      const map = (src, f) => {
+        const out = new ImageData(src.width, src.height);
+        for (let i = 0; i < src.data.length; i += 4) {
+          out.data[i] = f(src.data[i], i);
+          out.data[i + 1] = f(src.data[i + 1], i + 1);
+          out.data[i + 2] = f(src.data[i + 2], i + 2);
+          out.data[i + 3] = 255;
+        }
+        return out;
+      };
+      function histogram(canvas, g, marks = [], color = "#a78bfa") {
+        const h = new Array(256).fill(0);
+        g.forEach((v) => h[Math.max(0, Math.min(255, Math.round(v)))]++);
+        const max = Math.max(...h);
+        const ctx = canvas.getContext("2d");
+        const cw = canvas.width, ch = canvas.height;
+        ctx.clearRect(0, 0, cw, ch);
+        ctx.fillStyle = color;
+        h.forEach((n, i) => {
+          const bh = (Math.sqrt(n / max) * (ch - 8)) | 0;
+          ctx.fillRect(i * (cw / 256), ch - bh, cw / 256, bh);
+        });
+        marks.forEach(([v, c]) => {
+          ctx.fillStyle = c;
+          ctx.fillRect(v * (cw / 256) - 1, 0, 3, ch);
+        });
+        return h;
+      }
+
+      // ------------------------------------------------------------ cover
+      {
+        const cv = document.querySelector("#title canvas");
+        const name = document.querySelector("#title .opname");
+        const frames = [
+          ["img", A],
+          ["cv2.add(img, (60, 60, 60, 0))", map(A, (v) => v + 60)],
+          ["cv2.bitwise_not(img)", map(A, (v) => 255 - v)],
+          ["cv2.threshold(gray, 127, 255, THRESH_BINARY)", grayToImage(GA.map((v) => (v > 127 ? 255 : 0)), W, H)],
+          ["cv2.addWeighted(img1, 0.5, img2, 0.5, 0)", map(A, (v, i) => 0.5 * v + 0.5 * B.data[i])],
+        ];
+        let k = 0, timer = null;
+        const next = () => {
+          const [n, id] = frames[k];
+          show(cv, id);
+          name.textContent = n;
+          gsap.fromTo(cv, { opacity: 0.5 }, { opacity: 1, duration: 0.4 });
+          k = (k + 1) % frames.length;
+          timer = gsap.delayedCall(1.6, next);
+        };
+        show(cv, A);
+        Deck.scene("#title", {
+          enter(slide) {
+            gsap.from(slide.querySelectorAll("h1, p, .kicker"), { y: 24, opacity: 0, stagger: 0.12, duration: 0.8 });
+            k = 0;
+            timer?.kill();
+            timer = gsap.delayedCall(0.6, next);
+          },
+          leave: () => timer?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ overflow dials
+      {
+        const sl = document.querySelector("#overflow");
+        const inputs = Object.fromEntries([...sl.querySelectorAll("input")].map((i) => [i.name, i]));
+        const arcPath = (frac) => {
+          frac = Math.max(0.0001, Math.min(0.9999, frac));
+          const a = -Math.PI / 2 + frac * 2 * Math.PI;
+          const x = 200 + 160 * Math.cos(a), y = 200 + 160 * Math.sin(a);
+          return `M 200 40 A 160 160 0 ${frac > 0.5 ? 1 : 0} 1 ${x.toFixed(2)} ${y.toFixed(2)}`;
+        };
+        const st = { wrap: 0, sat: 0 };
+        function render(animate) {
+          const a = +inputs.a.value, b = +inputs.b.value;
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          const wrap = (a + b) % 256, sat = Math.min(a + b, 255);
+          sl.querySelector(".wrap ~ .formula, .dialbox:first-child .formula").textContent = `${a} + ${b} = ${wrap}`;
+          sl.querySelector(".dialbox:last-child .formula").textContent = `cv2.add(${a}, ${b}) = ${sat}`;
+          const draw = () => {
+            sl.querySelector(".wrap .arc").setAttribute("d", arcPath(st.wrap / 256));
+            sl.querySelector(".sat .arc").setAttribute("d", arcPath(st.sat / 256));
+            sl.querySelector(".wrap .num").textContent = Math.round(st.wrap) % 256;
+            sl.querySelector(".sat .num").textContent = Math.round(st.sat);
+          };
+          gsap.killTweensOf(st);
+          if (!animate) {
+            st.wrap = wrap;
+            st.sat = sat;
+            return draw();
+          }
+          // The wrapping counter runs up to a + b, passing 255 and starting again from 0
+          const t = { v: 0 };
+          gsap.to(t, {
+            v: a + b, duration: 1.6, ease: "power1.inOut",
+            onUpdate() {
+              st.wrap = t.v % 256;
+              st.sat = Math.min(t.v, 255);
+              draw();
+            },
+          });
+        }
+        sl.addEventListener("input", () => render(false));
+        Deck.scene("#overflow", { enter: () => render(true) });
+      }
+
+      // ------------------------------------------------------------ brighten: saturate vs wrap
+      {
+        const sl = document.querySelector("#bright");
+        const input = sl.querySelector("input");
+        function render() {
+          const v = +input.value;
+          sl.querySelector("output").textContent = v;
+          show(sl.querySelector(".a"), map(A, (p) => p + v));
+          show(sl.querySelector(".b"), map(A, (p) => (((p + v) % 256) + 256) % 256));
+        }
+        input.addEventListener("input", render);
+        render();
+      }
+
+      // ------------------------------------------------------------ blend
+      {
+        const sl = document.querySelector("#blend");
+        show(sl.querySelector(".i1"), A);
+        show(sl.querySelector(".i2"), B);
+        const inputs = Object.fromEntries([...sl.querySelectorAll("input")].map((i) => [i.name, i]));
+        function render(e) {
+          if (inputs.lock.checked) {
+            if (e?.target === inputs.b) inputs.a.value = (1 - +inputs.b.value).toFixed(2);
+            else inputs.b.value = (1 - +inputs.a.value).toFixed(2);
+          }
+          const a = +inputs.a.value, b = +inputs.b.value, g = +inputs.g.value;
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          show(sl.querySelector(".out"), map(A, (v, i) => a * v + b * B.data[i] + g));
+          sl.querySelector(".readout").textContent = `cv2.addWeighted(img1, ${a}, img2, ${b}, ${g})`;
+        }
+        sl.addEventListener("input", render);
+        render();
+        let tw = null;
+        Deck.scene("#blend", {
+          enter() {
+            const o = { a: 0 };
+            tw?.kill();
+            inputs.lock.checked = true;
+            tw = gsap.to(o, { a: 1, duration: 3, delay: 0.5, ease: "sine.inOut", yoyo: true, repeat: 1, onUpdate: () => ((inputs.a.value = o.a.toFixed(2)), render()), onComplete: () => ((inputs.a.value = 0.7), render()) });
+            sl.addEventListener("pointerdown", () => tw?.kill(), { once: true });
+          },
+          leave: () => tw?.kill(),
+        });
+      }
+
+      // ------------------------------------------------------------ bitwise on two masks
+      {
+        const sl = document.querySelector("#bitwise");
+        const w = 160, h = 120;
+        const draw = (c, f) => {
+          const x = c.getContext("2d");
+          x.fillStyle = "#000";
+          x.fillRect(0, 0, w, h);
+          x.fillStyle = "#fff";
+          f(x);
+        };
+        const m1 = sl.querySelector(".m1"), m2 = sl.querySelector(".m2"), mo = sl.querySelector(".mo");
+        draw(m1, (x) => (x.beginPath(), x.arc(65, 60, 42, 0, 7), x.fill()));
+        draw(m2, (x) => x.fillRect(70, 22, 70, 76));
+        const p1 = m1.getContext("2d").getImageData(0, 0, w, h), p2 = m2.getContext("2d").getImageData(0, 0, w, h);
+        const OPS = [
+          ["bitwise_and(img1, img2)", (a, b) => a & b],
+          ["bitwise_or(img1, img2)", (a, b) => a | b],
+          ["bitwise_not(img1)", (a) => 255 - a],
+          ["bitwise_xor(img1, img2)", (a, b) => a ^ b],
+        ];
+        function show_(k) {
+          const out = new ImageData(w, h);
+          for (let i = 0; i < out.data.length; i += 4) {
+            const v = OPS[k][1](p1.data[i], p2.data[i]);
+            out.data.set([v, v, v, 255], i);
+          }
+          mo.getContext("2d").putImageData(out, 0, 0);
+          sl.querySelector(".readout").textContent = OPS[k][0];
+          gsap.fromTo(mo, { scale: 0.9, opacity: 0.4 }, { scale: 1, opacity: 1, duration: 0.4 });
+        }
+        // Each pair of code steps (operation, then its answer) shows that operation's result
+        const at = (n) => (n >= 11 ? 3 : n >= 8 ? 2 : n >= 5 ? 1 : n >= 2 ? 0 : -1);
+        const set = (n) => {
+          const k = at(n);
+          if (k < 0) {
+            draw(mo, () => {});
+            sl.querySelector(".readout").textContent = "press → to apply each operation";
+          } else show_(k);
+        };
+        Deck.scene("#bitwise", { enter: () => set(0), step: (s, n) => set(n), unstep: (s, n) => set(n - 1) });
+      }
+
+      // ------------------------------------------------------------ threshold
+      {
+        const sl = document.querySelector("#thresh");
+        show(sl.querySelector(".g"), grayToImage(GA, W, H));
+        const inputs = Object.fromEntries([...sl.querySelectorAll("input")].map((i) => [i.name, i]));
+        let type = "BINARY";
+        function render() {
+          const t = +inputs.t.value, m = +inputs.m.value;
+          sl.querySelectorAll("output").forEach((o) => (o.textContent = o.previousElementSibling.value));
+          const inv = type === "BINARY_INV";
+          show(sl.querySelector(".b"), grayToImage(GA.map((v) => ((v > t) !== inv ? m : 0)), W, H));
+          histogram(sl.querySelector(".hist"), GA, [[t, "#ec4899"]]);
+          const above = GA.reduce((n, v) => n + (v > t ? 1 : 0), 0);
+          sl.querySelector(".readout").textContent = `ret, binary = cv2.threshold(gray, ${t}, ${m}, cv2.THRESH_${type}) · ${((100 * above) / GA.length).toFixed(0)}% of pixels > ${t}`;
+        }
+        chipGroup(sl.querySelector(".chips"), "button", (b) => ((type = b.dataset.t), render()));
+        sl.addEventListener("input", render);
+        render();
+      }
+
+      // ------------------------------------------------------------ masking
+      {
+        const sl = document.querySelector("#mask");
+        const src = sl.querySelector(".src"), mc = sl.querySelector(".m"), oc = sl.querySelector(".out");
+        const input = sl.querySelector("input");
+        let cx = 320, cy = 135, inv = false;
+        function render() {
+          const r = +input.value;
+          sl.querySelector("output").textContent = r;
+          const mask = new Float32Array(W * H);
+          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) mask[y * W + x] = ((x - cx) ** 2 + (y - cy) ** 2 <= r * r) !== inv ? 255 : 0;
+          show(mc, grayToImage(mask, W, H));
+          show(oc, map(A, (v, i) => (mask[i >> 2] ? v : 0)));
+          show(src, A);
+          const x = src.getContext("2d");
+          x.strokeStyle = "#22d3ee";
+          x.lineWidth = 3;
+          x.setLineDash([8, 6]);
+          x.beginPath();
+          x.arc(cx, cy, r, 0, 7);
+          x.stroke();
+          sl.querySelector(".mname").textContent = inv ? "inv_mask = bitwise_not(mask)" : `cv2.circle(mask, (${Math.round(cx)}, ${Math.round(cy)}), ${r}, 255, -1)`;
+          sl.querySelector(".oname").textContent = `bitwise_and(img, img, mask=${inv ? "inv_mask" : "mask"})`;
+        }
+        let drag = false;
+        src.addEventListener("pointerdown", (e) => {
+          drag = true;
+          src.setPointerCapture(e.pointerId);
+          [cx, cy] = canvasPoint(src, e);
+          render();
+        });
+        src.addEventListener("pointermove", (e) => {
+          if (!drag) return;
+          [cx, cy] = canvasPoint(src, e);
+          render();
+        });
+        src.addEventListener("pointerup", () => (drag = false));
+        input.addEventListener("input", render);
+        sl.querySelector("[data-act=inv]").addEventListener("click", (e) => {
+          inv = !inv;
+          e.target.classList.toggle("on", inv);
+          render();
+        });
+        render();
+      }
+
+      // ------------------------------------------------------------ normalization
+      {
+        const sl = document.querySelector("#norm");
+        // A washed-out version of the photo: values squeezed into [90, 170]
+        const lo = GA.map((v) => 90 + (v / 255) * 80);
+        const mn = lo.reduce((a, b) => Math.min(a, b), 255), mx = lo.reduce((a, b) => Math.max(a, b), 0);
+        show(sl.querySelector(".lo"), grayToImage(lo, W, H));
+        histogram(sl.querySelector(".h1"), lo, [[mn, "#22d3ee"], [mx, "#22d3ee"]]);
+        sl.querySelector(".r1").textContent = `low contrast: min ${Math.round(mn)}, max ${Math.round(mx)}`;
+        let tw = null;
+        function play() {
+          tw?.kill();
+          const o = { t: 0 };
+          const frame = () => {
+            // part-way through the stretch: interpolate the output range from [min, max] to [0, 255]
+            const a = mn * (1 - o.t), b = mx + (255 - mx) * o.t;
+            const out = lo.map((v) => a + ((v - mn) / (mx - mn)) * (b - a));
+            show(sl.querySelector(".hi"), grayToImage(out, W, H));
+            histogram(sl.querySelector(".h2"), out, [[a, "#ec4899"], [b, "#ec4899"]], "#22d3ee");
+            sl.querySelector(".r2").textContent = `cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX) · range ${Math.round(a)} to ${Math.round(b)}`;
+          };
+          frame();
+          tw = gsap.to(o, { t: 1, duration: 2, delay: 0.6, ease: "power2.inOut", onUpdate: frame });
+        }
+        sl.querySelector("[data-act=replay]").addEventListener("click", play);
+        Deck.scene("#norm", { enter: play, leave: () => tw?.kill() });
+      }
+    </script>
+  </body>
+</html>

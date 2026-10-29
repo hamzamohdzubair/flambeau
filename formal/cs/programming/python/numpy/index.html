@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NumPy</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      .numpy {
+        gap: 1.6rem;
+      }
+
+      .numpy .kicker {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+
+      .numpy h1 {
+        text-align: center;
+      }
+
+      .numpy .group {
+        display: grid;
+        gap: 0.7rem;
+        width: min(100%, 64rem);
+      }
+
+      .numpy .group h3 {
+        font-size: 1.15rem;
+        color: var(--text);
+      }
+
+      .numpy .group h3 span {
+        margin-right: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--violet-soft);
+      }
+
+      .numpy .tiles {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .numpy .tile {
+        min-height: 10rem;
+        font-size: 1.25rem;
+      }
+
+      .numpy .tile small {
+        font-size: 0.85rem;
+      }
+
+      .numpy .tiles.one {
+        grid-template-columns: minmax(0, 1fr);
+        width: min(100%, 34rem);
+      }
+
+      .numpy .tiles.one .tile {
+        min-height: 18rem;
+        font-size: 1.8rem;
+      }
+
+      .numpy .book {
+        display: flex;
+        align-items: center;
+        gap: 3rem;
+        width: min(100%, 60rem);
+      }
+
+      .numpy .book figure {
+        flex: 0 0 15rem;
+      }
+
+      .numpy .book img {
+        width: 15rem;
+        height: auto;
+        max-height: none;
+      }
+
+      .numpy .book p {
+        font-size: 1.5rem;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide hub-cover numpy" id="numpy">
+      <span class="kicker">Python</span>
+      <h1>NumPy</h1>
+      <nav class="contents">
+        <a class="pill" href="#2">Arrays</a>
+        <a class="pill" href="#3">Exercises</a>
+        <a class="pill" href="#4">Textbook</a>
+      </nav>
+    </section>
+
+    <section class="slide hub-group numpy">
+      <span class="kicker">Lessons</span>
+      <h2>Arrays</h2>
+      <div class="tiles">
+          <div class="tile" style="opacity: 0.45; --img: url('/assets/2025-10-20-00-35-34.png')"><span>Introduction<small>coming soon</small></span></div>
+          <a class="tile" href="fundamentals.html" style="--img: url('/assets/2025-10-20-00-32-25.png')"><span>Array Fundamentals</span></a>
+          <div class="tile" style="opacity: 0.45"><span>Array Manipulation<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Array Operations<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>IO<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Universal Functions<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Random<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Linear Algebra<small>coming soon</small></span></div>
+          <div class="tile" style="opacity: 0.45"><span>Statistics<small>coming soon</small></span></div>
+        </div>
+    </section>
+
+    <section class="slide hub-group numpy">
+      <span class="kicker">Practice</span>
+      <h2>Exercises</h2>
+      <div class="tiles one">
+          <a class="tile" href="x/nps.html" style="--img: url('/assets/2025-10-19-01-09-27.png')"><span>Net Promoter Score</span></a>
+        </div>
+    </section>
+
+    <section class="slide hub-group numpy">
+      <span class="kicker">Resources</span>
+      <h2>Textbook</h2>
+      <div class="book">
+          <figure><img src="/assets/2025-10-20-08-55-25.png" alt="Cover of Numerical Python, third edition, by Robert Johansson" /></figure>
+          <p>Robert Johansson, <em>Numerical Python: Scientific Computing and Data Science Applications with NumPy, SciPy and Matplotlib</em>, 3rd edition (Apress).</p>
+        </div>
+    </section>
+  </body>
+</html>

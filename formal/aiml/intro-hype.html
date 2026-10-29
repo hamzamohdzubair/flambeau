@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hype</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      /* ---------- Quotes on a timeline ---------- */
+      #quotes .tl {
+        display: grid;
+        gap: 0.55rem;
+        width: min(100%, 66rem);
+      }
+
+      #quotes .q {
+        display: grid;
+        grid-template-columns: 4.6rem minmax(0, 1fr);
+        gap: 1rem;
+        align-items: start;
+      }
+
+      #quotes .yr {
+        font-family: var(--font-mono);
+        font-size: 1.2rem;
+        color: var(--cyan);
+        padding-top: 0.6rem;
+        text-align: right;
+      }
+
+      #quotes blockquote {
+        margin: 0;
+        padding: 0.55rem 1.2rem;
+        font-size: 1.12rem;
+      }
+
+      #quotes blockquote cite {
+        display: inline;
+        margin-left: 0.6em;
+        white-space: nowrap;
+      }
+
+      #quotes .bar {
+        position: relative;
+        height: 4px;
+        width: min(100%, 66rem);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      #quotes .bar i {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 0;
+        border-radius: 4px;
+        background: var(--gradient);
+      }
+
+      #quotes .bar span {
+        position: absolute;
+        top: 0.5rem;
+        right: 0;
+        font: 0.85rem var(--font-mono);
+        color: var(--faint);
+      }
+
+      #quotes .tl {
+        margin-top: 0.6rem;
+      }
+
+      /* ---------- Hype curve ---------- */
+      #cycle svg {
+        width: 100%;
+        height: auto;
+        max-height: 74cqh;
+        overflow: visible;
+      }
+
+      #cycle .curve {
+        fill: none;
+        stroke: url(#hypeGrad);
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+
+      #cycle .winter rect {
+        fill: rgba(248, 113, 113, 0.14);
+      }
+
+      #cycle .winter text {
+        fill: #fca5a5;
+      }
+
+      #cycle text {
+        font-family: var(--font);
+        font-size: 20px;
+        fill: var(--muted);
+      }
+
+      #cycle .ev text.t {
+        font-family: var(--font-display);
+        font-size: 22px;
+        fill: var(--text);
+      }
+
+      #cycle .ev circle {
+        fill: var(--cyan);
+        stroke: #05060f;
+        stroke-width: 2;
+      }
+
+      #cycle .axis text {
+        font-family: var(--font-mono);
+        font-size: 18px;
+        fill: var(--faint);
+        text-anchor: middle;
+      }
+
+      #cycle .axis line {
+        stroke: var(--faint);
+      }
+
+      .figs.paper img {
+        background: #fff;
+      }
+
+      #winter .cols {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: 2rem;
+      }
+
+      #winter .cols > figure img {
+        max-height: 62cqh;
+      }
+
+      #winter .figs {
+        grid-template-columns: 1fr;
+      }
+
+      #winter .figs img {
+        aspect-ratio: auto;
+        max-height: 30cqh;
+      }
+
+      #original img {
+        max-height: 72cqh;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide cover" id="title">
+      <span class="kicker">Introduction to AI/ML</span>
+      <h1>Hype</h1>
+      <p>Bold predictions, two AI winters, and the hype cycle we are in now.</p>
+    </section>
+
+    <section class="slide top" id="quotes">
+      <h2>Hyping AI isn't new</h2>
+      <div class="bar"><i></i><span>1957 → 1967</span></div>
+      <div class="tl">
+        <div class="q step"><span class="yr">1957</span><blockquote>There are now in the world machines that think, that learn, and that create.<cite>— Herbert Simon</cite></blockquote></div>
+        <div class="q step"><span class="yr">1958</span><blockquote>Within ten years a digital computer will discover and prove an important new mathematical theorem.<cite>— Allen Newell</cite></blockquote></div>
+        <div class="q step"><span class="yr">1961</span><blockquote>Within our lifetime machines may surpass us in general intelligence.<cite>— Marvin Minsky</cite></blockquote></div>
+        <div class="q step"><span class="yr">1965</span><blockquote>Machines will be capable, within twenty years, of doing any work a man can do.<cite>— Herbert Simon</cite></blockquote></div>
+        <div class="q step"><span class="yr">1967</span><blockquote>Within a generation… few compartments of intellect will remain outside the machine's realm; the problem of creating "artificial intelligence" will be substantially solved.<cite>— Marvin Minsky</cite></blockquote></div>
+      </div>
+    </section>
+
+    <section class="slide" id="winter">
+      <h2>AI winter</h2>
+      <div class="cols">
+      <figure class="step"><img src="/assets/2025-11-01-16-21-36.png" alt="1973: the Lighthill report, Artificial Intelligence: A General Survey; 2024: Goldman Sachs, Gen AI: too much spend, too little benefit?" /><figcaption>The same doubts, 51 years apart: the Lighthill report (1973) and Goldman Sachs (2024)</figcaption></figure>
+      <div class="figs contain paper">
+        <figure class="step landscape"><img src="/assets/2025-11-01-16-24-10.png" alt="MIT report: 95% of generative AI pilots at companies are failing" /></figure>
+        <figure class="step landscape"><img src="/assets/2025-11-01-16-30-58.png" alt="Paper: The Illusion of Thinking, on the limits of reasoning models" /></figure>
+      </div>
+      </div>
+    </section>
+
+    <section class="slide" id="cycle">
+      <h2>The third hype cycle</h2>
+      <svg viewBox="0 -20 900 470" aria-label="Investment and research in AI from 1950 to 2025: rises, two winters, then explosive growth">
+        <defs>
+          <linearGradient id="hypeGrad" x1="0" x2="1">
+            <stop offset="0" stop-color="#8b5cf6" />
+            <stop offset="0.5" stop-color="#ec4899" />
+            <stop offset="1" stop-color="#22d3ee" />
+          </linearGradient>
+        </defs>
+        <text x="20" y="22">investment &amp; research = f(expectations, results)</text>
+        <g class="winters"></g>
+        <path class="curve" d=""></path>
+        <g class="evs"></g>
+        <g class="axis"></g>
+      </svg>
+    </section>
+
+    <section class="slide" id="original">
+      <h2>The third hype cycle: the original chart</h2>
+      <figure class="step"><img src="/assets/2025-11-01-16-26-07.png" alt="Chart of AI investment and research over time: Dartmouth 1956, inflated hype in the 1970s, AI winter 1974 to 1980, new hopes in the 1980s, AI winter 1987 to 1993, data explosion 2007, concerns 2020, explosive growth" /></figure>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent, text) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        if (text) e.textContent = text;
+        parent?.appendChild(e);
+        return e;
+      };
+
+      Deck.scene("#title", {
+        enter(slide) {
+          gsap.from(slide.querySelectorAll(".kicker, h1, p"), { y: 30, opacity: 0, stagger: 0.12, duration: 0.8, ease: "power3.out" });
+        },
+      });
+
+      // Quotes: the bar fills as the decade of predictions unfolds
+      const bar = document.querySelector("#quotes .bar i");
+      const fill = (n, animate) => gsap.to(bar, { width: (n / 5) * 100 + "%", duration: animate ? 0.6 : 0, ease: "power2.out" });
+      Deck.scene("#quotes", {
+        enter: () => fill(0, false),
+        step: (s, n, e, d) => fill(n, d.dir > 0),
+        unstep: (s, n) => fill(n - 1, false),
+      });
+
+      // Hype curve, drawn from the chart's own milestones
+      const slide = document.querySelector("#cycle");
+      const svg = slide.querySelector("svg");
+      const X = (yr) => 40 + ((yr - 1950) / 75) * 820;
+      const Y = (v) => 350 - v * 3; // v: 0..100
+      const knots = [[1950, 4], [1956, 14], [1965, 38], [1972, 52], [1977, 26], [1982, 46], [1986, 56], [1990, 34], [1996, 42], [2007, 58], [2014, 72], [2020, 86], [2025, 100]];
+      // Smooth path through the knots (Catmull-Rom to Bezier)
+      const P = knots.map(([x, y]) => [X(x), Y(y)]);
+      let d = `M ${P[0][0]} ${P[0][1]}`;
+      for (let i = 0; i < P.length - 1; i++) {
+        const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
+        const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+        const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+        d += ` C ${c1[0]} ${c1[1]}, ${c2[0]} ${c2[1]}, ${p2[0]} ${p2[1]}`;
+      }
+      const curve = slide.querySelector(".curve");
+      curve.setAttribute("d", d);
+      const len = curve.getTotalLength();
+      curve.style.strokeDasharray = len;
+
+      const winters = slide.querySelector(".winters");
+      const wGroups = [[1974, 1980, "AI Winter I"], [1987, 1993, "AI Winter II"]].map(([a, b, name]) => {
+        const g = el("g", { class: "winter" }, winters);
+        el("rect", { x: X(a), y: 40, width: X(b) - X(a), height: 338, rx: 6 }, g);
+        el("text", { x: (X(a) + X(b)) / 2, y: 404, "text-anchor": "middle" }, g, `${a}–${b}`);
+        el("text", { x: (X(a) + X(b)) / 2, y: 66, "text-anchor": "middle" }, g, name);
+        return { g, yr: a };
+      });
+
+      const evs = slide.querySelector(".evs");
+      const events = [
+        [1956, 14, "1956", "Dartmouth Conference", 1],
+        [1972, 52, "1970s", "Inflated hype", -1],
+        [1986, 56, "1980s", "New hopes", -1],
+        [2007, 58, "2007", "Data explosion", 1],
+        [2020, 86, "2020", "Concerns about AI", -1],
+        [2025, 100, "now", "Explosive growth", -1],
+      ].map(([yr, v, a, b, side]) => {
+        const g = el("g", { class: "ev" }, evs);
+        el("circle", { cx: X(yr), cy: Y(v), r: 6 }, g);
+        const anchor = yr > 2015 ? "end" : yr < 1960 ? "start" : "middle";
+        const dx = yr > 2015 ? -16 : yr < 1960 ? 10 : 0;
+        const y0 = side < 0 ? Y(v) - (yr === 2020 ? 32 : 52) : Y(v) + 30; // 2020 sits lower to clear the 'now' label
+        el("text", { x: X(yr) + dx, y: y0, "text-anchor": anchor, style: "fill:#67e8f9;font-family:var(--font-mono);font-size:18px" }, g, a);
+        el("text", { class: "t", x: X(yr) + dx, y: y0 + 25, "text-anchor": anchor }, g, b);
+        return { g, yr };
+      });
+
+      const axis = slide.querySelector(".axis");
+      el("line", { x1: X(1950), x2: X(2025), y1: 380, y2: 380 }, axis);
+      for (let yr = 1950; yr <= 2020; yr += 10) el("text", { x: X(yr), y: 436 }, axis, yr);
+
+      // Fraction of the curve's length reached at a given year
+      const lenAt = (yr) => {
+        let lo = 0, hi = len;
+        for (let k = 0; k < 30; k++) {
+          const mid = (lo + hi) / 2;
+          if (curve.getPointAtLength(mid).x < X(yr)) lo = mid;
+          else hi = mid;
+        }
+        return lo;
+      };
+
+      let tl = null;
+      function play(animate) {
+        tl?.kill();
+        const items = [...wGroups, ...events].sort((a, b) => a.yr - b.yr);
+        gsap.set(items.map((i) => i.g), { opacity: 0 });
+        gsap.set(curve, { strokeDashoffset: len });
+        tl = gsap.timeline();
+        const T = 5;
+        tl.to(curve, { strokeDashoffset: 0, duration: T, ease: "none" }, 0);
+        items.forEach((i) => tl.to(i.g, { opacity: 1, duration: 0.4 }, (lenAt(i.yr) / len) * T));
+        if (!animate) tl.progress(1);
+      }
+      Deck.scene("#cycle", {
+        enter: (s, d) => play(true),
+        leave: () => tl?.progress(1),
+      });
+    </script>
+  </body>
+</html>

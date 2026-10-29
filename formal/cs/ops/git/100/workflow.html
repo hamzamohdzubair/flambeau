@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Basic Workflow</title>
+    <link rel="stylesheet" href="/deck/deck.css" />
+    <script src="/deck/deck.js" defer></script>
+    <style>
+      #flow svg {
+        width: 100%;
+        height: 23.2rem;
+        overflow: visible;
+      }
+
+      #flow .beats {
+        position: absolute;
+      }
+
+      #flow .run {
+        display: flex;
+        align-items: center;
+        gap: 1.6rem;
+        width: 46rem;
+        min-height: 3.6rem;
+      }
+
+      #flow .box {
+        fill: rgba(15, 18, 35, 0.85);
+        stroke: rgba(167, 139, 250, 0.5);
+        stroke-width: 2;
+      }
+
+      #flow .box.remote {
+        stroke: rgba(134, 239, 172, 0.6);
+      }
+
+      #flow .zone {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.18);
+        stroke-dasharray: 6 6;
+      }
+
+      #flow .zl {
+        fill: var(--faint);
+        font: 600 18px var(--font-mono);
+        letter-spacing: 0.15em;
+        text-anchor: middle;
+      }
+
+      #flow .bl {
+        fill: var(--text);
+        font: 600 24px var(--font-display);
+        text-anchor: middle;
+      }
+
+      #flow .arrow {
+        fill: none;
+        stroke: rgba(167, 139, 250, 0.25);
+        stroke-width: 3;
+        marker-end: url(#wfTip);
+        transition: stroke 0.4s;
+      }
+
+      #flow .arrow.done {
+        stroke: rgba(167, 139, 250, 0.6);
+      }
+
+      #flow .arrow.now {
+        stroke: var(--pink);
+      }
+
+      #flow .al {
+        fill: var(--muted);
+        font: 600 20px var(--font-mono);
+        text-anchor: middle;
+        transition: fill 0.4s;
+      }
+
+      #flow .al.now {
+        fill: #f0abfc;
+      }
+
+      #flow .tok rect {
+        stroke-width: 2;
+      }
+
+      #flow .tok.mine rect {
+        fill: rgba(139, 92, 246, 0.85);
+        stroke: #c4b5fd;
+      }
+
+      #flow .tok.theirs rect {
+        fill: rgba(34, 211, 238, 0.75);
+        stroke: #a5f3fc;
+      }
+
+      #flow .tok text {
+        fill: #fff;
+        font: 600 18px var(--font-mono);
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      #flow .term,
+      #flow .say {
+        flex-shrink: 0;
+      }
+
+      #flow .term {
+        flex: 0 0 16rem;
+        margin: 0;
+        padding: 0.7rem 1.1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(5, 6, 15, 0.8);
+        font: 1.05rem var(--font-mono);
+        color: var(--green);
+        min-height: 1.6em;
+      }
+
+      #flow .term span {
+        color: var(--faint);
+      }
+
+      #flow .say {
+        flex: 1;
+        text-align: left;
+        color: var(--muted);
+      }
+
+      .cmds td:first-child {
+        font-family: var(--font-mono);
+        color: var(--violet-soft);
+        white-space: nowrap;
+      }
+
+      .cmds {
+        width: min(100%, 60rem);
+        font-size: 1.2rem;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================ cover -->
+    <section class="slide cover" id="title">
+      <span class="kicker">Git 100 · lesson 2</span>
+      <h1 class="grad-each"><span>Basic</span> <span>Workflow</span></h1>
+      <p>Where your changes live, and the commands that move them: add, commit, push, fetch, merge and pull.</p>
+    </section>
+
+    <!-- ================================================================ animated flow -->
+    <section class="slide" id="flow">
+      <h2>Four places a change can be</h2>
+      <svg viewBox="0 0 1000 510" aria-label="Working directory, staging area and local repository on your computer; remote repository in the cloud. Arrows: add, commit, push go right; fetch, merge and pull come back.">
+        <defs>
+          <marker id="wfTip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="context-stroke" />
+          </marker>
+        </defs>
+        <rect class="zone" x="20" y="10" width="740" height="490" rx="18" />
+        <text class="zl" x="390" y="44">LOCAL · your computer</text>
+        <rect class="zone" x="775" y="10" width="210" height="490" rx="18" />
+        <text class="zl" x="880" y="44">REMOTE</text>
+
+        <rect class="box" x="45" y="150" width="180" height="170" rx="14" />
+        <text class="bl" x="135" y="190">Working</text><text class="bl" x="135" y="217">directory</text>
+        <rect class="box" x="305" y="150" width="180" height="170" rx="14" />
+        <text class="bl" x="395" y="190">Staging</text><text class="bl" x="395" y="217">area</text>
+        <rect class="box" x="565" y="150" width="180" height="170" rx="14" />
+        <text class="bl" x="655" y="190">Local</text><text class="bl" x="655" y="217">repository</text>
+        <rect class="box remote" x="790" y="150" width="180" height="170" rx="14" />
+        <text class="bl" x="880" y="190">Remote</text><text class="bl" x="880" y="217">repository</text>
+
+        <path class="arrow" id="a1" d="M175 146 Q265 66 355 146" /><text class="al" data-a="1" x="265" y="92">add</text>
+        <path class="arrow" id="a2" d="M435 146 Q525 66 615 146" /><text class="al" data-a="2" x="525" y="92">commit</text>
+        <path class="arrow" id="a3" d="M695 146 Q767 66 840 146" /><text class="al" data-a="3" x="767" y="92">push</text>
+        <path class="arrow" id="a4" d="M840 324 Q767 410 695 324" /><text class="al" data-a="4" x="767" y="347">fetch</text>
+        <path class="arrow" id="a5" d="M610 324 Q372 460 135 324" /><text class="al" data-a="5" x="372" y="372">merge</text>
+        <path class="arrow" id="a6" d="M920 324 Q512 600 105 324" /><text class="al" data-a="6" x="512" y="490">pull = fetch + merge</text>
+
+        <g class="tok mine" data-t="0"><rect x="-55" y="-17" width="110" height="34" rx="8" /><text>hello.py</text></g>
+        <g class="tok theirs" data-t="1"><rect x="-55" y="-17" width="110" height="34" rx="8" /><text>john #1</text></g>
+        <g class="tok theirs" data-t="2"><rect x="-55" y="-17" width="110" height="34" rx="8" /><text>john #2</text></g>
+      </svg>
+      <div class="run">
+        <div class="term"></div>
+        <p class="say"></p>
+      </div>
+      <div class="beats">
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+        <span class="step" data-anim="none"></span>
+      </div>
+    </section>
+
+    <!-- ================================================================ figure -->
+    <section class="slide">
+      <h2>The workflow at a glance</h2>
+      <figure class="zoom-on-reveal">
+        <img src="/assets/2025-09-29-12-53-51.png" alt="Git workflow: add moves changes from the working directory to the staging area, commit to the local repository, push to the remote; fetch brings remote commits to the local repository, merge into the working directory, and pull does both" style="max-height: 74cqh" />
+        <figcaption>Source: CloudStudio.com.au</figcaption>
+      </figure>
+    </section>
+
+    <!-- ================================================================ table -->
+    <section class="slide">
+      <h2>The six commands</h2>
+      <table class="cmds">
+        <tbody>
+          <tr class="step"><td>git add</td><td>Working directory → staging area: choose what goes into the next commit</td></tr>
+          <tr class="step"><td>git commit</td><td>Staging area → local repository: save a snapshot with a message</td></tr>
+          <tr class="step"><td>git push</td><td>Local repository → remote: share your commits</td></tr>
+          <tr class="step"><td>git fetch</td><td>Remote → local repository: download others' commits without touching your files</td></tr>
+          <tr class="step"><td>git merge</td><td>Local repository → working directory: combine those commits with your work</td></tr>
+          <tr class="step"><td>git pull</td><td>Fetch and merge in one command</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <script type="module">
+      const gsap = await Deck.load("gsap");
+      await Deck.load("gsapMotionPath");
+
+      const slide = document.querySelector("#flow");
+      const toks = [...slide.querySelectorAll(".tok")];
+      const term = slide.querySelector(".term");
+      const say = slide.querySelector(".say");
+
+      // Resting spots inside each box; a second token in the same box sits lower
+      const SPOT = { WD: [135, 254], ST: [395, 254], LR: [655, 254], RR: [880, 254], HID: [880, 130] };
+      // Where each token is after step n (index = step)
+      const AT = [
+        ["WD", "HID", "HID"],
+        ["ST", "HID", "HID"],
+        ["LR", "HID", "HID"],
+        ["RR", "RR", "HID"],
+        ["RR", "LR", "HID"],
+        ["RR", "WD", "RR"],
+        ["RR", "WD", "WD"],
+      ];
+      const LINES = [
+        ["", "You edit hello.py in your working directory."],
+        ["git add hello.py", "add: stage the change, ready for the next commit."],
+        ['git commit -m "Say hello"', "commit: save the staged snapshot in your local repository."],
+        ["git push", "push: send your commits to the remote. Meanwhile, John pushes a commit too."],
+        ["git fetch", "fetch: download John's commit into your local repository. Your files are untouched."],
+        ["git merge", "merge: bring the fetched commit into your working directory. John pushes again."],
+        ["git pull", "pull: fetch and merge in one go."],
+      ];
+
+      // A second token in the same box sits a row lower
+      const place = (k, spot) => {
+        const [x, y] = SPOT[spot];
+        const low = spot !== "HID" && (k === 2 || (k === 1 && spot === "RR"));
+        return { x, y: y + (low ? 42 : 0) };
+      };
+
+      let tl = null;
+      function render(n, animate) {
+        tl?.kill();
+        slide.querySelectorAll(".arrow").forEach((a, i) => {
+          a.classList.toggle("done", i + 1 < n);
+          a.classList.toggle("now", i + 1 === n);
+        });
+        slide.querySelectorAll(".al").forEach((t) => t.classList.toggle("now", +t.dataset.a === n));
+        const [cmd, text] = LINES[n];
+        term.innerHTML = cmd ? `<span>$</span> ${cmd}` : "<span>$</span>";
+        say.textContent = text;
+        tl = gsap.timeline();
+        toks.forEach((tok, k) => {
+          const to = AT[n][k], from = n ? AT[n - 1][k] : to;
+          const p = place(k, to);
+          const visible = to !== "HID";
+          const moving = animate && from !== to && from !== "HID";
+          if (moving) {
+            const path = slide.querySelector("#a" + n);
+            gsap.set(tok, { opacity: 1, scale: 1 });
+            tl.to(tok, { duration: 1.3, ease: "power2.inOut", motionPath: { path, align: path, alignOrigin: [0.5, 0.5], autoRotate: false } }, 0);
+            tl.to(tok, { x: p.x, y: p.y, duration: 0.35, ease: "power1.out" }, 1.3);
+          } else if (animate && visible && from === "HID") {
+            gsap.set(tok, { x: p.x, y: p.y, opacity: 0, scale: 0.4 });
+            tl.to(tok, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)", delay: 0.9 }, 0);
+          } else {
+            gsap.set(tok, { x: p.x, y: p.y, opacity: visible ? 1 : 0, scale: 1 });
+          }
+          if (!visible) gsap.set(tok, { opacity: 0 });
+        });
+      }
+      gsap.set(toks, { transformOrigin: "50% 50%" });
+      render(0, false);
+
+      // deck.js updates Deck.step after firing the events, so read it in a microtask
+      Deck.scene("#flow", {
+        enter: () => queueMicrotask(() => render(Deck.step, false)),
+        step: (s, n, els, d) => queueMicrotask(() => render(Deck.step, d.dir > 0 && Deck.step === n)),
+        unstep: () => queueMicrotask(() => render(Deck.step, false)),
+        leave: () => tl?.kill(),
+      });
+    </script>
+  </body>
+</html>
